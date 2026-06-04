@@ -1,0 +1,49 @@
+"use client";
+
+import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
+import { useCareerData } from "@/lib/career-store";
+import { CareerSectionsAccordion } from "@/components/career/career-sections-accordion";
+import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
+import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
+import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+
+export default function MyCareerPage() {
+  const [data, , loading] = useCareerData();
+  const { settings, loading: settingsLoading } = useAdvisorSettings();
+
+  if (loading || settingsLoading) {
+    return (
+      <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-sm text-muted-foreground">
+        Loading profile…
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-[calc(100vh-4rem)]">
+      <div className="mx-auto max-w-6xl px-4 md:px-6 pt-8 md:pt-16 pb-2">
+        <div className="mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            YVITY · Profile
+          </p>
+          <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+            My Career
+          </h1>
+        </div>
+        <SectionProfileBanner className="mb-6 sm:mb-8" />
+        {!settings.visibility.careerJourney && !settings.visibility.educationalJourney ? (
+          <PublicSectionUnavailable title="Career sections hidden" />
+        ) : (
+          <CareerSectionsAccordion
+            experiences={data.experiences}
+            certifications={data.certifications}
+            education={data.education}
+            showCareerJourney={settings.visibility.careerJourney}
+            showEducationalJourney={settings.visibility.educationalJourney}
+          />
+        )}
+        <SectionAdvisorCta className="mt-8 sm:mt-10" />
+      </div>
+    </main>
+  );
+}

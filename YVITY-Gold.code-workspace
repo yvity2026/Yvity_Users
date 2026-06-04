@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "name": "YVITY Gold",
+      "path": "."
+    },
+    {
+      "name": "YVITY Dashboard",
+      "path": "YVITY-Dashboard"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/.data": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.next": true
+    },
+    "explorer.excludeGitIgnore": false
+  }
+}

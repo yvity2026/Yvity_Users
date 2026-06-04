@@ -1,0 +1,1520 @@
+@import "tailwindcss";
+@source "../**/*.{ts,tsx}";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-rose: var(--accent-rose);
+  --font-cormorant: var(--font-cormorant), Georgia, serif;
+  --font-poppins: var(--font-poppins), system-ui, sans-serif;
+}
+
+:root,
+[data-profile-theme="signature-dark"] {
+  --radius: 0.875rem;
+
+  --brand: oklch(0.295 0.062 232);
+  --brand-soft: oklch(0.42 0.07 232);
+
+  --background: oklch(0.18 0.035 235);
+  --foreground: oklch(0.97 0.01 230);
+
+  --card: oklch(0.235 0.04 232);
+  --card-foreground: oklch(0.97 0.01 230);
+  --popover: oklch(0.235 0.04 232);
+  --popover-foreground: oklch(0.97 0.01 230);
+
+  --primary: oklch(0.295 0.062 232);
+  --primary-foreground: oklch(0.98 0.005 230);
+
+  --secondary: oklch(0.32 0.05 232);
+  --secondary-foreground: oklch(0.97 0.01 230);
+
+  --muted: oklch(0.28 0.035 232);
+  --muted-foreground: oklch(0.72 0.025 230);
+
+  --accent: oklch(0.78 0.13 200);
+  --accent-foreground: oklch(0.15 0.03 232);
+
+  --destructive: oklch(0.62 0.22 22);
+  --destructive-foreground: oklch(0.98 0.01 230);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.78 0.13 200);
+
+  --accent-cyan: oklch(0.82 0.13 205);
+  --accent-violet: oklch(0.72 0.17 295);
+  --accent-emerald: oklch(0.78 0.16 162);
+  --accent-amber: oklch(0.82 0.16 78);
+  --accent-rose: oklch(0.72 0.18 15);
+
+  --yvity-glass-top: oklch(1 0 0 / 0.06);
+  --yvity-glass-bottom: oklch(1 0 0 / 0.02);
+  --yvity-glass-strong-top: oklch(1 0 0 / 0.09);
+  --yvity-glass-strong-bottom: oklch(1 0 0 / 0.03);
+  --yvity-glass-border: oklch(1 0 0 / 0.1);
+  --yvity-glass-strong-border: oklch(1 0 0 / 0.14);
+  --yvity-glass-inset: oklch(1 0 0 / 0.08);
+  --yvity-glass-strong-inset: oklch(1 0 0 / 0.1);
+  --yvity-glass-shadow: 0 30px 60px -30px oklch(0 0 0 / 0.6);
+  --yvity-glass-strong-shadow: 0 40px 80px -30px oklch(0 0 0 / 0.7);
+  --yvity-page-gradient-1: oklch(0.42 0.09 232 / 0.45);
+  --yvity-page-gradient-2: oklch(0.45 0.13 290 / 0.25);
+  --yvity-page-gradient-3: oklch(0.55 0.13 200 / 0.18);
+  --yvity-brand-text-start: oklch(0.95 0.02 230);
+  --yvity-brand-text-end: oklch(0.78 0.15 260);
+  --yvity-surface-tint: oklch(1 0 0);
+  --yvity-surface-tint-alpha: 1;
+
+  --yvity-nav-shell-bg: color-mix(in oklch, var(--background) 68%, transparent);
+  --yvity-nav-shell-border: var(--border);
+  --yvity-nav-link-active: oklch(1 0 0 / 0.1);
+  --yvity-nav-active-ring: oklch(0.82 0.13 205 / 0.55);
+  --yvity-nav-fab-gradient: linear-gradient(
+    135deg,
+    var(--accent-cyan),
+    var(--primary) 48%,
+    oklch(0.55 0.13 260)
+  );
+  --yvity-nav-mobile-shadow: 0 25px 50px -12px oklch(0 0 0 / 0.45);
+
+  --yvity-dash-nav-frame: linear-gradient(90deg, var(--accent-cyan), var(--accent-amber));
+  --yvity-dash-nav-surface: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--card) 94%, transparent),
+    color-mix(in oklch, var(--background) 90%, transparent)
+  );
+  --yvity-dash-nav-flat-bg: color-mix(in oklch, var(--background) 92%, transparent);
+  --yvity-dash-nav-flat-border: var(--border);
+  --yvity-dash-nav-link: var(--muted-foreground);
+  --yvity-dash-nav-link-hover-bg: color-mix(in oklch, var(--foreground) 8%, transparent);
+  --yvity-dash-nav-link-hover-text: var(--foreground);
+  --yvity-dash-nav-link-active-bg: var(--primary);
+  --yvity-dash-nav-link-active-text: var(--accent-amber);
+  --yvity-dash-nav-soon: var(--accent-amber);
+  --yvity-dash-nav-action-bg: color-mix(in oklch, var(--card) 90%, transparent);
+  --yvity-dash-nav-action-border: var(--border);
+  --yvity-dash-nav-avatar-ring: var(--accent-cyan);
+  --yvity-dash-nav-icon-idle: color-mix(in oklch, var(--foreground) 50%, transparent);
+  --yvity-dash-nav-cta-bg: var(--accent-amber);
+  --yvity-dash-nav-cta-text: var(--primary);
+}
+
+/* YVITY official brand — matches marketing landing (pearl ivory + teal + saffron) */
+[data-profile-theme="warm-ivory"] {
+  --brand: #0a4a4a;
+  --brand-soft: #0d6060;
+
+  --background: #f8f6f1;
+  --foreground: #111827;
+
+  --card: #fcfaf6;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  --primary: #0a4a4a;
+  --primary-foreground: #f59e0b;
+
+  --secondary: #f8f6f1;
+  --secondary-foreground: #374151;
+
+  --muted: #f0ede6;
+  --muted-foreground: #6b7280;
+
+  --accent: #0d6060;
+  --accent-foreground: #ffffff;
+
+  --destructive: oklch(0.55 0.22 22);
+  --destructive-foreground: #fcfaf6;
+
+  --border: color-mix(in srgb, #333333 13%, transparent);
+  --input: color-mix(in srgb, #333333 16%, transparent);
+  --ring: #0d6060;
+
+  --accent-cyan: #0d6060;
+  --accent-amber: #f59e0b;
+  --accent-emerald: oklch(0.5 0.15 162);
+  --accent-violet: oklch(0.5 0.18 295);
+  --accent-rose: oklch(0.55 0.18 15);
+
+  --yvity-glass-top: #fcfaf6;
+  --yvity-glass-bottom: color-mix(in srgb, #f8f6f1 97%, #fcfaf6);
+  --yvity-glass-strong-top: #ffffff;
+  --yvity-glass-strong-bottom: #fcfaf6;
+  --yvity-glass-border: color-mix(in srgb, #333333 13%, transparent);
+  --yvity-glass-strong-border: color-mix(in srgb, #333333 17%, transparent);
+  --yvity-glass-inset: color-mix(in srgb, #ffffff 92%, transparent);
+  --yvity-glass-strong-inset: #ffffff;
+  --yvity-glass-shadow:
+    0 1px 2px 0 color-mix(in srgb, #0a444a 5%, transparent),
+    0 14px 28px -14px color-mix(in srgb, #d97706 18%, transparent),
+    0 30px 60px -28px color-mix(in srgb, #d97706 24%, transparent);
+  --yvity-glass-strong-shadow:
+    0 1px 3px 0 color-mix(in srgb, #0a444a 7%, transparent),
+    0 20px 36px -16px color-mix(in srgb, #d97706 22%, transparent),
+    0 40px 80px -28px color-mix(in srgb, #d97706 30%, transparent);
+  --yvity-page-gradient-1: color-mix(in srgb, #f59e0b 32%, transparent);
+  --yvity-page-gradient-2: color-mix(in srgb, #0d6060 18%, transparent);
+  --yvity-page-gradient-3: color-mix(in srgb, #f8f6f1 45%, transparent);
+  --yvity-brand-text-start: #0a444a;
+  --yvity-brand-text-end: #0d6060;
+  --yvity-surface-tint: #111827;
+  --yvity-surface-tint-alpha: 1;
+
+  --yvity-accent-teal: #0d6060;
+  --yvity-accent-teal-soft: color-mix(in srgb, #0d6060 10%, transparent);
+  --yvity-accent-teal-border: color-mix(in srgb, #0d6060 35%, transparent);
+  --yvity-accent-gold: #f59e0b;
+  --yvity-accent-gold-strong: #d97706;
+  --yvity-accent-gold-soft: color-mix(in srgb, #f59e0b 14%, transparent);
+  --yvity-accent-gold-border: color-mix(in srgb, #d97706 40%, transparent);
+  --yvity-accent-violet: oklch(0.5 0.18 295);
+  --yvity-accent-emerald: oklch(0.5 0.15 162);
+  --yvity-track: color-mix(in srgb, #333333 10%, transparent);
+
+  --yvity-font-heading: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --yvity-font-body: var(--font-poppins), "Poppins", system-ui, sans-serif;
+  --yvity-font-numeric: var(--font-poppins), "Poppins", system-ui, sans-serif;
+
+  --yvity-nav-shell-bg: color-mix(in srgb, var(--card) 90%, transparent);
+  --yvity-nav-shell-border: var(--border);
+  --yvity-nav-link-active: color-mix(in srgb, var(--primary) 9%, var(--card));
+  --yvity-nav-active-ring: var(--yvity-accent-teal-border);
+  --yvity-nav-fab-gradient: linear-gradient(135deg, #0d6060, #0a4a4a 52%, #f59e0b);
+  --yvity-nav-mobile-shadow: var(--yvity-glass-strong-shadow);
+
+  --yvity-dash-nav-frame: linear-gradient(90deg, #0d6060 0%, #f59e0b 100%);
+  --yvity-dash-nav-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(252, 250, 246, 0.9));
+  --yvity-dash-nav-flat-bg: #f8f6f1;
+  --yvity-dash-nav-flat-border: #e5e0d6;
+  --yvity-dash-nav-link: #374151;
+  --yvity-dash-nav-link-hover-bg: #f8f6f1;
+  --yvity-dash-nav-link-hover-text: #0a4a4a;
+  --yvity-dash-nav-link-active-bg: #0a4a4a;
+  --yvity-dash-nav-link-active-text: #f59e0b;
+  --yvity-dash-nav-soon: #f59e0b;
+  --yvity-dash-nav-action-bg: #fcf8f3;
+  --yvity-dash-nav-action-border: #e4e2db;
+  --yvity-dash-nav-avatar-ring: #197272;
+  --yvity-dash-nav-icon-idle: color-mix(in srgb, #0a4a4a 55%, transparent);
+  --yvity-dash-nav-cta-bg: #f59e0b;
+  --yvity-dash-nav-cta-text: #ffffff;
+}
+
+[data-profile-theme="clean-white"] {
+  --brand: #0a4a4a;
+  --brand-soft: #0d6060;
+
+  --background: oklch(0.985 0.003 232);
+  --foreground: oklch(0.2 0.04 232);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.04 232);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.04 232);
+
+  --primary: oklch(0.3 0.07 232);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.965 0.005 232);
+  --secondary-foreground: oklch(0.22 0.04 232);
+
+  --muted: oklch(0.96 0.005 232);
+  --muted-foreground: oklch(0.42 0.025 232);
+
+  --accent: oklch(0.45 0.11 200);
+  --accent-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.22 0.04 232 / 11%);
+  --input: oklch(0.22 0.04 232 / 14%);
+  --ring: oklch(0.45 0.11 200);
+
+  --yvity-glass-top: oklch(1 0 0 / 1);
+  --yvity-glass-bottom: oklch(1 0 0 / 0.98);
+  --yvity-glass-strong-top: oklch(1 0 0 / 1);
+  --yvity-glass-strong-bottom: oklch(1 0 0 / 1);
+  --yvity-glass-border: oklch(0.22 0.04 232 / 0.11);
+  --yvity-glass-strong-border: oklch(0.22 0.04 232 / 0.14);
+  --yvity-glass-inset: oklch(1 0 0 / 0.95);
+  --yvity-glass-strong-inset: oklch(1 0 0 / 1);
+  --yvity-glass-shadow:
+    0 1px 2px 0 oklch(0.22 0.04 232 / 0.05),
+    0 12px 24px -12px oklch(0.22 0.04 232 / 0.13),
+    0 26px 52px -24px oklch(0.22 0.04 232 / 0.18);
+  --yvity-glass-strong-shadow:
+    0 1px 3px 0 oklch(0.22 0.04 232 / 0.07),
+    0 18px 36px -16px oklch(0.22 0.04 232 / 0.18),
+    0 34px 68px -24px oklch(0.22 0.04 232 / 0.22);
+  --yvity-page-gradient-1: oklch(0.72 0.1 200 / 0.12);
+  --yvity-page-gradient-2: oklch(0.78 0.08 232 / 0.08);
+  --yvity-page-gradient-3: oklch(0.94 0.005 232 / 0.5);
+  --yvity-brand-text-start: oklch(0.2 0.05 232);
+  --yvity-brand-text-end: oklch(0.42 0.11 200);
+  --yvity-surface-tint: oklch(0 0 0);
+  --yvity-surface-tint-alpha: 1;
+
+  --yvity-accent-teal: oklch(0.45 0.13 200);
+  --yvity-accent-teal-soft: oklch(0.45 0.13 200 / 0.09);
+  --yvity-accent-teal-border: oklch(0.45 0.13 200 / 0.32);
+  --yvity-accent-gold: oklch(0.58 0.16 78);
+  --yvity-accent-gold-strong: oklch(0.5 0.16 76);
+  --yvity-accent-gold-soft: oklch(0.58 0.16 78 / 0.12);
+  --yvity-accent-gold-border: oklch(0.52 0.16 78 / 0.38);
+  --yvity-accent-violet: oklch(0.48 0.18 295);
+  --yvity-accent-emerald: oklch(0.48 0.15 162);
+  --yvity-track: oklch(0.22 0.04 232 / 0.09);
+
+  --yvity-font-heading: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --yvity-font-body: var(--font-poppins), "Poppins", system-ui, sans-serif;
+  --yvity-font-numeric: var(--font-poppins), "Poppins", system-ui, sans-serif;
+
+  --yvity-nav-shell-bg: color-mix(in oklch, var(--background) 82%, transparent);
+  --yvity-nav-shell-border: var(--border);
+  --yvity-nav-link-active: color-mix(in oklch, var(--primary) 10%, var(--card));
+  --yvity-nav-active-ring: var(--yvity-accent-teal-border);
+  --yvity-nav-fab-gradient: linear-gradient(
+    135deg,
+    oklch(0.45 0.11 200),
+    var(--primary) 50%,
+    oklch(0.58 0.16 78)
+  );
+  --yvity-nav-mobile-shadow: var(--yvity-glass-strong-shadow);
+
+  --yvity-dash-nav-frame: linear-gradient(
+    90deg,
+    oklch(0.45 0.11 200),
+    oklch(0.58 0.16 78)
+  );
+  --yvity-dash-nav-surface: linear-gradient(180deg, oklch(1 0 0 / 0.96), oklch(0.99 0 0 / 0.92));
+  --yvity-dash-nav-flat-bg: oklch(0.985 0.003 232);
+  --yvity-dash-nav-flat-border: oklch(0.22 0.04 232 / 11%);
+  --yvity-dash-nav-link: oklch(0.42 0.025 232);
+  --yvity-dash-nav-link-hover-bg: oklch(0.96 0.005 232);
+  --yvity-dash-nav-link-hover-text: oklch(0.2 0.04 232);
+  --yvity-dash-nav-link-active-bg: oklch(0.3 0.07 232);
+  --yvity-dash-nav-link-active-text: oklch(0.99 0 0);
+  --yvity-dash-nav-soon: oklch(0.58 0.16 78);
+  --yvity-dash-nav-action-bg: oklch(1 0 0);
+  --yvity-dash-nav-action-border: oklch(0.22 0.04 232 / 11%);
+  --yvity-dash-nav-avatar-ring: oklch(0.45 0.11 200);
+  --yvity-dash-nav-icon-idle: oklch(0.3 0.07 232 / 55%);
+  --yvity-dash-nav-cta-bg: oklch(0.58 0.16 78);
+  --yvity-dash-nav-cta-text: oklch(0.99 0 0);
+}
+
+/* Option D — midnight + amber (fourth theme, experimental dark luxe) */
+[data-profile-theme="midnight-amber"] {
+  --brand: #1a1f36;
+  --brand-soft: #2e3a6b;
+
+  --background: #1a1f36;
+  --foreground: #eceef8;
+
+  --card: #2a3055;
+  --card-foreground: #eceef8;
+  --popover: #2a3055;
+  --popover-foreground: #eceef8;
+
+  --primary: #1a1f36;
+  --primary-foreground: #ffffff;
+
+  --secondary: #2e3a6b;
+  --secondary-foreground: #eceef8;
+
+  --muted: #242a47;
+  --muted-foreground: #a8afc9;
+
+  --accent: #ffb347;
+  --accent-foreground: #0f1123;
+
+  --destructive: oklch(0.62 0.22 22);
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #ffb347;
+
+  --accent-cyan: #2e3a6b;
+  --accent-violet: oklch(0.55 0.17 295);
+  --accent-emerald: oklch(0.55 0.15 162);
+  --accent-amber: #ffb347;
+  --accent-rose: oklch(0.62 0.18 15);
+
+  --yvity-glass-top: rgba(255, 255, 255, 0.08);
+  --yvity-glass-bottom: rgba(255, 255, 255, 0.03);
+  --yvity-glass-strong-top: rgba(255, 255, 255, 0.11);
+  --yvity-glass-strong-bottom: rgba(255, 255, 255, 0.04);
+  --yvity-glass-border: rgba(255, 255, 255, 0.12);
+  --yvity-glass-strong-border: rgba(255, 179, 71, 0.22);
+  --yvity-glass-inset: rgba(255, 255, 255, 0.1);
+  --yvity-glass-strong-inset: rgba(255, 255, 255, 0.12);
+  --yvity-glass-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55);
+  --yvity-glass-strong-shadow:
+    0 40px 80px -30px rgba(0, 0, 0, 0.65),
+    0 0 48px -12px rgba(255, 179, 71, 0.18);
+  --yvity-page-gradient-1: rgba(255, 179, 71, 0.14);
+  --yvity-page-gradient-2: rgba(46, 58, 107, 0.38);
+  --yvity-page-gradient-3: rgba(14, 17, 34, 0.55);
+  --yvity-brand-text-start: #ffd080;
+  --yvity-brand-text-end: #ffb347;
+  --yvity-surface-tint: oklch(1 0 0);
+  --yvity-surface-tint-alpha: 1;
+
+  --yvity-accent-teal: #2e3a6b;
+  --yvity-accent-teal-soft: rgba(46, 58, 107, 0.28);
+  --yvity-accent-teal-border: rgba(46, 58, 107, 0.5);
+  --yvity-accent-gold: #ffb347;
+  --yvity-accent-gold-strong: #e8821a;
+  --yvity-accent-gold-soft: rgba(255, 179, 71, 0.16);
+  --yvity-accent-gold-border: rgba(255, 179, 71, 0.48);
+  --yvity-accent-violet: oklch(0.55 0.17 295);
+  --yvity-accent-emerald: oklch(0.55 0.15 162);
+  --yvity-track: rgba(255, 255, 255, 0.1);
+
+  --yvity-font-heading: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --yvity-font-body: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --yvity-font-numeric: var(--font-poppins), "Poppins", system-ui, sans-serif;
+
+  --yvity-nav-shell-bg: color-mix(in srgb, var(--card) 72%, transparent);
+  --yvity-nav-shell-border: var(--border);
+  --yvity-nav-link-active: rgba(255, 255, 255, 0.1);
+  --yvity-nav-active-ring: var(--yvity-accent-gold-border);
+  --yvity-nav-fab-gradient: linear-gradient(135deg, #ffb347, #e8821a 48%, #2e3a6b);
+  --yvity-nav-mobile-shadow: var(--yvity-glass-strong-shadow);
+
+  --yvity-dash-nav-frame: linear-gradient(90deg, #ffb347, #e8821a);
+  --yvity-dash-nav-surface: linear-gradient(
+    180deg,
+    rgba(42, 48, 85, 0.94),
+    rgba(26, 31, 54, 0.92)
+  );
+  --yvity-dash-nav-flat-bg: color-mix(in srgb, #1a1f36 92%, transparent);
+  --yvity-dash-nav-flat-border: rgba(255, 255, 255, 0.12);
+  --yvity-dash-nav-link: #a8afc9;
+  --yvity-dash-nav-link-hover-bg: rgba(255, 255, 255, 0.06);
+  --yvity-dash-nav-link-hover-text: #eceef8;
+  --yvity-dash-nav-link-active-bg: #2a3055;
+  --yvity-dash-nav-link-active-text: #ffb347;
+  --yvity-dash-nav-soon: #ffb347;
+  --yvity-dash-nav-action-bg: rgba(42, 48, 85, 0.85);
+  --yvity-dash-nav-action-border: rgba(255, 179, 71, 0.35);
+  --yvity-dash-nav-avatar-ring: #ffb347;
+  --yvity-dash-nav-icon-idle: rgba(236, 238, 248, 0.45);
+  --yvity-dash-nav-cta-bg: #ffb347;
+  --yvity-dash-nav-cta-text: #1a1f36;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease;
+  }
+
+  /* Accessibility: respect the user's reduced-motion preference. Disables the
+     staggered fade/slide entry animations, hover micro-interactions, modal
+     slide-ins and skeleton pulses for users who set Reduce Motion in their
+     OS — applies to both mobile and desktop. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      transition-delay: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, var(--yvity-page-gradient-1), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, var(--yvity-page-gradient-2), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, var(--yvity-page-gradient-3), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  [data-profile-theme="warm-ivory"] body {
+    font-family: var(--yvity-font-body);
+  }
+
+  [data-profile-theme="warm-ivory"] .yvity-display,
+  [data-profile-theme="warm-ivory"] .yvity-section-h,
+  [data-profile-theme="warm-ivory"] .yvity-card-h,
+  [data-profile-theme="warm-ivory"] .yvity-sub-h,
+  [data-profile-theme="warm-ivory"] h1,
+  [data-profile-theme="warm-ivory"] h2,
+  [data-profile-theme="warm-ivory"] h3,
+  [data-profile-theme="warm-ivory"] .font-cormorant {
+    font-family: var(--yvity-font-heading);
+  }
+
+  [data-profile-theme="warm-ivory"] body,
+  [data-profile-theme="warm-ivory"] p,
+  [data-profile-theme="warm-ivory"] li,
+  [data-profile-theme="warm-ivory"] label,
+  [data-profile-theme="warm-ivory"] input,
+  [data-profile-theme="warm-ivory"] textarea,
+  [data-profile-theme="warm-ivory"] select,
+  [data-profile-theme="warm-ivory"] .font-poppins {
+    font-family: var(--yvity-font-body);
+  }
+
+  [data-profile-theme="warm-ivory"] button,
+  [data-profile-theme="warm-ivory"] [role="button"],
+  [data-profile-theme="warm-ivory"] .tabular-nums {
+    font-family: var(--yvity-font-numeric);
+  }
+
+  [data-profile-theme="clean-white"] body {
+    font-family: var(--yvity-font-body);
+  }
+
+  [data-profile-theme="clean-white"] .yvity-display,
+  [data-profile-theme="clean-white"] .yvity-section-h,
+  [data-profile-theme="warm-ivory"] .yvity-card-h,
+  [data-profile-theme="clean-white"] h1,
+  [data-profile-theme="clean-white"] h2,
+  [data-profile-theme="clean-white"] h3 {
+    font-family: var(--yvity-font-heading);
+  }
+
+  [data-profile-theme="midnight-amber"] body {
+    font-family: var(--yvity-font-body);
+  }
+
+  [data-profile-theme="midnight-amber"] .yvity-display,
+  [data-profile-theme="midnight-amber"] .yvity-section-h,
+  [data-profile-theme="midnight-amber"] .yvity-card-h,
+  [data-profile-theme="midnight-amber"] h1,
+  [data-profile-theme="midnight-amber"] h2 {
+    font-family: var(--yvity-font-heading);
+  }
+
+  [data-profile-theme="midnight-amber"] button,
+  [data-profile-theme="midnight-amber"] [role="button"],
+  [data-profile-theme="midnight-amber"] .tabular-nums {
+    font-family: var(--yvity-font-numeric);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: linear-gradient(180deg, var(--yvity-glass-top), var(--yvity-glass-bottom));
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--yvity-glass-border);
+    box-shadow:
+      0 1px 0 0 var(--yvity-glass-inset) inset,
+      var(--yvity-glass-shadow);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+  .glass-strong {
+    background: linear-gradient(180deg, var(--yvity-glass-strong-top), var(--yvity-glass-strong-bottom));
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--yvity-glass-strong-border);
+    box-shadow:
+      0 1px 0 0 var(--yvity-glass-strong-inset) inset,
+      var(--yvity-glass-strong-shadow);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  /* Profile / workspace chrome — follows Settings → Profile Appearance theme */
+  .yvity-nav-shell {
+    background: var(--yvity-nav-shell-bg);
+    border-color: var(--yvity-nav-shell-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .yvity-nav-link-active {
+    background: var(--yvity-nav-link-active);
+  }
+  .yvity-nav-active-ring {
+    box-shadow: 0 0 0 1px var(--yvity-nav-active-ring);
+  }
+  .yvity-nav-fab {
+    background: var(--yvity-nav-fab-gradient);
+    box-shadow: var(--yvity-nav-mobile-shadow);
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+  .yvity-nav-mobile-bar {
+    border-color: var(--yvity-glass-strong-border);
+    box-shadow: var(--yvity-nav-mobile-shadow);
+    transition:
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+  .yvity-workspace-chrome {
+    background: var(--yvity-nav-shell-bg);
+    border-color: var(--yvity-nav-shell-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  /* YVITY customer dashboard nav — follows Profile Appearance theme */
+  .yvity-dash-nav-brand-name {
+    color: var(--foreground);
+    transition: color 0.35s ease;
+  }
+  .yvity-dash-nav-brand-tagline {
+    color: var(--accent-amber);
+    transition: color 0.35s ease;
+  }
+  .yvity-dash-nav-top-frame {
+    background: var(--yvity-dash-nav-frame);
+    transition: background 0.35s ease;
+  }
+  .yvity-dash-nav-top-inner,
+  .yvity-dash-nav-bottom-inner,
+  .yvity-dash-nav-pill-surface {
+    background: var(--yvity-dash-nav-surface);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    transition: background 0.35s ease;
+  }
+  .yvity-dash-nav-flat {
+    background: var(--yvity-dash-nav-flat-bg);
+    border-color: var(--yvity-dash-nav-flat-border);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .yvity-dash-nav-pill-frame {
+    background: var(--yvity-dash-nav-frame);
+    transition: background 0.35s ease;
+  }
+  .yvity-dash-nav-link {
+    color: var(--yvity-dash-nav-link);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+  .yvity-dash-nav-link:hover {
+    background: var(--yvity-dash-nav-link-hover-bg);
+    color: var(--yvity-dash-nav-link-hover-text);
+  }
+  .yvity-dash-nav-link--active {
+    background: var(--yvity-dash-nav-link-active-bg);
+    color: var(--yvity-dash-nav-link-active-text);
+  }
+  .yvity-dash-nav-soon {
+    color: var(--yvity-dash-nav-soon);
+  }
+  .yvity-dash-nav-action {
+    border-color: var(--yvity-dash-nav-action-border);
+    background: var(--yvity-dash-nav-action-bg);
+    color: var(--yvity-dash-nav-link);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease,
+      color 0.35s ease;
+  }
+  .yvity-dash-nav-action:hover {
+    background: var(--yvity-dash-nav-link-hover-bg);
+  }
+  .yvity-dash-nav-avatar-ring {
+    --tw-ring-color: var(--yvity-dash-nav-avatar-ring);
+  }
+  .yvity-dash-nav-bottom-icon {
+    color: var(--yvity-dash-nav-icon-idle);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .yvity-dash-nav-bottom-icon--active {
+    background: var(--yvity-dash-nav-link-active-bg);
+    color: var(--yvity-dash-nav-link-active-text);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--yvity-dash-nav-link-active-bg) 45%, transparent);
+  }
+  .yvity-dash-nav-bottom-label {
+    color: var(--foreground);
+  }
+  .yvity-dash-nav-cta {
+    background: var(--yvity-dash-nav-cta-bg);
+    color: var(--yvity-dash-nav-cta-text);
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(90deg, var(--yvity-brand-text-start), var(--yvity-brand-text-end));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+   * YVITY HEADING SYSTEM — single source of truth for type styles.
+   *
+   * Use these utilities to keep headings consistent across every page
+   * and theme. If you write a one-off heading, copy the same class
+   * combo so visual rhythm stays identical.
+   *
+   *   .yvity-display     Hero / page name           text-2xl→text-[2.35rem]
+   *   .yvity-section-h   Section banner / home h2   text-2xl→text-4xl
+   *   .yvity-card-h      Card title (h3)            text-lg→text-xl
+   *   .yvity-sub-h       Inline sub-header (h3)     text-base→text-lg
+   *
+   * RULES
+   *   1. Always sans-serif. Do NOT use `font-serif` on any heading.
+   *   2. Default color is `text-foreground` (auto theme-aware).
+   *   3. For an accented word/phrase wrap it in
+   *        <span class="text-gradient-brand">…</span>
+   *      Do NOT hand-pick OKLCH values for headings.
+   *   4. Always include `tracking-tight`.
+   * ────────────────────────────────────────────────────────────────── */
+  .yvity-display {
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 1.12;
+    font-weight: 700; /* font-bold */
+    letter-spacing: -0.01em; /* tracking-tight */
+  }
+  @media (min-width: 640px) {
+    .yvity-display {
+      font-size: 1.875rem; /* text-3xl */
+    }
+  }
+  @media (min-width: 768px) {
+    .yvity-display {
+      font-size: 2.15rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .yvity-display {
+      font-size: 2.35rem;
+    }
+  }
+  .yvity-section-h {
+    font-size: 1.5rem;
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 640px) {
+    .yvity-section-h {
+      font-size: 1.875rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .yvity-section-h {
+      font-size: 2.25rem; /* text-4xl */
+    }
+  }
+  .yvity-card-h {
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.25;
+    font-weight: 600; /* font-semibold */
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .yvity-card-h {
+      font-size: 1.25rem; /* text-xl */
+    }
+  }
+  .yvity-sub-h {
+    font-size: 1rem; /* text-base */
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 640px) {
+    .yvity-sub-h {
+      font-size: 1.125rem; /* text-lg */
+    }
+  }
+  .ring-glow-cyan {
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.13 205 / 0.45),
+      0 0 30px oklch(0.82 0.13 205 / 0.25);
+  }
+  .ring-glow-violet {
+    box-shadow:
+      0 0 0 1px oklch(0.72 0.17 295 / 0.45),
+      0 0 30px oklch(0.72 0.17 295 / 0.25);
+  }
+  .ring-glow-emerald {
+    box-shadow:
+      0 0 0 1px oklch(0.78 0.16 162 / 0.45),
+      0 0 30px oklch(0.78 0.16 162 / 0.25);
+  }
+  .ring-glow-amber {
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.16 78 / 0.45),
+      0 0 30px oklch(0.82 0.16 78 / 0.25);
+  }
+
+  /* Soften the saturated glow rings on light themes so they read as elegant
+     accent edges instead of neon halos */
+  [data-profile-theme="warm-ivory"] .ring-glow-cyan {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, #0d6060 35%, transparent),
+      0 8px 20px -8px color-mix(in srgb, #0d6060 22%, transparent);
+  }
+  [data-profile-theme="clean-white"] .ring-glow-cyan {
+    box-shadow:
+      0 0 0 1px oklch(0.48 0.13 200 / 0.35),
+      0 8px 20px -8px oklch(0.48 0.13 200 / 0.22);
+  }
+  [data-profile-theme="warm-ivory"] .ring-glow-violet {
+    box-shadow:
+      0 0 0 1px oklch(0.5 0.18 295 / 0.35),
+      0 8px 20px -8px oklch(0.5 0.18 295 / 0.22);
+  }
+  [data-profile-theme="clean-white"] .ring-glow-violet {
+    box-shadow:
+      0 0 0 1px oklch(0.5 0.18 295 / 0.35),
+      0 8px 20px -8px oklch(0.5 0.18 295 / 0.22);
+  }
+  [data-profile-theme="warm-ivory"] .ring-glow-emerald {
+    box-shadow:
+      0 0 0 1px oklch(0.5 0.15 162 / 0.35),
+      0 8px 20px -8px oklch(0.5 0.15 162 / 0.22);
+  }
+  [data-profile-theme="clean-white"] .ring-glow-emerald {
+    box-shadow:
+      0 0 0 1px oklch(0.5 0.15 162 / 0.35),
+      0 8px 20px -8px oklch(0.5 0.15 162 / 0.22);
+  }
+  [data-profile-theme="warm-ivory"] .ring-glow-amber {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, #f59e0b 38%, transparent),
+      0 8px 20px -8px color-mix(in srgb, #d97706 25%, transparent);
+  }
+  [data-profile-theme="clean-white"] .ring-glow-amber {
+    box-shadow:
+      0 0 0 1px oklch(0.55 0.16 78 / 0.38),
+      0 8px 20px -8px oklch(0.55 0.16 78 / 0.25);
+  }
+
+  [data-profile-theme="midnight-amber"] .ring-glow-cyan {
+    box-shadow:
+      0 0 0 1px rgba(46, 58, 107, 0.55),
+      0 0 28px rgba(46, 58, 107, 0.35);
+  }
+  [data-profile-theme="midnight-amber"] .ring-glow-amber {
+    box-shadow:
+      0 0 0 1px rgba(255, 179, 71, 0.5),
+      0 0 36px rgba(255, 179, 71, 0.28);
+  }
+  [data-profile-theme="midnight-amber"] .ring-glow-violet {
+    box-shadow:
+      0 0 0 1px oklch(0.55 0.17 295 / 0.45),
+      0 0 28px oklch(0.55 0.17 295 / 0.22);
+  }
+  [data-profile-theme="midnight-amber"] .ring-glow-emerald {
+    box-shadow:
+      0 0 0 1px oklch(0.55 0.15 162 / 0.45),
+      0 0 28px oklch(0.55 0.15 162 / 0.22);
+  }
+
+  /* ---------- Light profile themes: white-surface utility remaps ---------- */
+  /* Cards sit on tinted ivory/cool-white backgrounds — translate the dark-mode
+     "border-white/X" and "bg-white/X" utilities to dark-on-light tints, with
+     slightly stronger contrast than a pure black/X% mapping so cards read as
+     premium and edges stay visible against the white surface. */
+
+  [data-profile-theme="warm-ivory"] .border-white\/8 {
+    border-color: color-mix(in srgb, #333333 10%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/8 {
+    border-color: oklch(0.22 0.04 232 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .border-white\/10 {
+    border-color: color-mix(in srgb, #333333 13%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/10 {
+    border-color: oklch(0.22 0.04 232 / 13%);
+  }
+  [data-profile-theme="warm-ivory"] .border-white\/12 {
+    border-color: color-mix(in srgb, #333333 15%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/12 {
+    border-color: oklch(0.22 0.04 232 / 15%);
+  }
+  [data-profile-theme="warm-ivory"] .border-white\/14,
+  [data-profile-theme="warm-ivory"] .border-white\/15 {
+    border-color: color-mix(in srgb, #333333 17%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/14,
+  [data-profile-theme="clean-white"] .border-white\/15 {
+    border-color: oklch(0.22 0.04 232 / 17%);
+  }
+  [data-profile-theme="warm-ivory"] .border-white\/16,
+  [data-profile-theme="warm-ivory"] .border-white\/18,
+  [data-profile-theme="warm-ivory"] .border-white\/20 {
+    border-color: color-mix(in srgb, #333333 20%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/16,
+  [data-profile-theme="clean-white"] .border-white\/18,
+  [data-profile-theme="clean-white"] .border-white\/20 {
+    border-color: oklch(0.22 0.04 232 / 20%);
+  }
+  [data-profile-theme="warm-ivory"] .border-white\/35 {
+    border-color: color-mix(in srgb, #333333 28%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-white\/35 {
+    border-color: oklch(0.22 0.04 232 / 28%);
+  }
+  [data-profile-theme="warm-ivory"] .divide-white\/10 > :not(:last-child) {
+    border-color: color-mix(in srgb, #333333 11%, transparent);
+  }
+  [data-profile-theme="clean-white"] .divide-white\/10 > :not(:last-child) {
+    border-color: oklch(0.22 0.04 232 / 11%);
+  }
+  [data-profile-theme="warm-ivory"] .border-dashed.border-white\/15,
+  [data-profile-theme="warm-ivory"] .border-dashed.border-white\/20 {
+    border-color: color-mix(in srgb, #333333 22%, transparent);
+  }
+  [data-profile-theme="clean-white"] .border-dashed.border-white\/15,
+  [data-profile-theme="clean-white"] .border-dashed.border-white\/20 {
+    border-color: oklch(0.22 0.04 232 / 22%);
+  }
+
+  /* Backgrounds: warm-ivory uses a slightly warmer overlay (cream/champagne tint),
+     clean-white uses a cool neutral so cards remain crisp. */
+  [data-profile-theme="warm-ivory"] .bg-white\/5 {
+    background-color: color-mix(in srgb, #d97706 5%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/5 {
+    background-color: oklch(0.22 0.04 232 / 4%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/10 {
+    background-color: color-mix(in srgb, #d97706 7%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/10 {
+    background-color: oklch(0.22 0.04 232 / 6%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/30 {
+    background-color: color-mix(in srgb, #333333 14%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/30 {
+    background-color: oklch(0.22 0.04 232 / 14%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/95 {
+    background-color: color-mix(in srgb, #fcfaf6 95%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/95 {
+    background-color: oklch(1 0 0 / 95%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.02\] {
+    background-color: color-mix(in srgb, #d97706 3%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.02\] {
+    background-color: oklch(0.22 0.04 232 / 3%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.03\] {
+    background-color: color-mix(in srgb, #d97706 4%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.03\] {
+    background-color: oklch(0.22 0.04 232 / 4%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.04\] {
+    background-color: color-mix(in srgb, #d97706 5%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.04\] {
+    background-color: oklch(0.22 0.04 232 / 5%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.05\] {
+    background-color: color-mix(in srgb, #d97706 6%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.05\] {
+    background-color: oklch(0.22 0.04 232 / 5.5%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.06\] {
+    background-color: color-mix(in srgb, #d97706 7%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.06\] {
+    background-color: oklch(0.22 0.04 232 / 6%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.08\] {
+    background-color: color-mix(in srgb, #d97706 9%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.08\] {
+    background-color: oklch(0.22 0.04 232 / 8%);
+  }
+  [data-profile-theme="warm-ivory"] .bg-white\/\[0\.10\] {
+    background-color: color-mix(in srgb, #d97706 10%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-white\/\[0\.10\] {
+    background-color: oklch(0.22 0.04 232 / 9%);
+  }
+  [data-profile-theme="warm-ivory"] .via-white\/18,
+  [data-profile-theme="warm-ivory"] .via-white\/20 {
+    --tw-gradient-via: color-mix(in srgb, #333333 14%, transparent);
+  }
+  [data-profile-theme="clean-white"] .via-white\/18,
+  [data-profile-theme="clean-white"] .via-white\/20 {
+    --tw-gradient-via: oklch(0.22 0.04 232 / 14%);
+  }
+  [data-profile-theme="warm-ivory"] .via-white\/35 {
+    --tw-gradient-via: color-mix(in srgb, #333333 22%, transparent);
+  }
+  [data-profile-theme="clean-white"] .via-white\/35 {
+    --tw-gradient-via: oklch(0.22 0.04 232 / 22%);
+  }
+  [data-profile-theme="warm-ivory"] .ring-white\/10 {
+    --tw-ring-color: color-mix(in srgb, #333333 12%, transparent);
+  }
+  [data-profile-theme="clean-white"] .ring-white\/10 {
+    --tw-ring-color: oklch(0.22 0.04 232 / 12%);
+  }
+  [data-profile-theme="warm-ivory"] .ring-white\/12,
+  [data-profile-theme="warm-ivory"] .ring-white\/15,
+  [data-profile-theme="warm-ivory"] .ring-white\/20,
+  [data-profile-theme="warm-ivory"] .ring-white\/25 {
+    --tw-ring-color: color-mix(in srgb, #333333 15%, transparent);
+  }
+  [data-profile-theme="clean-white"] .ring-white\/12,
+  [data-profile-theme="clean-white"] .ring-white\/15,
+  [data-profile-theme="clean-white"] .ring-white\/20,
+  [data-profile-theme="clean-white"] .ring-white\/25 {
+    --tw-ring-color: oklch(0.22 0.04 232 / 15%);
+  }
+  [data-profile-theme="warm-ivory"] .text-white\/20 {
+    color: color-mix(in srgb, #374151 22%, transparent);
+  }
+  [data-profile-theme="clean-white"] .text-white\/20 {
+    color: oklch(0.22 0.04 232 / 22%);
+  }
+
+  /* Hover states — keep restrained but visible on white */
+  [data-profile-theme="warm-ivory"] .hover\:border-white\/16:hover,
+  [data-profile-theme="warm-ivory"] .hover\:border-white\/20:hover {
+    border-color: color-mix(in srgb, #333333 24%, transparent);
+  }
+  [data-profile-theme="clean-white"] .hover\:border-white\/16:hover,
+  [data-profile-theme="clean-white"] .hover\:border-white\/20:hover {
+    border-color: oklch(0.22 0.04 232 / 24%);
+  }
+  [data-profile-theme="warm-ivory"] .hover\:bg-white\/10:hover {
+    background-color: color-mix(in srgb, #d97706 9%, transparent);
+  }
+  [data-profile-theme="clean-white"] .hover\:bg-white\/10:hover {
+    background-color: oklch(0.22 0.04 232 / 8%);
+  }
+  [data-profile-theme="warm-ivory"] .hover\:bg-white\/\[0\.04\]:hover,
+  [data-profile-theme="warm-ivory"] .hover\:bg-white\/\[0\.05\]:hover,
+  [data-profile-theme="warm-ivory"] .hover\:bg-white\/\[0\.06\]:hover,
+  [data-profile-theme="warm-ivory"] .hover\:bg-white\/\[0\.08\]:hover {
+    background-color: color-mix(in srgb, #d97706 8%, transparent);
+  }
+  [data-profile-theme="clean-white"] .hover\:bg-white\/\[0\.04\]:hover,
+  [data-profile-theme="clean-white"] .hover\:bg-white\/\[0\.05\]:hover,
+  [data-profile-theme="clean-white"] .hover\:bg-white\/\[0\.06\]:hover,
+  [data-profile-theme="clean-white"] .hover\:bg-white\/\[0\.08\]:hover {
+    background-color: oklch(0.22 0.04 232 / 7%);
+  }
+
+  /* ---------- Theme-aware accent colour remaps ---------- */
+  /* The dashboard uses several hardcoded oklch arbitrary classes for teal, gold,
+     emerald and violet accents. The dark-mode lightness (0.78–0.92) reads as
+     washed out on white. Remap them to darker, more saturated variants when a
+     light profile theme is active. */
+
+  /* Teal / cyan accent (205-ish) */
+  [data-profile-theme="warm-ivory"] .text-\[oklch\(0\.82_0\.13_205\)\],
+  [data-profile-theme="clean-white"] .text-\[oklch\(0\.82_0\.13_205\)\] {
+    color: var(--yvity-accent-teal);
+  }
+  [data-profile-theme="warm-ivory"] .border-\[oklch\(0\.82_0\.13_205\/0\.35\)\],
+  [data-profile-theme="clean-white"] .border-\[oklch\(0\.82_0\.13_205\/0\.35\)\] {
+    border-color: var(--yvity-accent-teal-border);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.82_0\.13_205\/0\.08\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.82_0\.13_205\/0\.08\)\] {
+    background-color: var(--yvity-accent-teal-soft);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.82_0\.13_205\/0\.1\)\],
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.82_0\.13_205\/0\.12\)\] {
+    background-color: color-mix(in srgb, #0d6060 12%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.82_0\.13_205\/0\.1\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.82_0\.13_205\/0\.12\)\] {
+    background-color: oklch(0.48 0.13 200 / 0.12);
+  }
+  [data-profile-theme="warm-ivory"] .from-\[oklch\(0\.82_0\.13_205\/0\.2\)\] {
+    --tw-gradient-from: color-mix(in srgb, #0d6060 16%, transparent);
+  }
+  [data-profile-theme="clean-white"] .from-\[oklch\(0\.82_0\.13_205\/0\.2\)\] {
+    --tw-gradient-from: oklch(0.48 0.13 200 / 0.16);
+  }
+  [data-profile-theme="warm-ivory"] .to-\[oklch\(0\.82_0\.13_205\/0\.06\)\] {
+    --tw-gradient-to: color-mix(in srgb, #0d6060 6%, transparent);
+  }
+  [data-profile-theme="clean-white"] .to-\[oklch\(0\.82_0\.13_205\/0\.06\)\] {
+    --tw-gradient-to: oklch(0.48 0.13 200 / 0.06);
+  }
+  [data-profile-theme="warm-ivory"] .hover\:border-\[oklch\(0\.82_0\.13_205\/0\.35\)\]:hover,
+  [data-profile-theme="warm-ivory"] .hover\:border-\[oklch\(0\.82_0\.13_205\/0\.4\)\]:hover {
+    border-color: color-mix(in srgb, #0d6060 50%, transparent);
+  }
+  [data-profile-theme="clean-white"] .hover\:border-\[oklch\(0\.82_0\.13_205\/0\.35\)\]:hover,
+  [data-profile-theme="clean-white"] .hover\:border-\[oklch\(0\.82_0\.13_205\/0\.4\)\]:hover {
+    border-color: oklch(0.48 0.13 200 / 0.5);
+  }
+
+  /* Gold / amber accent (78) — used heavily for name accent, MDRT, Verified */
+  [data-profile-theme="warm-ivory"] .text-\[oklch\(0\.85_0\.16_78\)\],
+  [data-profile-theme="clean-white"] .text-\[oklch\(0\.85_0\.16_78\)\] {
+    color: var(--yvity-accent-gold-strong);
+  }
+  [data-profile-theme="warm-ivory"] .text-\[oklch\(0\.92_0\.14_78\)\],
+  [data-profile-theme="clean-white"] .text-\[oklch\(0\.92_0\.14_78\)\] {
+    color: var(--yvity-accent-gold-strong);
+  }
+  [data-profile-theme="warm-ivory"] .fill-\[oklch\(0\.85_0\.16_78\)\],
+  [data-profile-theme="clean-white"] .fill-\[oklch\(0\.85_0\.16_78\)\] {
+    color: var(--yvity-accent-gold);
+    fill: var(--yvity-accent-gold);
+  }
+  [data-profile-theme="warm-ivory"] .border-\[oklch\(0\.85_0\.16_78\/0\.45\)\],
+  [data-profile-theme="clean-white"] .border-\[oklch\(0\.85_0\.16_78\/0\.45\)\] {
+    border-color: var(--yvity-accent-gold-border);
+  }
+  [data-profile-theme="warm-ivory"] .border-\[oklch\(0\.85_0\.16_78\/0\.35\)\] {
+    border-color: var(--yvity-accent-gold-border);
+  }
+  [data-profile-theme="clean-white"] .border-\[oklch\(0\.85_0\.16_78\/0\.35\)\] {
+    border-color: oklch(0.55 0.16 78 / 0.34);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.85_0\.16_78\/0\.1\)\],
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.85_0\.16_78\/0\.12\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.85_0\.16_78\/0\.1\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.85_0\.16_78\/0\.12\)\] {
+    background-color: var(--yvity-accent-gold-soft);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.85_0\.16_78\/0\.08\)\] {
+    background-color: var(--yvity-accent-gold-soft);
+  }
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.85_0\.16_78\/0\.08\)\] {
+    background-color: oklch(0.6 0.16 78 / 0.1);
+  }
+  [data-profile-theme="warm-ivory"] .from-\[oklch\(0\.85_0\.16_78\/0\.2\)\] {
+    --tw-gradient-from: color-mix(in srgb, #f59e0b 18%, transparent);
+  }
+  [data-profile-theme="clean-white"] .from-\[oklch\(0\.85_0\.16_78\/0\.2\)\] {
+    --tw-gradient-from: oklch(0.6 0.16 78 / 0.18);
+  }
+  [data-profile-theme="warm-ivory"] .to-\[oklch\(0\.85_0\.16_78\/0\.06\)\] {
+    --tw-gradient-to: color-mix(in srgb, #f59e0b 6%, transparent);
+  }
+  [data-profile-theme="clean-white"] .to-\[oklch\(0\.85_0\.16_78\/0\.06\)\] {
+    --tw-gradient-to: oklch(0.6 0.16 78 / 0.06);
+  }
+
+  /* Emerald accent (162) */
+  [data-profile-theme="warm-ivory"] .text-\[oklch\(0\.82_0\.16_162\)\],
+  [data-profile-theme="clean-white"] .text-\[oklch\(0\.82_0\.16_162\)\] {
+    color: var(--yvity-accent-emerald);
+  }
+  [data-profile-theme="warm-ivory"] .border-\[oklch\(0\.82_0\.16_162\/0\.35\)\],
+  [data-profile-theme="clean-white"] .border-\[oklch\(0\.82_0\.16_162\/0\.35\)\] {
+    border-color: oklch(0.5 0.15 162 / 0.34);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.82_0\.16_162\/0\.08\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.82_0\.16_162\/0\.08\)\] {
+    background-color: oklch(0.5 0.15 162 / 0.1);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.82_0\.16_162\/0\.12\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.82_0\.16_162\/0\.12\)\] {
+    background-color: oklch(0.5 0.15 162 / 0.13);
+  }
+  [data-profile-theme="warm-ivory"] .from-\[oklch\(0\.82_0\.16_162\/0\.2\)\],
+  [data-profile-theme="clean-white"] .from-\[oklch\(0\.82_0\.16_162\/0\.2\)\] {
+    --tw-gradient-from: oklch(0.5 0.15 162 / 0.16);
+  }
+  [data-profile-theme="warm-ivory"] .to-\[oklch\(0\.82_0\.16_162\/0\.06\)\],
+  [data-profile-theme="clean-white"] .to-\[oklch\(0\.82_0\.16_162\/0\.06\)\] {
+    --tw-gradient-to: oklch(0.5 0.15 162 / 0.06);
+  }
+
+  /* Violet accent (295) */
+  [data-profile-theme="warm-ivory"] .text-\[oklch\(0\.78_0\.15_295\)\],
+  [data-profile-theme="clean-white"] .text-\[oklch\(0\.78_0\.15_295\)\] {
+    color: var(--yvity-accent-violet);
+  }
+  [data-profile-theme="warm-ivory"] .border-\[oklch\(0\.78_0\.15_295\/0\.35\)\],
+  [data-profile-theme="clean-white"] .border-\[oklch\(0\.78_0\.15_295\/0\.35\)\] {
+    border-color: oklch(0.5 0.18 295 / 0.34);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.78_0\.15_295\/0\.08\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.78_0\.15_295\/0\.08\)\] {
+    background-color: oklch(0.5 0.18 295 / 0.09);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.78_0\.15_295\/0\.12\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.78_0\.15_295\/0\.12\)\] {
+    background-color: oklch(0.5 0.18 295 / 0.12);
+  }
+  [data-profile-theme="warm-ivory"] .from-\[oklch\(0\.78_0\.15_295\/0\.2\)\],
+  [data-profile-theme="clean-white"] .from-\[oklch\(0\.78_0\.15_295\/0\.2\)\] {
+    --tw-gradient-from: oklch(0.5 0.18 295 / 0.16);
+  }
+  [data-profile-theme="warm-ivory"] .to-\[oklch\(0\.78_0\.15_295\/0\.06\)\],
+  [data-profile-theme="clean-white"] .to-\[oklch\(0\.78_0\.15_295\/0\.06\)\] {
+    --tw-gradient-to: oklch(0.5 0.18 295 / 0.06);
+  }
+
+  /* YVITY Score progress track — bg-white/[0.08] inside the score card needs
+     to feel intentional, not invisible, on white */
+  [data-profile-theme="warm-ivory"] [role="progressbar"].bg-white\/\[0\.08\] {
+    background-color: var(--yvity-track);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, #333333 8%, transparent);
+  }
+  [data-profile-theme="clean-white"] [role="progressbar"].bg-white\/\[0\.08\] {
+    background-color: var(--yvity-track);
+    box-shadow: inset 0 1px 2px oklch(0.22 0.04 232 / 0.08);
+  }
+
+  /* Lift active "default" subgrounds: bg-card/40 and bg-card/60 (used in
+     appearance picker, etc.) read flat on white — give them stronger presence */
+  [data-profile-theme="warm-ivory"] .bg-card\/40 {
+    background-color: color-mix(in srgb, #fcfaf6 70%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-card\/40 {
+    background-color: oklch(1 0 0 / 0.7);
+  }
+  [data-profile-theme="warm-ivory"] .bg-card\/60 {
+    background-color: color-mix(in srgb, #fcfaf6 90%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-card\/60 {
+    background-color: oklch(1 0 0 / 0.9);
+  }
+
+  /* Star rating wrapper uses text-white/20 to dim un-filled stars; the override
+     above already handles it. Filled stars use fill-[oklch(0.85_0.16_78)] which
+     is also handled. The remaining concern is the gold name accent in the hero
+     — keep it slightly darker for readability on ivory/white */
+  [data-profile-theme="warm-ivory"] h1 .text-\[oklch\(0\.85_0\.16_78\)\] {
+    color: var(--yvity-accent-gold-strong);
+    text-shadow: 0 1px 0 color-mix(in srgb, #fcfaf6 60%, transparent);
+  }
+  [data-profile-theme="clean-white"] h1 .text-\[oklch\(0\.85_0\.16_78\)\] {
+    color: var(--yvity-accent-gold-strong);
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.6);
+  }
+
+  /* ---------- Hardcoded dark panels become themed cards ---------- */
+  /* A few components (gallery lightbox info strip, gallery editor footer,
+     recommend modal sticky header) use a hardcoded dark teal background
+     because the dark theme card alpha wasn't enough. On light themes those
+     panels turn into dark strips with dark text inside (invisible). Remap
+     them to the themed card colour so the surrounding text becomes readable. */
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.2_0\.035_235\/0\.95\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.2_0\.035_235\/0\.95\)\] {
+    background-color: var(--card);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.18_0\.035_235\/0\.95\)\],
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.18_0\.035_235\/0\.95\)\] {
+    background-color: var(--card);
+  }
+  [data-profile-theme="warm-ivory"] .bg-\[oklch\(0\.2_0\.035_235\/0\.5\)\] {
+    background-color: color-mix(in srgb, #333333 4%, transparent);
+  }
+  [data-profile-theme="clean-white"] .bg-\[oklch\(0\.2_0\.035_235\/0\.5\)\] {
+    background-color: oklch(0.22 0.04 232 / 0.04);
+  }
+  /* The intro video dialog (bg-[oklch(0.16_0.035_235)]) is intentionally dark
+     in every theme — it provides letterbox bars around the video. Left as-is. */
+
+  /* ---------- Dark-surface scope ---------- */
+  /* Section banners and the bottom CTA card use an intentionally dark teal/brand
+     gradient on every theme. Inside these containers, descendant text uses
+     `text-foreground` and the dark-theme white-tint utilities — both of which
+     break on a light theme (dark text on dark gradient, dark borders invisible).
+     We mark these containers with `.yvity-on-dark` and locally restore the
+     signature-dark colour ecosystem so they stay legible and premium. */
+
+  [data-profile-theme="warm-ivory"] .yvity-on-dark,
+  [data-profile-theme="clean-white"] .yvity-on-dark {
+    --foreground: oklch(0.97 0.01 230);
+    --card-foreground: oklch(0.97 0.01 230);
+    --muted-foreground: oklch(0.82 0.02 230);
+    --color-foreground: oklch(0.97 0.01 230);
+    --color-card-foreground: oklch(0.97 0.01 230);
+    --color-muted-foreground: oklch(0.82 0.02 230);
+    color: oklch(0.97 0.01 230);
+  }
+
+  /* Restore the white-tinted Tailwind utilities to their original (dark) values
+     inside the dark-surface scope. */
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/8,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/8 {
+    border-color: oklch(1 0 0 / 8%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/10,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/10 {
+    border-color: oklch(1 0 0 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/12,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/12 {
+    border-color: oklch(1 0 0 / 12%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/14,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/14,
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/15,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/15 {
+    border-color: oklch(1 0 0 / 15%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/16,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/16,
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/18,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/18,
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/20,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/20 {
+    border-color: oklch(1 0 0 / 20%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-white\/35,
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-white\/35 {
+    border-color: oklch(1 0 0 / 35%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .divide-white\/10 > :not(:last-child),
+  [data-profile-theme="clean-white"] .yvity-on-dark .divide-white\/10 > :not(:last-child) {
+    border-color: oklch(1 0 0 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/5,
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/5 {
+    background-color: oklch(1 0 0 / 5%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/10,
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/10 {
+    background-color: oklch(1 0 0 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.02\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.02\] {
+    background-color: oklch(1 0 0 / 2%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.03\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.03\] {
+    background-color: oklch(1 0 0 / 3%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.04\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.04\] {
+    background-color: oklch(1 0 0 / 4%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.05\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.05\] {
+    background-color: oklch(1 0 0 / 5%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.06\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.06\] {
+    background-color: oklch(1 0 0 / 6%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.08\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.08\] {
+    background-color: oklch(1 0 0 / 8%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-white\/\[0\.10\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-white\/\[0\.10\] {
+    background-color: oklch(1 0 0 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .via-white\/18,
+  [data-profile-theme="clean-white"] .yvity-on-dark .via-white\/18 {
+    --tw-gradient-via: oklch(1 0 0 / 18%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .via-white\/20,
+  [data-profile-theme="clean-white"] .yvity-on-dark .via-white\/20 {
+    --tw-gradient-via: oklch(1 0 0 / 20%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .via-white\/35,
+  [data-profile-theme="clean-white"] .yvity-on-dark .via-white\/35 {
+    --tw-gradient-via: oklch(1 0 0 / 35%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-white\/10,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-white\/10 {
+    --tw-ring-color: oklch(1 0 0 / 10%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-white\/12,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-white\/12 {
+    --tw-ring-color: oklch(1 0 0 / 12%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-white\/15,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-white\/15 {
+    --tw-ring-color: oklch(1 0 0 / 15%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-white\/20,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-white\/20 {
+    --tw-ring-color: oklch(1 0 0 / 20%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-white\/25,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-white\/25 {
+    --tw-ring-color: oklch(1 0 0 / 25%);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-white\/20,
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-white\/20 {
+    color: oklch(1 0 0 / 20%);
+  }
+
+  /* Restore accent oklch values to their original light variants inside the
+     dark-surface scope (teal label, gold pill, star fill, etc.) */
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.82_0\.13_205\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.82_0\.13_205\)\] {
+    color: oklch(0.82 0.13 205);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.85_0\.16_78\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.85_0\.16_78\)\] {
+    color: oklch(0.85 0.16 78);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.88_0\.14_78\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.88_0\.14_78\)\] {
+    color: oklch(0.88 0.14 78);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.92_0\.14_78\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.92_0\.14_78\)\] {
+    color: oklch(0.92 0.14 78);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.82_0\.16_162\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.82_0\.16_162\)\] {
+    color: oklch(0.82 0.16 162);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .text-\[oklch\(0\.78_0\.15_295\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .text-\[oklch\(0\.78_0\.15_295\)\] {
+    color: oklch(0.78 0.15 295);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .fill-\[oklch\(0\.85_0\.16_78\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .fill-\[oklch\(0\.85_0\.16_78\)\] {
+    color: oklch(0.85 0.16 78);
+    fill: oklch(0.85 0.16 78);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .fill-\[oklch\(0\.82_0\.16_78\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .fill-\[oklch\(0\.82_0\.16_78\)\] {
+    color: oklch(0.82 0.16 78);
+    fill: oklch(0.82 0.16 78);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-\[oklch\(0\.85_0\.16_78\/0\.45\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-\[oklch\(0\.85_0\.16_78\/0\.45\)\] {
+    border-color: oklch(0.85 0.16 78 / 0.45);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-\[oklch\(0\.82_0\.16_78\/0\.45\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-\[oklch\(0\.82_0\.16_78\/0\.45\)\] {
+    border-color: oklch(0.82 0.16 78 / 0.45);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.85_0\.16_78\/0\.1\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.85_0\.16_78\/0\.1\)\] {
+    background-color: oklch(0.85 0.16 78 / 0.1);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.85_0\.16_78\/0\.12\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.85_0\.16_78\/0\.12\)\] {
+    background-color: oklch(0.85 0.16 78 / 0.12);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.16_78\/0\.12\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.16_78\/0\.12\)\] {
+    background-color: oklch(0.82 0.16 78 / 0.12);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .border-\[oklch\(0\.82_0\.13_205\/0\.35\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .border-\[oklch\(0\.82_0\.13_205\/0\.35\)\] {
+    border-color: oklch(0.82 0.13 205 / 0.35);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.08\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.08\)\] {
+    background-color: oklch(0.82 0.13 205 / 0.08);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.1\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.1\)\] {
+    background-color: oklch(0.82 0.13 205 / 0.1);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.12\)\],
+  [data-profile-theme="clean-white"] .yvity-on-dark .bg-\[oklch\(0\.82_0\.13_205\/0\.12\)\] {
+    background-color: oklch(0.82 0.13 205 / 0.12);
+  }
+
+  /* Reset .glass / .glass-strong inside dark-surface scope to dark-theme tints
+     (mini stat cards use these glass utilities for backdrop) */
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .glass,
+  [data-profile-theme="clean-white"] .yvity-on-dark .glass {
+    background: linear-gradient(180deg, oklch(1 0 0 / 0.08), oklch(1 0 0 / 0.03));
+    border-color: oklch(1 0 0 / 0.14);
+    box-shadow:
+      0 1px 0 0 oklch(1 0 0 / 0.1) inset,
+      0 20px 40px -20px oklch(0 0 0 / 0.5);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .glass-strong,
+  [data-profile-theme="clean-white"] .yvity-on-dark .glass-strong {
+    background: linear-gradient(180deg, oklch(1 0 0 / 0.12), oklch(1 0 0 / 0.04));
+    border-color: oklch(1 0 0 / 0.18);
+    box-shadow:
+      0 1px 0 0 oklch(1 0 0 / 0.12) inset,
+      0 24px 48px -22px oklch(0 0 0 / 0.55);
+  }
+
+  /* Restore vibrant glow rings inside dark-surface scope */
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-glow-cyan,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-glow-cyan {
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.13 205 / 0.45),
+      0 0 30px oklch(0.82 0.13 205 / 0.25);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-glow-violet,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-glow-violet {
+    box-shadow:
+      0 0 0 1px oklch(0.72 0.17 295 / 0.45),
+      0 0 30px oklch(0.72 0.17 295 / 0.25);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-glow-emerald,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-glow-emerald {
+    box-shadow:
+      0 0 0 1px oklch(0.78 0.16 162 / 0.45),
+      0 0 30px oklch(0.78 0.16 162 / 0.25);
+  }
+  [data-profile-theme="warm-ivory"] .yvity-on-dark .ring-glow-amber,
+  [data-profile-theme="clean-white"] .yvity-on-dark .ring-glow-amber {
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.16 78 / 0.45),
+      0 0 30px oklch(0.82 0.16 78 / 0.25);
+  }
+}

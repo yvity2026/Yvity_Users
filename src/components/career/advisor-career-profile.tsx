@@ -1,0 +1,200 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { Briefcase, GraduationCap, Plus, Sparkles, UserRound } from "lucide-react";
+import { SectionCompletionGuidance } from "@/components/advisor/guidance/section-completion-guidance";
+import { CareerSectionsAccordion } from "@/components/career/career-sections-accordion";
+import {
+  CertificationEditModal,
+  EducationEditModal,
+  ExperienceEditModal,
+} from "@/components/career/career-edit-modals";
+import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
+import { uid } from "@/lib/career-store";
+import type { CareerData, Certification, Education, Experience } from "@/lib/career-types";
+import { Button } from "@/components/ui/button";
+import { getPublicProfileSharePath } from "@/lib/public-profile-url";
+
+type EditTarget =
+  | { kind: "experience"; item: Experience }
+  | { kind: "certification"; item: Certification }
+  | { kind: "education"; item: Education };
+
+export function AdvisorCareerProfile({
+  data,
+  setData,
+}: {
+  data: CareerData;
+  setData: (data: CareerData) => void;
+}) {
+  const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
+
+  const saveExperience = (item: Experience) => {
+    const exists = data.experiences.some((e) => e.id === item.id);
+    setData({
+      ...data,
+      experiences: exists
+        ? data.experiences.map((e) => (e.id === item.id ? item : e))
+        : [...data.experiences, item],
+    });
+    setEditTarget(null);
+  };
+
+  const saveCertification = (item: Certification) => {
+    const exists = data.certifications.some((c) => c.id === item.id);
+    setData({
+      ...data,
+      certifications: exists
+        ? data.certifications.map((c) => (c.id === item.id ? item : c))
+        : [...data.certifications, item],
+    });
+    setEditTarget(null);
+  };
+
+  const saveEducation = (item: Education) => {
+    const exists = data.education.some((e) => e.id === item.id);
+    setData({
+      ...data,
+      education: exists
+        ? data.education.map((e) => (e.id === item.id ? item : e))
+        : [...data.education, item],
+    });
+    setEditTarget(null);
+  };
+
+  const deleteExperience = (id: string) => {
+    if (!confirm("Delete this experience?")) return;
+    setData({ ...data, experiences: data.experiences.filter((e) => e.id !== id) });
+  };
+
+  const deleteCertification = (id: string) => {
+    if (!confirm("Delete this certification?")) return;
+    setData({ ...data, certifications: data.certifications.filter((c) => c.id !== id) });
+  };
+
+  const deleteEducation = (id: string) => {
+    if (!confirm("Delete this education entry?")) return;
+    setData({ ...data, education: data.education.filter((e) => e.id !== id) });
+  };
+
+  const addExperience = () => {
+    setEditTarget({
+      kind: "experience",
+      item: {
+        id: uid("exp"),
+        role: "",
+        company: "",
+        category: "",
+        location: "",
+        start: "",
+        end: "",
+        bullets: [""],
+        verified: false,
+      },
+    });
+  };
+
+  const addCertification = () => {
+    setEditTarget({
+      kind: "certification",
+      item: { id: uid("cert"), name: "", issuer: "", year: "", status: "pending", bullets: [""] },
+    });
+  };
+
+  const addEducation = () => {
+    setEditTarget({
+      kind: "education",
+      item: { id: uid("edu"), degree: "", institution: "", location: "", year: "" },
+    });
+  };
+
+  return (
+    <>
+      <SectionProfileBanner className="mb-6 sm:mb-8" />
+
+      <SectionCompletionGuidance healthId="photo" icon={UserRound} />
+      <SectionCompletionGuidance healthId="career" icon={Briefcase} />
+      <SectionCompletionGuidance healthId="education" icon={GraduationCap} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={addExperience} size="sm" className="gap-1.5">
+            <Plus className="size-4" /> Add experience
+          </Button>
+          <Button onClick={addCertification} size="sm" variant="secondary" className="gap-1.5">
+            <Plus className="size-4" /> Add certification
+          </Button>
+          <Button onClick={addEducation} size="sm" variant="secondary" className="gap-1.5">
+            <Plus className="size-4" /> Add education
+          </Button>
+        </div>
+      </div>
+
+      <CareerSectionsAccordion
+        experiences={data.experiences}
+        certifications={data.certifications}
+        education={data.education}
+        editable={{
+          experiences: {
+            onEdit: (id) => {
+              const item = data.experiences.find((e) => e.id === id);
+              if (item) setEditTarget({ kind: "experience", item });
+            },
+            onDelete: deleteExperience,
+          },
+          certifications: {
+            onEdit: (id) => {
+              const item = data.certifications.find((c) => c.id === id);
+              if (item) setEditTarget({ kind: "certification", item });
+            },
+            onDelete: deleteCertification,
+          },
+          education: {
+            onEdit: (id) => {
+              const item = data.education.find((e) => e.id === id);
+              if (item) setEditTarget({ kind: "education", item });
+            },
+            onDelete: deleteEducation,
+          },
+        }}
+      />
+
+      <div className="mt-8 flex items-center gap-2 rounded-2xl glass border border-white/10 p-4 text-xs text-muted-foreground">
+        <Sparkles className="size-4 text-primary shrink-0" />
+        Changes save automatically. Preview the{" "}
+        <Link
+          href={getPublicProfileSharePath()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-foreground underline underline-offset-2"
+        >
+          public profile
+        </Link>
+        .
+      </div>
+
+      {editTarget?.kind === "experience" && (
+        <ExperienceEditModal
+          item={editTarget.item}
+          onClose={() => setEditTarget(null)}
+          onSave={saveExperience}
+        />
+      )}
+      {editTarget?.kind === "certification" && (
+        <CertificationEditModal
+          item={editTarget.item}
+          onClose={() => setEditTarget(null)}
+          onSave={saveCertification}
+        />
+      )}
+      {editTarget?.kind === "education" && (
+        <EducationEditModal
+          item={editTarget.item}
+          onClose={() => setEditTarget(null)}
+          onSave={saveEducation}
+        />
+      )}
+    </>
+  );
+}
