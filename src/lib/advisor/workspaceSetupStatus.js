@@ -56,12 +56,16 @@ export function getAdvisorWorkspaceSetupState(user, advisor, options = {}) {
   const isUnderReview =
     advisor?.account_status === "under_review" && !canAccessDashboard;
 
+  const mySpaceProcessComplete = hasAdvisorProfile && hasIrdaiCertificate;
+  const irdaiPendingAdminReview =
+    mySpaceProcessComplete &&
+    advisor?.account_status === "under_review" &&
+    !canAccessDashboard;
+
   const showSetupWorkspace =
     !canAccessDashboard &&
-    !hasAdvisorProfile &&
-    !isIrdaiRejected &&
-    !shouldPromptIrdaiUpload &&
-    !isUnderReview;
+    !mySpaceProcessComplete &&
+    !isIrdaiRejected;
 
   return {
     isAdvisorRole,
@@ -75,5 +79,7 @@ export function getAdvisorWorkspaceSetupState(user, advisor, options = {}) {
     rejectedReason,
     hasPaidPlan,
     hasIrdaiCertificate,
+    mySpaceProcessComplete,
+    irdaiPendingAdminReview,
   };
 }

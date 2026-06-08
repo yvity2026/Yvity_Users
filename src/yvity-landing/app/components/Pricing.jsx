@@ -4,6 +4,7 @@ import React from "react";
 import { FaArrowRight, FaCheck } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { motion } from "framer-motion";
+import { MEMBERSHIP_PLAN_MARKETING } from "@/lib/advisor-membership/plan-catalog";
 import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
 import LandingSectionHeader from "./home/LandingSectionHeader";
 import LandingMobileSectionShell from "./home/LandingMobileSectionShell";
@@ -22,13 +23,11 @@ function PricingCard({ item }) {
       <p className="text-sm font-semibold tracking-[1.4px] text-(--ct-as-badges-accents,#F59E0B) uppercase font-poppins leading-none">
         {item.title}
       </p>
-      <p
-        className={`text-3xl font-bold font-poppins text-[#0A4A4A] ${
-          Number(item.price?.split("/")[0] || 0) === 0 ? "invisible" : ""
-        }`}
-      >
-        ₹{Number(item.price?.split("/")[0] || 0)}
-        <span className="text-gray-400 text-base font-bold">{item.period}</span>
+      <p className="text-3xl font-bold font-poppins text-[#0A4A4A]">
+        ₹{item.price}
+        {item.period ? (
+          <span className="text-gray-400 text-base font-bold">{item.period}</span>
+        ) : null}
       </p>
       {item.message ? (
         <p className="text-[14px] md:text-[11px] lg:text-[13px] xl:text-[16px] font-normal leading-[22px] md:leading-[26px] text-[var(--Body-content,#374151)] font-poppins">
@@ -79,6 +78,47 @@ function PricingCard({ item }) {
   );
 }
 
+const LANDING_CARD_STYLES = {
+  free: {
+    cardStyle:
+      "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
+    buttonText: "Start Free",
+    buttonStyle:
+      "flex items-center justify-center gap-2 w-full lg:min-h-[44px] rounded-full text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 border-2 border-transparent bg-[#F8F6F1] hover:border-[#0D6060] hover:bg-[#F8F6F1] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--labels-secondary-info,#6B7280)]",
+  },
+  silver: {
+    cardStyle:
+      "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
+    buttonText: "Get Silver",
+    buttonStyle:
+      "flex items-center justify-center gap-2 w-full xl:min-h-[44px] rounded-full text-sm  md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-(--primary-900,#0A4A4A) text-(--ct-as-badges-accents,#F59E0B) hover:bg-(--Primary-800,#076868) hover:text-(--ct-as-badges-accents,#F59E0B) hover:shadow-[0_4px_12px_rgba(13,96,96,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[ var(--ct-as-badges-accents,#F59E0B)]",
+  },
+  gold: {
+    cardStyle:
+      "hover:rounded-[16px] border border-[#F59E0B] bg-white hover:shadow-[0_0_4px_2px_rgba(217,119,6,0.25)]",
+    buttonText: "Get Gold",
+    buttonStyle:
+      "flex items-center justify-center gap-2 w-full xl:min-h-[44px] rounded-full text-xs sm:text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-[rgba(217,119,6,0.9)] to-[rgba(255,169,70,0.9)] hover:shadow-[0_4px_12px_rgba(217,119,6,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--Pearl-Whitepage-background,#F8F6F1)]",
+    cover: "most popular",
+    coverStyle:
+      "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] rounded-full",
+  },
+};
+
+const pricingData = MEMBERSHIP_PLAN_MARKETING.map((plan) => {
+  const styles = LANDING_CARD_STYLES[plan.id];
+  const shortTitle = plan.name.replace(" PLAN", "");
+  return {
+    title: shortTitle,
+    price: String(plan.priceAnnualInr),
+    period: plan.priceAnnualInr > 0 ? "/year" : "",
+    message: plan.tagline,
+    features: plan.included,
+    nonFeatures: plan.excluded.length > 0 ? plan.excluded : undefined,
+    ...styles,
+  };
+});
+
 const Pricing = () => {
   const container = {
     hidden: {},
@@ -93,87 +133,6 @@ const Pricing = () => {
     hidden: { opacity: 0, x: -85 },
     show: { opacity: 1, x: 0 },
   };
-
-  const pricingData = [
-    {
-      title: "Free",
-      price: "0",
-      period: "",
-      message: "Free forever, no credit card required",
-      features: [
-        "Appears in Search",
-        "Identity Verified Badge",
-        "Up to 5 Text Reviews",
-      ],
-      nonFeatures: [
-        "IRDAI License Verified",
-        "Audio Reviews",
-        "Video Reviews",
-        "Recommendations",
-        "Intro Video",
-        "QR Code Download",
-        "Founding Advisor Badge",
-        "Priority Directory Listing",
-      ],
-      cardStyle:
-        "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Start Free",
-      buttonStyle:
-        "flex items-center justify-center gap-2 w-full lg:min-h-[44px] rounded-full text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 border-2 border-transparent bg-[#F8F6F1] hover:border-[#0D6060] hover:bg-[#F8F6F1] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--labels-secondary-info,#6B7280)]",
-    },
-    {
-      title: "Silver",
-      price: "999",
-      period: "/year",
-      features: [
-        "Appears in Search",
-        "Identity Verified Badge",
-        "IRDAI License Verified",
-        "Unlimited Text Reviews",
-        "Audio Reviews",
-        "Recommendations",
-      ],
-      nonFeatures: [
-        "Video Reviews",
-        "Intro Video",
-        "QR Code Download",
-        "Founding Advisor Badge",
-        "Priority Directory Listing",
-      ],
-      cardStyle:
-        "hover:rounded-[16px] hover:border border-transparent hover:border-[#0D6060] bg-white hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)]",
-      buttonText: "Get Silver",
-      buttonStyle:
-        "flex items-center justify-center gap-2 w-full xl:min-h-[44px] rounded-full text-sm  md:text-base px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-(--primary-900,#0A4A4A) text-(--ct-as-badges-accents,#F59E0B) hover:bg-(--Primary-800,#076868) hover:text-(--ct-as-badges-accents,#F59E0B) hover:shadow-[0_4px_12px_rgba(13,96,96,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[ var(--ct-as-badges-accents,#F59E0B)]",
-    },
-    {
-      title: "Gold",
-      price: "2999",
-      period: "/year",
-      features: [
-        "Priority Search Listing",
-        "Identity Verified Badge",
-        "IRDAI License Verified",
-        "Unlimited Text Reviews",
-        "Audio Reviews",
-        "Video Reviews",
-        "Recommendations",
-        "Intro Video",
-        "QR Code Download",
-        "Founding Advisor Badge",
-        "Priority Directory Listing",
-        "Most Popular Badge",
-      ],
-      cardStyle:
-        "hover:rounded-[16px] border border-[#F59E0B] bg-white hover:shadow-[0_0_4px_2px_rgba(217,119,6,0.25)]",
-      buttonText: "Get Gold",
-      buttonStyle:
-        "flex items-center justify-center gap-2 w-full xl:min-h-[44px] rounded-full text-xs sm:text-sm md:text-base px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-[rgba(217,119,6,0.9)] to-[rgba(255,169,70,0.9)] hover:shadow-[0_4px_12px_rgba(217,119,6,0.25)] transition-all duration-500 active:scale-[0.98] cursor-pointer text-[var(--Pearl-Whitepage-background,#F8F6F1)]",
-      cover: "most popular",
-      coverStyle:
-        "absolute top-0  left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-(--primary-900,#0A4A4A) text-[var(--Pearl-Whitepage-background,#F8F6F1)] rounded-[16px] bg-gradient-to-r from-[#D97706] to-[#FF8900] rounded-full",
-    },
-  ];
 
   return (
     <section

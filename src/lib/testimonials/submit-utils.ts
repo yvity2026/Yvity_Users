@@ -1,8 +1,10 @@
 import { advisorProfile } from "@/lib/advisor-profile";
-import type { TestimonialType } from "@/lib/sections/types";
+import type { TestimonialService, TestimonialType } from "@/lib/sections/types";
 
 export type GiveTestimonialDraft = {
   type: TestimonialType;
+  service: TestimonialService | "";
+  rating: number;
   fullName: string;
   mobile: string;
   profession: string;
@@ -11,8 +13,30 @@ export type GiveTestimonialDraft = {
   mediaFile: File | null;
 };
 
+export const TESTIMONIAL_SERVICE_VALUES: TestimonialService[] = [
+  "life",
+  "health",
+  "general",
+  "mutual",
+  "claim",
+];
+
+export function isTestimonialService(value: string): value is TestimonialService {
+  return (TESTIMONIAL_SERVICE_VALUES as string[]).includes(value);
+}
+
+export function parseTestimonialRating(value: FormDataEntryValue | null): number | null {
+  const parsed = Number(String(value ?? "").trim());
+  if (!Number.isFinite(parsed)) return null;
+  const rounded = Math.round(parsed);
+  if (rounded < 1 || rounded > 5) return null;
+  return rounded;
+}
+
 export const initialGiveTestimonialDraft = (): GiveTestimonialDraft => ({
   type: "text",
+  service: "",
+  rating: 5,
   fullName: "",
   mobile: "",
   profession: "",
@@ -29,6 +53,12 @@ export function validateMobile(mobile: string): boolean {
 export function validateGiveDetails(draft: GiveTestimonialDraft): string | null {
   if (!draft.fullName.trim() || draft.fullName.trim().length < 2) {
     return "Please enter your full name.";
+  }
+  if (!draft.service || !isTestimonialService(draft.service)) {
+    return "Please select which service your testimonial is about.";
+  }
+  if (!Number.isInteger(draft.rating) || draft.rating < 1 || draft.rating > 5) {
+    return "Please rate your experience from 1 to 5 stars.";
   }
   if (!validateMobile(draft.mobile)) {
     return "Please enter a valid mobile number.";

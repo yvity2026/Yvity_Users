@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { Info, Play } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { advisorProfile } from "@/lib/advisor-profile";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideo } from "@/lib/intro-video";
+import { getPlanGatedIntroVideo } from "@/lib/intro-video";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
+import { IntroVideoPublicPlayer } from "@/components/intro-video/intro-video-public-player";
 import { usePublicYvityScore } from "@/hooks/use-public-yvity-score";
-import { useAuth } from "@/context/AuthUserContext";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { cn } from "@/lib/utils";
 
@@ -76,118 +77,56 @@ function ScoreInfoButton() {
 
 function IntroVideoTrustCard() {
   const { settings } = useAdvisorSettings();
-  const { user } = useAuth();
-  const {
-    url: introVideoUrl,
-    posterUrl: introVideoPosterUrl,
-    durationLabel: introVideoDuration,
-  } = getEffectiveIntroVideo(settings);
-  const profilePhoto =
-    resolveProfilePhotoUrl(user?.selfie_url) || advisorProfile.photoUrl?.trim() || "";
-  const poster = introVideoPosterUrl?.trim() || profilePhoto;
-  const hasVideo = Boolean(introVideoUrl?.trim());
-  const [open, setOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const openPlayer = () => {
-    if (!hasVideo) return;
-    setOpen(true);
-  };
-
-  useEffect(() => {
-    if (!open || !hasVideo) return;
-    const el = videoRef.current;
-    if (!el) return;
-    void el.play().catch(() => undefined);
-  }, [open, hasVideo]);
+  const { limits } = useResolvedPlanLimits();
+  const advisorProfile = useAdvisorDisplayProfile();
+  const video = getPlanGatedIntroVideo(settings, limits);
+  const profilePhoto = resolveProfilePhotoUrl(advisorProfile.photoUrl) || "";
+  const hasVideo = Boolean(video.url);
 
   return (
     <TrustCardShell className="p-2.5 sm:p-3">
       <div className="flex items-stretch gap-2.5 sm:gap-3">
-        <button
-          type="button"
-          onClick={openPlayer}
-          disabled={!hasVideo}
-          className={cn(
-            "group relative h-[4.25rem] w-[7.25rem] sm:h-[4.5rem] sm:w-[7.75rem] shrink-0 overflow-hidden rounded-lg",
-            "border border-white/10 bg-black/25 text-left",
-            hasVideo && "cursor-pointer",
-            !hasVideo && "cursor-default",
-          )}
-          aria-label={
-            hasVideo ? "Play advisor introduction video" : "Advisor introduction video preview"
-          }
-        >
-          {poster ? (
-            <Image
-              src={poster}
-              alt=""
-              fill
-              className="object-cover transition duration-500 group-hover:scale-[1.04]"
-              sizes="124px"
-              unoptimized={poster.startsWith("/api/")}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-[oklch(0.14_0.03_250)]" />
-          )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-
-          <span
+        {hasVideo ? (
+          <IntroVideoPublicPlayer
+            video={video}
+            advisorName={advisorProfile.name}
+            profilePhoto={profilePhoto}
+            variant="trust"
+          />
+        ) : (
+          <div
             className={cn(
-              "absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2",
-              "inline-flex size-9 items-center justify-center rounded-full",
-              "bg-gradient-to-br from-[oklch(0.88_0.16_78)] to-[oklch(0.82_0.15_72)]",
-              // Explicit dark teal foreground guarantees AA contrast on
-              // the gold gradient and matches the Hero "Call Now" button.
-              "text-[oklch(0.18_0.035_235)] shadow-[0_0_24px_-6px_oklch(0.85_0.16_78/0.85)] ring-2 ring-white/15",
-              "transition duration-300",
-              hasVideo && "group-hover:scale-105",
-              // When the advisor hasn't uploaded a video we visually mute
-              // the entire play button (border + chip) so it doesn't look
-              // like a broken interactive control.
-              !hasVideo && "opacity-60 grayscale-[0.35]",
+              "relative h-[4.25rem] w-[7.25rem] sm:h-[4.5rem] sm:w-[7.75rem] shrink-0 overflow-hidden rounded-lg",
+              "border border-white/10 bg-black/25",
             )}
+            aria-hidden
           >
-            <Play className="size-4 fill-current ml-0.5" />
-          </span>
-
-          {introVideoDuration && (
-            <span className="absolute bottom-1.5 right-1.5 z-10 rounded-md border border-white/12 bg-black/55 px-1.5 py-px text-[9px] font-semibold tabular-nums text-white backdrop-blur-sm">
-              {introVideoDuration}
-            </span>
-          )}
-        </button>
+            {profilePhoto ? (
+              <Image
+                src={profilePhoto}
+                alt=""
+                fill
+                className="object-cover opacity-60 grayscale-[0.35]"
+                sizes="124px"
+                unoptimized={profilePhoto.startsWith("/api/")}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-[oklch(0.14_0.03_250)]" />
+            )}
+          </div>
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
           <h3 className="text-xs sm:text-[13px] font-semibold tracking-tight text-foreground leading-tight">
             Advisor Introduction
           </h3>
           <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2">
-            Know your advisor before you connect.
+            {hasVideo
+              ? "Know your advisor before you connect."
+              : "Introduction video not added yet."}
           </p>
         </div>
       </div>
-
-      {hasVideo && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-3xl gap-0 overflow-hidden border-white/12 bg-[oklch(0.16_0.035_235)] p-0 sm:rounded-2xl">
-            <DialogHeader className="sr-only">
-              <DialogTitle>Advisor Introduction</DialogTitle>
-              <DialogDescription>Introduction video for {advisorProfile.name}</DialogDescription>
-            </DialogHeader>
-            <video
-              ref={videoRef}
-              className="aspect-video w-full bg-black object-contain"
-              src={introVideoUrl}
-              poster={introVideoPosterUrl || undefined}
-              controls
-              playsInline
-              onEnded={() => setOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
     </TrustCardShell>
   );
 }
@@ -273,18 +212,22 @@ function YvityScoreTrustCard({ score, loading }: { score: number; loading: boole
 
 export function HomeTrustSection() {
   const { settings } = useAdvisorSettings();
+  const { limits } = useResolvedPlanLimits();
   const { score, loading } = usePublicYvityScore();
-  const showVideo = settings.visibility.introductionVideo;
+  const showTrustStripVideo =
+    settings.visibility.introductionVideo &&
+    limits.introVideoEnabled &&
+    !limits.introVideoHeroPlacement;
 
   return (
     <div
       className={cn(
         "mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-white/10",
         "grid gap-2.5 sm:gap-3",
-        showVideo ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-sm mx-auto md:max-w-none",
+        showTrustStripVideo ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-sm mx-auto md:max-w-none",
       )}
     >
-      {showVideo && <IntroVideoTrustCard />}
+      {showTrustStripVideo ? <IntroVideoTrustCard /> : null}
       <YvityScoreTrustCard score={score} loading={loading} />
     </div>
   );

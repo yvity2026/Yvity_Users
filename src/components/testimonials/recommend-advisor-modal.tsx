@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, CheckCircle2, Loader2, ShieldCheck, Sparkles, Star, X } from "lucide-react";
+import { useAuth } from "@/context/AuthUserContext";
 import { advisorProfile } from "@/lib/advisor-profile";
 import { RECOMMENDATION_TAGS, type RecommendationTag } from "@/lib/recommendations/types";
 import { validateMobile } from "@/lib/testimonials/submit-utils";
@@ -41,6 +42,8 @@ function formatTimer(seconds: number): string {
  * `sm+`.
  */
 export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalProps) {
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user?.id);
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [comment, setComment] = useState("");
@@ -83,6 +86,12 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
       return () => window.clearTimeout(t);
     }
   }, [open, reset]);
+
+  useEffect(() => {
+    if (!open || !user) return;
+    setFullName((current) => current || user.name?.trim() || "");
+    setMobile((current) => current || user.mobile?.trim() || user.phone?.trim() || "");
+  }, [open, user]);
 
   // ESC to close + lock body scroll while the modal is open.
   useEffect(() => {
@@ -192,8 +201,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
     fullName.trim().length >= 2 &&
     tagsArray.length > 0 &&
     validateMobile(mobile) &&
-    mobileVerified &&
-    otp.length === 6;
+    (isLoggedIn || (mobileVerified && otp.length === 6));
 
   const submit = async () => {
     setError(null);
@@ -205,7 +213,11 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
       setError("Pick at least one reason you recommend this advisor.");
       return;
     }
-    if (!validateMobile(mobile) || !mobileVerified) {
+    if (!validateMobile(mobile)) {
+      setError("Please enter a valid mobile number.");
+      return;
+    }
+    if (!isLoggedIn && !mobileVerified) {
       setError("Please verify your mobile number with the OTP first.");
       return;
     }
@@ -220,7 +232,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
           mobile: mobile.trim(),
           comment: comment.trim(),
           tags: tagsArray,
-          otp: otp.trim(),
+          ...(isLoggedIn ? {} : { otp: otp.trim() }),
         }),
       });
       const json = (await res.json()) as { error?: string };
@@ -405,11 +417,23 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                     placeholder="+91 00000 00000"
                     className="h-11 rounded-xl border-white/15 bg-white/[0.04]"
                     autoComplete="tel"
-                    disabled={submitting || (mobileVerified && otpSent)}
+                    disabled={submitting || (!isLoggedIn && mobileVerified && otpSent)}
                   />
                 </div>
 
-                {mobileVerified ? (
+                {isLoggedIn ? (
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 rounded-xl px-3 py-2.5",
+                      "border border-[oklch(0.78_0.16_162/0.4)] bg-[oklch(0.78_0.16_162/0.1)]",
+                    )}
+                  >
+                    <ShieldCheck className="size-4 shrink-0 text-[oklch(0.86_0.14_162)]" />
+                    <p className="text-xs font-semibold text-[oklch(0.92_0.12_165)]">
+                      Signed in to YVITY — OTP verification skipped
+                    </p>
+                  </div>
+                ) : mobileVerified ? (
                   <div
                     className={cn(
                       "flex items-center gap-2 rounded-xl px-3 py-2.5",

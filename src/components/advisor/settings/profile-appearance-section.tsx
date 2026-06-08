@@ -3,7 +3,8 @@
 import { Check, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { SettingsGroup } from "@/components/advisor/settings/settings-ui";
-import { isDarkProfileTheme, PROFILE_THEMES, type ProfileThemeId } from "@/lib/profile-themes";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
+import { PROFILE_THEMES, type ProfileThemeId } from "@/lib/profile-themes";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +83,9 @@ function ThemePreviewThumbnail({
 
 export function ProfileAppearanceSection() {
   const { settings, updateSettings } = useAdvisorSettings();
+  const { themes: allowedThemes, limits } = usePlanLimits();
   const activeTheme = settings.appearance.theme;
+  const allowedSet = new Set<ProfileThemeId>(allowedThemes);
 
   return (
     <SettingsGroup
@@ -95,12 +98,13 @@ export function ProfileAppearanceSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
           {PROFILE_THEMES.map((theme) => {
             const selected = activeTheme === theme.id;
+            const locked = !allowedSet.has(theme.id);
             return (
               <button
                 key={theme.id}
                 type="button"
                 onClick={() => {
-                  if (selected) return;
+                  if (selected || locked) return;
                   updateSettings({ appearance: { theme: theme.id } });
                   // Confirmation toast — without it the change feels
                   // silent on the light themes where the selected ring
@@ -112,6 +116,7 @@ export function ProfileAppearanceSection() {
                 className={cn(
                   "group relative flex flex-col rounded-2xl border p-3 text-left transition-all duration-300",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  locked && "opacity-45 cursor-not-allowed",
                   selected
                     ? cn(
                         // Stronger ring + tint so the selected state
@@ -158,6 +163,9 @@ export function ProfileAppearanceSection() {
         <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
           Your selection saves automatically and applies instantly across your public profile and
           advisor dashboard.
+          {limits.profileThemes !== null ? (
+            <> Your plan includes {limits.profileThemes} theme{limits.profileThemes === 1 ? "" : "s"}.</>
+          ) : null}
         </p>
       </div>
     </SettingsGroup>

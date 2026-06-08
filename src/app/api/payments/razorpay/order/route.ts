@@ -1,17 +1,35 @@
 import { NextResponse } from "next/server";
+import {
+  resolveCheckoutQuoteForProfile,
+  type CheckoutKind,
+} from "@/lib/advisor-membership/checkout-pricing";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
+import { previewCouponDiscount, reserveCouponForOrder } from "@/lib/server/coupons-store";
+import { getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
+import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { createPendingPayment } from "@/lib/server/payment-store";
+import { resolveRegisteredUser } from "@/lib/server/profile";
 import {
   createRazorpayOrder,
-  getPlanAmountInr,
   getRazorpayKeyId,
   isRazorpayConfigured,
 } from "@/lib/server/razorpay";
-import { resolveRegisteredUser } from "@/lib/server/profile";
 import { getSessionUser } from "@/lib/server/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function normalizeCheckoutKind(value: unknown): CheckoutKind | null {
+  const kind = String(value ?? "").trim().toLowerCase();
+  if (kind === "renew" || kind === "upgrade" || kind === "purchase") return kind;
+  return null;
+}
+
+function normalizeTargetPlan(value: unknown): "silver" | "gold" | null {
+  const plan = String(value ?? "").trim().toLowerCase();
+  if (plan === "silver" || plan === "gold") return plan;
+  return null;
+}
 
 export async function POST(request: Request) {
   try {
@@ -30,18 +48,84 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = (await request.json()) as { planId?: MembershipPlanId };
-    const planId = body.planId;
-    if (planId !== "silver" && planId !== "gold") {
+    const globalFlags = await getGlobalFeatureFlags();
+    if (!globalFlags.membershipCheckoutEnabled) {
+      return NextResponse.json(
+        { success: false, message: "Membership checkout is temporarily unavailable" },
+        { status: 503 },
+      );
+    }
+
+    const body = (await request.json()) as {
+      planId?: MembershipPlanId;
+      checkoutKind?: CheckoutKind;
+      couponCode?: string;
+    };
+    const planId = normalizeTargetPlan(body.planId);
+    const checkoutKind = normalizeCheckoutKind(body.checkoutKind) ?? "purchase";
+
+    if (!planId) {
       return NextResponse.json(
         { success: false, message: "Payment is only required for Silver or Gold plans" },
         { status: 400 },
       );
     }
 
-    const amountInr = getPlanAmountInr(planId);
+    const profile = await getAdvisorProfileForUser(session.id);
+    const quote = profile
+      ? resolveCheckoutQuoteForProfile(profile, { checkoutKind, targetPlanId: planId })
+      : resolveCheckoutQuoteForProfile(
+          {
+            id: "",
+            advisor_id: "",
+            user_id: session.id,
+            account_status: "active",
+            profile_status: true,
+            profile_slug: "",
+            subscription_plan: "free",
+          },
+          { checkoutKind: "purchase", targetPlanId: planId },
+        );
+
+    if ("error" in quote) {
+      return NextResponse.json({ success: false, message: quote.error }, { status: 400 });
+    }
+
+    let amountInr = quote.amountInr;
+    let couponCode: string | null = null;
+    let couponDiscountInr = 0;
+    const amountBeforeCouponInr = quote.amountInr;
+
+    const registered = resolveRegisteredUser(session);
+    const rawCouponCode = body.couponCode?.trim();
+    if (rawCouponCode && !globalFlags.couponRedemptionEnabled) {
+      return NextResponse.json(
+        { success: false, message: "Coupon redemption is temporarily unavailable" },
+        { status: 503 },
+      );
+    }
+    if (rawCouponCode) {
+      const couponPreview = await previewCouponDiscount(rawCouponCode, {
+        baseAmountInr: amountBeforeCouponInr,
+        userId: session.id,
+        userEmail: registered?.email ?? null,
+        planId,
+      });
+
+      if ("error" in couponPreview) {
+        return NextResponse.json({ success: false, message: couponPreview.error }, { status: 400 });
+      }
+
+      amountInr = couponPreview.amountInr;
+      couponDiscountInr = couponPreview.discountInr;
+      couponCode = couponPreview.coupon.code;
+    }
+
     if (amountInr <= 0) {
-      return NextResponse.json({ success: false, message: "Invalid plan amount" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "No payment is required for this change" },
+        { status: 400 },
+      );
     }
 
     const order = await createRazorpayOrder({
@@ -50,14 +134,27 @@ export async function POST(request: Request) {
       amountInr,
     });
 
+    if (couponCode) {
+      await reserveCouponForOrder(couponCode, {
+        userId: session.id,
+        userEmail: registered?.email ?? null,
+        planId,
+        orderId: order.id,
+      });
+    }
+
     await createPendingPayment({
       userId: session.id,
       planId,
       amountInr,
       razorpayOrderId: order.id,
+      checkoutKind: quote.checkoutKind,
+      creditInr: quote.creditInr,
+      fromPlanId: quote.fromPlanId,
+      couponCode,
+      couponDiscountInr,
+      amountBeforeCouponInr,
     });
-
-    const registered = resolveRegisteredUser(session);
 
     return NextResponse.json({
       success: true,
@@ -67,7 +164,14 @@ export async function POST(request: Request) {
         amount: order.amount,
         currency: order.currency,
         planId,
+        checkoutKind: quote.checkoutKind,
         amountInr,
+        amountBeforeCouponInr,
+        listPriceInr: quote.listPriceInr,
+        creditInr: quote.creditInr,
+        couponCode,
+        couponDiscountInr,
+        summary: quote.summary,
         prefill: {
           name: registered?.fullName ?? session.name ?? "",
           email: registered?.email ?? "",

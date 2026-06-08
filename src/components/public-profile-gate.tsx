@@ -2,18 +2,22 @@
 
 import { usePathname } from "next/navigation";
 import { EyeOff } from "lucide-react";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { isPublicAdvisorSlugPath } from "@/lib/advisor/public-profile-slug";
 
-const BYPASS_PREFIXES = ["/advisor", "/login", "/edit", "/dashboard"];
+const BYPASS_PREFIXES = ["/advisor", "/login", "/register", "/edit", "/dashboard"];
 
 /** Blocks public profile routes when the advisor has deactivated their profile. */
 export function PublicProfileGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const publicView = usePublicProfileView();
   const { settings, loading } = useAdvisorSettings();
 
   const bypass = BYPASS_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const browsingPublicSlug = isPublicAdvisorSlugPath(pathname);
 
-  if (bypass || loading || settings.publicProfile.profileActive) {
+  if (bypass || loading || publicView || browsingPublicSlug || settings.publicProfile.profileActive) {
     return children;
   }
 

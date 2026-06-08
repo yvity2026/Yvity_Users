@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { Briefcase, FileCheck, HeartHandshake, Layers, Shield, Sparkles } from "lucide-react";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { Briefcase, FileCheck, HeartHandshake, Layers, Shield, Sparkles, Trophy } from "lucide-react";
+import { formatMdrtStatusLabel } from "@/lib/sections/achievement-tiers";
+import type { AchievementItem } from "@/lib/sections/types";
 
 export type WhyChooseMeStrength = {
   id: string;
@@ -45,28 +46,42 @@ const strengthAccents = [
 ] as const;
 
 function irdaLabel(): string {
-  const match = advisorProfile.highlights.find((h) => h.label.toLowerCase().includes("irda"));
-  if (!match) return "IRDA Certified Professional";
-  return match.label.toLowerCase().includes("professional")
-    ? match.label
-    : `${match.label} Professional`;
+  return "IRDA Certified Professional";
 }
 
-function multiServiceLabel(): string {
-  const chips = advisorProfile.home.serviceChips;
-  if (chips.length >= 3) return "Multi-Service Expertise";
-  if (chips.length === 0) return "Multi-Service Expertise";
-  return chips.map((c) => c.label.replace(/ Insurance$/, "")).join(", ") + " Expertise";
+function multiServiceLabel(serviceCount: number): string {
+  if (serviceCount >= 3) return "Multi-Service Expertise";
+  if (serviceCount === 0) return "Multi-Service Expertise";
+  return "Multi-Service Expertise";
 }
 
 /** Advisor strengths for the home “Why Choose Me” grid — profile-aware where possible. */
-export function getWhyChooseMeStrengths(): WhyChooseMeStrength[] {
-  const items: Array<{ id: string; label: string; icon: LucideIcon }> = [
-    {
+export function getWhyChooseMeStrengths(
+  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[] = [],
+  options?: { experienceDisplay?: string; serviceCount?: number },
+): WhyChooseMeStrength[] {
+  const mdrtLabel = formatMdrtStatusLabel(achievements);
+  const experienceDisplay = options?.experienceDisplay?.trim() || "";
+  const serviceCount = options?.serviceCount ?? 0;
+  const items: Array<{ id: string; label: string; icon: LucideIcon }> = [];
+
+  if (mdrtLabel !== "—") {
+    items.push({
+      id: "mdrt",
+      label: `${mdrtLabel} Recognized`,
+      icon: Trophy,
+    });
+  }
+
+  if (experienceDisplay) {
+    items.push({
       id: "experience",
-      label: `${advisorProfile.experienceDisplay} Experience`,
+      label: `${experienceDisplay} Experience`,
       icon: Briefcase,
-    },
+    });
+  }
+
+  items.push(
     {
       id: "irda",
       label: irdaLabel(),
@@ -89,10 +104,10 @@ export function getWhyChooseMeStrengths(): WhyChooseMeStrength[] {
     },
     {
       id: "services",
-      label: multiServiceLabel(),
+      label: multiServiceLabel(serviceCount),
       icon: Layers,
     },
-  ];
+  );
 
   return items.map((item, i) => ({
     ...item,

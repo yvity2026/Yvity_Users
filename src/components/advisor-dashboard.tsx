@@ -39,7 +39,7 @@ import {
   type AdvisorTopSection,
 } from "@/lib/advisor-nav";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { getPublicProfileSharePath } from "@/lib/public-profile-url";
+import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
 import { cn } from "@/lib/utils";
 
 export type AdvisorDashboardProps = {
@@ -68,6 +68,7 @@ export function AdvisorDashboard({
   // workspace header so the iframe fills the entire content area.
   const [publicViewMode, setPublicViewMode] = useState<PublicProfileViewMode>("mobile");
   const display = useAdvisorDisplayProfile();
+  const { previewPath } = usePublicProfileUrls();
 
   useEffect(() => {
     if (!embedMode && ready && !isAuthed) router.replace("/login");
@@ -219,7 +220,7 @@ export function AdvisorDashboard({
 
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link href={getPublicProfileSharePath()} target="_blank" rel="noopener noreferrer">
+              <Link href={previewPath} target="_blank" rel="noopener noreferrer">
                 <Eye className="size-4" /> Preview profile
               </Link>
             </Button>

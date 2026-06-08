@@ -19,6 +19,18 @@ export type ServiceAccent = {
   ratio: string;
 };
 
+/** Public card header — always the insurance category, never the advisor designation. */
+export const SERVICE_CATEGORY_HEADINGS: Record<ServiceCategory, string> = {
+  life: "Life Insurance",
+  health: "Health Insurance",
+  general: "General Insurance",
+  mutual: "Mutual Funds",
+};
+
+export function categoryHeadingFor(category: ServiceCategory): string {
+  return SERVICE_CATEGORY_HEADINGS[category];
+}
+
 export const serviceAccents: Record<ServiceCategory, ServiceAccent> = {
   life: {
     icon: Shield,

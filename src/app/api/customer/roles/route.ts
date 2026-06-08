@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadAdvisorRolesFromDb } from "@/lib/server/supabase/platform-supabase";
 
-/** Mock advisor role list for workspace setup (until Supabase advisor_roles is wired). */
 export async function GET() {
+  if (useSupabasePersistence()) {
+    try {
+      const data = await loadAdvisorRolesFromDb();
+      return NextResponse.json({ success: true, data });
+    } catch (error) {
+      console.error("[customer/roles]", error);
+    }
+  }
+
   return NextResponse.json({
     success: true,
     data: [

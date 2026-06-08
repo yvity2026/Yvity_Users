@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
-  Link2,
   Loader2,
   Play,
   Trash2,
@@ -12,9 +11,15 @@ import {
   Video as VideoIcon,
   X,
 } from "lucide-react";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideo } from "@/lib/intro-video";
+import {
+  getEffectiveIntroVideo,
+  parseDurationLabelToSeconds,
+} from "@/lib/intro-video";
+import { isHostedIntroVideoUrl } from "@/lib/media-urls";
 import { cn } from "@/lib/utils";
 
 type IntroVideoUploadModalProps = {
@@ -46,21 +51,15 @@ function formatDurationFromSeconds(seconds: number): string {
  *      Auto-detects duration via a hidden `<video>` probe and pre-fills
  *      the duration label.
  *
- *   2. Paste a URL — for direct MP4 / WebM links the advisor already
- *      hosts somewhere. (YouTube/Vimeo page URLs are NOT supported by
- *      the underlying `<video>` tag — the modal warns about this.)
- *
- * Save persists `{ url, posterUrl, durationLabel }` via the advisor
- * settings store. Removal clears those fields and immediately hides the
- * intro video everywhere on the public profile.
+ * Save persists `{ url, durationLabel }` via the advisor settings store.
  */
 export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalProps) {
   const { settings, updateSettings, saving } = useAdvisorSettings();
+  const { introVideoMaxSeconds, introVideoEnabled, introVideoHeroPlacement, planId } = usePlanLimits();
   const current = getEffectiveIntroVideo(settings);
 
   // Draft form state — only committed when the user clicks Save.
   const [url, setUrl] = useState(current.url);
-  const [posterUrl, setPosterUrl] = useState(current.posterUrl);
   const [durationLabel, setDurationLabel] = useState(current.durationLabel);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -75,7 +74,6 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
   useEffect(() => {
     if (!open) return;
     setUrl(current.url);
-    setPosterUrl(current.posterUrl);
     setDurationLabel(current.durationLabel);
     setUploadError(null);
     setSaved(false);
@@ -119,10 +117,36 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
       return;
     }
 
+    const probeUrl = URL.createObjectURL(file);
+    const durationSeconds = await new Promise<number>((resolve) => {
+      const probe = document.createElement("video");
+      probe.preload = "metadata";
+      probe.onloadedmetadata = () => {
+        const dur = Number.isFinite(probe.duration) ? probe.duration : 0;
+        URL.revokeObjectURL(probeUrl);
+        resolve(dur);
+      };
+      probe.onerror = () => {
+        URL.revokeObjectURL(probeUrl);
+        resolve(0);
+      };
+      probe.src = probeUrl;
+    });
+
+    if (durationSeconds > introVideoMaxSeconds) {
+      setUploadError(
+        `Your ${planId.charAt(0).toUpperCase()}${planId.slice(1)} plan allows intro videos up to ${introVideoMaxSeconds} seconds. Upgrade for a longer video.`,
+      );
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
+      if (durationSeconds > 0) {
+        formData.append("durationSeconds", String(Math.round(durationSeconds)));
+      }
       const res = await fetch("/api/intro-video/upload", {
         method: "POST",
         body: formData,
@@ -134,18 +158,8 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
       }
       setUrl(json.url);
 
-      // Best-effort duration probe — pre-fill the duration label so the
-      // advisor doesn't have to type it.
-      const probeUrl = URL.createObjectURL(file);
-      const probe = probeVideoRef.current;
-      if (probe) {
-        probe.src = probeUrl;
-        probe.onloadedmetadata = () => {
-          const label = formatDurationFromSeconds(probe.duration);
-          if (label) setDurationLabel(label);
-          URL.revokeObjectURL(probeUrl);
-        };
-      }
+      const label = formatDurationFromSeconds(durationSeconds);
+      if (label) setDurationLabel(label);
     } catch (e) {
       const message = e instanceof Error ? e.message : "Upload failed";
       setUploadError(message);
@@ -155,11 +169,33 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
   };
 
   const handleSave = () => {
+    setUploadError(null);
+    const trimmedUrl = url.trim();
+    const trimmedDuration = durationLabel.trim();
+
+    if (trimmedUrl) {
+      if (!isHostedIntroVideoUrl(trimmedUrl)) {
+        setUploadError("Please upload a video file — external URLs are not supported.");
+        return;
+      }
+      const durationSeconds = parseDurationLabelToSeconds(trimmedDuration);
+      if (durationSeconds === null) {
+        setUploadError("Please set the video duration (e.g. 0:30) so we can verify your plan limit.");
+        return;
+      }
+      if (durationSeconds > introVideoMaxSeconds) {
+        setUploadError(
+          `Your ${planId.charAt(0).toUpperCase()}${planId.slice(1)} plan allows intro videos up to ${introVideoMaxSeconds} seconds. Upgrade for a longer video.`,
+        );
+        return;
+      }
+    }
+
     updateSettings({
       introVideo: {
-        url: url.trim(),
-        posterUrl: posterUrl.trim(),
-        durationLabel: durationLabel.trim(),
+        url: trimmedUrl,
+        posterUrl: "",
+        durationLabel: trimmedDuration,
       },
     });
     setSaved(true);
@@ -171,7 +207,6 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
 
   const performRemove = () => {
     setUrl("");
-    setPosterUrl("");
     setDurationLabel("");
     updateSettings({
       introVideo: { url: "", posterUrl: "", durationLabel: "" },
@@ -182,9 +217,7 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
 
   const hasDraftUrl = url.trim().length > 0;
   const hasChanges =
-    url.trim() !== current.url ||
-    posterUrl.trim() !== current.posterUrl ||
-    durationLabel.trim() !== current.durationLabel;
+    url.trim() !== current.url || durationLabel.trim() !== current.durationLabel;
 
   return (
     <div
@@ -227,7 +260,9 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
               {current.url ? "Update your intro video" : "Add your intro video"}
             </h2>
             <p className="mt-0.5 text-[12px] text-muted-foreground leading-snug">
-              A short personal video boosts trust before the first call.
+              {introVideoHeroPlacement
+                ? "Gold profiles show your video prominently in the hero — up to 2 minutes."
+                : "Silver profiles can add a short intro (up to 30 seconds) in the trust strip."}
             </p>
           </div>
           <button
@@ -241,6 +276,20 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
         </header>
 
         <div className="p-5 sm:p-6 space-y-5">
+          {!introVideoEnabled ? (
+            <div className="rounded-2xl border border-white/12 bg-white/[0.03] p-6 text-center space-y-3">
+              <VideoIcon className="size-10 mx-auto text-[oklch(0.85_0.16_78)]" />
+              <h3 className="text-base font-bold">Intro video is a Silver feature</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                Upgrade to Silver for a short intro video (up to 30 seconds), or Gold for a hero
+                placement and up to 2 minutes.
+              </p>
+              <Button type="button" className="rounded-full" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          ) : (
+            <>
           {/* Current preview */}
           {hasDraftUrl && (
             <section className="space-y-2">
@@ -252,7 +301,6 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
                   key={url}
                   className="absolute inset-0 size-full object-contain"
                   src={url}
-                  poster={posterUrl || undefined}
                   controls
                   playsInline
                 />
@@ -321,7 +369,7 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
                   {uploading ? "Uploading…" : "Choose a video file"}
                 </span>
                 <span className="block text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                  MP4, MOV or WebM — up to 80&nbsp;MB. We recommend 30–60 seconds.
+                  MP4, MOV or WebM — up to 80&nbsp;MB, max {introVideoMaxSeconds}s on your plan.
                 </span>
               </span>
             </button>
@@ -337,96 +385,40 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
             )}
           </section>
 
-          {/* Divider */}
-          <div className="relative flex items-center gap-3">
-            <span className="h-px flex-1 bg-white/10" aria-hidden />
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
-            <span className="h-px flex-1 bg-white/10" aria-hidden />
-          </div>
-
-          {/* URL paste */}
+          {/* Duration (auto-filled after upload) */}
           <section className="space-y-2">
             <label
-              htmlFor="intro-video-url"
-              className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium"
+              htmlFor="intro-video-duration"
+              className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium"
             >
-              <Link2 className="size-3" aria-hidden />
-              Paste a video URL
+              Duration
             </label>
             <input
-              id="intro-video-url"
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://yoursite.com/intro.mp4"
+              id="intro-video-duration"
+              type="text"
+              value={durationLabel}
+              onChange={(e) => setDurationLabel(e.target.value)}
+              placeholder="0:30"
               className={cn(
-                "w-full rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2.5",
-                "text-sm text-foreground placeholder:text-muted-foreground/60",
+                "w-28 rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2.5",
+                "text-sm text-foreground tabular-nums placeholder:text-muted-foreground/60",
                 "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40",
                 "transition",
               )}
+              inputMode="numeric"
               autoComplete="off"
               spellCheck={false}
             />
             <p className="text-[10px] text-muted-foreground leading-snug">
-              Direct video links only (MP4 / WebM). YouTube and Vimeo page URLs won&apos;t play
-              inline — upload the file instead.
+              Filled automatically after upload. Adjust only if the detected length is wrong.
             </p>
           </section>
-
-          {/* Optional poster + duration */}
-          <section className="grid sm:grid-cols-[1fr_auto] gap-3">
-            <div className="space-y-2 min-w-0">
-              <label
-                htmlFor="intro-video-poster"
-                className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium"
-              >
-                Poster image (optional)
-              </label>
-              <input
-                id="intro-video-poster"
-                type="url"
-                value={posterUrl}
-                onChange={(e) => setPosterUrl(e.target.value)}
-                placeholder="https://… .jpg"
-                className={cn(
-                  "w-full rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2.5",
-                  "text-sm text-foreground placeholder:text-muted-foreground/60",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40",
-                  "transition",
-                )}
-                autoComplete="off"
-                spellCheck={false}
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="intro-video-duration"
-                className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium"
-              >
-                Duration
-              </label>
-              <input
-                id="intro-video-duration"
-                type="text"
-                value={durationLabel}
-                onChange={(e) => setDurationLabel(e.target.value)}
-                placeholder="2:30"
-                className={cn(
-                  "w-24 rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2.5",
-                  "text-sm text-foreground tabular-nums placeholder:text-muted-foreground/60",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40",
-                  "transition",
-                )}
-                inputMode="numeric"
-                autoComplete="off"
-                spellCheck={false}
-              />
-            </div>
-          </section>
+            </>
+          )}
         </div>
 
         {/* Footer */}
+        {introVideoEnabled ? (
         <footer className="sticky bottom-0 z-10 flex items-center justify-end gap-2 px-5 sm:px-6 py-3 border-t border-white/8 bg-background/85 backdrop-blur-xl rounded-b-3xl">
           <button
             type="button"
@@ -470,6 +462,7 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
             )}
           </button>
         </footer>
+        ) : null}
 
         {/* Hidden probe video — used to auto-detect uploaded clip duration */}
         <video ref={probeVideoRef} hidden muted preload="metadata" />

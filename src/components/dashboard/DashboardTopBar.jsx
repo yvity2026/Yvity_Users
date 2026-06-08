@@ -15,6 +15,7 @@ import {
 } from "@/lib/dashboard/phase1Nav";
 import { getAdvisorWorkspaceSetupState } from "@/lib/advisor/workspaceSetupStatus";
 import { cn } from "@/lib/utils";
+import { useNotifications } from "@/hooks/use-notifications";
 
 function DashboardNavLinks({ pathname, user, advisor, loading }) {
   return DASHBOARD_PRIMARY_NAV.map((item) => {
@@ -42,7 +43,7 @@ function DashboardNavLinks({ pathname, user, advisor, loading }) {
   });
 }
 
-function TopBarActions({ user, setupState }) {
+function TopBarActions({ user, setupState, unreadCount }) {
   return (
     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
       {setupState?.shouldPromptIrdaiUpload || setupState?.isIrdaiRejected ? (
@@ -60,7 +61,14 @@ function TopBarActions({ user, setupState }) {
       >
         <IoNotificationsOutline size={20} className="sm:hidden" />
         <IoNotificationsOutline size={22} className="hidden sm:block" />
-        <span className="yvity-dash-nav-soon absolute top-1.5 right-1.5 h-2 w-2 rounded-full border border-background bg-current sm:top-2 sm:right-2.5" />
+        {unreadCount > 0 ? (
+          <span
+            className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-[#F59E0B] px-1 text-[9px] font-bold text-[#0A4A4A] sm:top-2 sm:right-2"
+            aria-label={`${unreadCount} unread notifications`}
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        ) : null}
       </Link>
 
       <Link href={DASHBOARD_TOP_ROUTES.profile} aria-label="Profile and account">
@@ -95,9 +103,12 @@ function BrandBlock({ layout = "column" }) {
 export default function DashboardTopBar() {
   const pathname = usePathname();
   const { user, advisor, loading } = useAuth();
+  const { unreadCount } = useNotifications();
   const setupState = loading ? null : getAdvisorWorkspaceSetupState(user, advisor);
   const isMySpace =
     pathname === DASHBOARD_MY_SPACE_PATH || pathname?.startsWith(`${DASHBOARD_MY_SPACE_PATH}/`);
+  const useFlatNav =
+    isMySpace || pathname === DASHBOARD_TOP_ROUTES.profile;
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 m-0 p-0">
@@ -120,7 +131,11 @@ export default function DashboardTopBar() {
                 aria-label="Notifications"
               >
                 <IoNotificationsOutline size={20} />
-                <span className="yvity-dash-nav-soon absolute top-1.5 right-1.5 h-2 w-2 rounded-full border border-background bg-current" />
+                {unreadCount > 0 ? (
+                  <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-[#F59E0B] px-1 text-[9px] font-bold text-[#0A4A4A]">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                ) : null}
               </Link>
 
               <Link href={DASHBOARD_TOP_ROUTES.profile} aria-label="Profile and account">
@@ -137,7 +152,7 @@ export default function DashboardTopBar() {
       </div>
 
       {/* Desktop — flat bar on My Space */}
-      {isMySpace ? (
+      {useFlatNav ? (
         <div className="yvity-dash-nav-flat hidden border-b lg:block">
           <div className="mx-auto flex h-16 w-full max-w-[1536px] items-center justify-between gap-4 px-6">
             <Link
@@ -160,7 +175,7 @@ export default function DashboardTopBar() {
               />
             </nav>
 
-            <TopBarActions user={user} setupState={setupState} />
+            <TopBarActions user={user} setupState={setupState} unreadCount={unreadCount} />
           </div>
         </div>
       ) : (
@@ -196,7 +211,7 @@ export default function DashboardTopBar() {
                   />
                 </nav>
 
-                <TopBarActions user={user} setupState={setupState} />
+                <TopBarActions user={user} setupState={setupState} unreadCount={unreadCount} />
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   BadgeCheck,
   Briefcase,
@@ -7,6 +8,7 @@ import {
   Headphones,
   MapPin,
   MessageSquare,
+  Lock,
   MessageSquareReply,
   Pencil,
   Play,
@@ -18,12 +20,13 @@ import {
 } from "lucide-react";
 import { TestimonialAdvisorResponse } from "@/components/sections/testimonial-advisor-response";
 import {
-  memberBadgeLabels,
-  testimonialServiceLabels,
   testimonialTypeAccents,
   testimonialTypeLabels,
 } from "@/lib/sections/testimonials-config";
 import { isCustomerTestimonial } from "@/lib/sections/normalize-testimonials";
+import { labelForTestimonialService } from "@/lib/sections/testimonial-service-options";
+import { useServicesData } from "@/lib/sections/stores";
+import type { PublicVisibility } from "@/lib/advisor-membership/content-visibility";
 import type { TestimonialItem } from "@/lib/sections/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -54,6 +57,7 @@ export function TestimonialDetailCard({
   item,
   index = 0,
   manageReplies = false,
+  publicVisibility = "published",
   onReply,
   onEditReply,
   onDeleteReply,
@@ -62,15 +66,22 @@ export function TestimonialDetailCard({
   item: TestimonialItem;
   index?: number;
   manageReplies?: boolean;
+  publicVisibility?: PublicVisibility;
   onReply?: () => void;
   onEditReply?: () => void;
   onDeleteReply?: () => void;
   replyBusy?: boolean;
 }) {
+  const [services] = useServicesData();
+  const serviceLabel = useMemo(
+    () => labelForTestimonialService(item.service, services, { publicOnly: false }),
+    [item.service, services],
+  );
   const accent = testimonialTypeAccents[item.type];
   const TypeIcon = typeIcons[item.type];
   const avatarTone = avatarTones[index % avatarTones.length];
   const customerSubmitted = isCustomerTestimonial(item);
+  const isHeld = publicVisibility === "held";
 
   return (
     <article
@@ -79,9 +90,21 @@ export function TestimonialDetailCard({
         "transition-all duration-500 ease-out motion-reduce:transition-none",
         "hover:border-white/20 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5",
         "animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both motion-reduce:animate-none",
+        isHeld && "border-[oklch(0.85_0.16_78/0.35)]",
       )}
       style={{ animationDelay: `${Math.min(index * 70, 420)}ms` }}
     >
+      {isHeld ? (
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          <div className="absolute inset-0 backdrop-blur-[6px] bg-background/35" />
+          <div className="absolute inset-x-0 top-0 flex items-center justify-center px-4 pt-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.15)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.92_0.14_78)]">
+              <Lock className="size-3.5" />
+              Not on public profile
+            </span>
+          </div>
+        </div>
+      ) : null}
       <header className="flex items-center justify-between gap-2 px-4 sm:px-5 pt-4 sm:pt-5">
         <span
           className={cn(
@@ -214,9 +237,6 @@ export function TestimonialDetailCard({
                 </p>
               </div>
             </div>
-            <span className="mt-2 inline-flex rounded-full border border-[oklch(0.82_0.13_205/0.35)] bg-[oklch(0.82_0.13_205/0.08)] px-2 py-0.5 text-[10px] font-semibold text-[oklch(0.82_0.13_205)]">
-              {memberBadgeLabels[item.memberBadge]}
-            </span>
           </div>
         </div>
 
@@ -227,7 +247,7 @@ export function TestimonialDetailCard({
         <div className="flex items-center gap-2">
           <Shield className="size-3.5 text-[oklch(0.82_0.13_205)]" />
           <span className="text-xs font-medium text-muted-foreground">
-            {testimonialServiceLabels[item.service]}
+            {serviceLabel}
           </span>
         </div>
 

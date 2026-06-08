@@ -1,5 +1,9 @@
+"use client";
+
 import type { WhyChooseMeStrength } from "@/lib/home/why-choose-me-strengths";
 import { getWhyChooseMeStrengths } from "@/lib/home/why-choose-me-strengths";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useAchievementsData, useServicesData } from "@/lib/sections/stores";
 import { cn } from "@/lib/utils";
 
 /**
@@ -47,7 +51,13 @@ function StrengthRow({ strength, index }: { strength: WhyChooseMeStrength; index
 }
 
 export function WhyChooseMeSection() {
-  const strengths = getWhyChooseMeStrengths();
+  const [achievements] = useAchievementsData();
+  const [services] = useServicesData();
+  const advisorProfile = useAdvisorDisplayProfile();
+  const strengths = getWhyChooseMeStrengths(achievements, {
+    experienceDisplay: advisorProfile.experienceDisplay,
+    serviceCount: services.length,
+  });
 
   return (
     <section className="w-full" aria-labelledby="why-choose-me-heading">

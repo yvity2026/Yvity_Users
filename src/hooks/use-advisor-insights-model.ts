@@ -6,7 +6,8 @@ import type { InsightsModel } from "@/lib/advisor-insights/types";
 import type { Lead } from "@/lib/leads/types";
 import { useAuth } from "@/context/AuthUserContext";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideoUrl } from "@/lib/intro-video";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
+import { getAdvisorIntroVideoUrl } from "@/lib/intro-video";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { useCareerData } from "@/lib/career-store";
 import { useGalleryData } from "@/lib/gallery-store";
@@ -25,6 +26,7 @@ export function useAdvisorInsightsModel(): {
   const [leadsLoading, setLeadsLoading] = useState(true);
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { user, advisor } = useAuth();
+  const { limits } = usePlanLimits();
   const photoUrl = resolveProfilePhotoUrl(user?.selfie_url);
   const underReview = advisor?.account_status === "under_review";
 
@@ -65,7 +67,7 @@ export function useAdvisorInsightsModel(): {
     leadsLoading ||
     settingsLoading;
 
-  const introVideoUrl = getEffectiveIntroVideoUrl(settings);
+  const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
 
   const model = useMemo(
     () =>

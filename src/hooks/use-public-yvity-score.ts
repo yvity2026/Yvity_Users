@@ -3,12 +3,17 @@
 import { useMemo } from "react";
 import { getYvityScoreTotal } from "@/lib/advisor-score/build";
 import { useAuth } from "@/context/AuthUserContext";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideoUrl } from "@/lib/intro-video";
+import { getPlanGatedIntroVideoUrl } from "@/lib/intro-video";
 import { useCareerData } from "@/lib/career-store";
 import { useGalleryData } from "@/lib/gallery-store";
+import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
+import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
 import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib/sections/stores";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
 
 /** Public-facing YVITY Score — same activity model as dashboard and Score tab. */
 export function usePublicYvityScore(): { score: number; loading: boolean } {
@@ -19,8 +24,27 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
   const [gallery, , galleryLoading] = useGalleryData();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { user, advisor } = useAuth();
-  const photoUrl = resolveProfilePhotoUrl(user?.selfie_url);
-  const underReview = advisor?.account_status === "under_review";
+  const publicView = usePublicProfileView();
+  const { limits } = useResolvedPlanLimits();
+  const { recommendationCount, decayPenalty, decayActive, graceDaysRemaining, monthlyActivity, loading: recsLoading } =
+    usePublicProfileStats();
+
+  const photoUrl =
+    resolveProfilePhotoUrl(publicView?.selfie_url) ||
+    resolveProfilePhotoUrl(user?.selfie_url);
+
+  const profileApproved = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
+
+  const underReview = publicView
+    ? publicView.profile.account_status === "under_review"
+    : advisor?.account_status === "under_review";
+
+  const irdaiCertificateUploaded = publicView
+    ? Boolean(publicView.profile.iridai_certificate_url?.trim() &&
+        publicView.profile.iridai_certificate_url !== "pending")
+    : hasIrdaiCertificateUploaded(advisor);
 
   const loading =
     careerLoading ||
@@ -28,9 +52,10 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
     achievementsLoading ||
     testimonialsLoading ||
     galleryLoading ||
-    settingsLoading;
+    settingsLoading ||
+    recsLoading;
 
-  const introVideoUrl = getEffectiveIntroVideoUrl(settings);
+  const introVideoUrl = getPlanGatedIntroVideoUrl(settings, limits);
 
   const score = useMemo(() => {
     if (loading) return 0;
@@ -44,6 +69,13 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
       testimonials,
       gallery,
       underReview,
+      profileApproved,
+      irdaiCertificateUploaded,
+      verifiedRecommendationCount: profileApproved ? recommendationCount : 0,
+      decayPenalty,
+      decayActive,
+      decayGraceDaysRemaining: graceDaysRemaining,
+      monthlyActivity: monthlyActivity ?? undefined,
     });
   }, [
     loading,
@@ -56,6 +88,14 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
     testimonials,
     gallery,
     underReview,
+    profileApproved,
+    irdaiCertificateUploaded,
+    recommendationCount,
+    decayPenalty,
+    decayActive,
+    graceDaysRemaining,
+    monthlyActivity,
+    limits,
   ]);
 
   return { score, loading };

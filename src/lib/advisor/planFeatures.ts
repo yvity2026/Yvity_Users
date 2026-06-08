@@ -12,11 +12,10 @@ export function getEffectivePlan(subscriptionPlan: unknown, accountStatus: unkno
   const plan = normalizePlan(subscriptionPlan);
   const status = normalizeAccountStatus(accountStatus);
 
-  if (status === "active" && (plan === "silver" || plan === "gold")) {
-    return plan;
-  }
-
-  return "free";
+  if (status !== "active") return "free";
+  if (plan === "free") return "free";
+  // Custom tiers (e.g. platinum) keep their plan id when active.
+  return plan;
 }
 
 export function hasGoldPlan(subscriptionPlan: unknown, accountStatus: unknown) {

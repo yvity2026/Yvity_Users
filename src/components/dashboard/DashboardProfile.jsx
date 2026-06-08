@@ -191,6 +191,7 @@ export default function DashboardProfile() {
       if (!res.ok) throw new Error(json.error || "Failed to save profile");
 
       setUser?.(json.data || null);
+      window.dispatchEvent(new CustomEvent("profile-data-updated"));
       toast.success(json.message || "Profile saved");
       setIsEditing(false);
     } catch (error) {

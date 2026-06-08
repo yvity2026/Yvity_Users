@@ -15,7 +15,7 @@ export async function GET(
   }
 
   const { advisorProfileId } = await context.params;
-  const result = checkLocalSavedProfile(session.id, advisorProfileId);
+  const result = await checkLocalSavedProfile(session.id, advisorProfileId);
 
   return NextResponse.json({
     success: true,

@@ -194,6 +194,9 @@ export function AdvisorScoreModule({
         max={model.max}
         tagline={model.tagline}
         categories={model.categories}
+        decayPenalty={model.decayPenalty}
+        decayActive={model.decayActive}
+        decayGraceDaysRemaining={model.decayGraceDaysRemaining}
       />
 
       {/* Unified responsive accordion — same expand/collapse model on
@@ -419,6 +422,8 @@ function MobileCategoryBody({
 
 function CompactSubRow({ item }: { item: ScoreSubItem }) {
   const Icon = SUB_ITEM_ICONS[item.id];
+  const isBooleanItem = item.max === 1;
+
   return (
     <div
       className={cn(
@@ -433,7 +438,18 @@ function CompactSubRow({ item }: { item: ScoreSubItem }) {
       <span className="text-[13px] font-medium text-foreground/90 truncate flex-1 min-w-0">
         {item.label}
       </span>
-      <CompactProgressBadge earned={item.earned} max={item.max} />
+      {isBooleanItem ? (
+        item.complete ? (
+          <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-[oklch(0.55_0.13_185)]">
+            <BadgeCheck className="size-3.5" />
+            1 pt
+          </span>
+        ) : (
+          <span className="shrink-0 text-[11px] font-medium text-muted-foreground">0 pt</span>
+        )
+      ) : (
+        <CompactProgressBadge earned={item.earned} max={item.max} />
+      )}
     </div>
   );
 }
@@ -865,11 +881,17 @@ function ScoreHeroCard({
   max,
   tagline,
   categories,
+  decayPenalty = 0,
+  decayActive = false,
+  decayGraceDaysRemaining = null,
 }: {
   total: number;
   max: number;
   tagline: string;
   categories: ScoreCategory[];
+  decayPenalty?: number;
+  decayActive?: boolean;
+  decayGraceDaysRemaining?: number | null;
 }) {
   return (
     <section
@@ -924,6 +946,17 @@ function ScoreHeroCard({
             <p className="mt-1 text-[12px] md:text-sm text-white/85 leading-snug max-w-xs">
               {tagline}
             </p>
+            {!decayActive && decayGraceDaysRemaining != null && decayGraceDaysRemaining > 0 ? (
+              <p className="mt-2 text-[11px] text-white/70 leading-snug max-w-xs">
+                Score decay starts in {decayGraceDaysRemaining} day
+                {decayGraceDaysRemaining === 1 ? "" : "s"} (30-day grace from signup).
+              </p>
+            ) : null}
+            {decayPenalty > 0 ? (
+              <p className="mt-2 text-[11px] font-semibold text-[oklch(0.78_0.18_30)]">
+                −{decayPenalty} inactivity decay applied
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -1075,6 +1108,8 @@ function RuleRow({ rule, isLast }: { rule: ScoreRule; isLast?: boolean }) {
 
 function SubItemRow({ item }: { item: ScoreSubItem }) {
   const Icon = SUB_ITEM_ICONS[item.id];
+  const isBooleanItem = item.max === 1;
+
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2.5 min-w-0">
@@ -1085,7 +1120,18 @@ function SubItemRow({ item }: { item: ScoreSubItem }) {
         )}
         <span className="text-sm font-medium text-foreground/90 truncate">{item.label}</span>
       </div>
-      <RuleProgress earned={item.earned} max={item.max} compact />
+      {isBooleanItem ? (
+        item.complete ? (
+          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[oklch(0.55_0.13_185)]">
+            <BadgeCheck className="size-3.5" />
+            1 pt
+          </span>
+        ) : (
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">0 pt</span>
+        )
+      ) : (
+        <RuleProgress earned={item.earned} max={item.max} compact />
+      )}
     </div>
   );
 }

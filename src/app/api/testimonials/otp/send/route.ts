@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { DUMMY_OTP } from "@/lib/constants";
+import {
+  ADVISOR_SELF_TESTIMONIAL_MESSAGE,
+  rejectAdvisorSelfSubmissionForCurrentProfile,
+} from "@/lib/server/advisor-self-submission-guard";
 
 function isValidMobile(mobile: string): boolean {
   const digits = mobile.replace(/\D/g, "");
@@ -19,6 +23,12 @@ export async function POST(request: Request) {
   if (!isValidMobile(mobile)) {
     return NextResponse.json({ error: "Enter a valid mobile number" }, { status: 400 });
   }
+
+  const selfBlocked = await rejectAdvisorSelfSubmissionForCurrentProfile(
+    mobile,
+    ADVISOR_SELF_TESTIMONIAL_MESSAGE,
+  );
+  if (selfBlocked) return selfBlocked;
 
   // Demo: no SMS provider; client uses DUMMY_OTP for verification.
   return NextResponse.json({

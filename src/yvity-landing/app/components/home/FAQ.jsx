@@ -19,7 +19,7 @@ const advisorFaqs = [
   {
     question: "Is YVITY free?",
     answer:
-      "Yes. The Forever Free plan includes search visibility, the identity verified badge, and up to 5 text reviews. Silver (₹999/yr) adds IRDAI verification, audio reviews, and recommendations. Gold (₹2,999/yr) adds video reviews, intro video, QR download, priority listing, and premium badges.",
+      "Yes. The Free plan includes a public profile, identity verification, text testimonials, and more. Silver (₹1,499/yr) adds service verification, short intro video, and higher limits. Gold (₹2,999/yr) adds hero intro video, search visibility, profile analytics, and featured eligibility.",
   },
   {
     question: "What is the YVITY Score?",

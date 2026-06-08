@@ -3,11 +3,11 @@ import type { CareerData } from "@/lib/career-types";
 import { emptyCareerData } from "@/lib/empty-data";
 import { loadCareerForUser, saveCareerForUser } from "@/lib/server/career-persistence";
 import { requireSession, unauthorized } from "@/lib/server/api-auth";
-import { getSessionUser } from "@/lib/server/session";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 export async function GET() {
-  const session = await getSessionUser();
-  const data = await loadCareerForUser(session?.id);
+  const dataUserId = await resolveAdvisorDataUserId();
+  const data = await loadCareerForUser(dataUserId ?? undefined);
   return NextResponse.json({ data });
 }
 

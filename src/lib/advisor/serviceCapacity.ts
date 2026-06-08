@@ -1,9 +1,10 @@
 export const SERVICE_CAPACITY_OPTIONS = [
   {
     id: "individual_agent",
-    label: "Individual Agent",
+    label: "Individual",
     cardVariant: "agent",
-    description: "Independent advisor selling policies on your own",
+    description:
+      "Advisor, relationship manager, or anyone who works independently",
   },
   {
     id: "team_leader",
@@ -13,11 +14,38 @@ export const SERVICE_CAPACITY_OPTIONS = [
   },
   {
     id: "firm_account",
-    label: "Firm account",
+    label: "Firm / Company",
     cardVariant: "firm",
-    description: "Agency or firm account that manages a team",
+    description: "Firm or company account that manages a team",
   },
 ] as const;
+
+export type ServiceCapacityId = (typeof SERVICE_CAPACITY_OPTIONS)[number]["id"];
+
+/** Only Individual is open for onboarding until pricing/product is finalised. */
+export const CAPACITY_ONBOARDING_ENABLED_ID: ServiceCapacityId = "individual_agent";
+
+const COMING_SOON_CAPACITY_IDS = new Set<ServiceCapacityId>(["team_leader", "firm_account"]);
+
+export function isCapacityComingSoon(capacityId: string): boolean {
+  const normalized = normalizeCapacityId(capacityId) as ServiceCapacityId;
+  return COMING_SOON_CAPACITY_IDS.has(normalized);
+}
+
+export function isCapacityOnboardingEnabled(capacityId: string): boolean {
+  return normalizeCapacityId(capacityId) === CAPACITY_ONBOARDING_ENABLED_ID;
+}
+
+/** New registrations always store Individual until team/firm pricing launches. */
+export function capacityIdForOnboarding(_capacityId?: string): ServiceCapacityId {
+  return CAPACITY_ONBOARDING_ENABLED_ID;
+}
+
+export function normalizeStoredCapacityId(capacityId: string | undefined): ServiceCapacityId {
+  const normalized = normalizeCapacityId(capacityId ?? "") as ServiceCapacityId;
+  if (!normalized) return CAPACITY_ONBOARDING_ENABLED_ID;
+  return normalized;
+}
 
 /** Legacy setup values mapped to the current three account types. */
 const LEGACY_CAPACITY_IDS: Record<string, string> = {

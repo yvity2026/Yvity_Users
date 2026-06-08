@@ -110,6 +110,12 @@ export type ScoreImprovement = {
 
 export type YvityScoreModel = {
   total: number;
+  /** Score before decay penalties. */
+  rawTotal?: number;
+  /** Points removed by inactivity decay (when active). */
+  decayPenalty?: number;
+  decayActive?: boolean;
+  decayGraceDaysRemaining?: number | null;
   max: number;
   /** Tagline displayed under the headline number. */
   tagline: string;

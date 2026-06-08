@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seed:supabase": "node scripts/seed-json-to-supabase.mjs",
+    "backfill:supabase": "node scripts/backfill-json-to-supabase.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

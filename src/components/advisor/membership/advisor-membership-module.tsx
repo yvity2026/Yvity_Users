@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthUserContext";
 import {
   BadgeCheck,
@@ -18,11 +19,13 @@ import {
 import { DashboardSection } from "@/components/advisor/dashboard/dashboard-ui";
 import { MembershipActionSheet } from "@/components/advisor/membership/membership-action-sheet";
 import {
+  allPlanComparisonLabels,
   buildMembershipModel,
-  MEMBERSHIP_FEATURES,
-  planHasFeature,
+  marketingFeatureRows,
+  planMarketingIncludes,
   upgradePlanId,
 } from "@/lib/advisor-membership";
+import { openMembershipInvoice } from "@/lib/advisor-membership/membership-invoice";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,19 +48,43 @@ function formatInr(amount: number): string {
   }).format(amount);
 }
 
+type MembershipPaymentRow = {
+  id: string;
+  paidAt: string;
+  planName: string;
+  planId: string;
+  amountInr: number;
+  creditInr: number;
+  checkoutKind: string;
+  invoiceId: string;
+  status: "paid";
+};
+
 export function AdvisorMembershipModule() {
   const { advisor, setAdvisor } = useAuth();
+  const [payments, setPayments] = useState<MembershipPaymentRow[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
   const model = useMemo(
     () =>
       buildMembershipModel({
         subscriptionPlan: advisor?.subscription_plan,
+        approvedAt: advisor?.approved_at,
+        subscriptionStartedAt: advisor?.subscription_started_at,
+        subscriptionExpiresAt: advisor?.subscription_expires_at,
       }),
-    [advisor?.subscription_plan],
+    [
+      advisor?.subscription_plan,
+      advisor?.approved_at,
+      advisor?.subscription_started_at,
+      advisor?.subscription_expires_at,
+    ],
   );
+  const searchParams = useSearchParams();
   const [sheet, setSheet] = useState<{
     open: boolean;
     mode: "renew" | "upgrade";
     target?: MembershipPlanId;
+    couponCode?: string;
   }>({ open: false, mode: "renew" });
 
   const upgradeTarget = upgradePlanId(model.current.planId);
@@ -70,6 +97,47 @@ export function AdvisorMembershipModule() {
       mode: "upgrade",
       target: target ?? upgradeTarget ?? undefined,
     });
+
+  useEffect(() => {
+    const payPlan = searchParams.get("pay")?.trim().toLowerCase();
+    const checkout = searchParams.get("checkout")?.trim().toLowerCase();
+    const coupon = searchParams.get("coupon")?.trim() || undefined;
+    if (!payPlan || payPlan === "free") return;
+
+    const mode =
+      checkout === "renew" ? "renew" : checkout === "upgrade" ? "upgrade" : "upgrade";
+
+    setSheet({
+      open: true,
+      mode,
+      target: payPlan as MembershipPlanId,
+      couponCode: coupon,
+    });
+  }, [searchParams]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPaymentsLoading(true);
+    void fetch("/api/advisor/subscription/payments", { cache: "no-store", credentials: "same-origin" })
+      .then(async (res) => {
+        const json = (await res.json()) as {
+          success?: boolean;
+          data?: MembershipPaymentRow[];
+        };
+        if (cancelled) return;
+        setPayments(res.ok && json.success && json.data ? json.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setPayments([]);
+      })
+      .finally(() => {
+        if (!cancelled) setPaymentsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [advisor?.subscription_plan, advisor?.subscription_expires_at]);
 
   return (
     <div className="space-y-3 md:space-y-10 pb-6 animate-in fade-in duration-400">
@@ -223,12 +291,12 @@ export function AdvisorMembershipModule() {
               </tr>
             </thead>
             <tbody>
-              {MEMBERSHIP_FEATURES.map((f) => (
-                <tr key={f.id} className="border-b border-white/5 last:border-0">
-                  <td className="px-4 py-2.5 text-muted-foreground">{f.label}</td>
+              {allPlanComparisonLabels().map((label) => (
+                <tr key={label} className="border-b border-white/5 last:border-0">
+                  <td className="px-4 py-2.5 text-muted-foreground">{label}</td>
                   {model.plans.map((p) => (
                     <td key={p.id} className="px-4 py-2.5 text-center">
-                      {planHasFeature(p.id, f.id) ? (
+                      {planMarketingIncludes(p.id, label) ? (
                         <Check className="size-4 mx-auto text-[oklch(0.82_0.16_162)]" />
                       ) : (
                         <Minus className="size-4 mx-auto text-white/20" />
@@ -277,13 +345,17 @@ export function AdvisorMembershipModule() {
 
       {/* 5. Payment history */}
       <DashboardSection title="Payment history" subtitle="Past membership payments">
-        {model.payments.length === 0 ? (
+        {paymentsLoading ? (
+          <p className="text-sm text-muted-foreground text-center py-8 glass-strong rounded-2xl border border-dashed border-white/15">
+            Loading payments…
+          </p>
+        ) : payments.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8 glass-strong rounded-2xl border border-dashed border-white/15">
             No payments recorded yet.
           </p>
         ) : (
           <div className="space-y-2">
-            {model.payments.map((p) => (
+            {payments.map((p) => (
               <div
                 key={p.id}
                 className="glass-strong rounded-xl border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
@@ -320,7 +392,7 @@ export function AdvisorMembershipModule() {
                     variant="outline"
                     size="sm"
                     className="rounded-lg h-9 gap-1.5 flex-1 sm:flex-none border-white/12"
-                    onClick={() => handleInvoice(p.invoiceId, "view")}
+                    onClick={() => openMembershipInvoice(p, "view")}
                   >
                     <Eye className="size-3.5" />
                     View
@@ -330,7 +402,7 @@ export function AdvisorMembershipModule() {
                     variant="outline"
                     size="sm"
                     className="rounded-lg h-9 gap-1.5 flex-1 sm:flex-none border-white/12"
-                    onClick={() => handleInvoice(p.invoiceId, "download")}
+                    onClick={() => openMembershipInvoice(p, "download")}
                   >
                     <Download className="size-3.5" />
                     Download
@@ -340,10 +412,12 @@ export function AdvisorMembershipModule() {
             ))}
           </div>
         )}
-        <p className="text-[10px] text-muted-foreground text-center mt-3 flex items-center justify-center gap-1.5">
-          <FileText className="size-3" />
-          Invoice PDFs will be available when billing goes live.
-        </p>
+        {payments.length > 0 ? (
+          <p className="text-[10px] text-muted-foreground text-center mt-3 flex items-center justify-center gap-1.5">
+            <FileText className="size-3" />
+            Invoices open in a new tab — use Print to save as PDF.
+          </p>
+        ) : null}
       </DashboardSection>
 
       <MembershipActionSheet
@@ -351,7 +425,8 @@ export function AdvisorMembershipModule() {
         mode={sheet.mode}
         currentPlanId={current.planId}
         targetPlanId={sheet.target}
-        onClose={() => setSheet((s) => ({ ...s, open: false }))}
+        initialCouponCode={sheet.couponCode}
+        onClose={() => setSheet((s) => ({ ...s, open: false, couponCode: undefined }))}
         onSuccess={() => {
           void fetch("/api/advisor/auth/me", { cache: "no-store" })
             .then((res) => (res.ok ? res.json() : null))
@@ -359,20 +434,19 @@ export function AdvisorMembershipModule() {
               if (json?.data) setAdvisor(json.data);
             })
             .catch(() => {});
+          void fetch("/api/advisor/subscription/payments", { cache: "no-store", credentials: "same-origin" })
+            .then(async (res) => {
+              const json = (await res.json()) as {
+                success?: boolean;
+                data?: MembershipPaymentRow[];
+              };
+              if (res.ok && json.success && json.data) setPayments(json.data);
+            })
+            .catch(() => {});
         }}
       />
     </div>
   );
-}
-
-function handleInvoice(invoiceId: string, action: "view" | "download") {
-  // Surfaces inside the workspace via the shared <Toaster /> mounted
-  // in `src/components/providers.tsx`. Using `toast.info` instead of
-  // `window.alert` keeps the visual language consistent with other
-  // billing / lead toasts and avoids a hard-blocking native dialog.
-  toast.info(action === "view" ? `Invoice ${invoiceId} preview` : `Invoice ${invoiceId} download`, {
-    description: "Will be available when online billing is enabled.",
-  });
 }
 
 function StatusBadge({ status }: { status: "active" | "expired" }) {
@@ -524,21 +598,18 @@ function PlanCompareCard({
       <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{plan.tagline}</p>
 
       <ul className="mt-4 space-y-2 flex-1">
-        {MEMBERSHIP_FEATURES.map((f) => {
-          const included = planHasFeature(plan.id, f.id);
-          return (
-            <li key={f.id} className="flex items-start gap-2 text-xs">
-              {included ? (
-                <Check className="size-3.5 shrink-0 text-[oklch(0.82_0.16_162)] mt-0.5" />
-              ) : (
-                <X className="size-3.5 shrink-0 text-white/25 mt-0.5" />
-              )}
-              <span className={included ? "text-foreground/90" : "text-muted-foreground/60"}>
-                {f.label}
-              </span>
-            </li>
-          );
-        })}
+        {marketingFeatureRows(plan.id).map((f) => (
+          <li key={f.label} className="flex items-start gap-2 text-xs">
+            {f.included ? (
+              <Check className="size-3.5 shrink-0 text-[oklch(0.82_0.16_162)] mt-0.5" />
+            ) : (
+              <X className="size-3.5 shrink-0 text-white/25 mt-0.5" />
+            )}
+            <span className={f.included ? "text-foreground/90" : "text-muted-foreground/60"}>
+              {f.label}
+            </span>
+          </li>
+        ))}
       </ul>
 
       {!isCurrent && plan.priceAnnualInr > 0 && (

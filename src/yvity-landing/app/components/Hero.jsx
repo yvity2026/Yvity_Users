@@ -32,7 +32,8 @@ const HERO_PREVIEW_ADVISOR = {
     "Founding Advisor",
     "IRDA Certified",
   ],
-  profileUrl: "/profile",
+  profileUrl: "/krishna-mohan-noti-167ec15f",
+  profileSlug: "krishna-mohan-noti-167ec15f",
   showVerifiedBadge: true,
   showIdentityVerified: true,
 };
@@ -161,11 +162,11 @@ const Hero = ({ advisor = [] }) => {
       className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+0.75rem)] sm:pt-[calc(4rem+0.75rem)] md:pb-10 md:pt-24 lg:pt-[5.375rem] xl:pt-28 ${LANDING_SECTION_ANCHOR}`}
     >
       <div
-        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 lg:grid-cols-12 lg:gap-4 md:gap-10`}
+        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10`}
       >
         {/* Left side Panel */}
         <motion.div
-          className="relative z-10 flex h-full flex-col items-center justify-start gap-5 text-center md:gap-6 lg:col-span-7 lg:mr-8 lg:items-start lg:text-left xl:mr-20"
+          className="relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-5 text-center md:gap-6 lg:col-span-6 lg:items-start lg:text-left xl:col-span-7"
           {...(reducedMotion
             ? {}
             : {
@@ -220,11 +221,11 @@ const Hero = ({ advisor = [] }) => {
             </button>
           </div>
 
-          <span className="flex w-full flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[44px] sm:leading-[1.1] md:text-[64px] md:gap-3 lg:leading-14">
-            <p className="landing-hero-headline-accent w-full text-balance md:whitespace-nowrap">
+          <span className="flex w-full min-w-0 flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[40px] sm:leading-[1.12] md:text-[52px] md:gap-2 lg:text-[56px] lg:leading-[1.1] xl:text-[64px]">
+            <p className="landing-hero-headline-accent w-full text-balance">
               {heroCopy.line1}
             </p>
-            <p className="landing-hero-headline-primary w-full text-balance md:whitespace-nowrap">
+            <p className="landing-hero-headline-primary w-full text-balance">
               {heroCopy.line2}
             </p>
           </span>
@@ -296,7 +297,7 @@ const Hero = ({ advisor = [] }) => {
         {/* </div> */}
         {/* Right side pannel */}
 <motion.div
-    className="p-0 xl:pr-12.5 xl:pl-12.5 flex justify-center items-center mx-auto h-full w-full lg:col-span-5 overflow-visible"
+    className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
     {...(reducedMotion
       ? {}
       : {

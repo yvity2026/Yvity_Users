@@ -1,0 +1,213 @@
+import { PROFILE_THEME_IDS, type ProfileThemeId } from "@/lib/profile-themes";
+import type { Lead } from "@/lib/leads/types";
+import type { TestimonialItem, TestimonialType } from "@/lib/sections/types";
+import { isServiceVerifiedByYvity } from "@/lib/verification/defaults";
+import type { VerificationRecord } from "@/lib/verification/types";
+import type { PlanLimits } from "./plan-limits";
+import { nextUpgradePlan } from "./plan-limits";
+import type { MembershipPlanId } from "./types";
+import { isHostedIntroVideoUrl } from "@/lib/media-urls";
+
+export type PlanLimitCheck = {
+  ok: boolean;
+  reason?: string;
+  upgradePlan?: MembershipPlanId;
+};
+
+export function countCustomerTestimonialsByType(items: TestimonialItem[]): Record<TestimonialType, number> {
+  const customer = items.filter((item) => item.source !== "advisor");
+  return {
+    text: customer.filter((item) => item.type === "text").length,
+    audio: customer.filter((item) => item.type === "audio").length,
+    video: customer.filter((item) => item.type === "video").length,
+  };
+}
+
+export function validateTestimonialCounts(
+  limits: PlanLimits,
+  items: TestimonialItem[],
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  const counts = countCustomerTestimonialsByType(items);
+  for (const type of ["text", "audio", "video"] as const) {
+    const cap = limits.testimonials[type];
+    if (cap === null) continue;
+    if (counts[type] > cap) {
+      const upgrade = nextUpgradePlan(planId);
+      return {
+        ok: false,
+        reason: `Your plan allows up to ${cap} ${type} testimonial${cap === 1 ? "" : "s"}.`,
+        upgradePlan: upgrade ?? undefined,
+      };
+    }
+  }
+  return { ok: true };
+}
+
+export function canAcceptTestimonialType(
+  limits: PlanLimits,
+  items: TestimonialItem[],
+  type: TestimonialType,
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  const cap = limits.testimonials[type];
+  if (cap === null) return { ok: true };
+  const counts = countCustomerTestimonialsByType(items);
+  if (counts[type] >= cap) {
+    const upgrade = nextUpgradePlan(planId);
+    return {
+      ok: false,
+      reason: `This advisor has reached the ${type} testimonial limit (${cap}) on their current plan.`,
+      upgradePlan: upgrade ?? undefined,
+    };
+  }
+  return { ok: true };
+}
+
+export function canAddGalleryPhoto(
+  limits: PlanLimits,
+  currentCount: number,
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  const cap = limits.galleryPhotos;
+  if (cap === null) return { ok: true };
+  if (currentCount >= cap) {
+    return {
+      ok: false,
+      reason: `Your plan allows up to ${cap} gallery photos.`,
+      upgradePlan: nextUpgradePlan(planId) ?? undefined,
+    };
+  }
+  return { ok: true };
+}
+
+export function canAcceptRecommendation(
+  limits: PlanLimits,
+  currentCount: number,
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  const cap = limits.recommendations;
+  if (cap === null) return { ok: true };
+  if (currentCount >= cap) {
+    return {
+      ok: false,
+      reason: `This advisor has reached the recommendation limit (${cap}) on their current plan.`,
+      upgradePlan: nextUpgradePlan(planId) ?? undefined,
+    };
+  }
+  return { ok: true };
+}
+
+export function capCount(count: number, limit: number | null): number {
+  if (limit === null) return count;
+  return Math.min(count, limit);
+}
+
+export function visibleLeads<T extends Lead>(
+  limits: PlanLimits,
+  leads: T[],
+): { visible: T[]; total: number; lockedCount: number; limit: number | null } {
+  const total = leads.length;
+  const limit = limits.leadsVisible;
+  if (limit === null) {
+    return { visible: leads, total, lockedCount: 0, limit: null };
+  }
+  const visible = leads.slice(0, limit);
+  return { visible, total, lockedCount: Math.max(0, total - visible.length), limit };
+}
+
+export function allowedThemeIds(limits: PlanLimits): ProfileThemeId[] {
+  const cap = limits.profileThemes;
+  if (cap === null) return [...PROFILE_THEME_IDS];
+  return PROFILE_THEME_IDS.slice(0, Math.max(1, cap));
+}
+
+export function isThemeAllowed(limits: PlanLimits, themeId: ProfileThemeId): boolean {
+  return allowedThemeIds(limits).includes(themeId);
+}
+
+export function canUseIntroVideo(
+  limits: PlanLimits,
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  if (limits.introVideoEnabled) return { ok: true };
+  return {
+    ok: false,
+    reason: "Intro video is available on Silver and Gold plans.",
+    upgradePlan: "silver",
+  };
+}
+
+export function canUseIntroVideoDuration(
+  limits: PlanLimits,
+  durationSeconds: number,
+  planId: MembershipPlanId,
+): PlanLimitCheck {
+  const enabled = canUseIntroVideo(limits, planId);
+  if (!enabled.ok) return enabled;
+
+  if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+    return { ok: true };
+  }
+  if (durationSeconds <= limits.introVideoMaxSeconds) return { ok: true };
+  return {
+    ok: false,
+    reason: `Your plan allows intro videos up to ${limits.introVideoMaxSeconds} seconds.`,
+    upgradePlan: nextUpgradePlan(planId) ?? undefined,
+  };
+}
+
+export function validateIntroVideoSettings(
+  limits: PlanLimits,
+  planId: MembershipPlanId,
+  introVideo: { url?: string; durationLabel?: string },
+  parseDuration: (label: string | undefined | null) => number | null,
+): PlanLimitCheck {
+  const url = introVideo.url?.trim() ?? "";
+  if (!url) return { ok: true };
+
+  if (!isHostedIntroVideoUrl(url)) {
+    return {
+      ok: false,
+      reason: "Intro video must be uploaded directly — external URLs are not supported.",
+    };
+  }
+
+  const enabled = canUseIntroVideo(limits, planId);
+  if (!enabled.ok) return enabled;
+
+  const durationSeconds = parseDuration(introVideo.durationLabel);
+  if (durationSeconds === null) {
+    return {
+      ok: false,
+      reason: "Please set the video duration (e.g. 0:30) to save an intro video.",
+    };
+  }
+
+  return canUseIntroVideoDuration(limits, durationSeconds, planId);
+}
+
+export function advisorEligibleForSearch(
+  limits: PlanLimits,
+  searchVisibilityEnabled = true,
+): boolean {
+  return limits.searchAppearance && searchVisibilityEnabled;
+}
+
+export function isServiceVerifiedForPlan(
+  limits: PlanLimits,
+  item: { verification?: VerificationRecord },
+  profileApproved?: boolean,
+): boolean {
+  if (!limits.serviceVerification) return false;
+  return isServiceVerifiedByYvity(item, profileApproved);
+}
+
+/** Public profile: cap customer audio/video testimonials while preserving list order. */
+export { filterTestimonialsForPublicDisplay } from "./content-visibility";
+
+export function filterGalleryForPublicDisplay<T>(limits: PlanLimits, items: T[]): T[] {
+  const cap = limits.galleryPhotos;
+  if (cap === null) return items;
+  return items.slice(0, cap);
+}

@@ -5,12 +5,17 @@ import { buildDashboardOverviewModel } from "@/lib/advisor-dashboard/build-model
 import type { DashboardOverviewModel } from "@/lib/advisor-dashboard/types";
 import type { Lead } from "@/lib/leads/types";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideoUrl } from "@/lib/intro-video";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
+import { getAdvisorIntroVideoUrl } from "@/lib/intro-video";
 import { useCareerData } from "@/lib/career-store";
 import { useGalleryData } from "@/lib/gallery-store";
 import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib/sections/stores";
 import { useAuth } from "@/context/AuthUserContext";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
+import { useVerifiedRecommendationCount } from "@/hooks/use-verified-recommendation-count";
+import { useScoreActivity } from "@/hooks/use-score-activity";
 
 export function useAdvisorDashboardModel(): {
   model: DashboardOverviewModel | null;
@@ -26,8 +31,23 @@ export function useAdvisorDashboardModel(): {
   const [leadsLoading, setLeadsLoading] = useState(true);
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { user, advisor } = useAuth();
+  const { limits } = usePlanLimits();
   const profilePhotoUrl = resolveProfilePhotoUrl(user?.selfie_url);
   const underReview = advisor?.account_status === "under_review";
+  const profileApproved = isAdvisorProfileApproved(advisor);
+  const { count: verifiedRecommendationCount, loading: recsLoading } =
+    useVerifiedRecommendationCount();
+  const {
+    decayPenalty,
+    decayActive,
+    graceDaysRemaining,
+    monthlyActivity,
+    profileViews,
+    profileViewsDelta,
+    searchAppearances,
+    searchDelta,
+    loading: activityLoading,
+  } = useScoreActivity();
 
   const loadLeads = () => {
     setLeadsLoading(true);
@@ -52,9 +72,11 @@ export function useAdvisorDashboardModel(): {
     testimonialsLoading ||
     galleryLoading ||
     leadsLoading ||
-    settingsLoading;
+    settingsLoading ||
+    recsLoading ||
+    activityLoading;
 
-  const introVideoUrl = getEffectiveIntroVideoUrl(settings);
+  const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
 
   const model = useMemo(
     () =>
@@ -72,9 +94,23 @@ export function useAdvisorDashboardModel(): {
             introVideoUrl,
             photoUrl: profilePhotoUrl,
             underReview,
+            profileApproved,
+            irdaiCertificateUploaded: hasIrdaiCertificateUploaded(advisor),
             publicProfileActive: settings.publicProfile.profileActive,
             subscriptionPlan: advisor?.subscription_plan,
             approvedAt: advisor?.approved_at,
+            subscriptionStartedAt: advisor?.subscription_started_at,
+            subscriptionExpiresAt: advisor?.subscription_expires_at,
+            verifiedRecommendationCount,
+            accountCreatedAt: user?.created_at ?? null,
+            decayPenalty,
+            decayActive,
+            decayGraceDaysRemaining: graceDaysRemaining,
+            monthlyActivity: monthlyActivity ?? undefined,
+            profileViews,
+            profileViewsDelta,
+            searchAppearances,
+            searchDelta,
           }),
     [
       loading,
@@ -85,13 +121,26 @@ export function useAdvisorDashboardModel(): {
       gallery,
       leads,
       introVideoUrl,
+      limits.introVideoEnabled,
       profilePhotoUrl,
       user?.name,
       advisor?.profile_slug,
       underReview,
+      profileApproved,
+      advisor,
       settings.publicProfile.profileActive,
       advisor?.subscription_plan,
       advisor?.approved_at,
+      verifiedRecommendationCount,
+      user?.created_at,
+      decayPenalty,
+      decayActive,
+      graceDaysRemaining,
+      monthlyActivity,
+      profileViews,
+      profileViewsDelta,
+      searchAppearances,
+      searchDelta,
     ],
   );
 

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { visibleLeads } from "@/lib/advisor-membership/plan-enforcement";
+import { getAdvisorPlanContext } from "@/lib/advisor-membership/plan-enforcement-server";
 import { LEAD_SERVICE_TYPES } from "@/lib/leads/service-types";
 import type { CreateLeadInput, LeadPriority, SelfLeadChannel } from "@/lib/leads/types";
 import { LEAD_PRIORITIES, SELF_LEAD_SOURCES } from "@/lib/leads/config";
@@ -11,19 +13,25 @@ const validPriorities = new Set(LEAD_PRIORITIES.map((p) => p.id));
 
 export async function GET() {
   const user = await requireSession();
-  if (!user) return unauthorized();
+  if (!user?.id) return unauthorized();
 
-  const data = await listLeadsWithSync();
-  return NextResponse.json({
-    data: [...data].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    ),
-  });
+  const data = await listLeadsWithSync(user.id);
+  const sorted = [...data].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
+  const planCtx = await getAdvisorPlanContext(user.id);
+  if (!planCtx) {
+    return NextResponse.json({ data: sorted, meta: { total: sorted.length, visible: sorted.length, lockedCount: 0, limit: null } });
+  }
+
+  const { visible, total, lockedCount, limit } = visibleLeads(planCtx.limits, sorted);
+  return NextResponse.json({ data: visible, meta: { total, visible: visible.length, lockedCount, limit } });
 }
 
 export async function POST(request: Request) {
   const user = await requireSession();
-  if (!user) return unauthorized();
+  if (!user?.id) return unauthorized();
 
   let body: {
     fullName?: string;
@@ -79,7 +87,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const lead = await createLead(input);
+    const lead = await createLead(user.id, input);
     return NextResponse.json({ data: lead });
   } catch (err) {
     console.error("[leads POST]", err);

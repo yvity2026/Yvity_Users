@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { EMPTY_SERVICES } from "@/lib/empty-data";
-import { normalizeServices } from "@/lib/sections/normalize-services";
 import type { ServiceItem } from "@/lib/sections/types";
 import { requireSession, unauthorized } from "@/lib/server/api-auth";
-import { servicesFileForUser } from "@/lib/server/advisor-profile-store";
-import { loadJsonFile, saveJsonFile } from "@/lib/server/json-store";
-import { getSessionUser } from "@/lib/server/session";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
+import { loadServicesForUser, saveServicesForUser } from "@/lib/server/section-persistence";
+import { syncServicesVerificationForApprovedProfile } from "@/lib/server/sync-services-verification";
 
 export async function GET() {
-  const session = await getSessionUser();
-  const filename = session?.id ? servicesFileForUser(session.id) : "services-anonymous.json";
-  const raw = await loadJsonFile<unknown>(filename, EMPTY_SERVICES);
-  const data = normalizeServices(raw);
+  const dataUserId = await resolveAdvisorDataUserId();
+  if (dataUserId) {
+    await syncServicesVerificationForApprovedProfile(dataUserId);
+  }
+  const data = await loadServicesForUser(dataUserId);
   return NextResponse.json({ data });
 }
 
@@ -24,7 +23,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  const filename = servicesFileForUser(session.id);
-  await saveJsonFile(filename, body.data);
-  return NextResponse.json({ ok: true, data: body.data });
+  const normalized = await saveServicesForUser(session.id, body.data);
+  return NextResponse.json({ ok: true, data: normalized });
 }

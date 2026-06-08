@@ -41,6 +41,7 @@ import { sendEmailOtp } from "@/lib/api/auth/sendEmailOtp";
 import { verifyEmailOtp } from "@/lib/api/auth/verifyEmailOtp";
 import { createFreshDeviceToken } from "@/lib/deviceToken";
 import { notifyAuthChanged } from "@/lib/auth-store";
+import { clearStoredReferralCode, readStoredReferralCode } from "@/lib/referral/attribution";
 import { useRegistrationIdentityVerification } from "@/hooks/useRegistrationIdentityVerification";
 import RegistrationIdentityVerification from "@/components/auth/registration/RegistrationIdentityVerification";
 
@@ -116,7 +117,7 @@ const REG_STEP_META = {
   },
 };
 
-const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
+const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = null }) => {
   const [step, setStep] = useState(1);
   const [isSendingPhoneOtp, setIsSendingPhoneOtp] = useState(false);
   const [isResendingPhoneOtp, setIsResendingPhoneOtp] = useState(false);
@@ -339,6 +340,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         ...getValues(),
         selfieUrl: url,
         deviceToken: authDeviceTokenRef.current,
+        referralCode: readStoredReferralCode(),
       });
 
       if (result.error) {
@@ -354,6 +356,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
       }
 
       if (typeof window !== "undefined" && result.userId) {
+        clearStoredReferralCode();
         toast.success("Account created — opening your workspace…");
         notifyAuthChanged();
         onClose?.();
@@ -615,6 +618,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
           YVITY registration — {headerMeta.title}
         </h2>
 
+        {referralCode ? (
+          <div className="mx-4 mb-1 rounded-xl border border-[#F59E0B]/25 bg-[#FFF9F0] px-3 py-2 text-center text-[11px] font-medium text-[#92400E]">
+            Referred by ambassador · code <span className="font-bold">{referralCode}</span>
+          </div>
+        ) : null}
+
         <div
           ref={contentRef}
           className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-4"
@@ -650,10 +659,13 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         id="reg-full-name"
                         icon={User}
                         {...register("fullName")}
-                        placeholder="e.g. Krishna Mohan Noti"
+                        placeholder="Enter name as per your licence certificate"
                         autoComplete="name"
                         error={errors.fullName}
                       />
+                      <p className="mt-1 font-poppins text-[11px] text-[#6B7280]">
+                        Use the exact name printed on your IRDAI licence certificate.
+                      </p>
                       <FieldError message={errors.fullName?.message} />
                     </div>
 

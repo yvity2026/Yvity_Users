@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadLandingStatsFromDb } from "@/lib/server/supabase/platform-supabase";
 
-/** Mock landing stats until YVITY Supabase bridge is connected. */
 export async function GET() {
+  if (useSupabasePersistence()) {
+    try {
+      const data = await loadLandingStatsFromDb();
+      return NextResponse.json({ success: true, data });
+    } catch (error) {
+      console.error("[landing-stats]", error);
+    }
+  }
+
   return NextResponse.json({
     success: true,
     data: {
-      verifiedAdvisors: 8,
-      citiesCovered: 4,
-      verifiedReviews: 11,
+      verifiedAdvisors: 0,
+      citiesCovered: 0,
+      verifiedReviews: 0,
     },
   });
 }

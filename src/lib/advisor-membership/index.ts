@@ -2,6 +2,61 @@ import { advisorMembershipConfig } from "./config";
 
 export { advisorMembershipConfig, daysUntilRenewal } from "./config";
 export { buildMembershipModel } from "./build-model";
+export {
+  addOneYear,
+  resolveCheckoutQuote,
+  resolveCheckoutQuoteForProfile,
+  resolveSubscriptionDates,
+} from "./checkout-pricing";
+export type { CheckoutKind, CheckoutQuote } from "./checkout-pricing";
+export {
+  listActiveTestimonialLimitRows,
+  canAcceptAnyTestimonialType,
+  firstAvailableTestimonialType,
+} from "./testimonial-limit-usage";
+export {
+  calculateSilverToGoldUpgradeQuote,
+  calculateUnusedSilverCredit,
+  formatInr as formatMembershipInr,
+  remainingSubscriptionDays,
+  shouldApplySilverUpgradeCredit,
+} from "./proration";
+export {
+  allPlanComparisonLabels,
+  getPlanMarketing,
+  includedBenefitLabels,
+  marketingFeatureRows,
+  MEMBERSHIP_PLAN_MARKETING,
+  planMarketingIncludes,
+} from "./plan-catalog";
+export {
+  allowedThemeIds,
+  canAcceptRecommendation,
+  canAcceptTestimonialType,
+  canAddGalleryPhoto,
+  canUseIntroVideo,
+  canUseIntroVideoDuration,
+  capCount,
+  countCustomerTestimonialsByType,
+  filterGalleryForPublicDisplay,
+  filterTestimonialsForPublicDisplay,
+  isThemeAllowed,
+  validateIntroVideoSettings,
+  validateTestimonialCounts,
+  visibleLeads,
+  advisorEligibleForSearch,
+} from "./plan-enforcement";
+export {
+  countHeldRecommendations,
+  countHeldTestimonials,
+  countPublishedRecommendations,
+  heldTestimonialsByType,
+  resolveRecommendationPublicVisibility,
+  resolveTestimonialPublicVisibility,
+  upgradePlanForHeldContent,
+  type PublicVisibility,
+} from "./content-visibility";
+export { formatLimit, getPlanLimits, PLAN_LIMITS, resolvePlanLimits } from "./plan-limits";
 export { MEMBERSHIP_FEATURES, MEMBERSHIP_PLANS, planHasFeature, upgradePlanId } from "./plans";
 export type { MembershipModel, MembershipPlanId, MembershipStatus, PaymentRecord } from "./types";
 

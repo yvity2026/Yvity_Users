@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Expand, ImageIcon, Sparkles, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Expand, ImageIcon, Plus, Sparkles, X } from "lucide-react";
 import { SectionCompletionGuidance } from "@/components/advisor/guidance/section-completion-guidance";
-import { Plus } from "lucide-react";
+import { PlanLimitBanner } from "@/components/advisor/membership/plan-limit-banner";
+import { planLimitUsage } from "@/lib/advisor-membership/plan-limit-usage";
+import { nextUpgradePlan } from "@/lib/advisor-membership/plan-limits";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
 import { galleryCategories } from "@/lib/gallery-defaults";
 import type { GalleryCategory, GalleryItem, GalleryLayout } from "@/lib/gallery-types";
 import { useGalleryData, uid } from "@/lib/gallery-store";
@@ -21,6 +24,7 @@ import { SectionEmptyCard } from "@/components/ui/section-empty-card";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { MobilePreviewExpand } from "@/components/shared/mobile-preview-expand";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const categoryAccent: Record<GalleryCategory, string> = {
   milestones: "from-[oklch(0.82_0.13_205)] to-primary",
@@ -297,6 +301,7 @@ function CategoryFilterBar({
   count,
   editable,
   onAdd,
+  addDisabled,
   embedded,
 }: {
   active: GalleryCategory | "all";
@@ -304,6 +309,7 @@ function CategoryFilterBar({
   count: number;
   editable?: boolean;
   onAdd?: () => void;
+  addDisabled?: boolean;
   /** When `true` the bar does NOT pin — the workspace already has a
    *  sticky workspace header at top-0 and a second sticky strip would
    *  cover the breadcrumb. */
@@ -346,6 +352,7 @@ function CategoryFilterBar({
             <Button
               onClick={onAdd}
               size="sm"
+              disabled={addDisabled}
               className="gap-1.5 rounded-xl shadow-md shadow-primary/30"
             >
               <Plus className="size-4" /> Add photo
@@ -375,6 +382,12 @@ export function GalleryShowcase({
   embedded?: boolean;
 }) {
   const [items, setItems, loading] = useGalleryData();
+  const { planId, galleryCap, canAddGalleryItem } = usePlanLimits();
+  const galleryUsage = useMemo(
+    () => planLimitUsage(items.length, galleryCap),
+    [items.length, galleryCap],
+  );
+  const galleryAtLimit = !canAddGalleryItem(items.length).ok;
   const [activeCategory, setActiveCategory] = useState<GalleryCategory | "all">("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -419,6 +432,16 @@ export function GalleryShowcase({
   );
 
   const addPhoto = useCallback(() => {
+    const check = canAddGalleryItem(items.length);
+    if (!check.ok) {
+      toast.error(check.reason ?? "Gallery limit reached", {
+        description: check.upgradePlan
+          ? `Upgrade to ${check.upgradePlan === "gold" ? "Gold" : "Silver"} for more photos.`
+          : undefined,
+      });
+      return;
+    }
+
     const newItem: GalleryItem = {
       id: uid("gal"),
       title: "New moment",
@@ -435,7 +458,7 @@ export function GalleryShowcase({
       activeCategory === "all" ? next : next.filter((i) => i.category === activeCategory)
     ).findIndex((i) => i.id === newItem.id);
     if (idx >= 0) setLightboxIndex(idx);
-  }, [activeCategory, items, persistItems]);
+  }, [activeCategory, canAddGalleryItem, items, persistItems]);
 
   const openLightbox = useCallback(
     (id: string) => {
@@ -491,6 +514,15 @@ export function GalleryShowcase({
       >
         {editable ? <SectionCompletionGuidance healthId="gallery" icon={ImageIcon} /> : null}
 
+        {editable ? (
+          <PlanLimitBanner
+            usage={galleryUsage}
+            resourceLabel="gallery photos"
+            upgradePlan={nextUpgradePlan(planId)}
+            className="mb-4"
+          />
+        ) : null}
+
         <GalleryBanner items={items} className="mb-6 sm:mb-8" />
         {embedded && editable && (
           <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
@@ -508,6 +540,7 @@ export function GalleryShowcase({
           count={filtered.length}
           editable={editable}
           onAdd={editable ? addPhoto : undefined}
+          addDisabled={galleryAtLimit}
           embedded={embedded}
         />
 

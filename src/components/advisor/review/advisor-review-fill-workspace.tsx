@@ -19,7 +19,8 @@ import { AchievementsShowcase } from "@/components/sections/achievements-showcas
 import { ServicesShowcase } from "@/components/sections/services-showcase";
 import { TestimonialsShowcase } from "@/components/sections/testimonials-showcase";
 import { useCareerData } from "@/lib/career-store";
-import { getEffectiveIntroVideoUrl } from "@/lib/intro-video";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
+import { getAdvisorIntroVideoUrl } from "@/lib/intro-video";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { buildProfileHealth, profileCompletionPercent } from "@/lib/advisor-dashboard/build-model";
 import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib/sections/stores";
@@ -41,21 +42,23 @@ export function AdvisorReviewFillWorkspace({
   const [testimonials, , testimonialsLoading] = useTestimonialsData();
   const [gallery, , galleryLoading] = useGalleryData();
   const { settings } = useAdvisorSettings();
+  const { limits, introVideoEnabled } = usePlanLimits();
   const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
 
-  const introVideoUrl = getEffectiveIntroVideoUrl(settings);
+  const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
 
   const health = useMemo(
     () =>
       buildProfileHealth({
         introVideoUrl,
+        introVideoEnabled,
         career,
         services,
         achievements,
         testimonials,
         gallery,
       }),
-    [introVideoUrl, career, services, achievements, testimonials, gallery],
+    [introVideoUrl, introVideoEnabled, career, services, achievements, testimonials, gallery],
   );
 
   const completion = profileCompletionPercent(health);
@@ -169,10 +172,15 @@ export function AdvisorReviewFillWorkspace({
             <GalleryShowcase editable embedded />
           </ReviewWorkspaceSection>
 
+          {introVideoEnabled ? (
           <ReviewWorkspaceSection
             id="review-section-intro-video"
             title="Introduction video"
-            subtitle="A short intro video helps prospects connect with you before the first call."
+            subtitle={
+              limits.introVideoHeroPlacement
+                ? "Gold profiles show your intro prominently in the hero — up to 2 minutes."
+                : "Silver profiles can add a short intro (up to 30 seconds) on the public profile."
+            }
             icon={Video}
             status={introComplete ? "complete" : "empty"}
             complete={introComplete}
@@ -186,8 +194,9 @@ export function AdvisorReviewFillWorkspace({
                 <Video className="mx-auto size-10 text-muted-foreground" aria-hidden />
                 <p className="mt-3 text-base font-semibold">No intro video yet</p>
                 <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-                  Record or upload a 30–60 second welcome clip. It appears at the top of your public
-                  profile.
+                  {limits.introVideoHeroPlacement
+                    ? "Upload up to a 2-minute welcome clip — it appears prominently on your public profile."
+                    : "Record or upload a short welcome clip (up to 30 seconds) for your public profile."}
                 </p>
                 <button
                   type="button"
@@ -199,13 +208,16 @@ export function AdvisorReviewFillWorkspace({
               </div>
             )}
           </ReviewWorkspaceSection>
+          ) : null}
         </div>
       )}
 
-      <IntroVideoUploadModal
-        open={introVideoModalOpen}
-        onClose={() => setIntroVideoModalOpen(false)}
-      />
+      {introVideoEnabled ? (
+        <IntroVideoUploadModal
+          open={introVideoModalOpen}
+          onClose={() => setIntroVideoModalOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

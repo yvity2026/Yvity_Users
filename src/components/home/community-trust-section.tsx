@@ -3,12 +3,13 @@
 import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Eye, MessageSquareQuote, Share2, Star } from "lucide-react";
-import {
-  getCommunityTrustStats,
-  type CommunityTrustStat,
-  type CommunityTrustStatId,
-} from "@/lib/home/community-trust-stats";
-import { useTestimonialsData } from "@/lib/sections/stores";
+import { getCommunityTrustStats } from "@/lib/home/community-trust-stats";
+import type { CommunityTrustStat, CommunityTrustStatId } from "@/lib/home/community-trust-stats";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
+import { useAuth } from "@/context/AuthUserContext";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { StatCard, type StatCardAccent } from "@/components/ui/stat-card";
 
 /**
@@ -38,9 +39,7 @@ function CommunityTrustStatCard({
   index: number;
 }) {
   const meta = STAT_META[stat.id];
-  // Only the testimonials count is loaded async — show the skeleton
-  // there. Everything else is derived from a deterministic seed.
-  const isLoading = loading && stat.id === "testimonials";
+  const isLoading = loading && (stat.id === "testimonials" || stat.id === "recommendations");
 
   return (
     <li>
@@ -58,8 +57,32 @@ function CommunityTrustStatCard({
 }
 
 export function CommunityTrustSection() {
-  const [testimonials, , loading] = useTestimonialsData();
-  const stats = useMemo(() => getCommunityTrustStats(testimonials.length), [testimonials.length]);
+  const {
+    recommendationCount,
+    testimonialCount,
+    profileViews,
+    profileSharesByOthers,
+    loading: statsLoading,
+  } = usePublicProfileStats();
+  const { advisor } = useAuth();
+  const publicView = usePublicProfileView();
+  const profileApproved = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
+
+  const stats = useMemo(
+    () =>
+      getCommunityTrustStats({
+        testimonialCount,
+        recommendationCount,
+        profileViews,
+        profileSharesByOthers,
+        profileApproved,
+      }),
+    [testimonialCount, recommendationCount, profileViews, profileSharesByOthers, profileApproved],
+  );
+
+  const loading = statsLoading;
 
   return (
     <section className="w-full" aria-labelledby="community-trust-heading">

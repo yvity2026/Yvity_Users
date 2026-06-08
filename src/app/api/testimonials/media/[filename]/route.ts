@@ -1,7 +1,12 @@
-import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { testimonialMediaPath } from "@/lib/server/testimonial-uploads";
+import {
+  testimonialMediaPath,
+  testimonialStoragePath,
+} from "@/lib/server/testimonial-uploads";
+import { readLocalOrStorageFile } from "@/lib/server/storage/serve-local-or-storage";
+import { STORAGE_BUCKETS } from "@/lib/server/supabase/object-storage";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 const mimeByExt: Record<string, string> = {
   ".mp3": "audio/mpeg",
@@ -17,21 +22,27 @@ const mimeByExt: Record<string, string> = {
 export async function GET(_request: Request, context: { params: Promise<{ filename: string }> }) {
   const { filename } = await context.params;
   const filepath = testimonialMediaPath(filename);
-  if (!filepath) {
+  if (!filepath && filename.includes("..")) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  try {
-    const buffer = await fs.readFile(filepath);
-    const ext = path.extname(filename).toLowerCase();
-    const contentType = mimeByExt[ext] ?? "application/octet-stream";
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
-  } catch {
+  const advisorUserId = (await resolveAdvisorDataUserId()) ?? "anonymous";
+  const buffer = await readLocalOrStorageFile({
+    localPath: filepath,
+    bucket: STORAGE_BUCKETS.testimonials,
+    objectPath: testimonialStoragePath(advisorUserId, filename),
+  });
+
+  if (!buffer) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  const ext = path.extname(filename).toLowerCase();
+  const contentType = mimeByExt[ext] ?? "application/octet-stream";
+  return new NextResponse(new Uint8Array(buffer), {
+    headers: {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 }

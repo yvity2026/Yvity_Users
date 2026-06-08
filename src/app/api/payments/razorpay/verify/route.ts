@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { redeemCoupon } from "@/lib/server/coupons-store";
 import { markPaymentPaid } from "@/lib/server/payment-store";
+import { resolveRegisteredUser } from "@/lib/server/profile";
 import { verifyRazorpayPaymentSignature, isRazorpayConfigured } from "@/lib/server/razorpay";
+import { qualifyReferralOnPayment } from "@/lib/server/referrals-store";
 import { getSessionUser } from "@/lib/server/session";
 
 export const runtime = "nodejs";
@@ -51,6 +54,24 @@ export async function POST(request: Request) {
 
     if (!record || record.user_id !== session.id) {
       return NextResponse.json({ success: false, message: "Payment record not found" }, { status: 404 });
+    }
+
+    if (record.coupon_code) {
+      const registered = resolveRegisteredUser(session);
+      await redeemCoupon(record.coupon_code, {
+        userId: session.id,
+        userEmail: registered?.email ?? null,
+        paymentId,
+      });
+    }
+
+    try {
+      await qualifyReferralOnPayment({
+        userId: session.id,
+        payment: record,
+      });
+    } catch (error) {
+      console.error("[razorpay/verify] referral qualification failed:", error);
     }
 
     return NextResponse.json({

@@ -1,34 +1,17 @@
-/**
- * URL helpers for the advisor's public profile — single source of truth.
- *
- * Every "Share Profile" / "View Public Profile" / "Preview profile" entry
- * point across the app routes through these helpers so the link:
- *
- *   1. Always lands on the **public profile home** (`/profile`) — the
- *      canonical visitor page (marketing landing is `/`).
- *
- *   2. Always carries `?preview=public` so the embedded chrome shows
- *      the visitor view (Login CTA) instead of the advisor's post-login
- *      chrome (Dashboard + Logout) — even when the advisor is still
- *      authenticated via cookie in the same browser. Honoured by
- *      `useIsVisitorPreview()` inside `SiteChrome` and `Navbar`.
- */
+import { buildPublicProfilePath, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
+
+export function canAdvisorSharePublicProfile(
+  advisor?: { account_status?: string; approved_at?: string | null } | null,
+): boolean {
+  return advisor?.account_status === "active" && Boolean(advisor?.approved_at?.trim());
+}
 
 /**
- * Canonical relative path of the public profile. We always open the
- * homepage because that's the page a visitor lands on before login.
- */
-const PUBLIC_PROFILE_PATH = "/profile";
-
-/**
- * Append `preview=public` to a path so the embedded site renders its
- * **visitor** chrome even when the viewer is authenticated.
- *
- * Preserves any existing query string and is idempotent (calling twice
- * yields the same URL).
+ * Append `preview=public` so embedded chrome shows visitor UI while the
+ * advisor is still logged in.
  */
 export function withVisitorPreview(path: string): string {
-  if (!path) return `${PUBLIC_PROFILE_PATH}?preview=public`;
+  if (!path) return "/profile?preview=public";
 
   const [base, search = ""] = path.split("?");
   const params = new URLSearchParams(search);
@@ -36,21 +19,77 @@ export function withVisitorPreview(path: string): string {
   return `${base}?${params.toString()}`;
 }
 
-/**
- * Canonical relative path for "Share Profile" / "View Public Profile" /
- * "Preview profile" actions: the public homepage with the visitor flag.
- */
-export function getPublicProfileSharePath(): string {
-  return withVisitorPreview(PUBLIC_PROFILE_PATH);
+export function buildAdvisorPublicProfilePath(profileSlug?: string | null): string {
+  const segment = toPublicProfileSlugSegment(profileSlug ?? "");
+  return segment ? buildPublicProfilePath(segment) : "/profile";
+}
+
+/** Dashboard iframe / preview tab — always allowed before approval. */
+export function getPublicProfilePreviewPath(profileSlug?: string | null): string {
+  return withVisitorPreview(buildAdvisorPublicProfilePath(profileSlug));
+}
+
+/** Live shareable URL — only valid once admin has approved the profile. */
+export function getPublicProfileLivePath(profileSlug?: string | null): string {
+  return buildAdvisorPublicProfilePath(profileSlug);
 }
 
 /**
- * Absolute URL variant — useful for native Share API and clipboard copies.
- * Safe to call only on the client (inside event handlers / effects).
- * Falls back to the relative path during SSR.
+ * @deprecated Use getPublicProfilePreviewPath(slug) or getPublicProfileLivePath(slug).
  */
-export function getPublicProfileShareUrl(): string {
-  const path = getPublicProfileSharePath();
+export function getPublicProfileSharePath(profileSlug?: string | null): string {
+  return getPublicProfilePreviewPath(profileSlug);
+}
+
+export function getPublicProfileShareUrl(profileSlug?: string | null, live = false): string {
+  const path = live
+    ? getPublicProfileLivePath(profileSlug)
+    : getPublicProfilePreviewPath(profileSlug);
   if (typeof window === "undefined") return path;
   return new URL(path, window.location.origin).toString();
+}
+
+export function getPublicProfilePreviewUrl(profileSlug?: string | null): string {
+  const path = getPublicProfilePreviewPath(profileSlug);
+  if (typeof window === "undefined") return path;
+  return new URL(path, window.location.origin).toString();
+}
+
+export function getPublicProfileLiveUrl(profileSlug?: string | null): string {
+  return getPublicProfileShareUrl(profileSlug, true);
+}
+
+type AdvisorProfileLinkSource = {
+  profileUrl?: string | null;
+  profile_slug?: string | null;
+  profileSlug?: string | null;
+  slug?: string | null;
+};
+
+/**
+ * Canonical live public profile path for directory cards and CTAs —
+ * same URL advisors share from the workspace (`/{profile-slug}`).
+ */
+export function resolvePublicAdvisorProfileUrl(
+  advisor?: AdvisorProfileLinkSource | null,
+): string {
+  const direct = advisor?.profileUrl?.trim();
+  if (direct && direct !== "/profile") {
+    if (direct.startsWith("http://") || direct.startsWith("https://")) {
+      try {
+        return new URL(direct).pathname || "/profile";
+      } catch {
+        return direct.split("?")[0];
+      }
+    }
+    return direct.split("?")[0];
+  }
+
+  const slug =
+    advisor?.profile_slug?.trim() ||
+    advisor?.profileSlug?.trim() ||
+    advisor?.slug?.trim() ||
+    "";
+
+  return getPublicProfileLivePath(slug);
 }

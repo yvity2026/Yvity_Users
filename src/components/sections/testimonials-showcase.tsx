@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MessageSquareQuote } from "lucide-react";
 import { SectionCompletionGuidance } from "@/components/advisor/guidance/section-completion-guidance";
+import { HeldContentUpgradeBanner } from "@/components/advisor/membership/held-content-upgrade-banner";
 import { AdvisorReplyModal } from "@/components/testimonials/advisor-reply-modal";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
@@ -17,6 +18,9 @@ import { MobilePreviewExpand } from "@/components/shared/mobile-preview-expand";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionEmptyCard } from "@/components/ui/section-empty-card";
+import { useRegisteredTestimonialServices } from "@/hooks/use-registered-testimonial-services";
+import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { useTestimonialVisibility } from "@/hooks/use-content-visibility";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useTestimonialsData } from "@/lib/sections/stores";
 import type { TestimonialItem } from "@/lib/sections/types";
@@ -30,6 +34,9 @@ export function TestimonialsShowcase({
   embedded?: boolean;
 }) {
   const { settings } = useAdvisorSettings();
+  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
+  const canAcceptPublicTestimonials =
+    !isWorkspacePreview && !embedded && settings.leads.testimonialRequests;
   const [items, setItems, loading] = useTestimonialsData();
   const [optimisticItems, setOptimisticItems] = useState<TestimonialItem[]>([]);
   const [typeFilter, setTypeFilter] = useState<TestimonialTypeFilter>("all");
@@ -41,12 +48,15 @@ export function TestimonialsShowcase({
   const [pendingDeleteReply, setPendingDeleteReply] = useState<TestimonialItem | null>(null);
   const { openGiveTestimonial, openRequestTestimonial, registerOnPublished } =
     useTestimonialSubmit();
+  const { filterOptions: serviceFilterOptions } = useRegisteredTestimonialServices();
 
   const displayItems = useMemo(() => {
     const ids = new Set(items.map((i) => i.id));
     const extra = optimisticItems.filter((i) => !ids.has(i.id));
     return [...extra, ...items];
   }, [items, optimisticItems]);
+
+  const { visibilityFor, heldCount, heldByType, upgradePlan } = useTestimonialVisibility(displayItems);
 
   const patchItem = useCallback(
     (updated: TestimonialItem) => {
@@ -74,6 +84,12 @@ export function TestimonialsShowcase({
       return next.length === prev.length ? prev : next;
     });
   }, [items]);
+
+  useEffect(() => {
+    if (serviceFilter === "all") return;
+    const allowed = serviceFilterOptions.some((opt) => opt.value === serviceFilter);
+    if (!allowed) setServiceFilter("all");
+  }, [serviceFilter, serviceFilterOptions]);
 
   const filtered = useMemo(() => {
     return displayItems.filter((item) => {
@@ -129,6 +145,15 @@ export function TestimonialsShowcase({
           <SectionCompletionGuidance healthId="testimonials" icon={MessageSquareQuote} />
         ) : null}
 
+        {editable ? (
+          <HeldContentUpgradeBanner
+            heldTestimonialCount={heldCount}
+            heldByTestimonialType={heldByType}
+            upgradePlan={upgradePlan}
+            className="mb-4"
+          />
+        ) : null}
+
         {embedded && editable && (
           <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
             Manage section · testimonials are read-only · reply from each card
@@ -138,17 +163,18 @@ export function TestimonialsShowcase({
         <TestimonialsBanner items={displayItems} className="mb-8 sm:mb-10" />
 
         {displayItems.length > 0 ? (
-        <TestimonialsFilters
-          typeFilter={typeFilter}
-          serviceFilter={serviceFilter}
-          onTypeChange={setTypeFilter}
-          onServiceChange={setServiceFilter}
-          items={displayItems}
-          showGiveTestimonial={!embedded && settings.leads.testimonialRequests}
-          showRequestTestimonial={embedded && editable && settings.leads.recommendationRequests}
-          onGiveTestimonial={openGiveTestimonial}
-          onRequestTestimonial={openRequestTestimonial}
-        />
+          <TestimonialsFilters
+            typeFilter={typeFilter}
+            serviceFilter={serviceFilter}
+            onTypeChange={setTypeFilter}
+            onServiceChange={setServiceFilter}
+            items={displayItems}
+            serviceOptions={serviceFilterOptions}
+            showGiveTestimonial={canAcceptPublicTestimonials}
+            showRequestTestimonial={embedded && editable && settings.leads.recommendationRequests}
+            onGiveTestimonial={canAcceptPublicTestimonials ? openGiveTestimonial : undefined}
+            onRequestTestimonial={openRequestTestimonial}
+          />
         ) : null}
 
         {displayItems.length === 0 && editable ? (
@@ -175,6 +201,17 @@ export function TestimonialsShowcase({
             icon={MessageSquareQuote}
             title="No testimonials yet"
             description="Client reviews will appear here once they are shared on this profile."
+            action={
+              canAcceptPublicTestimonials ? (
+                <button
+                  type="button"
+                  onClick={openGiveTestimonial}
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-md hover:opacity-95 active:scale-[0.98] transition"
+                >
+                  Give Testimonial
+                </button>
+              ) : null
+            }
             className="mb-8"
           />
         ) : filtered.length === 0 ? (
@@ -192,6 +229,7 @@ export function TestimonialsShowcase({
                   item={item}
                   index={i}
                   manageReplies
+                  publicVisibility={visibilityFor(item.id)}
                   onReply={() => openReply(item, "create")}
                   onEditReply={() => openReply(item, "edit")}
                   onDeleteReply={() => setPendingDeleteReply(item)}

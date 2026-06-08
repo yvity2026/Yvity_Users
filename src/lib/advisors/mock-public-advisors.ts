@@ -9,7 +9,9 @@ export type PublicAdvisorCard = {
   showVerifiedBadge: boolean;
   score: number;
   profileUrl: string;
+  profileSlug?: string;
   serviceTypes: string[];
+  achievementTags: string[];
   companies: string[];
   subscription_plan: string;
   account_status: string;
@@ -20,6 +22,7 @@ export type PublicAdvisorCard = {
   avgRating: string;
   recs: string;
   clients: string;
+  clientsLabel?: string;
 };
 
 /** No seeded advisors — landing/explore use Supabase or an empty state. */

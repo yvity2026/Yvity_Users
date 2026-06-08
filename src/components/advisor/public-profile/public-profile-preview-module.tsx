@@ -15,22 +15,10 @@ import {
   Smartphone,
 } from "lucide-react";
 import { FacebookIcon, LinkedInIcon, WhatsAppIcon, XIcon } from "@/components/icons/brand-icons";
-import { advisorProfile } from "@/lib/advisor-profile";
-import { getPublicProfileSharePath, getPublicProfileShareUrl } from "@/lib/public-profile-url";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
+import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 import { cn } from "@/lib/utils";
-
-/**
- * Path the iframe loads and the URL we share externally — both routed
- * through `getPublicProfileSharePath()` so behaviour stays consistent
- * with every other "Share Profile" entry point in the app:
- *
- *   - Always lands on the public homepage (`/`).
- *   - Always carries `?preview=public` so the embedded chrome renders
- *     the visitor view (Login CTA) instead of the post-login chrome
- *     (Dashboard + Logout) — even when the advisor is still
- *     authenticated via cookie. Honoured by `useIsVisitorPreview()`.
- */
-const PUBLIC_PROFILE_PREVIEW_PATH = getPublicProfileSharePath();
 
 export type PublicProfileViewMode = "mobile" | "desktop";
 
@@ -62,25 +50,36 @@ export function PublicProfilePreviewModule({
 }: PublicProfilePreviewModuleProps) {
   // Reload counter — incrementing this remounts the iframe so the
   // advisor can refresh the preview after publishing changes.
+  const { previewPath, previewUrl, liveUrl, canShare } = usePublicProfileUrls();
   const [reloadKey, setReloadKey] = useState(0);
-
-  // Absolute URL is only available client-side. Falls back to the
-  // relative path until the component mounts.
-  const [absoluteUrl, setAbsoluteUrl] = useState<string>(PUBLIC_PROFILE_PREVIEW_PATH);
+  const [absoluteUrl, setAbsoluteUrl] = useState<string>(previewPath);
 
   useEffect(() => {
-    setAbsoluteUrl(getPublicProfileShareUrl());
-  }, []);
+    setAbsoluteUrl(canShare ? liveUrl : previewUrl);
+  }, [canShare, liveUrl, previewUrl]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
   return (
     <div className="space-y-3 sm:space-y-4">
+      {!canShare ? (
+        <p className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+          Preview mode — your profile link goes live after admin approval. You can explore the layout
+          below; sharing unlocks once you are approved.
+        </p>
+      ) : null}
       {/* ─── Top bar — view toggle + (desktop) compact share CTA ─── */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <ViewModeToggle value={viewMode} onChange={onViewModeChange} />
 
-        {viewMode === "desktop" && <DesktopShareCtaBar url={absoluteUrl} onReload={reload} />}
+        {viewMode === "desktop" && (
+          <DesktopShareCtaBar
+            url={absoluteUrl}
+            onReload={reload}
+            canShare={canShare}
+            previewUrl={previewUrl}
+          />
+        )}
       </div>
 
       {/* ─── Body — layout depends on the active view ─── */}
@@ -95,16 +94,23 @@ export function PublicProfilePreviewModule({
             reloadKey={reloadKey}
             onReload={reload}
             absoluteUrl={absoluteUrl}
+            previewPath={previewPath}
             showChrome
             compactEmbed={compactEmbed}
           />
-          <SharePanel url={absoluteUrl} compactEmbed={compactEmbed} />
+          <SharePanel
+            url={absoluteUrl}
+            compactEmbed={compactEmbed}
+            canShare={canShare}
+            previewUrl={previewUrl}
+          />
         </div>
       ) : (
         <PreviewPane
           reloadKey={reloadKey}
           onReload={reload}
           absoluteUrl={absoluteUrl}
+          previewPath={previewPath}
           showChrome={false}
           tall
           compactEmbed={compactEmbed}
@@ -191,6 +197,7 @@ function PreviewPane({
   reloadKey,
   onReload,
   absoluteUrl,
+  previewPath,
   showChrome,
   tall = false,
   compactEmbed = false,
@@ -198,6 +205,7 @@ function PreviewPane({
   reloadKey: number;
   onReload: () => void;
   absoluteUrl: string;
+  previewPath: string;
   showChrome: boolean;
   tall?: boolean;
   compactEmbed?: boolean;
@@ -255,7 +263,7 @@ function PreviewPane({
       <div className="relative w-full">
         <iframe
           key={reloadKey}
-          src={PUBLIC_PROFILE_PREVIEW_PATH}
+          src={previewPath}
           title="Public profile preview"
           onLoad={() => setLoading(false)}
           className={cn(
@@ -290,34 +298,54 @@ function PreviewPane({
 
 // ─── Desktop view — compact horizontal share CTA bar ────────────────
 
-function DesktopShareCtaBar({ url, onReload }: { url: string; onReload: () => void }) {
+function DesktopShareCtaBar({
+  url,
+  onReload,
+  canShare,
+  previewUrl,
+}: {
+  url: string;
+  onReload: () => void;
+  canShare: boolean;
+  previewUrl: string;
+}) {
+  const display = useAdvisorDisplayProfile();
+  const { share } = useShareProfileLink();
   const [copied, setCopied] = useState(false);
-  const channels = useShareChannels(url);
+  const channels = useShareChannels(canShare ? url : previewUrl);
   const canNativeShare =
     typeof navigator !== "undefined" && typeof (navigator as Navigator).share === "function";
 
   const copyLink = useCallback(async () => {
+    if (!canShare) {
+      await share();
+      return;
+    }
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      // ignored — older browsers
+      // ignored
     }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
-  }, [url]);
+  }, [canShare, share, url]);
 
   const nativeShare = useCallback(async () => {
+    if (!canShare) {
+      await share();
+      return;
+    }
     if (!canNativeShare) return;
     try {
       await (navigator as Navigator).share({
-        title: `${advisorProfile.name} — YVITY`,
-        text: `${advisorProfile.title}. ${advisorProfile.ctaDescription}`,
+        title: `${display.name} — YVITY`,
+        text: `${display.title}. ${display.ctaDescription}`,
         url,
       });
     } catch {
       // user dismissed
     }
-  }, [canNativeShare, url]);
+  }, [canShare, canNativeShare, display, share, url]);
 
   return (
     <div className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
@@ -339,7 +367,7 @@ function DesktopShareCtaBar({ url, onReload }: { url: string; onReload: () => vo
         ) : (
           <Copy className="size-3.5" aria-hidden />
         )}
-        {copied ? "Link copied" : "Copy link"}
+        {copied ? "Link copied" : canShare ? "Copy link" : "Share locked"}
       </button>
 
       {canNativeShare && (
@@ -400,13 +428,29 @@ function DesktopShareCtaBar({ url, onReload }: { url: string; onReload: () => vo
 
 // ─── Mobile view — full share panel on the right ────────────────────
 
-function SharePanel({ url, compactEmbed: _compactEmbed = false }: { url: string; compactEmbed?: boolean }) {
+function SharePanel({
+  url,
+  compactEmbed: _compactEmbed = false,
+  canShare,
+  previewUrl,
+}: {
+  url: string;
+  compactEmbed?: boolean;
+  canShare: boolean;
+  previewUrl: string;
+}) {
+  const display = useAdvisorDisplayProfile();
+  const { share } = useShareProfileLink();
   const [copied, setCopied] = useState(false);
-  const channels = useShareChannels(url);
+  const channels = useShareChannels(canShare ? url : previewUrl);
   const canNativeShare =
     typeof navigator !== "undefined" && typeof (navigator as Navigator).share === "function";
 
   const copyLink = useCallback(async () => {
+    if (!canShare) {
+      await share();
+      return;
+    }
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -425,20 +469,24 @@ function SharePanel({ url, compactEmbed: _compactEmbed = false }: { url: string;
     }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
-  }, [url]);
+  }, [canShare, share, url]);
 
   const nativeShare = useCallback(async () => {
+    if (!canShare) {
+      await share();
+      return;
+    }
     if (!canNativeShare) return;
     try {
       await (navigator as Navigator).share({
-        title: `${advisorProfile.name} — YVITY`,
-        text: `${advisorProfile.title}. ${advisorProfile.ctaDescription}`,
+        title: `${display.name} — YVITY`,
+        text: `${display.title}. ${display.ctaDescription}`,
         url,
       });
     } catch {
       // user dismissed
     }
-  }, [canNativeShare, url]);
+  }, [canShare, canNativeShare, display, share, url]);
 
   return (
     <aside
@@ -455,7 +503,9 @@ function SharePanel({ url, compactEmbed: _compactEmbed = false }: { url: string;
         </p>
         <h2 className="mt-1 text-base sm:text-lg font-semibold tracking-tight">Spread the word</h2>
         <p className="mt-0.5 text-[12px] text-muted-foreground">
-          Copy the link or share directly to your favourite channels.
+          {canShare
+            ? "Copy the link or share directly to your favourite channels."
+            : "Sharing is locked until YVITY approves your profile."}
         </p>
       </header>
 
@@ -495,7 +545,7 @@ function SharePanel({ url, compactEmbed: _compactEmbed = false }: { url: string;
             ) : (
               <Copy className="size-3.5" aria-hidden />
             )}
-            {copied ? "Copied" : "Copy"}
+            {copied ? "Copied" : canShare ? "Copy" : "Locked"}
           </button>
         </div>
       </div>
@@ -553,7 +603,7 @@ function SharePanel({ url, compactEmbed: _compactEmbed = false }: { url: string;
       </div>
 
       <a
-        href={PUBLIC_PROFILE_PREVIEW_PATH}
+        href={previewUrl}
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
@@ -582,8 +632,9 @@ type ShareChannelDef = {
 };
 
 function useShareChannels(url: string): ShareChannelDef[] {
+  const display = useAdvisorDisplayProfile();
   return useMemo(() => {
-    const shareText = `Check out my profile on YVITY — ${advisorProfile.title}. ${url}`;
+    const shareText = `Check out my profile on YVITY — ${display.title}. ${url}`;
     const encShare = encodeURIComponent(shareText);
     const encUrl = encodeURIComponent(url);
     const encMsgOnly = encodeURIComponent(
@@ -627,7 +678,7 @@ function useShareChannels(url: string): ShareChannelDef[] {
         tone: "bg-[oklch(0.85_0.16_78/0.12)] text-[oklch(0.85_0.16_78)] hover:bg-[oklch(0.85_0.16_78/0.2)]",
       },
     ];
-  }, [url]);
+  }, [display.title, url]);
 }
 
 // Brand icons (WhatsApp, X, Facebook, LinkedIn) are imported from

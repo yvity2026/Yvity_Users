@@ -1,3 +1,5 @@
+import type { ProfileHeroStat } from "@/lib/advisor/profile-hero-stat";
+import type { ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
 import type { ServiceCategory } from "@/lib/sections/types";
 import type { DashboardAdvisor, DashboardUser } from "@/context/AuthUserContext";
 
@@ -11,7 +13,7 @@ export const ADVISOR_PROFILE_LABELS = {
     "Share how you help clients — your services and contact details appear here once you fill your profile.",
   consultationHref: "/login",
   home: {
-    heroBio: "",
+    heroBio: "" as string,
     headline: "How Can I Help?",
     introVideoLabel: "Intro video",
     introVideoDuration: "",
@@ -21,6 +23,11 @@ export const ADVISOR_PROFILE_LABELS = {
     heroBadges: [] as { label: string; caption: string; tone: "amber" | "cyan" | "emerald" }[],
     serviceChips: [] as { category: ServiceCategory; label: string; href: string }[],
   },
+  defaultHighlights: [
+    { label: "Verified credentials" },
+    { label: "Flexible consultation" },
+    { label: "Direct advisor contact" },
+  ],
 } as const;
 
 export type AdvisorDisplayProfile = {
@@ -33,7 +40,10 @@ export type AdvisorDisplayProfile = {
   journeyDescription: string;
   ctaDescription: string;
   rating: number | null;
+  /** @deprecated Use profileHeroStat.value — kept for older call sites */
   clientsCount: string;
+  profileHeroStat: ProfileHeroStat;
+  profileCapacityId: ServiceCapacityId;
   phone: string;
   email: string;
   location: string;
@@ -65,6 +75,7 @@ export function buildAdvisorDisplayProfile(input: {
   const state = input.user?.state?.trim() || "";
   const location = [city, state].filter(Boolean).join(", ") || "Add your city in profile settings";
   const whatsapp = phone ? `91${phone.replace(/\D/g, "").slice(-10)}` : "";
+  const aboutText = input.user?.about?.trim() || "";
 
   return {
     slug,
@@ -72,8 +83,17 @@ export function buildAdvisorDisplayProfile(input: {
     title,
     photoUrl: input.user?.selfie_url?.trim() || undefined,
     ...ADVISOR_PROFILE_LABELS,
+    ctaDescription: aboutText || ADVISOR_PROFILE_LABELS.ctaDescription,
     rating: null,
     clientsCount: "—",
+    profileHeroStat: {
+      value: "—",
+      label: "Clients",
+      ctaLabel: "Satisfied Clients",
+      highlightLabel: "",
+      capacityId: "individual_agent",
+    },
+    profileCapacityId: "individual_agent",
     phone: phone ? `+91 ${phone}` : "Add mobile number",
     email: email || "Add email",
     location,
@@ -83,8 +103,29 @@ export function buildAdvisorDisplayProfile(input: {
     experienceDisplay: "",
     whatsapp,
     stats: [],
-    highlights: [],
-    home: { ...ADVISOR_PROFILE_LABELS.home },
+    highlights: [...ADVISOR_PROFILE_LABELS.defaultHighlights],
+    home: {
+      ...ADVISOR_PROFILE_LABELS.home,
+      heroBio: aboutText || ADVISOR_PROFILE_LABELS.home.heroBio,
+    },
+  };
+}
+
+/** Apply My Account “About you” copy to CTA + hero bio fields. */
+export function applyAboutToDisplayProfile(
+  profile: AdvisorDisplayProfile,
+  about?: string | null,
+): AdvisorDisplayProfile {
+  const aboutText = about?.trim() || "";
+  if (!aboutText) return profile;
+
+  return {
+    ...profile,
+    ctaDescription: aboutText,
+    home: {
+      ...profile.home,
+      heroBio: aboutText,
+    },
   };
 }
 

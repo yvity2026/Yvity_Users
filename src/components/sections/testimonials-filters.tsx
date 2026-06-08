@@ -1,10 +1,8 @@
 "use client";
 
 import { ChevronDown, MessageCircle, Pencil, Shield } from "lucide-react";
-import {
-  testimonialServiceOptions,
-  testimonialTypeFilters,
-} from "@/lib/sections/testimonials-config";
+import { testimonialTypeFilters } from "@/lib/sections/testimonials-config";
+import type { TestimonialServiceFilterOption } from "@/lib/sections/testimonial-service-options";
 import type { TestimonialItem, TestimonialService, TestimonialType } from "@/lib/sections/types";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +15,7 @@ export function TestimonialsFilters({
   onTypeChange,
   onServiceChange,
   items,
+  serviceOptions,
   showGiveTestimonial = true,
   showRequestTestimonial = false,
   onGiveTestimonial,
@@ -27,6 +26,7 @@ export function TestimonialsFilters({
   onTypeChange: (v: TestimonialTypeFilter) => void;
   onServiceChange: (v: TestimonialServiceFilter) => void;
   items: TestimonialItem[];
+  serviceOptions: TestimonialServiceFilterOption[];
   showGiveTestimonial?: boolean;
   showRequestTestimonial?: boolean;
   onGiveTestimonial?: () => void;
@@ -107,7 +107,7 @@ export function TestimonialsFilters({
               "text-foreground focus:outline-none focus:ring-1 focus:ring-[oklch(0.82_0.13_205/0.5)]",
             )}
           >
-            {testimonialServiceOptions.map((opt) => (
+            {serviceOptions.map((opt) => (
               <option key={opt.value} value={opt.value} className="bg-[oklch(0.18_0.035_235)]">
                 {opt.label}
               </option>
@@ -125,7 +125,7 @@ export function TestimonialsFilters({
               {" "}
               ·{" "}
               <span className="text-foreground font-medium">
-                {testimonialServiceOptions.find((o) => o.value === serviceFilter)?.label}
+                {serviceOptions.find((o) => o.value === serviceFilter)?.label}
               </span>
             </>
           )}

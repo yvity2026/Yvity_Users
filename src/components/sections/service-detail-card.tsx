@@ -1,20 +1,29 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Image from "next/image";
-import { CheckCircle2, ChevronDown, FileText, Shield, Users } from "lucide-react";
+import { Building2, CheckCircle2, ChevronDown, FileText, Shield, Users } from "lucide-react";
 import type { ServiceItem } from "@/lib/sections/types";
+import {
+  formatCountMetric,
+  mergeCardDisplay,
+  metricLabelsForCapacity,
+  shouldShowServiceCardMetric,
+} from "@/lib/advisor/service-card-display";
 import { serviceAccents } from "@/lib/sections/services-config";
 import {
+  displayCategoryHeading,
   displayCompanyName,
   displayDesignation,
   displayExperience,
+  displayLicenseHolder,
   formatMetricValue,
   normalizeCompanyName,
 } from "@/lib/sections/service-display";
 import { resolveServiceExperience } from "@/lib/sections/service-experience";
 import { VerifiedByYvityBadge } from "@/components/verification/verified-by-yvity-badge";
-import { isPubliclyVisible } from "@/lib/verification/defaults";
+import { isServiceVerifiedForPlan } from "@/lib/advisor-membership/plan-enforcement";
+import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
 import { cn } from "@/lib/utils";
 
 /**
@@ -89,6 +98,10 @@ type ServiceDetailCardProps = {
    * the collapsed state on mobile stays as clean as on desktop.
    */
   footer?: React.ReactNode;
+  /** Registration / profile name — used for Self licence holder display. */
+  profileOwnerName?: string | null;
+  /** When true, registration services approved with the profile show YVITY verified. */
+  profileApproved?: boolean;
 };
 
 /**
@@ -122,6 +135,8 @@ export function ServiceDetailCard({
   open: controlledOpen,
   onOpenChange,
   footer,
+  profileOwnerName,
+  profileApproved = false,
 }: ServiceDetailCardProps) {
   void _editable;
   void _onEdit;
@@ -136,13 +151,42 @@ export function ServiceDetailCard({
   const triggerId = useId();
   const contentId = useId();
 
+  const { limits } = useResolvedPlanLimits();
   const accent = serviceAccents[item.category];
-  const showVerified = isPubliclyVisible(item.verification);
+  const showVerified = isServiceVerifiedForPlan(limits, item, profileApproved);
   const companyName = normalizeCompanyName(item.provider);
   const companyDisplay = displayCompanyName(item.provider);
+  const categoryHeading = displayCategoryHeading(item);
   const designationDisplay = displayDesignation(item);
   const experienceDisplay = displayExperience(item);
+  const licenseHolderLine = displayLicenseHolder(item, profileOwnerName);
   const subtitleLine = `${designationDisplay} • ${experienceDisplay}`;
+  const capacityId = item.capacityId ?? "individual_agent";
+  const cardDisplay = useMemo(
+    () => mergeCardDisplay(capacityId, item.cardDisplay),
+    [item.cardDisplay, capacityId],
+  );
+  const metricLabels = useMemo(() => metricLabelsForCapacity(capacityId), [capacityId]);
+  const showCapacityChip = capacityId !== "individual_agent";
+  const showClients = shouldShowServiceCardMetric(cardDisplay, "showClients", item);
+  const showClaims = shouldShowServiceCardMetric(cardDisplay, "showClaims", item);
+  const showSumInsured = shouldShowServiceCardMetric(cardDisplay, "showSumInsured", item);
+  const showClaimSettled = shouldShowServiceCardMetric(cardDisplay, "showClaimSettled", item);
+  const showClaimRatio = shouldShowServiceCardMetric(cardDisplay, "showClaimRatio", item);
+  const showTeamSize = shouldShowServiceCardMetric(cardDisplay, "showTeamSize", item);
+  const showActiveAgents = shouldShowServiceCardMetric(cardDisplay, "showActiveAgents", item);
+  const showBranches = shouldShowServiceCardMetric(cardDisplay, "showBranches", item);
+  const showStatus =
+    cardDisplay.showStatusMessage && shouldShowServiceCardMetric(cardDisplay, "showStatusMessage", item);
+  const showAreas = shouldShowServiceCardMetric(cardDisplay, "showAreas", item);
+  const hasMetricGrid =
+    showClients ||
+    showClaims ||
+    showSumInsured ||
+    showClaimSettled ||
+    showTeamSize ||
+    showActiveAgents ||
+    showBranches;
   const logoUrl = item.companyLogoUrl?.trim() ?? "";
   const hasLogo = logoUrl.length > 0;
   const initials = deriveCompanyInitials(companyName || item.provider);
@@ -207,7 +251,7 @@ export function ServiceDetailCard({
               "text-white",
             )}
           >
-            <span className="line-clamp-1">{item.title}</span>
+            <span className="line-clamp-1">{categoryHeading}</span>
           </h3>
           {badge && <div className="shrink-0">{badge}</div>}
         </div>
@@ -259,7 +303,17 @@ export function ServiceDetailCard({
             >
               {companyDisplay}
             </p>
+            {licenseHolderLine ? (
+              <p className="mt-0.5 text-[11px] sm:text-xs text-muted-foreground truncate">
+                {licenseHolderLine}
+              </p>
+            ) : null}
             <p className={cn("mt-0.5 text-xs sm:text-sm truncate", accent.text)}>{subtitleLine}</p>
+            {showCapacityChip ? (
+              <p className="mt-1 inline-flex max-w-full truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {metricLabels.capacityChip}
+              </p>
+            ) : null}
           </div>
 
           {/* Chevron — visual cue that this card opens. Rotates when
@@ -297,60 +351,98 @@ export function ServiceDetailCard({
           <div className="flex-1 flex flex-col px-5 sm:px-6 pb-5 sm:pb-6">
             <div className="mb-4 border-t border-white/10" aria-hidden />
 
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-              <MetricChip
-                icon={Users}
-                label="Clients"
-                value={formatMetricValue(item.clients, "0")}
-                accent={accent.text}
-              />
-              <MetricChip
-                icon={FileText}
-                label="Claims"
-                value={formatMetricValue(item.claims, "0")}
-                accent={accent.text}
-              />
+            {hasMetricGrid ? (
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                {showClients ? (
+                  <MetricChip
+                    icon={Users}
+                    label={metricLabels.clients}
+                    value={formatCountMetric(item.clients)}
+                    accent={accent.text}
+                  />
+                ) : null}
+                {showClaims ? (
+                  <MetricChip
+                    icon={FileText}
+                    label={metricLabels.claims}
+                    value={formatCountMetric(item.claims)}
+                    accent={accent.text}
+                  />
+                ) : null}
+                {showTeamSize ? (
+                  <MetricChip
+                    icon={Users}
+                    label={metricLabels.teamSize}
+                    value={formatCountMetric(item.teamSize)}
+                    accent={accent.text}
+                  />
+                ) : null}
+                {showActiveAgents ? (
+                  <MetricChip
+                    icon={Users}
+                    label={metricLabels.activeAgents}
+                    value={formatCountMetric(item.activeAgents)}
+                    accent={accent.text}
+                  />
+                ) : null}
+                {showBranches ? (
+                  <MetricChip
+                    icon={Building2}
+                    label={metricLabels.branches}
+                    value={formatCountMetric(item.branchCount)}
+                    accent={accent.text}
+                  />
+                ) : null}
+                {showSumInsured ? (
+                  <div
+                    className={cn(
+                      "rounded-xl border border-white/10 p-3 col-span-1 text-center",
+                      accent.soft,
+                      !showClaimSettled && "col-span-2",
+                    )}
+                  >
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Total Sum Insured
+                    </p>
+                    <p className="mt-1 text-sm sm:text-base font-bold text-foreground">
+                      {formatMetricValue(item.sumInsured, "₹ 0")}
+                    </p>
+                  </div>
+                ) : null}
+                {showClaimSettled ? (
+                  <div
+                    className={cn(
+                      "rounded-xl border border-white/10 p-3 col-span-1 text-center",
+                      accent.soft,
+                      !showSumInsured && "col-span-2",
+                    )}
+                  >
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Total Claim Settled
+                    </p>
+                    <p className="mt-1 text-sm sm:text-base font-bold text-foreground">
+                      {formatMetricValue(item.claimSettled, "₹ 0")}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {showClaimRatio ? (
               <div
                 className={cn(
-                  "rounded-xl border border-white/10 p-3 col-span-1 text-center",
-                  accent.soft,
+                  "mt-3 flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2.5 bg-gradient-to-r",
+                  accent.ratio,
                 )}
               >
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Total Sum Insured
-                </p>
-                <p className="mt-1 text-sm sm:text-base font-bold text-foreground">
-                  {formatMetricValue(item.sumInsured, "₹ 0")}
-                </p>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">
+                  {metricLabels.claimRatio}
+                </span>
+                <span className={cn("text-sm font-bold", accent.text)}>{item.claimRatio}%</span>
               </div>
-              <div
-                className={cn(
-                  "rounded-xl border border-white/10 p-3 col-span-1 text-center",
-                  accent.soft,
-                )}
-              >
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Total Claim Settled
-                </p>
-                <p className="mt-1 text-sm sm:text-base font-bold text-foreground">
-                  {formatMetricValue(item.claimSettled, "₹ 0")}
-                </p>
-              </div>
-            </div>
+            ) : null}
 
-            <div
-              className={cn(
-                "mt-3 flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2.5 bg-gradient-to-r",
-                accent.ratio,
-              )}
-            >
-              <span className="text-[10px] sm:text-xs text-muted-foreground">
-                My Individual Claim Ratio
-              </span>
-              <span className={cn("text-sm font-bold", accent.text)}>{item.claimRatio}%</span>
-            </div>
-
-            {item.statusMessage && (
+            {showStatus && item.statusMessage ? (
               <div className={cn("mt-3 rounded-xl border border-white/10 p-3 sm:p-4", accent.soft)}>
                 <p className="flex items-center gap-2 text-xs sm:text-sm font-medium text-foreground">
                   <CheckCircle2 className={cn("size-4 shrink-0", accent.text)} />
@@ -362,9 +454,9 @@ export function ServiceDetailCard({
                   </p>
                 )}
               </div>
-            )}
+            ) : null}
 
-            {item.areas.length > 0 && (
+            {showAreas && item.areas.length > 0 ? (
               <div className="mt-4">
                 <p className="text-xs font-medium text-muted-foreground mb-2">Areas:</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -384,7 +476,7 @@ export function ServiceDetailCard({
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {footer && <div className="mt-4">{footer}</div>}
           </div>

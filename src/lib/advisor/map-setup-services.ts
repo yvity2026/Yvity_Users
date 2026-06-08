@@ -1,7 +1,17 @@
 import { uid } from "@/lib/id";
 import { formatExperienceFromStart } from "@/lib/sections/service-experience";
+import { categoryHeadingFor } from "@/lib/sections/services-config";
 import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
-import { decodeCapacityMetadata } from "@/lib/advisor/serviceCapacity";
+import {
+  defaultCardDisplayForCapacity,
+} from "@/lib/advisor/service-card-display";
+import type { ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
+import { capacityIdForOnboarding, decodeCapacityMetadata } from "@/lib/advisor/serviceCapacity";
+import {
+  defaultLicenseHolder,
+  normalizeLicenseHolder,
+  type ServiceLicenseHolder,
+} from "@/lib/advisor/service-license-holder";
 import { emptyVerification } from "@/lib/verification/defaults";
 import type { VerificationDocument } from "@/lib/verification/types";
 
@@ -21,7 +31,25 @@ export type SetupServicePayload = {
   fromYear?: string | null;
   toYear?: string | null;
   keyServices?: string[];
+  license_holder_type?: "self" | "other";
+  license_holder_name?: string;
+  license_holder_relationship?: string;
+  license_holder_consent_url?: string;
 };
+
+function licenseHolderFromPayload(row: SetupServicePayload): ServiceLicenseHolder {
+  const type = row.license_holder_type === "other" ? "other" : "self";
+  if (type === "self") {
+    return defaultLicenseHolder("self");
+  }
+  return normalizeLicenseHolder({
+    type: "other",
+    name: row.license_holder_name,
+    relationship: row.license_holder_relationship,
+    consentUrl: row.license_holder_consent_url,
+    licenseNumber: row.license,
+  }) ?? defaultLicenseHolder("other");
+}
 
 function categoryForApiType(apiType: string): ServiceCategory {
   return API_TYPE_TO_CATEGORY[apiType] ?? "life";
@@ -53,7 +81,9 @@ export function mapSetupServicesToItems(
   return services.map((row) => {
     const apiType = row.service ?? "Life Insurance";
     const category = categoryForApiType(apiType);
-    decodeCapacityMetadata(row.keyServices ?? []);
+    const capacityId = capacityIdForOnboarding(
+      decodeCapacityMetadata(row.keyServices ?? []),
+    ) as ServiceCapacityId;
     const startDate =
       typeof row.fromYear === "string" && row.fromYear.length >= 4
         ? row.fromYear.length === 4
@@ -75,7 +105,7 @@ export function mapSetupServicesToItems(
     return {
       id: uid("svc"),
       category,
-      title: apiType,
+      title: categoryHeadingFor(category),
       provider: row.company?.trim() || "",
       experience: experienceLabel,
       serviceStartDate: startDate,
@@ -90,6 +120,9 @@ export function mapSetupServicesToItems(
       areas: [],
       verified: false,
       verification,
+      licenseHolder: licenseHolderFromPayload(row),
+      capacityId,
+      cardDisplay: defaultCardDisplayForCapacity(capacityId),
       showDetailCard: true,
     };
   });

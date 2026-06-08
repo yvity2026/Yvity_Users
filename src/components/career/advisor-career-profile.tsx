@@ -14,7 +14,7 @@ import { SectionProfileBanner } from "@/components/sections/section-profile-bann
 import { uid } from "@/lib/career-store";
 import type { CareerData, Certification, Education, Experience } from "@/lib/career-types";
 import { Button } from "@/components/ui/button";
-import { getPublicProfileSharePath } from "@/lib/public-profile-url";
+import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
 
 type EditTarget =
   | { kind: "experience"; item: Experience }
@@ -28,6 +28,7 @@ export function AdvisorCareerProfile({
   data: CareerData;
   setData: (data: CareerData) => void;
 }) {
+  const { previewPath } = usePublicProfileUrls();
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   const saveExperience = (item: Experience) => {
@@ -164,7 +165,7 @@ export function AdvisorCareerProfile({
         <Sparkles className="size-4 text-primary shrink-0" />
         Changes save automatically. Preview the{" "}
         <Link
-          href={getPublicProfileSharePath()}
+          href={previewPath}
           target="_blank"
           rel="noopener noreferrer"
           className="text-foreground underline underline-offset-2"

@@ -31,11 +31,10 @@ export type DashboardAction = {
 };
 
 export type LeadSummary = {
+  totalLeads: number;
   newLeads: number;
-  activeLeads: number;
-  followUpsPending: number;
+  followUpLeads: number;
   convertedLeads: number;
-  total: number;
 };
 
 export type PerformanceSnapshot = {
@@ -44,7 +43,7 @@ export type PerformanceSnapshot = {
   profileViewsDelta: string;
   searchAppearances: number;
   searchDelta: string;
-  leadsReceived: number;
+  profileSharesByOthers: number;
   testimonialsReceived: number;
   recommendationsReceived: number;
 };

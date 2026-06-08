@@ -1,4 +1,7 @@
 import type { VerificationRecord } from "@/lib/verification/types";
+import type { ServiceLicenseHolder } from "@/lib/advisor/service-license-holder";
+import type { ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
+import type { ServiceCardDisplay } from "@/lib/advisor/service-card-display";
 
 export type ServiceCategory = "life" | "health" | "general" | "mutual";
 
@@ -39,6 +42,16 @@ export type ServiceItem = {
   verification: VerificationRecord;
   /** Optional company / insurer logo (upload or URL). */
   companyLogoUrl?: string;
+  /** IRDAI licence holder for this company appointment (setup + admin verified). */
+  licenseHolder?: ServiceLicenseHolder;
+  /** Account type: individual agent, team leader, or firm. */
+  capacityId?: ServiceCapacityId;
+  /** Which metric blocks appear on the public service card. */
+  cardDisplay?: ServiceCardDisplay;
+  /** Optional team / firm metrics (shown when enabled in cardDisplay). */
+  teamSize?: number;
+  activeAgents?: number;
+  branchCount?: number;
   /** When false, item appears in the banner only (e.g. Mutual Funds). */
   showDetailCard?: boolean;
 };
@@ -97,6 +110,8 @@ export type TestimonialItem = {
   quote: string;
   rating: number;
   date: string;
+  /** ISO timestamp for FIFO public visibility (customer submissions). */
+  submittedAt?: string;
   memberBadge: TestimonialMemberBadge;
   verified?: boolean;
   audioDuration?: string;

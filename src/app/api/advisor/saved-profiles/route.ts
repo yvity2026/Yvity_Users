@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = saveLocalAdvisorProfile(session.id, advisorProfileId);
+  const result = await saveLocalAdvisorProfile(session.id, advisorProfileId);
 
   if (result.error) {
     return NextResponse.json({ success: false, error: result.error }, { status: 400 });

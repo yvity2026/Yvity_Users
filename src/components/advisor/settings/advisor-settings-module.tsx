@@ -2,6 +2,7 @@
 
 import { Bell, Eye, Globe, Phone, Settings2, Shield, UserRound, Users } from "lucide-react";
 import { ProfileAppearanceSection } from "@/components/advisor/settings/profile-appearance-section";
+import { AdvisorReferralSettingsSection } from "@/components/advisor/settings/advisor-referral-settings-section";
 import { SettingsGroup, SettingsToggleRow } from "@/components/advisor/settings/settings-ui";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 
@@ -252,6 +253,8 @@ export function AdvisorSettingsModule() {
           disabled={!settings.publicProfile.profileActive}
         />
       </SettingsGroup>
+
+      <AdvisorReferralSettingsSection />
 
       <p className="text-[10px] text-center text-muted-foreground px-4 flex items-center justify-center gap-1.5">
         <Shield className="size-3" />

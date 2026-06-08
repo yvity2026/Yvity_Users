@@ -1,6 +1,9 @@
 /** Shared landing page width + horizontal padding so section text aligns on one left edge */
 export const LANDING_INNER =
-  "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-12";
+  "mx-auto w-full max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10";
+
+/** Nav bar uses the same horizontal rhythm as section content */
+export const LANDING_NAV_INNER = LANDING_INNER;
 
 export const LANDING_SECTION_PY = "py-10 md:py-14";
 

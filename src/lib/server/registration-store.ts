@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const REGISTRATION_FILE = path.join(DATA_DIR, "registration.json");
@@ -21,6 +23,8 @@ export type RegisteredUser = {
   pincode?: string;
   about?: string;
   createdAt: number;
+  referral_code?: string;
+  referred_by?: string;
 };
 
 export type RegistrationDb = {
@@ -61,6 +65,12 @@ export function saveRegistrationDb(next: RegistrationDb) {
   cache = next;
   ensureDataDir();
   fs.writeFileSync(REGISTRATION_FILE, JSON.stringify(next, null, 2), "utf-8");
+
+  if (useSupabasePersistence()) {
+    void Promise.all(next.users.map((user) => upsertUserToDb(user))).catch((error) => {
+      console.error("[registration-store] Supabase sync failed:", error);
+    });
+  }
 }
 
 export function mutateRegistrationDb(mutator: (db: RegistrationDb) => void) {

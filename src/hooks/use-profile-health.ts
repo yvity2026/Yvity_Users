@@ -9,8 +9,9 @@ import {
 import type { ProfileHealthItem, ProfileStrengthLabel } from "@/lib/advisor-dashboard/types";
 import type { ProfileHealthId } from "@/lib/advisor-dashboard/section-guidance";
 import { useAuth } from "@/context/AuthUserContext";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { getEffectiveIntroVideoUrl } from "@/lib/intro-video";
+import { getAdvisorIntroVideoUrl } from "@/lib/intro-video";
 import { useCareerData } from "@/lib/career-store";
 import { useGalleryData } from "@/lib/gallery-store";
 import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib/sections/stores";
@@ -31,8 +32,9 @@ export function useProfileHealth(): {
   const [gallery, , galleryLoading] = useGalleryData();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { user } = useAuth();
+  const { limits } = usePlanLimits();
   const photoUrl = resolveProfilePhotoUrl(user?.selfie_url);
-  const introVideoUrl = getEffectiveIntroVideoUrl(settings);
+  const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
 
   const loading =
     careerLoading ||
@@ -55,6 +57,7 @@ export function useProfileHealth(): {
     const items = buildProfileHealth({
       photoUrl,
       introVideoUrl,
+      introVideoEnabled: limits.introVideoEnabled,
       career,
       services,
       achievements,
@@ -70,6 +73,7 @@ export function useProfileHealth(): {
     loading,
     photoUrl,
     introVideoUrl,
+    limits,
     career,
     services,
     achievements,

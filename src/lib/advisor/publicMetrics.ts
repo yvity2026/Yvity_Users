@@ -64,3 +64,33 @@ export function calculateTotalClients(
 
   return String(total);
 }
+
+function experienceYearsForService(service: { from_year?: string; to_year?: string }) {
+  const totalDays = mergeExperienceRanges([service]).reduce((sum, range) => {
+    return sum + Math.max(0, (range.end.getTime() - range.start.getTime()) / MS_PER_DAY);
+  }, 0);
+  return Math.max(0, Math.round(totalDays / DAYS_PER_YEAR));
+}
+
+/** Highest tenure across services (matches public profile header). */
+export function calculateHighestExperienceYears(
+  services: Array<{ from_year?: string; to_year?: string }> = [],
+) {
+  let max = 0;
+  for (const service of services) {
+    max = Math.max(max, experienceYearsForService(service));
+  }
+  return String(max);
+}
+
+/** Highest client count across services (matches public profile header). */
+export function calculateHighestClients(
+  services: Array<{ no_of_clients?: number | string }> = [],
+) {
+  let max = 0;
+  for (const service of services) {
+    const value = Number(service?.no_of_clients ?? 0);
+    if (Number.isFinite(value)) max = Math.max(max, value);
+  }
+  return String(max);
+}

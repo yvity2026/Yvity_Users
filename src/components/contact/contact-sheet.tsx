@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Loader2, Mail, Phone, Send, X } from "lucide-react";
 import {
@@ -8,9 +8,10 @@ import {
   contactInterestTones,
   type ContactInterestId,
 } from "@/lib/contact-config";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useContact } from "@/lib/contact-store";
-import { advisorProfile } from "@/lib/advisor-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,40 +37,11 @@ type QuickAction = {
   external?: boolean;
 };
 
-const quickActions: QuickAction[] = [
-  {
-    id: "call",
-    label: "Call",
-    icon: Phone,
-    tile: "bg-gradient-to-br from-[oklch(0.38_0.09_155)] to-[oklch(0.30_0.08_168)] hover:from-[oklch(0.42_0.10_155)] hover:to-[oklch(0.34_0.09_168)]",
-    iconWrap: "bg-[oklch(0.88_0.14_155/0.22)] ring-1 ring-[oklch(0.92_0.08_155/0.35)]",
-    iconColor: "text-[oklch(0.95_0.04_155)]",
-    href: () => `tel:${advisorProfile.phone.replace(/\s/g, "")}`,
-  },
-  {
-    id: "whatsapp",
-    label: "WhatsApp",
-    icon: WhatsAppIcon,
-    tile: "bg-gradient-to-br from-[oklch(0.52_0.14_155)] to-[oklch(0.44_0.13_158)] hover:from-[oklch(0.56_0.15_155)] hover:to-[oklch(0.48_0.14_158)]",
-    iconWrap: "bg-[oklch(0.95_0.06_155/0.25)] ring-1 ring-[oklch(0.98_0.04_155/0.4)]",
-    iconColor: "text-white",
-    href: () => `https://wa.me/${advisorProfile.whatsapp}`,
-    external: true,
-  },
-  {
-    id: "email",
-    label: "Email",
-    icon: Mail,
-    tile: "bg-gradient-to-br from-[oklch(0.40_0.09_205)] to-[oklch(0.32_0.08_220)] hover:from-[oklch(0.44_0.10_205)] hover:to-[oklch(0.36_0.09_220)]",
-    iconWrap: "bg-[oklch(0.88_0.10_205/0.22)] ring-1 ring-[oklch(0.92_0.08_205/0.35)]",
-    iconColor: "text-[oklch(0.95_0.04_205)]",
-    href: () => `mailto:${advisorProfile.email}`,
-  },
-];
-
 export function ContactSheet() {
   const { open, closeContact } = useContact();
+  const advisor = useAdvisorDisplayProfile();
   const { settings } = useAdvisorSettings();
+  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
   const [message, setMessage] = useState("");
@@ -77,6 +49,40 @@ export function ContactSheet() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+
+  const quickActions = useMemo<QuickAction[]>(
+    () => [
+      {
+        id: "call",
+        label: "Call",
+        icon: Phone,
+        tile: "bg-gradient-to-br from-[oklch(0.38_0.09_155)] to-[oklch(0.30_0.08_168)] hover:from-[oklch(0.42_0.10_155)] hover:to-[oklch(0.34_0.09_168)]",
+        iconWrap: "bg-[oklch(0.88_0.14_155/0.22)] ring-1 ring-[oklch(0.92_0.08_155/0.35)]",
+        iconColor: "text-[oklch(0.95_0.04_155)]",
+        href: () => `tel:${advisor.phone.replace(/\s/g, "")}`,
+      },
+      {
+        id: "whatsapp",
+        label: "WhatsApp",
+        icon: WhatsAppIcon,
+        tile: "bg-gradient-to-br from-[oklch(0.52_0.14_155)] to-[oklch(0.44_0.13_158)] hover:from-[oklch(0.56_0.15_155)] hover:to-[oklch(0.48_0.14_158)]",
+        iconWrap: "bg-[oklch(0.95_0.06_155/0.25)] ring-1 ring-[oklch(0.98_0.04_155/0.4)]",
+        iconColor: "text-white",
+        href: () => `https://wa.me/${advisor.whatsapp}`,
+        external: true,
+      },
+      {
+        id: "email",
+        label: "Email",
+        icon: Mail,
+        tile: "bg-gradient-to-br from-[oklch(0.40_0.09_205)] to-[oklch(0.32_0.08_220)] hover:from-[oklch(0.44_0.10_205)] hover:to-[oklch(0.36_0.09_220)]",
+        iconWrap: "bg-[oklch(0.88_0.10_205/0.22)] ring-1 ring-[oklch(0.92_0.08_205/0.35)]",
+        iconColor: "text-[oklch(0.95_0.04_205)]",
+        href: () => `mailto:${advisor.email}`,
+      },
+    ],
+    [advisor.phone, advisor.whatsapp, advisor.email],
+  );
 
   if (!open) return null;
 
@@ -86,10 +92,11 @@ export function ContactSheet() {
     return true;
   });
   const showContactForm =
+    !isWorkspacePreview &&
     settings.contact.contactForm &&
     settings.leads.acceptNewLeads &&
     settings.leads.publicProfileEnquiries;
-  const headerMobile = settings.contact.showMobileNumber ? advisorProfile.phone : null;
+  const headerMobile = settings.contact.showMobileNumber ? advisor.phone : null;
 
   const toggleInterest = (id: ContactInterestId) => {
     setInterests((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -152,15 +159,11 @@ export function ContactSheet() {
             <h2 id="contact-sheet-title" className="text-xl sm:text-2xl font-bold tracking-tight">
               Get in Touch
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {advisorProfile.name} · {advisorProfile.location}
-              {headerMobile && (
-                <>
-                  <br />
-                  <span className="tabular-nums">{headerMobile}</span>
-                </>
-              )}
-            </p>
+            <p className="mt-1 text-sm font-semibold text-foreground">{advisor.name}</p>
+            <p className="text-sm text-[oklch(0.85_0.16_78)]">{advisor.title}</p>
+            {headerMobile ? (
+              <p className="mt-1 text-sm tabular-nums text-muted-foreground">{headerMobile}</p>
+            ) : null}
           </div>
           <button
             type="button"
@@ -177,7 +180,7 @@ export function ContactSheet() {
             <div className="py-8 text-center animate-in fade-in duration-300">
               <p className="text-lg font-semibold text-foreground">Message sent</p>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
-                Thank you! {advisorProfile.name.split(" ")[0]} will get back to you shortly.
+                Thank you! {advisor.name.split(" ")[0]} will get back to you shortly.
               </p>
               <Button onClick={handleClose} className="mt-6 rounded-full px-8">
                 Done

@@ -1,6 +1,8 @@
 import type { CareerData, Certification, Experience } from "@/lib/career-types";
 import { emptyCareerData } from "@/lib/empty-data";
 import { loadJsonFile, saveJsonFile } from "@/lib/server/json-store";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadCareerFromDb, syncCareerToDb } from "@/lib/server/supabase/sync-career";
 import { careerFileForUser } from "@/lib/server/user-data-files";
 import { normalizeOptionalVerification } from "@/lib/verification/defaults";
 
@@ -45,12 +47,22 @@ function normalizeCareer(data: CareerData): CareerData {
 
 export async function loadCareerForUser(userId: string | undefined): Promise<CareerData> {
   if (!userId) return emptyCareerData;
+
+  if (useSupabasePersistence()) {
+    return normalizeCareer(await loadCareerFromDb(userId));
+  }
+
   const raw = await loadJsonFile<unknown>(careerFileForUser(userId), emptyCareerData);
   return normalizeCareer(raw as CareerData);
 }
 
 export async function saveCareerForUser(userId: string, data: CareerData): Promise<void> {
-  await saveJsonFile(careerFileForUser(userId), normalizeCareer(data));
+  const normalized = normalizeCareer(data);
+  if (useSupabasePersistence()) {
+    await syncCareerToDb(userId, normalized);
+    return;
+  }
+  await saveJsonFile(careerFileForUser(userId), normalized);
 }
 
 /** @deprecated Use loadCareerForUser(session.id) */

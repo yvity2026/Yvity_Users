@@ -55,7 +55,7 @@ export async function downloadProfilePdf(): Promise<void> {
   addText(advisorProfile.home.heroBio, 10);
   y += 6;
   addText(
-    `Rating ${advisorProfile.rating} · ${advisorProfile.clientsCount} clients · ${advisorProfile.experienceDisplay} experience`,
+    `Rating ${advisorProfile.rating} · ${advisorProfile.profileHeroStat.value} ${advisorProfile.profileHeroStat.label.toLowerCase()} · ${advisorProfile.experienceDisplay} experience`,
     10,
   );
   y += 8;

@@ -17,17 +17,25 @@ import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { MobilePreviewExpand } from "@/components/shared/mobile-preview-expand";
 import { SectionEmptyCard } from "@/components/ui/section-empty-card";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { useAuth } from "@/context/AuthUserContext";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { useServicesData } from "@/lib/sections/stores";
 import type { ServiceItem } from "@/lib/sections/types";
+import { categoryHeadingFor } from "@/lib/sections/services-config";
+import { formatExperienceFromStart } from "@/lib/sections/service-experience";
+import { defaultCardDisplayForCapacity } from "@/lib/advisor/service-card-display";
+import type { ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
 import { uid } from "@/lib/section-store";
-import { isPubliclyVisible, emptyVerification } from "@/lib/verification/defaults";
+import { emptyVerification, isServiceVisibleOnPublicProfile } from "@/lib/verification/defaults";
 import { cn } from "@/lib/utils";
 
 function newService(): ServiceItem {
+  const category: ServiceItem["category"] = "life";
   return {
     id: uid("svc"),
-    category: "life",
-    title: "New Insurance Service",
+    category,
+    title: categoryHeadingFor(category),
     provider: "",
     experience: "",
     roleLabel: "",
@@ -42,6 +50,8 @@ function newService(): ServiceItem {
     areas: [],
     verified: false,
     verification: emptyVerification(),
+    capacityId: "individual_agent" as ServiceCapacityId,
+    cardDisplay: defaultCardDisplayForCapacity("individual_agent"),
     showDetailCard: true,
   };
 }
@@ -58,12 +68,19 @@ export function ServicesShowcase({
 }) {
   const [items, setItems, loading] = useServicesData();
   const { settings } = useAdvisorSettings();
+  const { advisor, user } = useAuth();
+  const publicView = usePublicProfileView();
+  const profileApproved = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
   const [editId, setEditId] = useState<string | null>(null);
   // Draft for a brand-new service. It is NOT added to `items` until the
   // advisor clicks Save in the editor, so closing the modal (X / backdrop /
   // Discard) leaves no orphan card behind in the dashboard.
   const [pendingNew, setPendingNew] = useState<ServiceItem | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const profileOwnerName = publicView?.name ?? user?.name ?? null;
 
   const draft = pendingNew ?? (editId ? items.find((i) => i.id === editId) : null);
   const isNewDraft = Boolean(pendingNew);
@@ -73,7 +90,9 @@ export function ServicesShowcase({
   // On the public profile only verified services are visible (banner + detail
   // cards). In the editable dashboard, advisors see every saved service so
   // they can act on pending/rejected ones.
-  const publicItems = editable ? items : items.filter((i) => isPubliclyVisible(i.verification));
+  const publicItems = editable
+    ? items
+    : items.filter((i) => isServiceVisibleOnPublicProfile(i, profileApproved));
   const bannerItems = publicItems;
 
   const detailItems = showDetailCards
@@ -146,6 +165,7 @@ export function ServicesShowcase({
                 onEdit={() => {}}
                 onDelete={() => {}}
                 readOnly
+                profileApproved={profileApproved}
               />
             ))}
           </div>
@@ -214,6 +234,8 @@ export function ServicesShowcase({
                   index={i}
                   onEdit={() => setEditId(item.id)}
                   onDelete={() => deleteItem(item.id)}
+                  profileApproved={profileApproved}
+                  profileOwnerName={profileOwnerName}
                 />
               ))}
             </div>
@@ -228,7 +250,11 @@ export function ServicesShowcase({
           <EmptyState
             icon={Briefcase}
             title="No insurance services to display yet"
-            description="Verified services will appear here as soon as the advisor publishes them."
+            description={
+              profileApproved
+                ? "Add or complete your services in My Space — clients will see them here once saved."
+                : "Verified services will appear here as soon as the advisor publishes them."
+            }
           />
         ) : (
           <div className="grid grid-cols-1 gap-5 md:gap-6 md:grid-cols-2">
@@ -238,7 +264,14 @@ export function ServicesShowcase({
               toggleClassName="mt-1"
             >
               {detailItems.map((item, i) => (
-                <ServiceDetailCard key={item.id} item={item} editable={false} index={i} />
+                <ServiceDetailCard
+                  key={item.id}
+                  item={item}
+                  editable={false}
+                  index={i}
+                  profileApproved={profileApproved}
+                  profileOwnerName={profileOwnerName}
+                />
               ))}
             </MobilePreviewExpand>
           </div>

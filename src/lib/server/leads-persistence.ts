@@ -14,6 +14,14 @@ import type {
   UpdateLeadInput,
 } from "@/lib/leads/types";
 import { loadContactInquiries } from "@/lib/server/contact-persistence";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import {
+  deleteLeadForAdvisor,
+  insertLeadForAdvisor,
+  loadLeadsForAdvisor,
+  saveLeadsForAdvisor,
+  updateLeadForAdvisor,
+} from "@/lib/server/supabase/leads-supabase";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
@@ -75,7 +83,7 @@ export function normalizeLead(raw: Record<string, unknown>): Lead {
   };
 }
 
-export async function loadLeads(): Promise<Lead[]> {
+async function loadLeadsJson(): Promise<Lead[]> {
   try {
     const raw = await fs.readFile(LEADS_FILE, "utf-8");
     const parsed = JSON.parse(raw) as Record<string, unknown>[];
@@ -86,7 +94,7 @@ export async function loadLeads(): Promise<Lead[]> {
   }
 }
 
-async function saveLeads(leads: Lead[]): Promise<void> {
+async function saveLeadsJson(leads: Lead[]): Promise<void> {
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8");
 }
@@ -102,7 +110,7 @@ function inquiryToLead(inquiry: ContactInquiry): Lead {
     serviceType: mapContactInterestToLeadService(inquiry.interests[0] ?? "general"),
     priority: "medium",
     status: "new",
-    notes: inquiry.message ?? "",
+    notes: "",
     message: inquiry.message,
     sourceInquiryId: inquiry.id,
     createdAt: now,
@@ -110,24 +118,32 @@ function inquiryToLead(inquiry: ContactInquiry): Lead {
   };
 }
 
-export async function syncInquiriesToLeads(leads: Lead[]): Promise<Lead[]> {
-  const inquiries = await loadContactInquiries();
+async function syncInquiriesToLeads(advisorUserId: string, leads: Lead[]): Promise<Lead[]> {
+  const inquiries = await loadContactInquiries(advisorUserId);
   const linked = new Set(leads.map((l) => l.sourceInquiryId).filter(Boolean));
   const toAdd = inquiries.filter((i) => !linked.has(i.id)).map(inquiryToLead);
   if (toAdd.length === 0) return leads;
   const merged = [...toAdd, ...leads];
-  await saveLeads(merged);
+  if (useSupabasePersistence()) {
+    await saveLeadsForAdvisor(advisorUserId, merged);
+  } else {
+    await saveLeadsJson(merged);
+  }
   return merged;
 }
 
-export async function listLeadsWithSync(): Promise<Lead[]> {
-  const current = await loadLeads();
-  return syncInquiriesToLeads(current);
+export async function listLeadsWithSync(advisorUserId: string): Promise<Lead[]> {
+  const current = useSupabasePersistence()
+    ? await loadLeadsForAdvisor(advisorUserId)
+    : await loadLeadsJson();
+  return syncInquiriesToLeads(advisorUserId, current);
 }
 
-export async function createLead(input: CreateLeadInput): Promise<Lead> {
-  let leads = await loadLeads();
-  leads = await syncInquiriesToLeads(leads);
+export async function createLead(advisorUserId: string, input: CreateLeadInput): Promise<Lead> {
+  let leads = useSupabasePersistence()
+    ? await loadLeadsForAdvisor(advisorUserId)
+    : await loadLeadsJson();
+  leads = await syncInquiriesToLeads(advisorUserId, leads);
 
   const now = new Date().toISOString();
   const lead: Lead = {
@@ -145,12 +161,76 @@ export async function createLead(input: CreateLeadInput): Promise<Lead> {
     updatedAt: now,
   };
 
-  await saveLeads([lead, ...leads]);
+  if (useSupabasePersistence()) {
+    return insertLeadForAdvisor(advisorUserId, lead);
+  }
+
+  await saveLeadsJson([lead, ...leads]);
   return lead;
 }
 
-export async function updateLead(id: string, patch: UpdateLeadInput): Promise<Lead | null> {
-  const leads = await listLeadsWithSync();
+export async function updateLead(
+  advisorUserId: string,
+  id: string,
+  patch: UpdateLeadInput,
+): Promise<Lead | null> {
+  if (useSupabasePersistence()) {
+    const leads = await listLeadsWithSync(advisorUserId);
+    const index = leads.findIndex((l) => l.id === id);
+    if (index < 0) return null;
+
+    const current = leads[index]!;
+    const now = new Date().toISOString();
+
+    let convertedAt = current.convertedAt;
+    if (patch.status === "converted" && current.status !== "converted") {
+      convertedAt = now;
+    }
+
+    const merged: Lead = {
+      ...current,
+      fullName: patch.fullName?.trim() ?? current.fullName,
+      mobile: patch.mobile?.trim() ?? current.mobile,
+      city: patch.city !== undefined ? patch.city.trim() || undefined : current.city,
+      channel: patch.channel && current.origin === "self" ? patch.channel : current.channel,
+      serviceType: patch.serviceType ?? current.serviceType,
+      priority: patch.priority ?? current.priority,
+      status: patch.status ?? current.status,
+      notes: patch.notes !== undefined ? patch.notes : current.notes,
+      followUpType:
+        patch.followUpType === null ? undefined : (patch.followUpType ?? current.followUpType),
+      followUpDate:
+        patch.followUpDate === null ? undefined : (patch.followUpDate ?? current.followUpDate),
+      followUpTime:
+        patch.followUpTime === null ? undefined : (patch.followUpTime ?? current.followUpTime),
+      lastActivityAt: patch.lastActivityAt ?? current.lastActivityAt,
+      convertedAt,
+      updatedAt: now,
+    };
+
+    if (patch.status || patch.followUpType || patch.notes !== undefined) {
+      merged.lastActivityAt = patch.lastActivityAt ?? now;
+    }
+
+    return updateLeadForAdvisor(advisorUserId, id, {
+      ...patch,
+      fullName: merged.fullName,
+      mobile: merged.mobile,
+      city: merged.city,
+      channel: merged.channel,
+      serviceType: merged.serviceType,
+      priority: merged.priority,
+      status: merged.status,
+      notes: merged.notes,
+      followUpType: merged.followUpType,
+      followUpDate: merged.followUpDate,
+      followUpTime: merged.followUpTime,
+      lastActivityAt: merged.lastActivityAt,
+      convertedAt: merged.convertedAt,
+    });
+  }
+
+  const leads = await listLeadsWithSync(advisorUserId);
   const index = leads.findIndex((l) => l.id === id);
   if (index < 0) return null;
 
@@ -189,14 +269,18 @@ export async function updateLead(id: string, patch: UpdateLeadInput): Promise<Le
 
   const next = [...leads];
   next[index] = updated;
-  await saveLeads(next);
+  await saveLeadsJson(next);
   return updated;
 }
 
-export async function deleteLead(id: string): Promise<boolean> {
-  const leads = await listLeadsWithSync();
+export async function deleteLead(advisorUserId: string, id: string): Promise<boolean> {
+  if (useSupabasePersistence()) {
+    return deleteLeadForAdvisor(advisorUserId, id);
+  }
+
+  const leads = await listLeadsWithSync(advisorUserId);
   const next = leads.filter((l) => l.id !== id);
   if (next.length === leads.length) return false;
-  await saveLeads(next);
+  await saveLeadsJson(next);
   return true;
 }

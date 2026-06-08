@@ -18,16 +18,16 @@ export function AdvisorReviewBanner({
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-200/90">
-            While we verify your services
+            While we verify your IRDAI license
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl">
             Complete your public profile
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Your insurance services are with our team (usually{" "}
+            Your IRDAI certificate is with our team (usually{" "}
             <span className="font-semibold text-foreground">24–48 hours</span>). Use this time to
-            fill the sections below — each area shows exactly how it will look on your live profile
-            once approved.
+            fill the sections below — profile strength counts toward your score now; IRDAI, sharing,
+            and visibility points unlock after approval.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-4 self-start sm:self-center">

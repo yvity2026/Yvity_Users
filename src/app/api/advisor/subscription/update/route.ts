@@ -57,7 +57,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const profile = await updateAdvisorSubscriptionPlan(session.id, planId);
+    const profile = await updateAdvisorSubscriptionPlan(session.id, planId, {
+      checkoutKind: paid.checkout_kind ?? "purchase",
+      paidAt: paid.paid_at ?? undefined,
+    });
     if (!profile) {
       return NextResponse.json(
         { success: false, message: "Advisor profile not found" },
@@ -65,9 +68,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const checkoutKind = paid.checkout_kind ?? "purchase";
+    const message =
+      checkoutKind === "upgrade" && planId === "gold"
+        ? "Your Gold membership is active for one year from today"
+        : checkoutKind === "renew"
+          ? `Your ${planId === "gold" ? "Gold" : "Silver"} membership has been renewed`
+          : `Your ${planId === "gold" ? "Gold" : "Silver"} membership is active`;
+
     return NextResponse.json({
       success: true,
-      message: `Your ${planId === "gold" ? "Gold" : "Silver"} membership is active`,
+      message,
       data: advisorProfileToApi(profile),
     });
   } catch (error) {

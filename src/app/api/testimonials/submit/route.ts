@@ -1,17 +1,32 @@
 import { NextResponse } from "next/server";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { getAdvisorPlanContext } from "@/lib/advisor-membership/plan-enforcement-server";
 import { uid } from "@/lib/id";
-import type { TestimonialItem, TestimonialType } from "@/lib/sections/types";
+import { isRegisteredTestimonialService } from "@/lib/sections/testimonial-service-options";
+import type { TestimonialItem, TestimonialService, TestimonialType } from "@/lib/sections/types";
 import { verifyOtpCode } from "@/lib/server/auth";
+import { getSessionUser } from "@/lib/server/session";
+import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { saveTestimonialMedia } from "@/lib/server/testimonial-uploads";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
-import { appendPublishedTestimonial } from "@/lib/server/testimonials-persistence";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
+import { loadServicesForUser } from "@/lib/server/section-persistence";
+import { appendPublishedTestimonial, loadTestimonials } from "@/lib/server/testimonials-persistence";
 import {
   formatMediaDuration,
   formatTestimonialDate,
+  isTestimonialService,
+  parseTestimonialRating,
   validateGiveContent,
   validateGiveDetails,
   validateMobile,
 } from "@/lib/testimonials/submit-utils";
+import {
+  ADVISOR_SELF_TESTIMONIAL_MESSAGE,
+  rejectAdvisorSelfSubmission,
+} from "@/lib/server/advisor-self-submission-guard";
+import { hasRecentTestimonialFromMobileForService } from "@/lib/server/testimonial-submission-limits";
+import { TESTIMONIAL_MONTHLY_DUPLICATE_MESSAGE } from "@/lib/testimonials/submission-limits";
 
 export const runtime = "nodejs";
 
@@ -38,11 +53,15 @@ export async function POST(request: Request) {
     const profession = String(formData.get("profession") ?? "").trim();
     const location = String(formData.get("location") ?? "").trim();
     const quote = String(formData.get("quote") ?? "").trim();
+    const serviceRaw = String(formData.get("service") ?? "").trim();
+    const rating = parseTestimonialRating(formData.get("rating"));
     const audioDuration = String(formData.get("audioDuration") ?? "").trim();
     const videoDuration = String(formData.get("videoDuration") ?? "").trim();
     const media = formData.get("media");
 
-    if (!verifyOtpCode(otp)) {
+    const session = await getSessionUser();
+    const skipOtp = Boolean(session?.id);
+    if (!skipOtp && !verifyOtpCode(otp)) {
       return NextResponse.json({ error: "Invalid OTP. Please try again." }, { status: 401 });
     }
 
@@ -50,8 +69,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid testimonial type" }, { status: 400 });
     }
 
+    const service: TestimonialService | "" = isTestimonialService(serviceRaw) ? serviceRaw : "";
+
     const draft = {
       type,
+      service,
+      rating: rating ?? 0,
       fullName,
       mobile,
       profession,
@@ -63,6 +86,35 @@ export async function POST(request: Request) {
     const detailsErr = validateGiveDetails(draft);
     if (detailsErr) return NextResponse.json({ error: detailsErr }, { status: 400 });
 
+    const advisorUserId = await resolveAdvisorDataUserId();
+    if (!advisorUserId) {
+      return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
+    }
+
+    const planCtx = await getAdvisorPlanContext(advisorUserId);
+    if (!planCtx) {
+      return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
+    }
+
+    const profile = await getAdvisorProfileForUser(advisorUserId);
+    const services = await loadServicesForUser(advisorUserId);
+    const profileApproved = isAdvisorProfileApproved(profile);
+
+    if (
+      !isRegisteredTestimonialService(service, services, {
+        profileApproved,
+        publicOnly: true,
+      })
+    ) {
+      return NextResponse.json(
+        { error: "Please select a service offered on this advisor profile." },
+        { status: 400 },
+      );
+    }
+
+    const existing = await loadTestimonials();
+    void existing;
+
     const contentErr = validateGiveContent(draft);
     if (contentErr) return NextResponse.json({ error: contentErr }, { status: 400 });
 
@@ -70,9 +122,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid mobile number" }, { status: 400 });
     }
 
+    const selfBlocked = await rejectAdvisorSelfSubmission(
+      advisorUserId,
+      mobile,
+      ADVISOR_SELF_TESTIMONIAL_MESSAGE,
+    );
+    if (selfBlocked) return selfBlocked;
+
+    if (await hasRecentTestimonialFromMobileForService(advisorUserId, mobile, service)) {
+      return NextResponse.json({ error: TESTIMONIAL_MONTHLY_DUPLICATE_MESSAGE }, { status: 409 });
+    }
+
     let mediaUrl: string | undefined;
     if (type !== "text" && draft.mediaFile) {
-      const saved = await saveTestimonialMedia(draft.mediaFile, type);
+      const saved = await saveTestimonialMedia(draft.mediaFile, type, advisorUserId);
       mediaUrl = saved.url;
     }
 
@@ -86,16 +149,17 @@ export async function POST(request: Request) {
       id: uid("tst"),
       source: "customer",
       type,
-      service: "life",
+      service,
       name: fullName,
       profession: profession || "Client",
       location: location || "Andhra Pradesh",
       quote: displayQuote,
-      rating: 5,
+      rating: draft.rating,
       date: formatTestimonialDate(),
       memberBadge: "mobile-verified",
       verified: true,
       status: "published",
+      submittedAt: new Date().toISOString(),
       mediaUrl,
       audioDuration:
         type === "audio"
@@ -107,7 +171,7 @@ export async function POST(request: Request) {
           : undefined,
     };
 
-    const published = await appendPublishedTestimonial(item);
+    const published = await appendPublishedTestimonial(item, mobile);
     return NextResponse.json({ ok: true, data: published });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Submission failed";

@@ -5,9 +5,12 @@ import Image from "next/image";
 import { AlertTriangle, FileText, Pencil, RefreshCcw, Trash2, Upload } from "lucide-react";
 import { ServiceDetailCard } from "@/components/sections/service-detail-card";
 import { VerificationStatusBadge } from "@/components/verification/verification-status-badge";
-import { displayCompanyName } from "@/lib/sections/service-display";
+import { displayCompanyName, displayCategoryHeading } from "@/lib/sections/service-display";
 import { serviceAccents } from "@/lib/sections/services-config";
 import type { ServiceItem } from "@/lib/sections/types";
+import { isServiceVerifiedForPlan } from "@/lib/advisor-membership/plan-enforcement";
+import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
+import type { VerificationStatus } from "@/lib/verification/types";
 import { cn } from "@/lib/utils";
 
 function formatDate(iso?: string) {
@@ -40,20 +43,29 @@ export function ServiceDashboardCard({
   onDelete,
   index = 0,
   readOnly = false,
+  profileApproved = false,
+  profileOwnerName,
 }: {
   item: ServiceItem;
   onEdit: () => void;
   onDelete: () => void;
   index?: number;
   readOnly?: boolean;
+  profileApproved?: boolean;
+  profileOwnerName?: string | null;
 }) {
   const verification = item.verification;
   const isRejected = verification.status === "rejected";
   const isBannerOnly = item.category === "mutual" || item.showDetailCard === false;
   const [open, setOpen] = useState(false);
+  const { limits } = useResolvedPlanLimits();
+  const yvityVerified = isServiceVerifiedForPlan(limits, item, profileApproved);
+  const badgeStatus: VerificationStatus = yvityVerified
+    ? "verified"
+    : verification.status;
 
   const statusBadge = (
-    <VerificationStatusBadge status={verification.status} size="xs" className="shrink-0" />
+    <VerificationStatusBadge status={badgeStatus} size="xs" className="shrink-0" />
   );
 
   // The rejection banner + actions toolbar are tucked INSIDE the accordion
@@ -77,6 +89,7 @@ export function ServiceDashboardCard({
         onEdit={onEdit}
         onDelete={onDelete}
         isRejected={isRejected}
+        profileApproved={profileApproved}
       />
     </div>
   );
@@ -108,6 +121,7 @@ export function ServiceDashboardCard({
               onEdit={onEdit}
               onDelete={onDelete}
               isRejected={isRejected}
+              profileApproved={profileApproved}
             />
           ) : null}
         </div>
@@ -120,6 +134,7 @@ export function ServiceDashboardCard({
           open={open}
           onOpenChange={setOpen}
           footer={dashboardFooter}
+          profileOwnerName={profileOwnerName}
         />
       )}
     </div>
@@ -131,13 +146,17 @@ function DashboardActionsBar({
   onEdit,
   onDelete,
   isRejected,
+  profileApproved = false,
 }: {
   item: ServiceItem;
   onEdit: () => void;
   onDelete: () => void;
   isRejected: boolean;
+  profileApproved?: boolean;
 }) {
   const verification = item.verification;
+  const { limits } = useResolvedPlanLimits();
+  const yvityVerified = isServiceVerifiedForPlan(limits, item, profileApproved);
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
       <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
@@ -148,13 +167,13 @@ function DashboardActionsBar({
         </span>
         <span aria-hidden>·</span>
         <span>Last updated {formatDate(verification.updatedAt)}</span>
-        {verification.status === "verified" && (
+        {yvityVerified && (
           <>
             <span aria-hidden>·</span>
             <span>Visible on public profile</span>
           </>
         )}
-        {verification.status === "pending" && (
+        {!yvityVerified && verification.status === "pending" && (
           <>
             <span aria-hidden>·</span>
             <span>Hidden until approved</span>
@@ -268,7 +287,7 @@ function BannerOnlyServiceCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-semibold tracking-tight truncate min-w-0">
-              {item.title || "Untitled service"}
+              {displayCategoryHeading(item)}
             </h3>
             {statusBadge}
           </div>

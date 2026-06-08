@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,11 +16,17 @@ import {
   Users,
 } from "lucide-react";
 import { ContactTrigger } from "@/components/contact/contact-trigger";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { useShareProfileLink } from "@/hooks/use-share-profile-link";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { buildHomeServiceChips } from "@/lib/home/home-service-chips";
 import { serviceAccents } from "@/lib/sections/services-config";
 import { VERIFIED_BY_YVITY_LABEL } from "@/lib/verification/copy";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { useShareProfileLink } from "@/hooks/use-share-profile-link";
+import { useAchievementsData, useServicesData } from "@/lib/sections/stores";
+import { formatMdrtMemberLabel } from "@/lib/sections/achievement-tiers";
 import { useAuth } from "@/context/AuthUserContext";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { YvityVerificationSeal } from "@/components/brand/yvity-verification-seal";
@@ -28,19 +35,11 @@ import { HomeQuickActionsSection } from "@/components/home/home-quick-actions-se
 import { LatestHighlightsSection } from "@/components/home/latest-highlights-section";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { WhyChooseMeSection } from "@/components/home/why-choose-me-section";
+import { IntroVideoHeroBlock } from "@/components/intro-video/intro-video-hero-block";
 import { HomeTrustSection } from "@/components/home/home-trust-section";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/star-rating";
 import { cn } from "@/lib/utils";
-
-function heroMdrtLabel(): string {
-  if (advisorProfile.mdrtMember === false) return "Trusted Advisor";
-  if (advisorProfile.mdrtMember === true) return "MDRT Member";
-  const hasMdrt = advisorProfile.stats.some(
-    (s) => s.value.toUpperCase().includes("MDRT") || s.label.toUpperCase().includes("MDRT"),
-  );
-  return hasMdrt ? "MDRT Member" : "Trusted Advisor";
-}
 
 function splitDisplayName(fullName: string): { leading: string; accent: string } {
   const parts = fullName.trim().split(/\s+/);
@@ -53,6 +52,7 @@ function splitDisplayName(fullName: string): { leading: string; accent: string }
 
 function HomeAdvisorPhoto({ className }: { className?: string }) {
   const { user } = useAuth();
+  const advisorProfile = useAdvisorDisplayProfile();
   const initials = advisorProfile.name
     .split(" ")
     .map((n) => n[0])
@@ -61,7 +61,9 @@ function HomeAdvisorPhoto({ className }: { className?: string }) {
     .toUpperCase();
 
   const photoUrl =
-    resolveProfilePhotoUrl(user?.selfie_url) || advisorProfile.photoUrl?.trim() || "";
+    resolveProfilePhotoUrl(advisorProfile.photoUrl) ||
+    resolveProfilePhotoUrl(user?.selfie_url) ||
+    "";
   const photoSize = "size-28 sm:size-32 md:size-36 lg:size-[8.5rem]";
 
   return (
@@ -126,19 +128,32 @@ function HomeAdvisorPhoto({ className }: { className?: string }) {
 }
 
 function ProfileHeaderBanner() {
+  const advisorProfile = useAdvisorDisplayProfile();
+  const publicView = usePublicProfileView();
   const { home } = advisorProfile;
   const { settings } = useAdvisorSettings();
-  const { share, copied: shareDone } = useShareProfileLink();
+  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
+  const [achievements] = useAchievementsData();
+  const { advisor } = useAuth();
+  const { share, copied: shareDone, canShare } = useShareProfileLink({
+    advisorUserId: publicView?.userId,
+    profileSlug: advisorProfile.slug,
+    livePublicProfile: Boolean(publicView?.userId),
+  });
   const { leading, accent } = splitDisplayName(advisorProfile.name);
-  const mdrtLabel = heroMdrtLabel();
+  const mdrtLabel = formatMdrtMemberLabel(achievements);
+  const showIrdaiBadge = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
   const telHref = `tel:${advisorProfile.phone.replace(/\s/g, "")}`;
 
   const showCall = settings.contact.callButton;
   const showCallback =
+    !isWorkspacePreview &&
     settings.contact.contactForm &&
     settings.leads.acceptNewLeads &&
     settings.leads.publicProfileEnquiries;
-  const showShare = settings.publicProfile.shareProfile;
+  const showShare = canShare && settings.publicProfile.shareProfile;
 
   const headerBtn =
     "h-11 sm:h-12 w-full rounded-full text-sm font-semibold gap-2 shadow-md transition active:scale-[0.98]";
@@ -197,11 +212,25 @@ function ProfileHeaderBanner() {
               {home.heroBio}
             </p>
 
+            <IntroVideoHeroBlock className="max-w-xl mx-auto lg:mx-0" />
+
             <ul className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <FactPill icon={MapPin} label={advisorProfile.location} />
-              <FactPill icon={Shield} label="IRDA Certified" />
-              <FactPill icon={Clock} label={`${advisorProfile.experienceDisplay} Experience`} />
-              <FactPill icon={Users} label={`${advisorProfile.clientsCount} Clients`} />
+              {showIrdaiBadge ? (
+                <FactPill icon={Shield} label="IRDA Certified" />
+              ) : null}
+              {advisorProfile.experienceDisplay ? (
+                <FactPill
+                  icon={Clock}
+                  label={`${advisorProfile.experienceDisplay} Experience`}
+                />
+              ) : null}
+              {advisorProfile.profileHeroStat.value !== "—" ? (
+                <FactPill
+                  icon={Users}
+                  label={`${advisorProfile.profileHeroStat.value} ${advisorProfile.profileHeroStat.label}`}
+                />
+              ) : null}
             </ul>
           </div>
 
@@ -274,7 +303,23 @@ function FactPill({ icon: Icon, label }: { icon: typeof MapPin; label: string })
 }
 
 function HeroServicesSection() {
+  const advisorProfile = useAdvisorDisplayProfile();
   const { home } = advisorProfile;
+  const [services, , loading] = useServicesData();
+  const { advisor } = useAuth();
+  const publicView = usePublicProfileView();
+  const profileApproved = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
+
+  const serviceChips = useMemo(
+    () => buildHomeServiceChips(services, profileApproved),
+    [services, profileApproved],
+  );
+
+  if (!loading && serviceChips.length === 0) {
+    return null;
+  }
 
   return (
     <div className="w-full">
@@ -289,55 +334,66 @@ function HeroServicesSection() {
         goals.
       </p>
 
-      <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {home.serviceChips.map((chip) => {
-          const accent = serviceAccents[chip.category];
-          const Icon = accent.icon;
-          return (
-            <li key={chip.category}>
-              <Link
-                href={chip.href}
-                className={cn(
-                  "group relative flex h-full items-center gap-3 sm:gap-4 overflow-hidden rounded-2xl border p-3.5 sm:p-4",
-                  "transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99]",
-                  accent.border,
-                  accent.soft,
-                )}
-              >
-                <div
+      {loading ? (
+        <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[0, 1, 2].map((i) => (
+            <li
+              key={i}
+              className="h-[5.25rem] rounded-2xl border border-white/10 bg-white/[0.03] animate-pulse"
+            />
+          ))}
+        </ul>
+      ) : (
+        <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {serviceChips.map((chip) => {
+            const accent = serviceAccents[chip.category];
+            const Icon = accent.icon;
+            return (
+              <li key={chip.id}>
+                <Link
+                  href={chip.href}
                   className={cn(
-                    "pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100",
-                    "bg-gradient-to-br",
-                    accent.ratio,
-                  )}
-                />
-                <span
-                  className={cn(
-                    "relative inline-flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-xl glass",
-                    accent.ring,
+                    "group relative flex h-full items-center gap-3 sm:gap-4 overflow-hidden rounded-2xl border p-3.5 sm:p-4",
+                    "transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99]",
+                    accent.border,
+                    accent.soft,
                   )}
                 >
-                  <Icon className={cn("size-5 sm:size-6", accent.text)} />
-                </span>
-                <span className="relative min-w-0 flex-1 text-left">
-                  <span className={cn("block text-sm sm:text-base font-semibold", accent.text)}>
-                    {chip.label}
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100",
+                      "bg-gradient-to-br",
+                      accent.ratio,
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "relative inline-flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-xl glass",
+                      accent.ring,
+                    )}
+                  >
+                    <Icon className={cn("size-5 sm:size-6", accent.text)} />
                   </span>
-                  <span className="mt-0.5 block text-[11px] text-muted-foreground group-hover:text-foreground/70 transition">
-                    View details
+                  <span className="relative min-w-0 flex-1 text-left">
+                    <span className={cn("block text-sm sm:text-base font-semibold", accent.text)}>
+                      {chip.label}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] text-muted-foreground group-hover:text-foreground/70 transition line-clamp-1">
+                      {chip.subtitle}
+                    </span>
                   </span>
-                </span>
-                <ArrowRight
-                  className={cn(
-                    "relative size-4 shrink-0 opacity-40 transition group-hover:translate-x-0.5 group-hover:opacity-100",
-                    accent.text,
-                  )}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                  <ArrowRight
+                    className={cn(
+                      "relative size-4 shrink-0 opacity-40 transition group-hover:translate-x-0.5 group-hover:opacity-100",
+                      accent.text,
+                    )}
+                  />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

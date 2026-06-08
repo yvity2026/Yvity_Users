@@ -9,7 +9,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { ServiceCompanyLogoUpload } from "@/components/sections/service-company-logo-upload";
 import { VerificationDocumentUpload } from "@/components/verification/verification-document-upload";
 import { VerificationStatusBadge } from "@/components/verification/verification-status-badge";
+import { ServiceAccountTypePicker } from "@/components/advisor/service-account-type-picker";
+import {
+  defaultCardDisplayForCapacity,
+  mergeCardDisplay,
+  metricLabelsForCapacity,
+  SERVICE_CARD_DISPLAY_OPTIONS,
+} from "@/lib/advisor/service-card-display";
+import {
+  isCapacityComingSoon,
+  normalizeStoredCapacityId,
+  type ServiceCapacityId,
+} from "@/lib/advisor/serviceCapacity";
 import { formatExperienceFromStart } from "@/lib/sections/service-experience";
+import { categoryHeadingFor } from "@/lib/sections/services-config";
 import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
 import { markSubmitted } from "@/lib/verification/defaults";
 import { SERVICE_DOCUMENT_REQUIREMENTS } from "@/lib/verification/service-config";
@@ -88,6 +101,27 @@ export function ServicesEditorModal({
     [draft.serviceStartDate],
   );
 
+  const capacityId = (draft.capacityId ?? "individual_agent") as ServiceCapacityId;
+  const capacityLocked = isCapacityComingSoon(capacityId);
+  const cardDisplay = draft.cardDisplay ?? mergeCardDisplay(capacityId);
+  const metricLabels = useMemo(() => metricLabelsForCapacity(capacityId), [capacityId]);
+
+  const patchCardDisplay = (key: keyof typeof cardDisplay, value: boolean) => {
+    setDraft((d) => ({
+      ...d,
+      cardDisplay: { ...mergeCardDisplay(d.capacityId ?? "individual_agent", d.cardDisplay), [key]: value },
+    }));
+  };
+
+  const handleCapacityChange = (nextCapacity: ServiceCapacityId) => {
+    if (isCapacityComingSoon(nextCapacity)) return;
+    setDraft((d) => ({
+      ...d,
+      capacityId: nextCapacity,
+      cardDisplay: defaultCardDisplayForCapacity(nextCapacity),
+    }));
+  };
+
   const handleDocsChange = (next: VerificationDocument[]) => {
     setPendingDocs(next);
     setDocsDirty(true);
@@ -115,7 +149,10 @@ export function ServicesEditorModal({
 
     onSave({
       ...draft,
+      title: categoryHeadingFor(draft.category),
       areas,
+      capacityId: normalizeStoredCapacityId(draft.capacityId),
+      cardDisplay: mergeCardDisplay(capacityId, draft.cardDisplay),
       showDetailCard: draft.category !== "mutual",
       verification: nextVerification,
       verified: nextVerification.status === "verified",
@@ -136,7 +173,7 @@ export function ServicesEditorModal({
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Service details
             </p>
-            <p className="font-semibold">{draft.title || "Untitled"}</p>
+            <p className="font-semibold">{categoryHeadingFor(draft.category)}</p>
           </div>
           <button
             type="button"
@@ -154,6 +191,7 @@ export function ServicesEditorModal({
             onChange={(e) => {
               const category = e.target.value as ServiceCategory;
               patch("category", category);
+              patch("title", categoryHeadingFor(category));
               patch("showDetailCard", category !== "mutual");
             }}
           >
@@ -165,8 +203,12 @@ export function ServicesEditorModal({
           </select>
         </Field>
 
-        <Field label="Title">
-          <Input value={draft.title} onChange={(e) => patch("title", e.target.value)} />
+        <Field label="Category heading">
+          <Input
+            readOnly
+            value={categoryHeadingFor(draft.category)}
+            className="bg-muted/40 text-muted-foreground"
+          />
         </Field>
         <Field label="Company name">
           <Input
@@ -227,67 +269,164 @@ export function ServicesEditorModal({
             </p>
           )}
         </Field>
-        <Field label="Role label">
-          <Input value={draft.roleLabel} onChange={(e) => patch("roleLabel", e.target.value)} />
+        <Field label="Designation">
+          <Input
+            placeholder="e.g. Chief Life Planner"
+            value={draft.roleLabel}
+            onChange={(e) => patch("roleLabel", e.target.value)}
+          />
         </Field>
 
         {showDetail && (
           <>
+            <Field label="Account type">
+              <ServiceAccountTypePicker
+                variant="editor"
+                value={capacityId}
+                onChange={capacityLocked ? undefined : handleCapacityChange}
+              />
+            </Field>
+
+            <section className="rounded-2xl border border-white/12 bg-white/[0.03] p-4 space-y-3">
+              <p className="text-sm font-semibold">Show on public service card</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Only selected fields with values appear on your profile. Defaults match your account
+                type — uncheck anything that does not apply.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {SERVICE_CARD_DISPLAY_OPTIONS.map((option) => (
+                  <label
+                    key={option.key}
+                    className="flex cursor-pointer items-start gap-2 rounded-lg border border-white/10 px-2.5 py-2"
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={cardDisplay[option.key]}
+                      onChange={(e) => patchCardDisplay(option.key, e.target.checked)}
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-xs font-medium">{option.label}</span>
+                      {option.hint ? (
+                        <span className="block text-[10px] text-muted-foreground">{option.hint}</span>
+                      ) : null}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Clients">
-                <Input
-                  type="number"
-                  value={draft.clients}
-                  onChange={(e) => patch("clients", Number(e.target.value) || 0)}
-                />
-              </Field>
-              <Field label="Claims">
-                <Input
-                  type="number"
-                  value={draft.claims}
-                  onChange={(e) => patch("claims", Number(e.target.value) || 0)}
-                />
-              </Field>
+              {cardDisplay.showClients ? (
+                <Field label={metricLabels.clients}>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.clients}
+                    onChange={(e) => patch("clients", Number(e.target.value) || 0)}
+                  />
+                </Field>
+              ) : null}
+              {cardDisplay.showClaims ? (
+                <Field label={metricLabels.claims}>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.claims}
+                    onChange={(e) => patch("claims", Number(e.target.value) || 0)}
+                  />
+                </Field>
+              ) : null}
+              {cardDisplay.showTeamSize ? (
+                <Field label={metricLabels.teamSize}>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.teamSize ?? ""}
+                    onChange={(e) =>
+                      patch("teamSize", e.target.value ? Number(e.target.value) : undefined)
+                    }
+                  />
+                </Field>
+              ) : null}
+              {cardDisplay.showActiveAgents ? (
+                <Field label={metricLabels.activeAgents}>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.activeAgents ?? ""}
+                    onChange={(e) =>
+                      patch("activeAgents", e.target.value ? Number(e.target.value) : undefined)
+                    }
+                  />
+                </Field>
+              ) : null}
             </div>
-            <Field label="Total sum insured">
-              <Input
-                value={draft.sumInsured}
-                onChange={(e) => patch("sumInsured", e.target.value)}
-              />
-            </Field>
-            <Field label="Total claim settled">
-              <Input
-                value={draft.claimSettled}
-                onChange={(e) => patch("claimSettled", e.target.value)}
-              />
-            </Field>
-            <Field label="Claim ratio (%)">
-              <Input
-                type="number"
-                value={draft.claimRatio}
-                onChange={(e) => patch("claimRatio", Number(e.target.value) || 0)}
-              />
-            </Field>
-            <Field label="Status message">
-              <Input
-                value={draft.statusMessage}
-                onChange={(e) => patch("statusMessage", e.target.value)}
-              />
-            </Field>
-            <Field label="Status caption">
-              <Input
-                value={draft.statusCaption}
-                onChange={(e) => patch("statusCaption", e.target.value)}
-              />
-            </Field>
-            <Field label="Areas (comma-separated)">
-              <Textarea
-                rows={2}
-                placeholder="Term, Child Plan, Retirement, ULIP"
-                value={areasText}
-                onChange={(e) => setAreasText(e.target.value)}
-              />
-            </Field>
+            {cardDisplay.showBranches ? (
+              <Field label={metricLabels.branches}>
+                <Input
+                  type="number"
+                  min={0}
+                  value={draft.branchCount ?? ""}
+                  onChange={(e) =>
+                    patch("branchCount", e.target.value ? Number(e.target.value) : undefined)
+                  }
+                />
+              </Field>
+            ) : null}
+            {cardDisplay.showSumInsured ? (
+              <Field label="Total sum insured">
+                <Input
+                  value={draft.sumInsured}
+                  onChange={(e) => patch("sumInsured", e.target.value)}
+                />
+              </Field>
+            ) : null}
+            {cardDisplay.showClaimSettled ? (
+              <Field label="Total claim settled">
+                <Input
+                  value={draft.claimSettled}
+                  onChange={(e) => patch("claimSettled", e.target.value)}
+                />
+              </Field>
+            ) : null}
+            {cardDisplay.showClaimRatio ? (
+              <Field label={`${metricLabels.claimRatio} (%)`}>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={draft.claimRatio}
+                  onChange={(e) => patch("claimRatio", Number(e.target.value) || 0)}
+                />
+              </Field>
+            ) : null}
+            {cardDisplay.showStatusMessage ? (
+              <>
+                <Field label="Status message">
+                  <Input
+                    value={draft.statusMessage}
+                    onChange={(e) => patch("statusMessage", e.target.value)}
+                  />
+                </Field>
+                <Field label="Status caption">
+                  <Input
+                    value={draft.statusCaption}
+                    onChange={(e) => patch("statusCaption", e.target.value)}
+                  />
+                </Field>
+              </>
+            ) : null}
+            {cardDisplay.showAreas ? (
+              <Field label="Areas (comma-separated)">
+                <Textarea
+                  rows={2}
+                  placeholder="Term, Child Plan, Retirement, ULIP"
+                  value={areasText}
+                  onChange={(e) => setAreasText(e.target.value)}
+                />
+              </Field>
+            ) : null}
           </>
         )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
-import { serviceAccents, servicesPageCopy } from "@/lib/sections/services-config";
+import { categoryHeadingFor, serviceAccents, servicesPageCopy } from "@/lib/sections/services-config";
 import { cn } from "@/lib/utils";
 
 const PLACEHOLDER_SLOTS: { category: ServiceCategory; provider: string }[] = [
@@ -68,7 +68,7 @@ export function ServicesBanner({ items, className }: { items: ServiceItem[]; cla
                   <Icon className={cn("size-4 sm:size-[1.125rem]", accent.text)} />
                 </span>
                 <p className="text-xs sm:text-sm font-semibold text-foreground leading-tight">
-                  {item.title}
+                  {categoryHeadingFor(item.category)}
                 </p>
                 <p className="mt-1 text-[10px] sm:text-xs text-[oklch(0.82_0.13_205)] leading-tight">
                   {item.provider}

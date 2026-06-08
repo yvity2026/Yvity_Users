@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { isHostedGalleryUrl } from "@/lib/media-urls";
 
 export function GalleryImageUpload({
   imageUrl,
@@ -24,7 +25,7 @@ export function GalleryImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"upload" | "url">(
-    imageUrl.startsWith("/api/gallery/uploads/") ? "upload" : "url",
+    isHostedGalleryUrl(imageUrl) ? "upload" : "url",
   );
 
   const uploadFile = async (file: File) => {

@@ -6,11 +6,17 @@ import { cn } from "@/lib/utils";
 
 export function AchievementsBanner({
   totalAwards,
+  mdrtLabel,
+  experienceDisplay,
   className,
 }: {
   totalAwards: number;
+  mdrtLabel?: string;
+  experienceDisplay?: string;
   className?: string;
 }) {
+  const experienceValue = experienceDisplay?.trim() || achievementsBannerStats.experienceValue;
+
   const stats = [
     {
       icon: Trophy,
@@ -19,12 +25,12 @@ export function AchievementsBanner({
     },
     {
       icon: Globe,
-      value: achievementsBannerStats.mdrtLabel,
+      value: mdrtLabel ?? achievementsBannerStats.mdrtLabel,
       label: achievementsBannerStats.mdrtSub,
     },
     {
       icon: Clock,
-      value: achievementsBannerStats.experienceValue,
+      value: experienceValue || "—",
       label: achievementsBannerStats.experienceLabel,
     },
   ] as const;

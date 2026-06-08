@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { FileDown, MessageSquareQuote, QrCode, Star } from "lucide-react";
 import { toast } from "sonner";
 import { RecommendAdvisorModal } from "@/components/testimonials/recommend-advisor-modal";
+import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { downloadProfilePdf, downloadProfileQrCode } from "@/lib/profile/profile-downloads";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
@@ -102,9 +103,6 @@ function QuickActionCard({
             action.ring,
           )}
         >
-          {/* Standardised glyph sizing (matches Hero service chips and
-              other quick-action surfaces) — keeps the icon strokes
-              visually aligned across the home page. */}
           <Icon className="size-5" strokeWidth={2.1} />
         </span>
         <span className="relative min-w-0">
@@ -123,8 +121,16 @@ function QuickActionCard({
 export function HomeQuickActionsSection() {
   const { settings } = useAdvisorSettings();
   const { openGiveTestimonial } = useTestimonialSubmit();
+  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const [recommendOpen, setRecommendOpen] = useState(false);
   const [busyId, setBusyId] = useState<QuickActionId | null>(null);
+
+  const visibleActions = actions.filter((action) => {
+    if (isWorkspacePreview && (action.id === "recommend" || action.id === "testimonial")) {
+      return false;
+    }
+    return true;
+  });
 
   const isDisabled = (id: QuickActionId): boolean => {
     if (id === "recommend") return !settings.leads.recommendationRequests;
@@ -174,7 +180,7 @@ export function HomeQuickActionsSection() {
         </p>
 
         <ul className="mt-5 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {actions.map((action) => (
+          {visibleActions.map((action) => (
             <QuickActionCard
               key={action.id}
               action={action}

@@ -88,6 +88,20 @@ export function isPubliclyVisible(record: VerificationRecord | undefined): boole
 }
 
 /**
+ * After admin approves the advisor profile, registration services (pending
+ * verification) are shown on the public profile with registration data;
+ * advisors can fill metrics via Edit in the dashboard.
+ */
+export function isServiceVisibleOnPublicProfile(
+  item: { verification?: VerificationRecord },
+  profileApproved: boolean,
+): boolean {
+  if (isPubliclyVisible(item.verification)) return true;
+  if (item.verification?.status === "rejected") return false;
+  return profileApproved;
+}
+
+/**
  * Convenience predicate used by entity types where verification is OPTIONAL
  * (career experiences, certifications, achievements). Returns `true` only
  * when an explicit record exists and its `status === "verified"`.
@@ -98,6 +112,23 @@ export function isPubliclyVisible(record: VerificationRecord | undefined): boole
  */
 export function isYvityVerified(record: VerificationRecord | undefined): boolean {
   return record?.status === "verified";
+}
+
+/**
+ * Whether to show "Verified by YVITY" on a service. Uses stored status when
+ * present; when the advisor profile is approved, registration services that
+ * were submitted with documents count as verified even before a backfill run.
+ */
+export function isServiceVerifiedByYvity(
+  item: { verification?: VerificationRecord },
+  profileApproved?: boolean,
+): boolean {
+  if (isYvityVerified(item.verification)) return true;
+  if (!profileApproved) return false;
+  if (item.verification?.status === "rejected") return false;
+  const v = item.verification;
+  if (!v) return false;
+  return Boolean(v.submittedAt) || (v.documents?.length ?? 0) > 0;
 }
 
 /**

@@ -1,5 +1,7 @@
+import { MEMBERSHIP_PLAN_MARKETING } from "./plan-catalog";
 import type { MembershipFeature, MembershipFeatureId, MembershipPlanDefinition } from "./types";
 
+/** @deprecated Legacy feature ids — enforcement wiring uses plan-catalog limits next. */
 export const MEMBERSHIP_FEATURES: MembershipFeature[] = [
   { id: "public_profile", label: "Public Profile" },
   { id: "services", label: "Services" },
@@ -13,47 +15,44 @@ export const MEMBERSHIP_FEATURES: MembershipFeature[] = [
   { id: "verified_badge", label: "YVITY Verified Badge" },
 ];
 
-const freeFeatures: MembershipFeatureId[] = ["public_profile", "services", "career_journey"];
+const legacyFeatures: Record<MembershipPlanDefinition["id"], MembershipFeatureId[]> = {
+  free: ["public_profile", "services", "career_journey"],
+  silver: [
+    "public_profile",
+    "services",
+    "career_journey",
+    "education",
+    "testimonials",
+    "gallery",
+    "achievements",
+    "leads",
+    "verified_badge",
+  ],
+  gold: [
+    "public_profile",
+    "services",
+    "career_journey",
+    "education",
+    "testimonials",
+    "gallery",
+    "achievements",
+    "leads",
+    "insights",
+    "verified_badge",
+  ],
+};
 
-const silverFeatures: MembershipFeatureId[] = [
-  ...freeFeatures,
-  "education",
-  "testimonials",
-  "gallery",
-  "achievements",
-  "leads",
-];
-
-const goldFeatures: MembershipFeatureId[] = [...silverFeatures, "insights", "verified_badge"];
-
-export const MEMBERSHIP_PLANS: MembershipPlanDefinition[] = [
-  {
-    id: "free",
-    name: "FREE",
-    priceLabel: "Free",
-    priceAnnualInr: 0,
-    tagline: "Start your digital presence",
-    features: freeFeatures,
-  },
-  {
-    id: "silver",
-    name: "SILVER",
-    priceLabel: "₹1,499/year",
-    priceAnnualInr: 1499,
-    tagline: "Grow with leads & social proof",
-    features: silverFeatures,
-    highlight: "Most popular for active advisors",
-  },
-  {
-    id: "gold",
-    name: "GOLD",
-    priceLabel: "₹2,999/year",
-    priceAnnualInr: 2999,
-    tagline: "Full credibility & growth toolkit",
-    features: goldFeatures,
-    highlight: "Verified badge & insights included",
-  },
-];
+export const MEMBERSHIP_PLANS: MembershipPlanDefinition[] = MEMBERSHIP_PLAN_MARKETING.map(
+  (card) => ({
+    id: card.id,
+    name: card.name,
+    priceLabel: card.priceLabel,
+    priceAnnualInr: card.priceAnnualInr,
+    tagline: card.tagline,
+    highlight: card.highlight,
+    features: legacyFeatures[card.id],
+  }),
+);
 
 export function planHasFeature(
   planId: MembershipPlanDefinition["id"],
@@ -64,9 +63,11 @@ export function planHasFeature(
 }
 
 export function featuresForPlan(planId: MembershipPlanDefinition["id"]): MembershipFeature[] {
-  const plan = MEMBERSHIP_PLANS.find((p) => p.id === planId);
-  if (!plan) return [];
-  return MEMBERSHIP_FEATURES.filter((f) => plan.features.includes(f.id));
+  const labels = MEMBERSHIP_PLAN_MARKETING.find((p) => p.id === planId)?.included ?? [];
+  return labels.map((label, index) => ({
+    id: `marketing_${index}` as MembershipFeatureId,
+    label,
+  }));
 }
 
 export function upgradePlanId(

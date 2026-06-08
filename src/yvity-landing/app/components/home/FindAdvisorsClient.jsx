@@ -8,6 +8,7 @@ import LandingSectionHeader from "./LandingSectionHeader";
 import LandingSnapScroll, {
   LandingSnapItem,
 } from "./LandingSnapScroll";
+import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
 import { LANDING_INNER, LANDING_SECTION_ANCHOR, LANDING_SECTION_PY } from "./landingLayout";
 
 const SERVICE_FILTER_OPTIONS = ["Life Insurance", "Health Insurance"];
@@ -26,7 +27,7 @@ function FilterField({ label, className = "", children }) {
   );
 }
 
-export default function FindAdvisorsClient({ advisors }) {
+export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
   const [results, setResults] = useState(null);
   const [searchState, setSearchState] = useState("");
   const [searchCity, setSearchCity] = useState("");
@@ -92,6 +93,11 @@ export default function FindAdvisorsClient({ advisors }) {
         );
         const payload = await response.json();
 
+        if (response.status === 401 || payload.code === "LOGIN_REQUIRED") {
+          openLoginModal();
+          throw new Error("Log in to search all advisors.");
+        }
+
         if (!response.ok) {
           throw new Error(payload.error || "Search failed");
         }
@@ -116,7 +122,7 @@ export default function FindAdvisorsClient({ advisors }) {
     Boolean(searchName.trim());
 
   useEffect(() => {
-    if (!hasSearchInputs) return undefined;
+    if (!hasSearchInputs || !isLoggedIn) return undefined;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -142,6 +148,7 @@ export default function FindAdvisorsClient({ advisors }) {
     searchService,
     searchCompany,
     searchName,
+    isLoggedIn,
   ]);
 
   const clearAllFilters = () => {
@@ -154,10 +161,15 @@ export default function FindAdvisorsClient({ advisors }) {
     setSearchError("");
   };
 
-  const advisorsToDisplay = hasSearchInputs ? results ?? [] : advisors;
-  const displayedAdvisors = hasSearchInputs
+  const advisorsToDisplay = hasSearchInputs && isLoggedIn ? results ?? [] : advisors;
+  const displayedAdvisors = hasSearchInputs && isLoggedIn
     ? advisorsToDisplay.slice(0, 15)
-    : advisorsToDisplay.slice(0, 9);
+    : advisorsToDisplay.slice(0, 6);
+
+  const promptLoginToSearch = () => {
+    setSearchError("Log in to search all advisors.");
+    openLoginModal();
+  };
 
   const resetField = () => {
     setSearchError("");
@@ -191,6 +203,19 @@ export default function FindAdvisorsClient({ advisors }) {
         </motion.div>
 
         <div className="mb-5 rounded-xl border border-[#D7D7D7]/80 bg-white p-3 font-poppins shadow-[0_2px_12px_rgba(10,74,74,0.06)] lg:mb-6 lg:rounded-2xl lg:p-4">
+          {!isLoggedIn ? (
+            <div className="mb-3 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5 text-[12px] text-[#92400E] lg:text-[13px]">
+              Featured advisors below are visible without login.{" "}
+              <button
+                type="button"
+                onClick={openLoginModal}
+                className="font-semibold text-[#0A4A4A] underline underline-offset-2"
+              >
+                Log in
+              </button>{" "}
+              to search the full directory.
+            </div>
+          ) : null}
           <div className="mb-2.5 flex items-center justify-between gap-2 lg:mb-3">
             <p className="text-xs font-semibold text-[#0A4A4A] lg:text-sm">
               Search advisors
@@ -295,19 +320,23 @@ export default function FindAdvisorsClient({ advisors }) {
 
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
+              if (!isLoggedIn) {
+                promptLoginToSearch();
+                return;
+              }
               runSearch({
                 state: searchState,
                 city: searchCity,
                 service: searchService,
                 company: searchCompany,
                 name: searchName,
-              })
-            }
+              });
+            }}
             disabled={!hasSearchInputs || isSearching}
             className="mt-3 flex w-full items-center justify-center rounded-full bg-[#0A4A4A] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:hidden"
           >
-            {isSearching ? "Searching…" : "Search advisors"}
+            {isSearching ? "Searching…" : isLoggedIn ? "Search advisors" : "Log in to search"}
           </button>
 
           {hasSearchInputs && searchError ? (

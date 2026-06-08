@@ -1,6 +1,4 @@
 import { randomUUID } from "crypto";
-import fs from "fs";
-import path from "path";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { normalizeIndianMobile } from "@/lib/server/registration";
@@ -10,16 +8,11 @@ import {
   toProfileUser,
   updateRegisteredSelfie,
 } from "@/lib/server/profile";
+import { saveSelfieUpload } from "@/lib/server/uploads";
 import { getSessionUser, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const SELFIE_DIR = path.join(process.cwd(), ".data", "selfies");
-
-function ensureSelfieDir() {
-  fs.mkdirSync(SELFIE_DIR, { recursive: true });
-}
 
 export async function POST(request: Request) {
   const session = await getSessionUser();
@@ -52,16 +45,18 @@ export async function POST(request: Request) {
     }
 
     const phone = normalizeIndianMobile(session.phone ?? session.identifier);
+    const ownerKey = session.id || phone || "user";
     const fileKey = `${phone || session.id || "user"}-${randomUUID().slice(0, 8)}.jpg`;
-    const filePath = path.join(SELFIE_DIR, fileKey);
-
-    ensureSelfieDir();
     const buffer = Buffer.from(await (image as Blob).arrayBuffer());
-    fs.writeFileSync(filePath, buffer);
+    const saved = await saveSelfieUpload({
+      buffer,
+      fileKey,
+      ownerKey,
+      contentType: "image/jpeg",
+    });
 
-    const url = `/api/auth/selfie/${fileKey}`;
-    const registered = updateRegisteredSelfie(session, url);
-    const nextSession = mergeSessionProfile({ ...session, selfie_url: url }, registered);
+    const registered = updateRegisteredSelfie(session, saved.url);
+    const nextSession = mergeSessionProfile({ ...session, selfie_url: saved.url }, registered);
 
     cookieStore.set(SESSION_COOKIE, JSON.stringify(nextSession), sessionCookieOptions());
 

@@ -1,17 +1,57 @@
 import { NextResponse } from "next/server";
+import { getAdvisorPlanContext } from "@/lib/advisor-membership/plan-enforcement-server";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
+import { unauthorized, requireSession } from "@/lib/server/api-auth";
 import {
   appendRecommendation,
   hasVerifiedRecommendationFromMobile,
+  loadRecommendations,
 } from "@/lib/server/recommendations-persistence";
+import {
+  countHeldRecommendations,
+  countPublishedRecommendations,
+} from "@/lib/advisor-membership/content-visibility";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 import {
   isRecommendationTag,
   normaliseMobile,
   type RecommendationTag,
 } from "@/lib/recommendations/types";
 import { verifyOtpCode } from "@/lib/server/auth";
+import { getSessionUser } from "@/lib/server/session";
+import {
+  ADVISOR_SELF_RECOMMENDATION_MESSAGE,
+  rejectAdvisorSelfSubmission,
+} from "@/lib/server/advisor-self-submission-guard";
 
 export const runtime = "nodejs";
+
+export async function GET() {
+  const user = await requireSession();
+  if (!user?.id) return unauthorized();
+
+  const list = await loadRecommendations(user.id);
+  const verified = list.filter((row) => row.verified);
+  const planCtx = await getAdvisorPlanContext(user.id);
+
+  if (planCtx) {
+    const publishedCount = countPublishedRecommendations(planCtx.limits, list);
+    const heldCount = countHeldRecommendations(planCtx.limits, list);
+    return NextResponse.json({
+      count: publishedCount,
+      totalCount: verified.length,
+      publishedCount,
+      heldCount,
+    });
+  }
+
+  return NextResponse.json({
+    count: verified.length,
+    totalCount: verified.length,
+    publishedCount: verified.length,
+    heldCount: 0,
+  });
+}
 
 type RecommendationSubmission = {
   fullName?: string;
@@ -69,18 +109,30 @@ export async function POST(request: Request) {
     );
   }
 
-  // OTP verification is mandatory — we only persist *verified*
-  // recommendations. The OTP was already validated by the inline
-  // `/otp/verify` endpoint; this is the authoritative re-check.
-  if (!verifyOtpCode(otp)) {
+  // OTP for anonymous visitors; signed-in YVITY users skip OTP.
+  const session = await getSessionUser();
+  const skipOtp = Boolean(session?.id);
+  if (!skipOtp && !verifyOtpCode(otp)) {
     return NextResponse.json(
       { error: "Mobile number not verified. Please verify with OTP first." },
       { status: 401 },
     );
   }
 
+  const advisorUserId = await resolveAdvisorDataUserId();
+  if (!advisorUserId) {
+    return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
+  }
+
+  const selfBlocked = await rejectAdvisorSelfSubmission(
+    advisorUserId,
+    mobile,
+    ADVISOR_SELF_RECOMMENDATION_MESSAGE,
+  );
+  if (selfBlocked) return selfBlocked;
+
   // Duplicate prevention — one verified recommendation per mobile.
-  if (await hasVerifiedRecommendationFromMobile(mobile)) {
+  if (await hasVerifiedRecommendationFromMobile(mobile, advisorUserId)) {
     return NextResponse.json(
       {
         error:
@@ -90,14 +142,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const entry = await appendRecommendation({
-    fullName,
-    mobile,
-    mobileNormalised: normalised,
-    tags,
-    comment: comment || undefined,
-    verified: true,
-  });
+  const entry = await appendRecommendation(
+    {
+      fullName,
+      mobile,
+      mobileNormalised: normalised,
+      tags,
+      comment: comment || undefined,
+      verified: true,
+    },
+    advisorUserId,
+  );
 
   return NextResponse.json({ ok: true, id: entry.id });
 }

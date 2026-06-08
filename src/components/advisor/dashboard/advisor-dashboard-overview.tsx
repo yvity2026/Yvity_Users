@@ -27,12 +27,19 @@ import {
   DashboardStatCard,
   ProgressRing,
 } from "@/components/advisor/dashboard/dashboard-ui";
+import { HeldContentUpgradeBanner } from "@/components/advisor/membership/held-content-upgrade-banner";
 import { toast } from "sonner";
 import { IntroVideoUploadModal } from "@/components/intro-video/intro-video-upload-modal";
+import { AdvisorAmbassadorReferralCard } from "@/components/advisor/dashboard/advisor-ambassador-referral-card";
+import { DashboardApprovalBanner } from "@/components/dashboard/DashboardNotifications";
 import { useAdvisorDashboardModel } from "@/hooks/use-advisor-dashboard-model";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
+import { useVerifiedRecommendationCount } from "@/hooks/use-verified-recommendation-count";
+import { useTestimonialVisibility } from "@/hooks/use-content-visibility";
+import { useTestimonialsData } from "@/lib/sections/stores";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useShareProfileLink } from "@/hooks/use-share-profile-link";
-import { getPublicProfileSharePath } from "@/lib/public-profile-url";
+import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
 import type { AdvisorProfileSection, AdvisorTopSection } from "@/lib/advisor-nav";
 import type { DashboardAction } from "@/lib/advisor-dashboard/types";
 import { cn } from "@/lib/utils";
@@ -60,8 +67,14 @@ export function AdvisorDashboardOverview({
   underReview = false,
 }: AdvisorDashboardOverviewProps) {
   const { model, loading } = useAdvisorDashboardModel();
+  const { canAppearInSearch } = usePlanLimits();
+  const { heldCount: heldRecommendationCount } = useVerifiedRecommendationCount();
+  const [testimonials] = useTestimonialsData();
+  const { heldCount: heldTestimonialCount, heldByType, upgradePlan } =
+    useTestimonialVisibility(testimonials);
   const { settings } = useAdvisorSettings();
-  const { share, copied: shareDone } = useShareProfileLink();
+  const { share, copied: shareDone, canShare } = useShareProfileLink();
+  const { previewPath } = usePublicProfileUrls();
   const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
 
   if (loading || !model) {
@@ -134,6 +147,8 @@ export function AdvisorDashboardOverview({
 
   return (
     <div className="space-y-3 md:space-y-10 pb-4 animate-in fade-in duration-500">
+      <DashboardApprovalBanner />
+
       {/* 1. Welcome section */}
       <section
         aria-labelledby="dashboard-welcome-title"
@@ -192,6 +207,8 @@ export function AdvisorDashboardOverview({
         </div>
       </section>
 
+      <AdvisorAmbassadorReferralCard />
+
       {/* 2. Performance Snapshot */}
       <DashboardSection
         title="Performance Snapshot"
@@ -218,17 +235,19 @@ export function AdvisorDashboardOverview({
             icon={Eye}
             accent="cyan"
           />
+          {canAppearInSearch ? (
+            <DashboardStatCard
+              label="Search Appearances"
+              value={model.performance.searchAppearances}
+              delta={model.performance.searchDelta}
+              icon={Search}
+              accent="violet"
+            />
+          ) : null}
           <DashboardStatCard
-            label="Search Appearances"
-            value={model.performance.searchAppearances}
-            delta={model.performance.searchDelta}
-            icon={Search}
-            accent="violet"
-          />
-          <DashboardStatCard
-            label="Leads Received"
-            value={model.performance.leadsReceived}
-            icon={Users}
+            label="Profile Shares (Others)"
+            value={model.performance.profileSharesByOthers}
+            icon={Share2}
             accent="emerald"
           />
           <DashboardStatCard
@@ -244,6 +263,15 @@ export function AdvisorDashboardOverview({
             accent="rose"
           />
         </div>
+        {!underReview ? (
+          <HeldContentUpgradeBanner
+            heldTestimonialCount={heldTestimonialCount}
+            heldRecommendationCount={heldRecommendationCount}
+            heldByTestimonialType={heldByType}
+            upgradePlan={upgradePlan}
+            className="mt-4"
+          />
+        ) : null}
       </DashboardSection>
 
       {/* 3. Lead Summary */}
@@ -262,6 +290,13 @@ export function AdvisorDashboardOverview({
             variants on this surface. */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <DashboardStatCard
+            label="Total Leads"
+            value={model.leads.totalLeads}
+            icon={Users}
+            accent="emerald"
+            onClick={() => onNavigateTop("leads")}
+          />
+          <DashboardStatCard
             label="New Leads"
             value={model.leads.newLeads}
             icon={UserPlus}
@@ -269,21 +304,14 @@ export function AdvisorDashboardOverview({
             onClick={() => onNavigateTop("leads")}
           />
           <DashboardStatCard
-            label="Active Leads"
-            value={model.leads.activeLeads}
-            icon={Users}
-            accent="emerald"
-            onClick={() => onNavigateTop("leads")}
-          />
-          <DashboardStatCard
-            label="Follow-Ups Pending"
-            value={model.leads.followUpsPending}
+            label="Follow-up Leads"
+            value={model.leads.followUpLeads}
             icon={Target}
             accent="amber"
             onClick={() => onNavigateTop("leads")}
           />
           <DashboardStatCard
-            label="Converted"
+            label="Converted Leads"
             value={model.leads.convertedLeads}
             icon={Award}
             accent="violet"
@@ -387,16 +415,16 @@ export function AdvisorDashboardOverview({
               // Opens the public profile with `?preview=public` so the
               // page renders the visitor chrome (Login CTA, no Dashboard
               // / Logout) even though the advisor is still authenticated.
-              window.open(getPublicProfileSharePath(), "_blank", "noopener,noreferrer")
+              window.open(previewPath, "_blank", "noopener,noreferrer")
             }
           />
-          {settings.publicProfile.shareProfile && (
-            <QuickAction
-              icon={Share2}
-              label={shareDone ? "Link Copied!" : "Share Profile"}
-              onClick={() => void handleShareProfile()}
-            />
-          )}
+          <QuickAction
+            icon={Share2}
+            label={
+              shareDone ? "Link Copied!" : canShare ? "Share Profile" : "Share (after approval)"
+            }
+            onClick={() => void handleShareProfile()}
+          />
           <QuickAction
             icon={MessageCircle}
             label="Request Testimonial"

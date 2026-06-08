@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { DUMMY_OTP } from "@/lib/constants";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
+import {
+  ADVISOR_SELF_RECOMMENDATION_MESSAGE,
+  rejectAdvisorSelfSubmissionForCurrentProfile,
+} from "@/lib/server/advisor-self-submission-guard";
 import { hasVerifiedRecommendationFromMobile } from "@/lib/server/recommendations-persistence";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 function isValidMobile(mobile: string): boolean {
   const digits = mobile.replace(/\D/g, "");
@@ -39,7 +44,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter a valid mobile number" }, { status: 400 });
   }
 
-  if (await hasVerifiedRecommendationFromMobile(mobile)) {
+  const advisorUserId = await resolveAdvisorDataUserId();
+  if (!advisorUserId) {
+    return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
+  }
+
+  const selfBlocked = await rejectAdvisorSelfSubmissionForCurrentProfile(
+    mobile,
+    ADVISOR_SELF_RECOMMENDATION_MESSAGE,
+  );
+  if (selfBlocked) return selfBlocked;
+
+  if (await hasVerifiedRecommendationFromMobile(mobile, advisorUserId)) {
     return NextResponse.json(
       {
         error:

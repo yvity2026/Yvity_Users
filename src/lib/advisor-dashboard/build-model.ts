@@ -10,6 +10,8 @@ import type { CareerData } from "@/lib/career-types";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/lib/sections/types";
 import type { GalleryItem } from "@/lib/gallery-types";
 import { getYvityScoreTotal } from "@/lib/advisor-score/build";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { getEmptyAnalytics } from "./demo-analytics";
 import type {
   DashboardAction,
@@ -22,11 +24,10 @@ import type {
 export function summarizeLeads(leads: Lead[]): LeadSummary {
   const stats = computeOverviewStats(leads);
   return {
+    totalLeads: stats.total,
     newLeads: stats.new,
-    activeLeads: stats.interested + stats.followUpPending,
-    followUpsPending: stats.followUpPending,
+    followUpLeads: stats.followUpPending,
     convertedLeads: stats.converted,
-    total: stats.total,
   };
 }
 
@@ -34,6 +35,8 @@ export function buildProfileHealth(input: {
   /** Registration / identity selfie — default public profile photo. */
   photoUrl?: string;
   introVideoUrl?: string;
+  /** When false, intro video is omitted from profile health (Free plan). */
+  introVideoEnabled?: boolean;
   career: CareerData;
   services: ServiceItem[];
   achievements: AchievementItem[];
@@ -44,6 +47,7 @@ export function buildProfileHealth(input: {
     input.career.experiences.length > 0 &&
     input.career.experiences.some((e) => e.bullets.some((b) => b.trim().length > 0));
   const hasEducation = input.career.education.length > 0;
+  const includeIntroVideo = input.introVideoEnabled !== false;
 
   return [
     {
@@ -53,13 +57,17 @@ export function buildProfileHealth(input: {
       weight: 12,
       profileSection: "profile",
     },
-    {
-      id: "intro-video",
-      label: "Introduction Video",
-      complete: Boolean(input.introVideoUrl?.trim()),
-      weight: 10,
-      profileSection: "profile",
-    },
+    ...(includeIntroVideo
+      ? [
+          {
+            id: "intro-video" as const,
+            label: "Introduction Video",
+            complete: Boolean(input.introVideoUrl?.trim()),
+            weight: 10,
+            profileSection: "profile" as const,
+          },
+        ]
+      : []),
     {
       id: "career",
       label: "Career Journey",
@@ -200,16 +208,34 @@ export function buildDashboardOverviewModel(input: {
   photoUrl?: string;
   /** When true, performance stats show zeros until the profile is approved. */
   underReview?: boolean;
+  /** Admin approved IRDAI license — unlocks IRDA points and live visibility score. */
+  profileApproved?: boolean;
+  /** IRDA certificate uploaded during My Space setup. */
+  irdaiCertificateUploaded?: boolean;
   publicProfileActive?: boolean;
   subscriptionPlan?: string | null;
   approvedAt?: string | null;
+  subscriptionStartedAt?: string | null;
+  subscriptionExpiresAt?: string | null;
+  verifiedRecommendationCount?: number;
+  accountCreatedAt?: string | null;
+  decayPenalty?: number;
+  decayActive?: boolean;
+  decayGraceDaysRemaining?: number | null;
+  monthlyActivity?: import("@/lib/advisor-score/decay").MonthlyScoreActivity;
+  profileViews?: number;
+  profileViewsDelta?: string;
+  searchAppearances?: number;
+  searchDelta?: string;
 }): DashboardOverviewModel {
   const demo = getEmptyAnalytics();
   const profilePhotoUrl = input.photoUrl?.trim() || "";
+  const planLimits = resolvePlanLimits(input.subscriptionPlan, "active");
 
   const healthItems = buildProfileHealth({
     photoUrl: profilePhotoUrl,
     introVideoUrl: input.introVideoUrl ?? "",
+    introVideoEnabled: planLimits.introVideoEnabled,
     career: input.career,
     services: input.services,
     achievements: input.achievements,
@@ -223,6 +249,11 @@ export function buildDashboardOverviewModel(input: {
     (t) => t.source === "customer" && !t.advisorReply?.text?.trim(),
   ).length;
 
+  const profileApproved =
+    input.profileApproved ??
+    Boolean(input.approvedAt?.trim() && input.underReview === false);
+  const irdaiCertificateUploaded = Boolean(input.irdaiCertificateUploaded);
+
   const yvityScore = getYvityScoreTotal({
     photoUrl: profilePhotoUrl,
     introVideoUrl: input.introVideoUrl ?? "",
@@ -233,11 +264,26 @@ export function buildDashboardOverviewModel(input: {
     testimonials: input.testimonials,
     gallery: input.gallery,
     underReview: input.underReview,
+    profileApproved,
+    irdaiCertificateUploaded,
+    verifiedRecommendationCount: profileApproved
+      ? Math.max(0, input.verifiedRecommendationCount ?? 0)
+      : 0,
+    decayPenalty: input.decayActive ? Math.max(0, input.decayPenalty ?? 0) : 0,
+    decayActive: input.decayActive,
+    decayGraceDaysRemaining: input.decayGraceDaysRemaining,
+    monthlyActivity: input.monthlyActivity,
   });
+
+  const recommendationCount = profileApproved
+    ? Math.max(0, input.verifiedRecommendationCount ?? 0)
+    : 0;
 
   const membershipModel = buildMembershipModel({
     subscriptionPlan: input.subscriptionPlan,
     approvedAt: input.approvedAt,
+    subscriptionStartedAt: input.subscriptionStartedAt,
+    subscriptionExpiresAt: input.subscriptionExpiresAt,
   });
   const upgradeId = upgradePlanId(membershipModel.current.planId);
   const upgradePlan = MEMBERSHIP_PLANS.find((p) => p.id === upgradeId);
@@ -258,13 +304,15 @@ export function buildDashboardOverviewModel(input: {
     profileStrength,
     performance: {
       yvityScore,
-      profileViews: demo.profileViews,
-      profileViewsDelta: demo.profileViewsDelta,
-      searchAppearances: demo.searchAppearances,
-      searchDelta: demo.searchDelta,
-      leadsReceived: leads.total,
+      profileViews: profileApproved ? Math.max(0, input.profileViews ?? 0) : 0,
+      profileViewsDelta: profileApproved ? (input.profileViewsDelta ?? "0%") : "0%",
+      searchAppearances: profileApproved ? Math.max(0, input.searchAppearances ?? 0) : 0,
+      searchDelta: profileApproved ? (input.searchDelta ?? "0%") : "0%",
+      profileSharesByOthers: profileApproved
+        ? Math.max(0, input.monthlyActivity?.clientSharers ?? 0)
+        : 0,
       testimonialsReceived: input.testimonials.length,
-      recommendationsReceived: demo.recommendationsReceived,
+      recommendationsReceived: recommendationCount,
     },
     leads,
     healthItems,
@@ -275,8 +323,8 @@ export function buildDashboardOverviewModel(input: {
       { label: "Testimonial growth", value: demo.testimonialGrowth, hint: "Last 30 days" },
       {
         label: "Recommendation growth",
-        value: demo.recommendationGrowth,
-        hint: "Peer endorsements",
+        value: recommendationCount > 0 ? `+${recommendationCount} verified` : "0 verified",
+        hint: "OTP-verified client recommendations",
       },
     ],
     viewsTrend: demo.viewsTrend,

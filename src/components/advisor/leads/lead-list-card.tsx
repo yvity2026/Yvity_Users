@@ -75,8 +75,10 @@ export function LeadListCard({
   const subtitle = [serviceLabel(lead.serviceType), lead.city].filter(Boolean).join(" · ");
 
   const hasFollowUp = Boolean(lead.followUpDate || lead.followUpType);
-  const hasNotes = Boolean(lead.notes?.trim());
-  const hasMessage = Boolean(lead.message?.trim());
+  const messageText = lead.message?.trim() ?? "";
+  const notesText = lead.notes?.trim() ?? "";
+  const hasMessage = Boolean(messageText);
+  const hasNotes = Boolean(notesText) && notesText !== messageText;
 
   return (
     <article

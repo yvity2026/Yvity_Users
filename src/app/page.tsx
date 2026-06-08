@@ -15,6 +15,11 @@ import LandingMobileExperience from "@/yvity-landing/app/components/home/Landing
 import LandingMobileSectionSlot from "@/yvity-landing/app/components/home/LandingMobileSectionSlot";
 import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
 import { getPublicAdvisors } from "@/lib/advisors";
+import {
+  pickHeroAdvisors,
+  pickLandingFeaturedAdvisors,
+} from "@/lib/advisors/landing-featured";
+import { getSessionUser } from "@/lib/server/session";
 
 function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
@@ -30,7 +35,10 @@ type LandingSection = { id: string; content: ReactNode };
 
 /** Marketing landing — ported from YVITY/src/app/page.js */
 export default async function LandingPage() {
-  const advisors = await getPublicAdvisors();
+  const [advisors, session] = await Promise.all([getPublicAdvisors(), getSessionUser()]);
+  const heroAdvisors = pickHeroAdvisors(advisors);
+  const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
+  const isLoggedIn = Boolean(session);
 
   const landingSections: LandingSection[] = [
     {
@@ -45,7 +53,7 @@ export default async function LandingPage() {
       id: "find-advisors",
       content: (
         <Suspense fallback={<SectionFallback />}>
-          <FindAdvisors advisors={advisors} />
+          <FindAdvisors advisors={landingAdvisors} isLoggedIn={isLoggedIn} />
         </Suspense>
       ),
     },
@@ -88,7 +96,7 @@ export default async function LandingPage() {
       <Navbar />
       <LandingMobileShell>
         <LandingMobileExperience
-          home={<Hero advisor={advisors} />}
+          home={<Hero advisor={heroAdvisors} />}
           footer={
             <Suspense fallback={<SectionFallback />}>
               <Footer />

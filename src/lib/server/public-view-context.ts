@@ -1,0 +1,133 @@
+import { cookies } from "next/headers";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import type { AdvisorProfileRecord } from "@/lib/server/advisor-profile-store";
+import { getAdvisorProfileForUser, loadAllAdvisorProfiles } from "@/lib/server/advisor-profile-store";
+import { loadRegistrationDb } from "@/lib/server/registration-store";
+import { slugMatches, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
+import { getSessionUser } from "@/lib/server/session";
+
+export const PUBLIC_VIEW_COOKIE = "yvity-view-advisor";
+
+/** Anonymous visitor id for unique monthly profile view counts. */
+export const VIEWER_COOKIE = "yvity_viewer";
+
+export function publicViewCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 2,
+  };
+}
+
+export function viewerCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  };
+}
+
+export function isAdvisorProfileLive(profile: AdvisorProfileRecord | null): boolean {
+  return isAdvisorProfileApproved(profile);
+}
+
+export async function findAdvisorProfileByPublicSlug(
+  pathSlug: string,
+): Promise<AdvisorProfileRecord | null> {
+  const segment = toPublicProfileSlugSegment(pathSlug);
+  if (!segment) return null;
+
+  const db = await loadAllAdvisorProfiles();
+  return (
+    Object.values(db.profiles).find((p) => slugMatches(p.profile_slug, segment)) ?? null
+  );
+}
+
+export async function clearPublicViewAdvisorCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(PUBLIC_VIEW_COOKIE);
+}
+
+/**
+ * Whose persisted section data (services, career, …) to load.
+ * When a visitor browses another advisor's public profile, the view cookie wins.
+ */
+export async function resolveAdvisorDataUserId(): Promise<string | null> {
+  const session = await getSessionUser();
+  const cookieStore = await cookies();
+  const viewId = cookieStore.get(PUBLIC_VIEW_COOKIE)?.value?.trim();
+
+  if (viewId) {
+    const viewProfile = await getAdvisorProfileForUser(viewId);
+    if (isAdvisorProfileLive(viewProfile)) {
+      if (!session?.id || session.id !== viewId) {
+        return viewId;
+      }
+    }
+  }
+
+  if (session?.id) return session.id;
+
+  if (viewId) {
+    const viewProfile = await getAdvisorProfileForUser(viewId);
+    if (isAdvisorProfileLive(viewProfile)) return viewId;
+  }
+
+  return null;
+}
+
+/** True when the signed-in advisor is loading their own persisted section data. */
+export async function isViewingOwnAdvisorData(): Promise<boolean> {
+  const session = await getSessionUser();
+  const dataUserId = await resolveAdvisorDataUserId();
+  return Boolean(session?.id && dataUserId && session.id === dataUserId);
+}
+
+export type PublicViewAdvisorPayload = {
+  userId: string;
+  profile: AdvisorProfileRecord;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  profession: string;
+  about?: string;
+  selfie_url?: string;
+};
+
+export async function loadPublicViewAdvisorByUserId(
+  userId: string,
+): Promise<PublicViewAdvisorPayload | null> {
+  const profile = await getAdvisorProfileForUser(userId);
+  if (!profile) return null;
+
+  const user = loadRegistrationDb().users.find((u) => u.id === userId);
+  if (!user) return null;
+
+  return {
+    userId,
+    profile,
+    name: user.fullName?.trim() || "Advisor",
+    email: user.email?.trim() || "",
+    phone: user.phone?.trim() || "",
+    city: user.city?.trim() || "",
+    state: user.state?.trim() || "",
+    profession: user.profession?.trim() || profile.designation?.trim() || "",
+    about: user.about?.trim() || "",
+    selfie_url: user.selfieUrl?.trim() || undefined,
+  };
+}
+
+export async function loadPublicViewAdvisorBySlug(
+  pathSlug: string,
+): Promise<PublicViewAdvisorPayload | null> {
+  const profile = await findAdvisorProfileByPublicSlug(pathSlug);
+  if (!profile) return null;
+
+  return loadPublicViewAdvisorByUserId(profile.user_id);
+}

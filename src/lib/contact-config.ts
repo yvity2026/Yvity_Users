@@ -14,6 +14,8 @@ export type ContactInterestId = (typeof contactInterestOptions)[number]["id"];
 
 export type ContactInquiry = {
   id: string;
+  /** Present in local JSON persistence; Supabase uses advisor_id on the row. */
+  advisorUserId?: string;
   fullName: string;
   mobile: string;
   interests: ContactInterestId[];

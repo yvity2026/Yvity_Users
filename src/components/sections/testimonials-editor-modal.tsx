@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { testimonialServiceOptions } from "@/lib/sections/testimonials-config";
+import { useRegisteredTestimonialServices } from "@/hooks/use-registered-testimonial-services";
 import type {
   TestimonialItem,
   TestimonialMemberBadge,
@@ -27,6 +27,7 @@ export function TestimonialsEditorModal({
   onSave,
   onDelete,
 }: TestimonialsEditorModalProps) {
+  const { serviceOptions } = useRegisteredTestimonialServices("all");
   const [draft, setDraft] = useState<TestimonialItem>(item);
   const [replyText, setReplyText] = useState(item.advisorReply?.text ?? "");
   const [replyDate, setReplyDate] = useState(item.advisorReply?.repliedOn ?? "");
@@ -97,13 +98,11 @@ export function TestimonialsEditorModal({
               value={draft.service}
               onChange={(e) => patch("service", e.target.value as TestimonialService)}
             >
-              {testimonialServiceOptions
-                .filter((o) => o.value !== "all")
-                .map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
+              {serviceOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </Field>
         </div>

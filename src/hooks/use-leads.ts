@@ -10,6 +10,12 @@ const fetchOpts: RequestInit = {
 
 export function useLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [meta, setMeta] = useState<{
+    total: number;
+    visible: number;
+    lockedCount: number;
+    limit: number | null;
+  }>({ total: 0, visible: 0, lockedCount: 0, limit: null });
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +28,25 @@ export function useLeads() {
     }
     try {
       const res = await fetch("/api/leads", fetchOpts);
-      const json = (await res.json()) as { data?: Lead[]; error?: string };
+      const json = (await res.json()) as {
+        data?: Lead[];
+        meta?: { total: number; visible: number; lockedCount: number; limit: number | null };
+        error?: string;
+      };
       if (!res.ok) {
         const message = json.error ?? "Could not load leads";
         if (!silent) setError(message);
         throw new Error(message);
       }
       setLeads(json.data ?? []);
+      setMeta(
+        json.meta ?? {
+          total: json.data?.length ?? 0,
+          visible: json.data?.length ?? 0,
+          lockedCount: 0,
+          limit: null,
+        },
+      );
       if (!silent) setError(null);
     } catch (err) {
       if (!silent) {
@@ -86,6 +104,7 @@ export function useLeads() {
 
   return {
     leads,
+    meta,
     loading: initialLoading,
     refreshing,
     error,

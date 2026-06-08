@@ -1,9 +1,11 @@
 import "server-only";
 
+import { resolveProfileHeroStat } from "@/lib/advisor/profile-hero-stat";
 import {
-  calculateTotalClients,
-  calculateTotalExperienceYears,
+  calculateHighestExperienceYears,
 } from "@/lib/advisor/publicMetrics";
+import { mapDbServices } from "@/lib/server/supabase/mappers";
+import { extractAchievementTags } from "@/lib/sections/achievement-tiers";
 import {
   getEffectivePlan,
   hasIdentityVerified,
@@ -18,9 +20,14 @@ const DEFAULT_CARD_METRICS = {
   reviews: "0",
   recs: "0",
   clients: "0",
+  clientsLabel: "Clients",
 };
 
-const SEARCHABLE_SERVICE_TAGS = ["Life Insurance", "Health Insurance"];
+const SEARCHABLE_SERVICE_TAGS = [
+  "Life Insurance",
+  "Health Insurance",
+  "General Insurance",
+];
 
 function extractStateFromLocation(location: string) {
   if (!location?.includes(",")) return "";
@@ -28,17 +35,7 @@ function extractStateFromLocation(location: string) {
   return segments[segments.length - 1]?.trim() ?? "";
 }
 
-function buildProfileUrl(profileSlug: string | null) {
-  if (!profileSlug) return "/profile";
-  const display = String(profileSlug)
-    .trim()
-    .toLowerCase()
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("-");
-  return display ? `/Advisor/${display}` : "/profile";
-}
+import { getPublicProfileLivePath } from "@/lib/public-profile-url";
 
 function countRowsByAdvisorId(rows: Array<{ advisor_id?: string }> = []) {
   const counts = new Map<string, number>();
@@ -85,6 +82,7 @@ function mapAdvisorToCard(
   usersById: Map<string, Record<string, unknown>>,
   scoresByAdvisorId: Map<string, { total_score?: number }>,
   servicesByAdvisorId: Map<string, Array<Record<string, unknown>>>,
+  achievementsByAdvisorId: Map<string, Array<Record<string, unknown>>>,
   recommendationsCountByAdvisorId: Map<string, number>,
   testimonialsCountByAdvisorId: Map<string, number>,
   averageRatingByAdvisorIdMap: Map<string, number>,
@@ -98,12 +96,21 @@ function mapAdvisorToCard(
     profile.subscription_plan,
     profile.account_status,
   );
-  const exp = calculateTotalExperienceYears(services);
-  const clients = calculateTotalClients(services);
+  const exp = calculateHighestExperienceYears(services);
+  const serviceItems = mapDbServices(services);
+  const heroStat = resolveProfileHeroStat(serviceItems, true);
   const recs = recommendationsCountByAdvisorId.get(profile.advisor_id) ?? 0;
   const reviews = testimonialsCountByAdvisorId.get(profile.advisor_id) ?? 0;
   const avgRating = averageRatingByAdvisorIdMap.get(profile.advisor_id) ?? 0;
   const city = String(user.city || "Location not available");
+  const achievementRecords = achievementsByAdvisorId.get(profile.advisor_id) ?? [];
+  const achievementTags = extractAchievementTags(
+    achievementRecords.map((row) => ({
+      title: String(row.title ?? ""),
+      subtitle: String(row.organisation ?? ""),
+      years: row.achievement_year ? [String(row.achievement_year)] : [],
+    })),
+  );
 
   return {
     id: profile.advisor_id,
@@ -118,10 +125,16 @@ function mapAdvisorToCard(
       profile.account_status,
     ),
     score: Math.max(0, Math.min(100, score)),
-    profileUrl: buildProfileUrl(profile.profile_slug),
-    serviceTypes: services
-      .map((service) => String(service.service_type || ""))
-      .filter((serviceType) => SEARCHABLE_SERVICE_TAGS.includes(serviceType)),
+    profileUrl: getPublicProfileLivePath(profile.profile_slug ?? ""),
+    profileSlug: profile.profile_slug ?? "",
+    serviceTypes: [
+      ...new Set(
+        services
+          .map((service) => String(service.service_type || ""))
+          .filter((serviceType) => SEARCHABLE_SERVICE_TAGS.includes(serviceType)),
+      ),
+    ].slice(0, 3),
+    achievementTags,
     companies: [
       ...new Set(services.map((service) => String(service.company || "")).filter(Boolean)),
     ],
@@ -134,7 +147,8 @@ function mapAdvisorToCard(
     reviews: String(reviews),
     avgRating: String(avgRating),
     recs: String(recs),
-    clients: String(clients),
+    clients: heroStat.value === "—" ? "0" : heroStat.value,
+    clientsLabel: heroStat.label,
   };
 }
 
@@ -167,6 +181,7 @@ export async function fetchSupabasePublicAdvisors(
     usersResult,
     scoresResult,
     servicesResult,
+    achievementsResult,
     recommendationsResult,
     testimonialsResult,
   ] = await Promise.all([
@@ -178,6 +193,10 @@ export async function fetchSupabasePublicAdvisors(
     supabase
       .from("advisor_services")
       .select("advisor_id, service_type, company, no_of_clients, from_year, to_year")
+      .in("advisor_id", advisorIds),
+    supabase
+      .from("advisor_achievements")
+      .select("advisor_id, title, organisation, achievement_year")
       .in("advisor_id", advisorIds),
     supabase.from("advisor_recommendations").select("advisor_id").in("advisor_id", advisorIds),
     supabase
@@ -194,6 +213,9 @@ export async function fetchSupabasePublicAdvisors(
   }
   if (servicesResult.error) {
     throw new Error(`Failed to load advisor services: ${servicesResult.error.message}`);
+  }
+  if (achievementsResult.error) {
+    throw new Error(`Failed to load advisor achievements: ${achievementsResult.error.message}`);
   }
   if (recommendationsResult.error) {
     throw new Error(
@@ -213,6 +235,7 @@ export async function fetchSupabasePublicAdvisors(
     (scoresResult.data ?? []).map((score) => [score.advisor_id, score]),
   );
   const servicesByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
+  const achievementsByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
   const recommendationsCountByAdvisorId = countRowsByAdvisorId(recommendationsResult.data ?? []);
   const testimonialsCountByAdvisorId = countRowsByAdvisorId(testimonialsResult.data ?? []);
   const averageRatingByAdvisorIdMap = averageRatingByAdvisorId(testimonialsResult.data ?? []);
@@ -223,6 +246,12 @@ export async function fetchSupabasePublicAdvisors(
     servicesByAdvisorId.set(service.advisor_id, list);
   }
 
+  for (const achievement of achievementsResult.data ?? []) {
+    const list = achievementsByAdvisorId.get(achievement.advisor_id) ?? [];
+    list.push(achievement as Record<string, unknown>);
+    achievementsByAdvisorId.set(achievement.advisor_id, list);
+  }
+
   const advisors = (profiles as AdvisorProfileRow[])
     .map((profile) =>
       mapAdvisorToCard(
@@ -230,6 +259,7 @@ export async function fetchSupabasePublicAdvisors(
         usersById,
         scoresByAdvisorId,
         servicesByAdvisorId,
+        achievementsByAdvisorId,
         recommendationsCountByAdvisorId,
         testimonialsCountByAdvisorId,
         averageRatingByAdvisorIdMap,

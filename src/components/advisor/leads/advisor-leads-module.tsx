@@ -12,7 +12,7 @@ import { computeOverviewStats, sortLeadsNewestFirst } from "@/lib/leads/utils";
 import { Button } from "@/components/ui/button";
 
 export function AdvisorLeadsModule() {
-  const { leads, loading, refreshing, error, createLead, patchLead, removeLead, reload } =
+  const { leads, meta, loading, refreshing, error, createLead, patchLead, removeLead, reload } =
     useLeads();
   const [addOpen, setAddOpen] = useState(false);
   const [manageLead, setManageLead] = useState<Lead | null>(null);
@@ -51,6 +51,18 @@ export function AdvisorLeadsModule() {
           <span className="sm:hidden">Add</span>
         </Button>
       </div>
+
+      {meta.lockedCount > 0 && (
+        <div className="rounded-2xl border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-4 py-3">
+          <p className="text-sm font-semibold">
+            {meta.lockedCount} more lead{meta.lockedCount === 1 ? "" : "s"} hidden on your plan
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Your plan shows the first {meta.limit} leads. Upgrade to Silver or Gold to view all{" "}
+            {meta.total} leads.
+          </p>
+        </div>
+      )}
 
       {refreshing && <p className="text-[10px] text-center text-muted-foreground">Syncing…</p>}
 

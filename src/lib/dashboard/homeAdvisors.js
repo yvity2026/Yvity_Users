@@ -18,9 +18,14 @@ export function sortAdvisorsByRating(advisors) {
   );
 }
 
+import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
+
 export function getFeaturedAdvisors(advisors, limit = 8) {
-  const flagged = advisors.filter((a) => a.isHero || a.isLanding);
-  const pool = flagged.length >= 3 ? flagged : advisors;
+  const eligible = advisors.filter(
+    (a) => resolvePlanLimits(a.subscription_plan, a.account_status).featuredAdvisorEligibility,
+  );
+  const flagged = eligible.filter((a) => a.isHero || a.isLanding);
+  const pool = flagged.length >= 3 ? flagged : eligible;
   return [...pool].sort(compareAdvisors).slice(0, limit);
 }
 

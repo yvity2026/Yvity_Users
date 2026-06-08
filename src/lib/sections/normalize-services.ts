@@ -1,5 +1,12 @@
 import { defaultServices } from "./defaults";
 import type { ServiceItem } from "./types";
+import { categoryHeadingFor } from "./services-config";
+import { normalizeLicenseHolder } from "@/lib/advisor/service-license-holder";
+import {
+  defaultCardDisplayForCapacity,
+  mergeCardDisplay,
+} from "@/lib/advisor/service-card-display";
+import { normalizeCapacityId, type ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
 import {
   emptyVerification,
   normalizeVerification,
@@ -36,10 +43,14 @@ export function normalizeServices(data: unknown): ServiceItem[] {
       ? normalizeVerification(partial.verification, fallbackVerification)
       : fallbackVerification();
 
+    const category = (partial.category ?? "life") as ServiceItem["category"];
+    const capacityId = (normalizeCapacityId(partial.capacityId ?? "") ||
+      "individual_agent") as ServiceCapacityId;
+
     return {
       id: partial.id ?? "",
-      category: (partial.category ?? "life") as ServiceItem["category"],
-      title: partial.title ?? "Untitled service",
+      category,
+      title: categoryHeadingFor(category),
       provider: partial.provider ?? "",
       experience: partial.experience ?? "",
       serviceStartDate:
@@ -58,6 +69,12 @@ export function normalizeServices(data: unknown): ServiceItem[] {
       verified: verification.status === "verified",
       verification,
       companyLogoUrl: partial.companyLogoUrl,
+      licenseHolder: normalizeLicenseHolder(partial.licenseHolder),
+      capacityId,
+      cardDisplay: mergeCardDisplay(capacityId, partial.cardDisplay),
+      teamSize: typeof partial.teamSize === "number" ? partial.teamSize : undefined,
+      activeAgents: typeof partial.activeAgents === "number" ? partial.activeAgents : undefined,
+      branchCount: typeof partial.branchCount === "number" ? partial.branchCount : undefined,
       showDetailCard: partial.showDetailCard,
     };
   });

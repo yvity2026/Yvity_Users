@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { DUMMY_OTP } from "@/lib/constants";
 import type { AuthUser } from "@/lib/auth-store";
 import { loadRegistrationDb, mutateRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
+import { recordReferralOnRegistration } from "@/lib/server/referrals-store";
 
 export type { RegisteredUser } from "@/lib/server/registration-store";
 
@@ -116,6 +117,7 @@ export function registerUserRecord(input: {
   state: string;
   profession: string;
   selfieUrl?: string | null;
+  referralCode?: string | null;
 }): RegisteredUser {
   const phone = normalizeIndianMobile(input.phone);
   const email = normalizeEmail(input.email);
@@ -147,6 +149,17 @@ export function registerUserRecord(input: {
   mutateRegistrationDb((db) => {
     db.users.push(user);
   });
+
+  if (input.referralCode) {
+    try {
+      recordReferralOnRegistration({
+        referredUser: user,
+        referralCode: input.referralCode,
+      });
+    } catch (error) {
+      console.error("[registration] referral attribution failed:", error);
+    }
+  }
 
   return user;
 }

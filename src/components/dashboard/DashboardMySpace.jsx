@@ -33,8 +33,8 @@ function WorkspaceCardBody({ workspaceActive, isAdvisorRole, accountStatus }) {
               ? accountStatus === "action_required"
                 ? "Complete your profile setup to activate your advisor workspace."
                 : accountStatus === "under_review"
-                  ? "Your workspace is under review. You will get dashboard access when approved."
-                  : "Set up your services and verification to go live on YVITY."
+                  ? "IRDAI license submitted — awaiting admin verification (usually 24–48 hours)."
+                  : "Upload your IRDAI certificate and services to complete My Space setup."
               : "Create your verified advisor workspace when you want to list services on YVITY."}
         </p>
       </div>
@@ -48,8 +48,8 @@ function WorkspaceSetupActions({ setupState, onSetupMySpace }) {
   if (isUnderReview) {
     return (
       <p className="mt-4 rounded-xl bg-[#E6F4F4] px-4 py-3 font-poppins text-sm text-[#0A4A4A]">
-        Your profile is under review. Verification usually takes 24–48 hours. You can still open
-        My Space and complete journey, achievements, and gallery.
+        IRDAI certificate received — admin verification usually takes 24–48 hours. Keep building
+        your profile; score and sharing points unlock after approval.
       </p>
     );
   }
@@ -82,7 +82,7 @@ export default function DashboardMySpace() {
   const [setupProfileOpen, setSetupProfileOpen] = useState(false);
 
   const { setupState } = setup;
-  const { isUnderReview, showSetupWorkspace } = setupState;
+  const { isUnderReview, showSetupWorkspace, irdaiPendingAdminReview } = setupState;
 
   const showGoldWorkspace = shouldShowGoldAdvisorWorkspace(user, advisor);
   const roleList = parseUserRoles(user);
@@ -153,6 +153,8 @@ export default function DashboardMySpace() {
 
         {showSetupWorkspace ? (
           <MySpaceSetupBanner variant="setup" onSetup={openSetupProfile} />
+        ) : irdaiPendingAdminReview ? (
+          <MySpaceSetupBanner variant="review" />
         ) : null}
 
         <YvityGoldMySpaceDashboard reviewMode={isUnderReview} />

@@ -4,8 +4,8 @@ import {
   type SetupServicePayload,
 } from "@/lib/advisor/map-setup-services";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
-import { servicesFileForUser, submitAdvisorProfile } from "@/lib/server/advisor-profile-store";
-import { saveJsonFile } from "@/lib/server/json-store";
+import { submitAdvisorProfile } from "@/lib/server/advisor-profile-store";
+import { saveServicesForUser } from "@/lib/server/section-persistence";
 import { getSessionUser } from "@/lib/server/session";
 
 export async function POST(request: Request) {
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         : [];
 
     const items = mapSetupServicesToItems(services, documentUrls);
-    await saveJsonFile(servicesFileForUser(session.id), items);
+    await saveServicesForUser(session.id, items);
 
     const plan = body.subscription_plan ?? "free";
     const { profile, user } = await submitAdvisorProfile({

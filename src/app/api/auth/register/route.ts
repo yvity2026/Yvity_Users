@@ -27,6 +27,7 @@ export async function POST(request: Request) {
       state?: string;
       profession?: string;
       selfieUrl?: string;
+      referralCode?: string;
     };
 
     const mobile = normalizeIndianMobile(body.phone ?? "");
@@ -78,6 +79,7 @@ export async function POST(request: Request) {
       state: body.state ?? "",
       profession: body.profession ?? "",
       selfieUrl: body.selfieUrl ?? null,
+      referralCode: body.referralCode?.trim() || null,
     });
 
     const authUser = toAuthUser(user);

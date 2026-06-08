@@ -1,5 +1,4 @@
-import { getEmptyAnalytics } from "@/lib/advisor-dashboard/demo-analytics";
-import { getEmptyInsightsMetrics } from "@/lib/advisor-insights/demo-metrics";
+import { buildCommunityTrustStatsFromCounts } from "@/lib/home/public-profile-banner-stats";
 
 export type CommunityTrustStatId =
   | "profileViews"
@@ -15,34 +14,26 @@ export type CommunityTrustStat = {
   trend?: string;
 };
 
-export function getCommunityTrustStats(testimonialCount: number): CommunityTrustStat[] {
-  const demo = getEmptyAnalytics();
-  const metrics = getEmptyInsightsMetrics();
+export function getCommunityTrustStats(input: {
+  testimonialCount: number;
+  recommendationCount?: number;
+  profileViews?: number;
+  profileSharesByOthers?: number;
+  profileApproved?: boolean;
+}): CommunityTrustStat[] {
+  const {
+    testimonialCount,
+    recommendationCount = 0,
+    profileViews,
+    profileSharesByOthers,
+    profileApproved = true,
+  } = input;
 
-  return [
-    {
-      id: "profileViews",
-      label: "Profile Views",
-      value: demo.profileViews,
-      trend: demo.profileViewsDelta,
-    },
-    {
-      id: "recommendations",
-      label: "Recommendations",
-      value: demo.recommendationsReceived,
-      trend: demo.recommendationGrowth,
-    },
-    {
-      id: "testimonials",
-      label: "Testimonials",
-      value: testimonialCount,
-      trend: demo.testimonialGrowth,
-    },
-    {
-      id: "profileShares",
-      label: "Profile Shares",
-      value: metrics.profileShares,
-      trend: metrics.sharesDelta,
-    },
-  ];
+  return buildCommunityTrustStatsFromCounts({
+    testimonialCount,
+    recommendationCount,
+    profileApproved,
+    profileViews,
+    clientSharers: profileSharesByOthers,
+  });
 }

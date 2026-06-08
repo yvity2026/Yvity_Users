@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 import { contactInterestOptions, type ContactInterestId } from "@/lib/contact-config";
+import {
+  ADVISOR_SELF_CONTACT_MESSAGE,
+  CONTACT_MONTHLY_DUPLICATE_MESSAGE,
+} from "@/lib/contact/submission-limits";
 import { unauthorized, requireSession } from "@/lib/server/api-auth";
 import { appendContactInquiry, loadContactInquiries } from "@/lib/server/contact-persistence";
+import { hasRecentContactInquiryFromMobile } from "@/lib/server/contact-inquiry-limits";
+import {
+  rejectAdvisorSelfSubmission,
+} from "@/lib/server/advisor-self-submission-guard";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
+import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 const validIds = new Set(contactInterestOptions.map((o) => o.id));
 
 export async function GET() {
   const user = await requireSession();
-  if (!user) return unauthorized();
-  const data = await loadContactInquiries();
+  if (!user?.id) return unauthorized();
+  const data = await loadContactInquiries(user.id);
   return NextResponse.json({
     data: [...data].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -30,6 +39,11 @@ export async function POST(request: Request) {
       { error: "Contact form submissions are currently disabled." },
       { status: 403 },
     );
+  }
+
+  const advisorUserId = await resolveAdvisorDataUserId();
+  if (!advisorUserId) {
+    return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
   }
 
   let body: {
@@ -65,7 +79,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Select at least one topic" }, { status: 400 });
   }
 
-  const entry = await appendContactInquiry({
+  const selfBlocked = await rejectAdvisorSelfSubmission(
+    advisorUserId,
+    mobile,
+    ADVISOR_SELF_CONTACT_MESSAGE,
+  );
+  if (selfBlocked) return selfBlocked;
+
+  if (await hasRecentContactInquiryFromMobile(advisorUserId, mobile)) {
+    return NextResponse.json({ error: CONTACT_MONTHLY_DUPLICATE_MESSAGE }, { status: 409 });
+  }
+
+  const entry = await appendContactInquiry(advisorUserId, {
     fullName,
     mobile,
     interests,

@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, Headphones, Loader2, MessageSquare, Upload, Video, X } from "lucide-react";
+import { CheckCircle2, Headphones, Loader2, MessageSquare, Shield, Upload, Video, X } from "lucide-react";
+import { useAuth } from "@/context/AuthUserContext";
 import { DUMMY_OTP } from "@/lib/constants";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import { testimonialTypeFilters } from "@/lib/sections/testimonials-config";
-import type { TestimonialType } from "@/lib/sections/types";
+import type { TestimonialService, TestimonialType } from "@/lib/sections/types";
+import { StarRatingInput } from "@/components/ui/star-rating-input";
+import { useRegisteredTestimonialServices } from "@/hooks/use-registered-testimonial-services";
 import {
   formatMediaDuration,
   initialGiveTestimonialDraft,
@@ -50,6 +53,9 @@ function formatTimer(seconds: number): string {
 
 export function GiveTestimonialModal() {
   const { giveOpen, closeGiveTestimonial, onPublished } = useTestimonialSubmit();
+  const { serviceOptions, loading: servicesLoading } = useRegisteredTestimonialServices("public");
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user?.id);
   const [draft, setDraft] = useState<GiveTestimonialDraft>(initialGiveTestimonialDraft);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +92,24 @@ export function GiveTestimonialModal() {
     }, 1000);
     return () => window.clearInterval(id);
   }, [otpSent, otpSecondsLeft]);
+
+  useEffect(() => {
+    if (!giveOpen || servicesLoading || serviceOptions.length === 0) return;
+    setDraft((current) => {
+      const hasValidService = serviceOptions.some((opt) => opt.value === current.service);
+      if (hasValidService) return current;
+      return { ...current, service: serviceOptions[0]?.value ?? "" };
+    });
+  }, [giveOpen, servicesLoading, serviceOptions]);
+
+  useEffect(() => {
+    if (!giveOpen || !user) return;
+    setDraft((current) => ({
+      ...current,
+      fullName: current.fullName || user.name?.trim() || "",
+      mobile: current.mobile || user.mobile?.trim() || user.phone?.trim() || "",
+    }));
+  }, [giveOpen, user]);
 
   if (!giveOpen) return null;
 
@@ -138,20 +162,24 @@ export function GiveTestimonialModal() {
       setError(contentErr);
       return;
     }
-    if (!otpSent) {
-      setError("Please verify your mobile number with OTP first.");
-      return;
-    }
-    if (otp.trim().length < 6) {
-      setError("Enter the 6-digit OTP sent to your mobile.");
-      return;
+    if (!isLoggedIn) {
+      if (!otpSent) {
+        setError("Please verify your mobile number with OTP first.");
+        return;
+      }
+      if (otp.trim().length < 6) {
+        setError("Enter the 6-digit OTP sent to your mobile.");
+        return;
+      }
     }
 
     setSubmitting(true);
     try {
       const formData = new FormData();
-      formData.set("otp", otp.trim());
+      if (!isLoggedIn) formData.set("otp", otp.trim());
       formData.set("type", draft.type);
+      formData.set("service", draft.service);
+      formData.set("rating", String(draft.rating));
       formData.set("fullName", draft.fullName);
       formData.set("mobile", draft.mobile);
       formData.set("profession", draft.profession);
@@ -172,7 +200,7 @@ export function GiveTestimonialModal() {
         data?: import("@/lib/sections/types").TestimonialItem;
       };
       if (!res.ok) {
-        setError(data.error ?? "Could not publish testimonial.");
+        setError(data.error ?? "Could not submit testimonial.");
         return;
       }
       if (data.data) onPublished(data.data);
@@ -218,7 +246,7 @@ export function GiveTestimonialModal() {
             </h2>
             {!success && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Share your experience — verify mobile to publish
+                Share your experience — verify mobile to submit
               </p>
             )}
           </div>
@@ -236,9 +264,9 @@ export function GiveTestimonialModal() {
           {success ? (
             <div className="py-8 text-center animate-in fade-in">
               <CheckCircle2 className="size-14 mx-auto text-[oklch(0.82_0.16_162)] mb-4" />
-              <p className="text-lg font-semibold">Testimonial published</p>
+              <p className="text-lg font-semibold">Thank you!</p>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
-                Your feedback is now live on the advisor profile. Thank you for sharing!
+                Your feedback has been sent to the advisor. Thank you for sharing!
               </p>
               <Button onClick={closeGiveTestimonial} className="mt-6 rounded-full px-8">
                 Done
@@ -280,6 +308,62 @@ export function GiveTestimonialModal() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="gt-service">
+                    Related service <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[oklch(0.82_0.13_205)] pointer-events-none" />
+                    <select
+                      id="gt-service"
+                      value={draft.service}
+                      onChange={(e) =>
+                        patch({ service: e.target.value as TestimonialService | "" })
+                      }
+                      disabled={servicesLoading || serviceOptions.length === 0}
+                      className={cn(
+                        "w-full appearance-none rounded-xl border border-white/15 bg-white/[0.04] py-2.5 pl-10 pr-10 text-sm",
+                        "text-foreground focus:outline-none focus:ring-1 focus:ring-[oklch(0.82_0.13_205/0.5)]",
+                      )}
+                    >
+                      {servicesLoading ? (
+                        <option value="" className="bg-[oklch(0.18_0.035_235)]">
+                          Loading services…
+                        </option>
+                      ) : serviceOptions.length === 0 ? (
+                        <option value="" className="bg-[oklch(0.18_0.035_235)]">
+                          No services available yet
+                        </option>
+                      ) : (
+                        serviceOptions.map((opt) => (
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            className="bg-[oklch(0.18_0.035_235)]"
+                          >
+                            {opt.label}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>
+                    Your rating <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <StarRatingInput
+                      value={draft.rating}
+                      onChange={(rating) => patch({ rating })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {draft.rating} out of 5 stars — tap to change
+                    </p>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="gt-name">
                     Full Name <span className="text-destructive">*</span>
@@ -375,7 +459,11 @@ export function GiveTestimonialModal() {
                   />
                 </div>
 
-                {!otpSent ? (
+                {isLoggedIn ? (
+                  <p className="text-xs text-[oklch(0.82_0.16_162)]">
+                    Signed in to YVITY — OTP verification skipped.
+                  </p>
+                ) : !otpSent ? (
                   <Button
                     type="button"
                     variant="secondary"
@@ -460,12 +548,19 @@ export function GiveTestimonialModal() {
               type="button"
               className="w-full rounded-full h-11 font-semibold"
               onClick={() => void submitTestimonial()}
-              disabled={submitting || !otpSent || otp.length < 6}
+              disabled={
+                submitting ||
+                (!isLoggedIn && (!otpSent || otp.length < 6)) ||
+                !draft.service ||
+                draft.rating < 1 ||
+                serviceOptions.length === 0 ||
+                !validateMobile(draft.mobile)
+              }
             >
               {submitting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Publishing…
+                  Submitting…
                 </>
               ) : (
                 "Submit Testimonial"

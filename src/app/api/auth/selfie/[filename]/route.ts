@@ -1,6 +1,8 @@
-import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
+import { readLocalOrStorageFile } from "@/lib/server/storage/serve-local-or-storage";
+import { STORAGE_BUCKETS } from "@/lib/server/supabase/object-storage";
+import { selfieStoragePath } from "@/lib/server/uploads";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,15 +19,18 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid file" }, { status: 400 });
   }
 
-  const filePath = path.join(SELFIE_DIR, safeName);
+  const ownerPrefix = safeName.split("-")[0] ?? "guest";
+  const buffer = await readLocalOrStorageFile({
+    localPath: path.join(SELFIE_DIR, safeName),
+    bucket: STORAGE_BUCKETS.selfies,
+    objectPath: selfieStoragePath(ownerPrefix, safeName),
+  });
 
-  if (!fs.existsSync(filePath)) {
+  if (!buffer) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const buffer = fs.readFileSync(filePath);
-
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "image/jpeg",
       "Cache-Control": "private, max-age=3600",

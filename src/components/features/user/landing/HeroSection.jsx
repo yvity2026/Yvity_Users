@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthUserContext";
 import { AdvisorCardGold } from "@/yvity-landing/app/components/home-features/advisor-card-gold";
+import { recordSearchImpressionsClient } from "@/lib/advisors/record-search-impressions";
 import { toAdvisorCardGoldProps } from "@/lib/advisor/cardGoldProps";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";
 import AnimatedCounter from "@/yvity-landing/components/ui/AnimatedCounter";
@@ -170,6 +171,14 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [], mode = "explore" }
   const displayedAdvisors = hasActiveFilters
     ? filteredAdvisors.slice(0, 15)
     : filteredAdvisors.slice(0, 9);
+
+  useEffect(() => {
+    if (!hasActiveFilters || displayedAdvisors.length === 0) return;
+    void recordSearchImpressionsClient(
+      displayedAdvisors.map((advisor) => advisor.id),
+      "dashboard_explore",
+    );
+  }, [hasActiveFilters, displayedAdvisors]);
 
   useEffect(() => {
     if (!onSearchChange) {

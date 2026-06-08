@@ -1,5 +1,6 @@
 import type { MembershipPlanId } from "./types";
 import { daysUntilRenewal } from "./config";
+import { resolveSubscriptionDates } from "./checkout-pricing";
 import { featuresForPlan, MEMBERSHIP_PLANS } from "./plans";
 import type { MembershipModel, MembershipStatus } from "./types";
 
@@ -19,13 +20,20 @@ function normalizePlanId(value: unknown): MembershipPlanId {
 export function buildMembershipModel(input?: {
   subscriptionPlan?: string | null;
   approvedAt?: string | null;
+  submittedAt?: string | null;
+  subscriptionStartedAt?: string | null;
+  subscriptionExpiresAt?: string | null;
 }): MembershipModel {
   const planId = normalizePlanId(input?.subscriptionPlan);
   const planDef = MEMBERSHIP_PLANS.find((p) => p.id === planId) ?? MEMBERSHIP_PLANS[0]!;
-  const startDate = input?.approvedAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
-  const renewal = new Date(startDate);
-  renewal.setFullYear(renewal.getFullYear() + 1);
-  const renewalDate = renewal.toISOString().slice(0, 10);
+  const dates = resolveSubscriptionDates({
+    approved_at: input?.approvedAt ?? null,
+    submitted_at: input?.submittedAt ?? null,
+    subscription_started_at: input?.subscriptionStartedAt ?? null,
+    subscription_expires_at: input?.subscriptionExpiresAt ?? null,
+  });
+  const startDate = dates.startedAt.slice(0, 10);
+  const renewalDate = dates.expiresAt.slice(0, 10);
   const daysRemaining = daysUntilRenewal(renewalDate);
   const status: MembershipStatus = planId === "free" || daysRemaining > 0 ? "active" : "expired";
 
@@ -37,7 +45,7 @@ export function buildMembershipModel(input?: {
       startDate,
       expiryDate: renewalDate,
       daysRemaining: Math.max(0, daysRemaining),
-      showVerifiedBadge: planDef.features.includes("verified_badge"),
+      showVerifiedBadge: planId === "silver" || planId === "gold",
     },
     benefits: featuresForPlan(planDef.id),
     plans: MEMBERSHIP_PLANS,

@@ -1,5 +1,22 @@
 import type { CareerData } from "@/lib/career-types";
 import type { GalleryItem } from "@/lib/gallery-types";
+import {
+  computeClientSharePoints,
+  computeSelfSharePoints,
+  MAX_CLIENT_SHARE_POINTS,
+  MAX_SELF_SHARE_EVENTS,
+  MAX_SELF_SHARE_POINTS,
+  SELF_SHARES_PER_POINT,
+  selfSharesUntilMaxPoints,
+} from "@/lib/advisor-score/share-points";
+import {
+  buildDecayNegativeRules,
+  type MonthlyScoreActivity,
+} from "@/lib/advisor-score/decay";
+import {
+  getMdrtLatestYear,
+  hasAchievementTier,
+} from "@/lib/sections/achievement-tiers";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/lib/sections/types";
 import type {
   ScoreCategory,
@@ -35,6 +52,28 @@ export type YvityScoreBuildInput = {
   gallery: GalleryItem[];
   /** No placeholder share/recommendation points until profile is approved. */
   underReview?: boolean;
+  /** OTP-verified client recommendations received. */
+  verifiedRecommendationCount?: number;
+  /** Logged-in advisor self-share events (every 5 → 1 pt). */
+  selfShareCount?: number;
+  /** Unique logged-in users (not the advisor) who shared this profile. */
+  clientShareCount?: number;
+  /** Admin approved IRDAI license — unlocks IRDA identity points + live visibility score. */
+  profileApproved?: boolean;
+  /** IRDA certificate uploaded during My Space setup (may await admin). */
+  irdaiCertificateUploaded?: boolean;
+  /** Account creation timestamp — decay grace window starts here. */
+  accountCreatedAt?: string | null;
+  /** Points subtracted from total when decay is active. */
+  decayPenalty?: number;
+  /** Whether the 30-day grace period has passed. */
+  decayActive?: boolean;
+  /** Days until decay starts (null when decay is already active). */
+  decayGraceDaysRemaining?: number | null;
+  /** Current-month activity used for Activity rule + decay UI. */
+  monthlyActivity?: MonthlyScoreActivity;
+  /** Override negative-rule copy (defaults built from decay state). */
+  decayNegativeRules?: ScoreNegativeRule[];
 };
 
 /**
@@ -53,8 +92,11 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
   // that make the dashboard feel populated for first-time advisors.
   const selfieVerified = Boolean(input.photoUrl?.trim());
   const mobileEmailVerified = true; // assumed once the advisor is logged in
-  const irdaiVerified = input.career.certifications.some((c) => c.status === "verified");
+  const profileApproved = Boolean(input.profileApproved);
+  const irdaiCertificateUploaded = Boolean(input.irdaiCertificateUploaded);
+  const irdaiVerified = profileApproved;
   const hasIntroVideo = Boolean(input.introVideoUrl?.trim());
+  const visibilityScoreActive = profileApproved && !input.underReview;
 
   const identityRule: ScoreRule = {
     id: "identity-summary",
@@ -108,17 +150,41 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       };
   if (identitySuggestion) identityRule.explanation = identitySuggestion;
 
+  if (!irdaiVerified && irdaiCertificateUploaded) {
+    identityRule.explanation = {
+      bullets: [
+        "IRDAI certificate received — our team is verifying your license.",
+        "IRDAI license points unlock after admin approval (usually 24–48 hours).",
+      ],
+      caption: "My Space setup is complete on your side. Score updates once approved.",
+      tone: "success" as const,
+    };
+  }
+
   // -------------------------------------------------------------------
   // VISIBILITY  (30 pts)
   // -------------------------------------------------------------------
-  // The platform does not yet track per-month share counts, so we use
-  // representative demo values that match the design — except while under review.
-  const selfShares = input.underReview ? 0 : 14;
-  const clientShares = input.underReview ? 0 : 4;
-  const monthlyActiveDays = input.underReview ? 0 : 15;
-  const selfShareEarned = Math.min(5, Math.floor(selfShares / 5));
-  const clientShareEarned = Math.min(5, clientShares);
-  const activityEarned = Math.min(5, monthlyActiveDays > 0 ? 5 : 0);
+  // Visibility points (public profile live, shares, activity) accrue only
+  // after admin approves the IRDAI license. Shares are tracked only when
+  // the sharer is logged in.
+  const selfSharesRaw = Math.max(0, input.selfShareCount ?? 0);
+  const clientSharesRaw = Math.max(0, input.clientShareCount ?? 0);
+  const selfShares = visibilityScoreActive ? selfSharesRaw : 0;
+  const clientShares = visibilityScoreActive ? clientSharesRaw : 0;
+  const monthlyActiveDays = visibilityScoreActive
+    ? Math.max(0, input.monthlyActivity?.loginDays ?? 0)
+    : 0;
+  const selfShareEarned = visibilityScoreActive
+    ? computeSelfSharePoints(selfShares)
+    : 0;
+  const clientShareEarned = visibilityScoreActive
+    ? computeClientSharePoints(clientShares)
+    : 0;
+  const activityEarned = visibilityScoreActive
+    ? Math.min(5, monthlyActiveDays)
+    : 0;
+  const publicProfileEarned =
+    visibilityScoreActive && input.publicProfileActive ? 10 : 0;
 
   const profileStrengthSubItems = [
     {
@@ -138,20 +204,22 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       id: "public-active",
       label: "Public Profile Active",
       iconHint: "globe",
-      earned: input.publicProfileActive ? 10 : 0,
+      earned: publicProfileEarned,
       max: 10,
-      status: ruleStatus(input.publicProfileActive ? 10 : 0, 10),
+      status: ruleStatus(publicProfileEarned, 10),
       explanation: {
         bullets: [
-          input.publicProfileActive
-            ? "Your public profile is live and discoverable on YVITY."
-            : "Activate your public profile in Settings → Visibility to earn this score.",
+          profileApproved
+            ? input.publicProfileActive
+              ? "Your public profile is live and discoverable on YVITY."
+              : "Turn on your public profile in Settings → Visibility."
+            : "Unlocks after YVITY admin approves your IRDAI license.",
         ],
         metrics: [
           {
             label: "",
-            value: input.publicProfileActive ? "Full score" : "+10 pts available",
-            tone: input.publicProfileActive ? "success" : "warning",
+            value: publicProfileEarned ? "Full score" : "+10 pts available",
+            tone: publicProfileEarned ? "success" : "warning",
           },
         ],
       },
@@ -161,17 +229,28 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       label: "Profile Sharing (self)",
       iconHint: "upload",
       earned: selfShareEarned,
-      max: 5,
-      status: ruleStatus(selfShareEarned, 5),
+      max: MAX_SELF_SHARE_POINTS,
+      status: ruleStatus(selfShareEarned, MAX_SELF_SHARE_POINTS),
       explanation: {
-        bullets: ["Every 5 shares → 1 point", "25 total shares → 5 points"],
-        caption:
-          selfShareEarned < 5
-            ? `Share your profile ${25 - selfShares} more times to earn full score.`
-            : "Full score earned. Keep sharing to maintain your score.",
+        bullets: [
+          "Logged-in advisor only — use Share / Copy link on your live profile",
+          `Every ${SELF_SHARES_PER_POINT} shares → 1 point (${MAX_SELF_SHARE_EVENTS} shares → ${MAX_SELF_SHARE_POINTS} points max)`,
+          visibilityScoreActive
+            ? `Current : ${selfSharesRaw} tracked share${selfSharesRaw === 1 ? "" : "s"}`
+            : "Counts after admin approves your IRDAI license",
+        ],
+        caption: visibilityScoreActive
+          ? selfShareEarned < MAX_SELF_SHARE_POINTS
+            ? `${selfSharesUntilMaxPoints(selfSharesRaw)} more share${selfSharesUntilMaxPoints(selfSharesRaw) === 1 ? "" : "s"} to reach full score.`
+            : "Full score earned. Keep sharing to maintain your score."
+          : "My Space IRDA upload is done — sharing points start after approval.",
         metrics: [
-          { label: "Max", value: "5 pts" },
-          { label: "Current", value: `${selfShares} shares` },
+          { label: "Max", value: `${MAX_SELF_SHARE_POINTS} pts` },
+          {
+            label: "Earned",
+            value: visibilityScoreActive ? `${selfShareEarned} pts` : "Pending approval",
+            tone: visibilityScoreActive ? "success" : "warning",
+          },
         ],
       },
     },
@@ -180,20 +259,30 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       label: "Profile Sharing (client)",
       iconHint: "users",
       earned: clientShareEarned,
-      max: 5,
-      status: ruleStatus(clientShareEarned, 5),
+      max: MAX_CLIENT_SHARE_POINTS,
+      status: ruleStatus(clientShareEarned, MAX_CLIENT_SHARE_POINTS),
       explanation: {
         bullets: [
-          "Every user share → 1 point",
-          `Current : ${clientShares} users shared your profile`,
+          "Logged-in clients only — each unique user share → 1 point",
+          visibilityScoreActive
+            ? clientSharesRaw > 0
+              ? `Current : ${clientSharesRaw} user${clientSharesRaw === 1 ? "" : "s"} shared your profile`
+              : "Current : no logged-in client shares yet"
+            : "Counts after admin approves your IRDAI license",
         ],
-        caption: "Encourage clients to share your profile link to earn more points.",
+        caption: "Anonymous shares do not count. Clients must sign in first.",
         metrics: [
-          { label: "Max", value: "5 pts" },
+          { label: "Max", value: `${MAX_CLIENT_SHARE_POINTS} pts` },
           {
             label: "",
-            value: clientShareEarned < 5 ? `+${5 - clientShareEarned} more needed` : "Full score",
-            tone: clientShareEarned < 5 ? "warning" : "success",
+            value: visibilityScoreActive
+              ? clientShareEarned < MAX_CLIENT_SHARE_POINTS
+                ? `+${MAX_CLIENT_SHARE_POINTS - clientShareEarned} more needed`
+                : "Full score"
+              : "Pending approval",
+            tone: visibilityScoreActive && clientShareEarned < MAX_CLIENT_SHARE_POINTS
+              ? "warning"
+              : "success",
           },
         ],
       },
@@ -205,14 +294,13 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       earned: profileStrengthEarned,
       max: 5,
       status: ruleStatus(profileStrengthEarned, 5),
-      explanation: {
-        bullets: profileStrengthSubItems.map((s) => `${s.label}`),
-        metrics: profileStrengthSubItems.map((s) => ({
-          label: "",
-          value: s.complete ? "1 pt" : "0 pt",
-          tone: s.complete ? ("success" as const) : ("warning" as const),
-        })),
-      },
+      subItems: profileStrengthSubItems.map((s) => ({
+        id: s.id,
+        label: s.label,
+        earned: s.complete ? 1 : 0,
+        max: 1,
+        complete: s.complete,
+      })),
     },
     {
       id: "activity",
@@ -247,24 +335,18 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
   const videoEarned = Math.min(9, videoTestimonials * 3);
   const testimonialsEarned = textEarned + audioEarned + videoEarned;
 
-  // No first-class "recommendations" stream yet — derive a demo value
-  // similar to the design (3 recommendations received, 1 short of bonus).
-  const recommendations = input.underReview ? 0 : 3;
+  const recommendations = visibilityScoreActive
+    ? Math.max(0, input.verifiedRecommendationCount ?? 0)
+    : 0;
   const recommendationsEarned = Math.min(14, recommendations * 2);
   const bonusEarned = recommendations >= 7 ? 1 : 0;
 
   // Latest achievement (by category label heuristic) drives the tier UI.
-  const hasMDRT = input.achievements.some(
-    (a) => /\bmdrt\b/i.test(a.title) || /\bmdrt\b/i.test(a.subtitle ?? ""),
-  );
-  const hasCOT = input.achievements.some((a) => /\bcot\b/i.test(a.title));
-  const hasTOT = input.achievements.some((a) => /\btot\b/i.test(a.title));
+  const hasMDRT = hasAchievementTier(input.achievements, "mdrt");
+  const hasCOT = hasAchievementTier(input.achievements, "cot");
+  const hasTOT = hasAchievementTier(input.achievements, "tot");
   const achievementYears = hasMDRT
-    ? Math.max(
-        ...input.achievements
-          .filter((a) => /\bmdrt\b/i.test(a.title))
-          .map((a) => Math.max(...a.years.map((y) => Number(y) || 0), 1)),
-      )
+    ? getMdrtLatestYear(input.achievements) ?? 1
     : 1;
   const mdrtEarned = hasMDRT ? Math.min(10, 2 * Math.max(1, achievementYears - 2023)) : 0;
   const cotEarned = hasCOT ? 6 : 0;
@@ -390,33 +472,21 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
     rules: trustRules,
   };
 
-  const total = identityCategory.earned + visibilityCategory.earned + trustCategory.earned;
+  const rawTotal =
+    identityCategory.earned + visibilityCategory.earned + trustCategory.earned;
+  const decayPenalty =
+    input.decayActive && visibilityScoreActive ? Math.max(0, input.decayPenalty ?? 0) : 0;
+  const total = Math.max(0, rawTotal - decayPenalty);
 
   // -------------------------------------------------------------------
-  // Negative rules (always shown so advisors know how decay works).
+  // Negative rules (score decay — active after 30-day account grace).
   // -------------------------------------------------------------------
-  const negativeRules: ScoreNegativeRule[] = [
-    {
-      label: "Profile Views",
-      description: "Every 5 unique views = 1 pt (Max: 10 pts).",
-      decay: "0 views in a month results in -1 pt/month (Max: -10 pts).",
-    },
-    {
-      label: "Self-Share",
-      description: "Every 5 shares = 1 pt (Max: 5 pts).",
-      decay: "< 5 shares/month results in -1 pt/month (Max: -5 pts).",
-    },
-    {
-      label: "Others-Share",
-      description: "1 logged-in customer share = 1 pt (Max: 5 pts).",
-      decay: "0 customer shares/month results in -1 pt/month (Max: -5 pts).",
-    },
-    {
-      label: "Login Activity",
-      description: "5 logins in a month = 5 pts (Max: 5 pts).",
-      decay: "0 logins in a month results in -1 pt/month (Max: -5 pts).",
-    },
-  ];
+  const negativeRules =
+    input.decayNegativeRules ??
+    buildDecayNegativeRules({
+      active: Boolean(input.decayActive),
+      graceDaysRemaining: input.decayGraceDaysRemaining ?? null,
+    });
 
   // -------------------------------------------------------------------
   // Improvements — dynamic list ordered by points unlocked.
@@ -442,7 +512,7 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       target: { kind: "profile-section", section: "testimonials" },
     });
   }
-  if (recommendations < 7) {
+  if (visibilityScoreActive && recommendations < 7) {
     const remaining = 7 - recommendations;
     improvements.push({
       id: "imp-recommendations",
@@ -452,16 +522,20 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       target: { kind: "share" },
     });
   }
-  if (selfShares < 25) {
+  if (visibilityScoreActive && selfSharesRaw < MAX_SELF_SHARE_EVENTS) {
+    const remaining = selfSharesUntilMaxPoints(selfSharesRaw);
     improvements.push({
       id: "imp-self-share",
-      label: `Share profile ${25 - selfShares} more time${25 - selfShares === 1 ? "" : "s"}`,
-      points: Math.min(5, Math.ceil((25 - selfShares) / 5)),
+      label: `Share profile ${remaining} more time${remaining === 1 ? "" : "s"}`,
+      points: Math.min(
+        MAX_SELF_SHARE_POINTS,
+        Math.ceil(remaining / SELF_SHARES_PER_POINT),
+      ),
       cta: "Share",
       target: { kind: "share" },
     });
   }
-  if (recommendations < 7) {
+  if (visibilityScoreActive && recommendations < 7) {
     improvements.push({
       id: "imp-bonus",
       label: "Reach 7 recommendations to unlock the final bonus point",
@@ -470,10 +544,10 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       target: { kind: "share" },
     });
   }
-  if (clientShares < 5) {
+  if (visibilityScoreActive && clientSharesRaw < MAX_CLIENT_SHARE_POINTS) {
     improvements.push({
       id: "imp-client-share",
-      label: `Ask ${5 - clientShares} client to share your profile`,
+      label: `Ask ${MAX_CLIENT_SHARE_POINTS - clientSharesRaw} client${MAX_CLIENT_SHARE_POINTS - clientSharesRaw === 1 ? "" : "s"} to share your profile`,
       points: 1,
       cta: "Invite",
       target: { kind: "share" },
@@ -500,8 +574,15 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
 
   return {
     total,
+    rawTotal,
+    decayPenalty,
+    decayActive: Boolean(input.decayActive),
+    decayGraceDaysRemaining: input.decayGraceDaysRemaining ?? null,
     max: 100,
-    tagline: "Your professional trust score based on Identity, Visibility, and Credibility",
+    tagline:
+      decayPenalty > 0
+        ? "Score adjusted for monthly inactivity — stay active to recover points"
+        : "Your professional trust score based on Identity, Visibility, and Credibility",
     categories: [identityCategory, visibilityCategory, trustCategory],
     negativeRules,
     improvements: sortedImprovements,

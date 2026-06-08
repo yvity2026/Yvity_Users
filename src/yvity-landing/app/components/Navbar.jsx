@@ -158,8 +158,9 @@
 import React, { useEffect } from "react";
 import BrandMark from "@/yvity-landing/components/brand/BrandMark";
 import { scrollToSection } from "@/yvity-landing/lib/landing/scrollToSection";
-import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationModal";
 import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
+import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationModal";
+import { LANDING_NAV_INNER } from "@/yvity-landing/app/components/home/landingLayout";
 
 const Navitems = [
   { name: "Home", link: "home" },
@@ -202,7 +203,7 @@ const Navbar = ({ initialLoginOpen = false }) => {
       {/* Mobile: square top, rounded bottom, gradient border */}
       <div className="mob-nav-top-frame lg:hidden">
         <div className="glass-nav-mobile mob-nav-top-inner">
-          <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
+          <div className={`${LANDING_NAV_INNER} flex h-[3.75rem] items-center justify-between sm:h-16`}>
             <div className="flex min-w-0 items-center justify-start">
               <BrandMark
                 logoSize={40}
@@ -210,18 +211,19 @@ const Navbar = ({ initialLoginOpen = false }) => {
                 showTagline
                 logoClassName="h-10 w-10 object-contain"
                 nameClassName="font-cormorant text-base font-bold leading-none text-[#0A4A4A]"
+                taglineClassName="font-poppins text-[10px] font-semibold leading-tight text-[#F59E0B]"
               />
             </div>
             <button
               type="button"
               onClick={goLogin}
-              className="relative flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#0A4A4A] via-[#0D5555] to-[#0A4A4A] px-4 font-poppins shadow-[0_4px_16px_rgba(10,74,74,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-[#F59E0B]/40 transition-transform duration-200 active:scale-95 sm:h-10 sm:px-5"
+              className="relative flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#0A4A4A] via-[#0D5555] to-[#0A4A4A] px-4 font-poppins shadow-[0_4px_16px_rgba(10,74,74,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-[#F59E0B]/40 transition-transform duration-200 active:scale-95 sm:h-10 sm:px-5"
             >
               <span
                 aria-hidden
                 className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"
               />
-              <span className="relative text-[13px] font-bold leading-none tracking-wide text-(--ct-as-badges-accents,#F59E0B) drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] sm:text-sm">
+              <span className="relative text-[13px] font-bold leading-none tracking-wide text-[#F59E0B] sm:text-sm">
                 Login
               </span>
             </button>
@@ -229,12 +231,12 @@ const Navbar = ({ initialLoginOpen = false }) => {
         </div>
       </div>
 
-      {/* Desktop: gradient pill nav */}
-      <div className="app-top-nav-desktop-wrap mx-auto hidden w-full max-w-[1536px] justify-center px-0 lg:flex lg:px-6">
-        <div className="relative h-17.5 w-full max-w-4xl xl:max-w-7xl">
-          <div className="glass-nav-frame relative flex h-full w-full items-center justify-between rounded-[100px] p-[1px] transition duration-800 hover:scale-105">
-            <div className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-8.5 py-5">
-              <div className="flex items-center justify-start">
+      {/* Desktop: full-width brand nav aligned with page content */}
+      <div className="app-top-nav-desktop-wrap hidden lg:block">
+        <div className={`${LANDING_NAV_INNER} py-3 xl:py-4`}>
+          <div className="glass-nav-frame relative flex h-17.5 w-full items-center justify-between rounded-[100px] p-[1px]">
+            <div className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-6 py-4 lg:px-8 xl:px-10">
+              <div className="flex shrink-0 items-center justify-start">
                 <BrandMark
                   logoSize={48}
                   showName
@@ -245,38 +247,36 @@ const Navbar = ({ initialLoginOpen = false }) => {
                 />
               </div>
 
-              <div className="flex h-full items-center justify-end gap-8 xl:gap-16">
-                <ul className="flex items-center gap-4 font-poppins text-[#0A4A4A] md:text-xs lg:text-sm xl:gap-10 xl:font-medium">
+              <div className="flex h-full items-center justify-end gap-6 xl:gap-10">
+                <ul className="flex items-center gap-4 font-poppins text-[#0A4A4A] md:text-xs lg:text-sm xl:gap-8 xl:text-[15px]">
                   {Navitems.map((item, index) => (
                     <li key={index}>
                       <button
                         type="button"
                         onClick={() => scrollToSection(item.link)}
-                        className="group relative inline-block cursor-pointer bg-transparent p-0 font-inherit text-[#0A4A4A] transition-colors hover:text-[#076868]"
+                        className="group relative inline-block cursor-pointer bg-transparent p-0 font-inherit text-[#0A4A4A] transition-colors hover:text-[#D97706]"
                       >
                         {item.name}
-                        <span className="absolute bottom-0 left-1/2 h-0.5 w-0 bg-[#F49F0F] transition-all duration-500 ease-out group-hover:left-0 group-hover:w-full" />
+                        <span className="absolute bottom-0 left-1/2 h-0.5 w-0 bg-[#F59E0B] transition-all duration-500 ease-out group-hover:left-0 group-hover:w-full" />
                       </button>
                     </li>
                   ))}
                 </ul>
-                <div className="flex items-center gap-3 font-poppins font-medium lg:gap-4 xl:gap-6">
+                <div className="flex items-center gap-3 font-poppins font-medium lg:gap-4">
                   <button
                     type="button"
                     onClick={goLogin}
-                    className="relative flex h-9.5 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#0A4A4A] via-[#0D5555] to-[#0A4A4A] px-5.5 py-3.5 text-sm font-bold leading-none shadow-[0_4px_16px_rgba(10,74,74,0.25),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-[#F59E0B]/40 transition-all duration-300 hover:shadow-[0_0_16px_3px_rgba(245,158,11,0.22)] active:scale-[0.98]"
+                    className="relative flex h-9.5 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#0A4A4A] via-[#0D5555] to-[#0A4A4A] px-5.5 py-3.5 text-sm font-bold leading-none shadow-[0_4px_16px_rgba(10,74,74,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-[#F59E0B]/40 transition-all duration-300 hover:shadow-[0_0_16px_3px_rgba(245,158,11,0.18)] active:scale-[0.98]"
                   >
                     <span
                       aria-hidden
                       className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"
                     />
-                    <span className="relative text-(--ct-as-badges-accents,#F59E0B)">
-                      Login
-                    </span>
+                    <span className="relative text-[#F59E0B]">Login</span>
                   </button>
                   <button
                     onClick={goRegister}
-                    className="flex h-9.5 items-center justify-center gap-2.5 rounded-3xl bg-[#F49F0F] px-5.5 py-3.5 text-sm font-bold leading-normal text-[#0A4A4A] shadow-[0_4px_14px_rgba(244,159,15,0.4)] ring-1 ring-[#F59E0B]/50 transition-all hover:bg-[#FFAE26] hover:shadow-[0_4px_18px_rgba(245,158,11,0.45)]"
+                    className="flex h-9.5 items-center justify-center gap-2.5 rounded-3xl bg-[#F59E0B] px-5.5 py-3.5 text-sm font-bold leading-normal text-[#0A4A4A] shadow-[0_4px_14px_rgba(244,159,15,0.4)] ring-1 ring-[#FFAE26]/50 transition-all hover:bg-[#FFAE26] hover:shadow-[0_4px_18px_rgba(245,158,11,0.45)]"
                   >
                     Join Now
                   </button>

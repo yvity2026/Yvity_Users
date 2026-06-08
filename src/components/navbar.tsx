@@ -14,10 +14,13 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { YvityLogo } from "@/components/brand/yvity-logo";
+import BrandMark from "@/components/brand/BrandMark";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-store";
-import { useIsVisitorPreview } from "@/lib/use-visitor-preview";
+import { LANDING_PATH } from "@/lib/landing/paths";
+import { useShowPublicVisitorNav } from "@/lib/use-public-visitor-nav";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
+import { isPublicAdvisorSlugPath } from "@/lib/advisor/public-profile-slug";
 
 const links = [
   { href: "/profile", label: "Home", icon: Home },
@@ -32,8 +35,10 @@ function navLinkClass(active: boolean, base: string) {
   return cn(base, active && "yvity-dash-nav-link--active");
 }
 
-function isActivePath(pathname: string, href: string) {
-  if (href === "/profile") return pathname === "/profile";
+function isActivePath(pathname: string, href: string, homeHref: string) {
+  if (href === "/profile") {
+    return pathname === "/profile" || isPublicAdvisorSlugPath(pathname);
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -42,10 +47,9 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthed } = useAuth();
-  // Inside the advisor workspace's "Public Profile" iframe we want to mimic
-  // the logged-out visitor experience even though the user is signed in.
-  const isVisitorPreview = useIsVisitorPreview();
-  const showAuthed = isAuthed && !isVisitorPreview;
+  const showVisitorNav = useShowPublicVisitorNav();
+  const showAuthed = isAuthed && !showVisitorNav;
+  const homeHref = usePublicProfileNavHome();
 
   useEffect(() => {
     setExpanded(false);
@@ -58,68 +62,119 @@ export function Navbar() {
     };
   }, [expanded]);
 
-  const ctaHref = showAuthed ? "/advisor" : "/login";
+  const ctaHref = showAuthed ? "/advisor" : LANDING_PATH;
   const ctaLabel = showAuthed ? "Dashboard" : "Login";
   const CtaIcon = showAuthed ? LayoutDashboard : LogIn;
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full yvity-dash-nav-flat border-b">
-        <nav className="mx-auto max-w-6xl px-4 md:px-6 h-16 flex items-center justify-between">
-          <Link href="/profile" className="group rounded-lg outline-offset-4 transition-opacity hover:opacity-90">
-            <YvityLogo
-              size={36}
-              wordmarkClassName="yvity-dash-nav-brand-name text-base md:text-lg font-semibold"
-              taglineClassName="yvity-dash-nav-brand-tagline text-[10px] hidden sm:block"
-            />
-          </Link>
+      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0">
+        <div className="yvity-dash-nav-flat border-b lg:hidden">
+          <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
+            <Link
+              href={homeHref}
+              className="flex min-w-0 items-center justify-start rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
+              aria-label="YVITY home"
+            >
+              <BrandMark
+                logoSize={40}
+                showName
+                showTagline
+                layout="row"
+                logoClassName="h-9 w-9 object-contain"
+                nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none"
+                taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
+              />
+            </Link>
 
-          <ul className="hidden md:flex items-center gap-1">
-            {links.map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  className={navLinkClass(
-                    isActivePath(pathname, l.href),
-                    "yvity-dash-nav-link relative rounded-full px-3.5 py-1.5 text-sm font-medium font-poppins transition-colors",
-                  )}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+            <button
+              type="button"
+              onClick={() => router.push(ctaHref)}
+              className="yvity-dash-nav-cta inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+            >
+              <CtaIcon className="size-3.5" /> {ctaLabel}
+            </button>
+          </div>
+        </div>
 
-          <button
-            onClick={() => router.push(ctaHref)}
-            className="yvity-dash-nav-cta inline-flex items-center gap-1.5 rounded-full px-3 md:px-4 py-1.5 md:py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
-          >
-            <CtaIcon className="size-3.5" /> {ctaLabel}
-          </button>
-        </nav>
+        <div className="yvity-dash-nav-flat hidden border-b lg:block">
+          <nav className="mx-auto flex h-16 w-full max-w-[1536px] items-center justify-between gap-4 px-6">
+            <Link
+              href={homeHref}
+              className="flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
+              aria-label="YVITY home"
+            >
+              <BrandMark
+                logoSize={40}
+                showName
+                showTagline
+                layout="row"
+                logoClassName="h-9 w-9 object-contain"
+                nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none xl:text-lg"
+                taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
+              />
+            </Link>
+
+            <ul className="flex min-w-0 flex-1 items-center justify-center gap-0.5 sm:gap-1">
+              {links.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href === "/profile" ? homeHref : l.href}
+                    className={navLinkClass(
+                      isActivePath(pathname, l.href, homeHref),
+                      "yvity-dash-nav-link relative rounded-full px-3.5 py-1.5 text-sm font-medium font-poppins transition-colors",
+                    )}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              type="button"
+              onClick={() => router.push(ctaHref)}
+              className="yvity-dash-nav-cta inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+            >
+              <CtaIcon className="size-3.5" /> {ctaLabel}
+            </button>
+          </nav>
+        </div>
       </header>
+
+      {/* Reserve space so fixed header does not overlap page content */}
+      <div className="h-[3.75rem] shrink-0 sm:h-16" aria-hidden />
 
       <MobileBottomBar
         expanded={expanded}
         onToggle={() => setExpanded((v) => !v)}
         pathname={pathname}
+        homeHref={homeHref}
         servicesHref="/services"
         testimonialsHref="/testimonials"
       />
 
       {expanded && (
         <div
-          className="md:hidden fixed inset-0 z-[55] animate-in fade-in duration-200"
+          className="lg:hidden fixed inset-0 z-[55] animate-in fade-in duration-200"
           onClick={() => setExpanded(false)}
         >
           <div className="absolute inset-0 yvity-nav-shell" />
           <div
-            className="absolute inset-x-3 bottom-24 rounded-3xl glass-strong p-4 animate-in slide-in-from-bottom-4 duration-300"
+            className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] rounded-3xl glass-strong p-4 animate-in slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-2 pb-3">
-              <YvityLogo size={32} showTagline taglineClassName="text-[10px]" />
+              <BrandMark
+                logoSize={32}
+                showName
+                showTagline
+                layout="row"
+                nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold"
+                taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px]"
+              />
               <button
+                type="button"
                 onClick={() => setExpanded(false)}
                 aria-label="Close menu"
                 className="inline-flex size-9 items-center justify-center rounded-full glass"
@@ -130,11 +185,12 @@ export function Navbar() {
             <ul className="grid grid-cols-3 gap-2">
               {links.map((l) => {
                 const Icon = l.icon;
-                const active = isActivePath(pathname, l.href);
+                const href = l.href === "/profile" ? homeHref : l.href;
+                const active = isActivePath(pathname, l.href, homeHref);
                 return (
                   <li key={l.href}>
                     <Link
-                      href={l.href}
+                      href={href}
                       className={cn(
                         "group flex flex-col items-center gap-1.5 rounded-2xl p-3 glass hover:bg-white/5 transition active:scale-95",
                         active && "yvity-nav-active-ring",
@@ -170,74 +226,113 @@ function MobileBottomBar({
   expanded,
   onToggle,
   pathname,
+  homeHref,
   servicesHref,
   testimonialsHref,
 }: {
   expanded: boolean;
   onToggle: () => void;
   pathname: string;
+  homeHref: string;
   servicesHref: string;
   testimonialsHref: string;
 }) {
+  const homeActive = isActivePath(pathname, "/profile", homeHref);
+
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 z-[60] pointer-events-none">
-      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background/95 via-background/70 to-transparent" />
-      <div className="pointer-events-auto relative mx-auto mb-3 max-w-sm px-4 pb-[max(env(safe-area-inset-bottom),0.25rem)]">
-        <div className="mob-nav-bottom-frame yvity-dash-nav-top-frame relative rounded-[28px]">
-          <div className="mob-nav-bottom-inner yvity-dash-nav-bottom-inner relative flex h-16 items-center rounded-[28px]">
+    <nav
+      aria-label="Mobile profile navigation"
+      className="lg:hidden fixed inset-x-0 bottom-0 z-[60]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <div className="yvity-dash-nav-flat border-t">
+        <div className="mx-auto flex h-[4.25rem] max-w-lg items-stretch justify-around px-1">
           <Link
             href={servicesHref}
             className={navLinkClass(
-              isActivePath(pathname, servicesHref),
-              "yvity-dash-nav-bottom-label flex flex-1 flex-col items-center gap-0.5 active:scale-95 transition",
+              isActivePath(pathname, servicesHref, homeHref),
+              "yvity-dash-nav-bottom-label relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition",
             )}
           >
             <span
               className={cn(
-                "yvity-dash-nav-bottom-icon flex size-9 items-center justify-center rounded-2xl",
-                isActivePath(pathname, servicesHref) && "yvity-dash-nav-bottom-icon--active",
+                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                isActivePath(pathname, servicesHref, homeHref) &&
+                  "yvity-dash-nav-bottom-icon--active",
               )}
             >
-              <Sparkles className="size-4" />
+              <Sparkles className="size-5" strokeWidth={2} />
             </span>
-            <span className="text-[10px] font-medium font-poppins">Services</span>
+            <span className="mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
+              Services
+            </span>
           </Link>
-          <div className="w-20" />
+
+          <Link
+            href={homeHref}
+            aria-current={homeActive ? "page" : undefined}
+            className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
+          >
+            <span
+              className={cn(
+                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                homeActive && "yvity-dash-nav-bottom-icon--active",
+              )}
+            >
+              <Home className="size-5" strokeWidth={homeActive ? 2.25 : 2} />
+            </span>
+            <span
+              className={cn(
+                "yvity-dash-nav-bottom-label mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight sm:text-[10px]",
+                homeActive ? "font-semibold" : "font-medium opacity-65",
+              )}
+            >
+              Home
+            </span>
+          </Link>
+
           <Link
             href={testimonialsHref}
             className={navLinkClass(
-              isActivePath(pathname, testimonialsHref),
-              "yvity-dash-nav-bottom-label flex flex-1 flex-col items-center gap-0.5 active:scale-95 transition",
+              isActivePath(pathname, testimonialsHref, homeHref),
+              "yvity-dash-nav-bottom-label relative flex min-h-[44px] min-w-0 flex-col items-center justify-center px-0.5 active:scale-95 transition",
             )}
           >
             <span
               className={cn(
-                "yvity-dash-nav-bottom-icon flex size-9 items-center justify-center rounded-2xl",
-                isActivePath(pathname, testimonialsHref) && "yvity-dash-nav-bottom-icon--active",
+                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                isActivePath(pathname, testimonialsHref, homeHref) &&
+                  "yvity-dash-nav-bottom-icon--active",
               )}
             >
-              <Quote className="size-4" />
+              <Quote className="size-5" strokeWidth={2} />
             </span>
-            <span className="text-[10px] font-medium font-poppins">Testimonials</span>
+            <span className="mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
+              Testimonials
+            </span>
           </Link>
+
           <button
+            type="button"
             onClick={onToggle}
-            aria-label="Toggle navigation"
+            aria-label="More navigation"
             aria-expanded={expanded}
-            className={cn(
-              "absolute left-1/2 -translate-x-1/2 -top-6 size-16 rounded-full yvity-nav-fab",
-              "ring-4 ring-background",
-              "flex items-center justify-center text-primary-foreground",
-              "transition-transform duration-300 active:scale-95",
-              expanded && "rotate-45",
-            )}
+            className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
           >
-            <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 hover:opacity-100 transition" />
-            {expanded ? <X className="size-6" /> : <Home className="size-6" />}
+            <span
+              className={cn(
+                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                expanded && "yvity-dash-nav-bottom-icon--active",
+              )}
+            >
+              {expanded ? <X className="size-5" /> : <Briefcase className="size-5" strokeWidth={2} />}
+            </span>
+            <span className="yvity-dash-nav-bottom-label mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
+              More
+            </span>
           </button>
-          </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

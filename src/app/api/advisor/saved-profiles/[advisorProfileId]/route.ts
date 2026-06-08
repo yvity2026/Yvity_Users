@@ -15,7 +15,7 @@ export async function DELETE(
   }
 
   const { advisorProfileId } = await context.params;
-  const result = removeLocalSavedProfile(session.id, advisorProfileId);
+  const result = await removeLocalSavedProfile(session.id, advisorProfileId);
 
   if (result.error) {
     return NextResponse.json({ success: false, error: result.error }, { status: 404 });

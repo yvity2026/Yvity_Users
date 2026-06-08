@@ -26,7 +26,7 @@ type RouteCtx = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, ctx: RouteCtx) {
   const user = await requireSession();
-  if (!user) return unauthorized();
+  if (!user?.id) return unauthorized();
 
   const { id } = await ctx.params;
 
@@ -61,7 +61,7 @@ export async function PATCH(request: Request, ctx: RouteCtx) {
     return NextResponse.json({ error: "Invalid follow-up type" }, { status: 400 });
   }
 
-  const updated = await updateLead(id, body);
+  const updated = await updateLead(user.id, id, body);
   if (!updated) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
   return NextResponse.json({ data: updated });
@@ -69,10 +69,10 @@ export async function PATCH(request: Request, ctx: RouteCtx) {
 
 export async function DELETE(_request: Request, ctx: RouteCtx) {
   const user = await requireSession();
-  if (!user) return unauthorized();
+  if (!user?.id) return unauthorized();
 
   const { id } = await ctx.params;
-  const ok = await deleteLead(id);
+  const ok = await deleteLead(user.id, id);
   if (!ok) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
   return NextResponse.json({ ok: true });

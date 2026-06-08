@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Calendar, CloudUpload, FileText, Lock, Trash2 } from "lucide-react";
+import { Calendar, CloudUpload, Download, FileText, Lock, Trash2 } from "lucide-react";
 import {
   createEmptyServiceDetail,
   DEFAULT_CATEGORY_ID,
@@ -19,8 +19,20 @@ import {
 } from "@/lib/advisor/setupOnboardingTaxonomy";
 import {
   encodeCapacityMetadata,
-  SERVICE_CAPACITY_OPTIONS,
+  capacityIdForOnboarding,
 } from "@/lib/advisor/serviceCapacity";
+import { ServiceAccountTypePicker } from "@/components/advisor/service-account-type-picker";
+import {
+  LICENSE_HOLDER_CONSENT_HINT,
+  LICENSE_HOLDER_DECLARATION,
+  LICENSE_HOLDER_RELATIONSHIPS,
+  relationshipLabel,
+} from "@/lib/advisor/service-license-holder";
+import {
+  canGenerateLicenseHolderConsentPdf,
+  downloadLicenseHolderConsentPdf,
+} from "@/lib/advisor/license-holder-consent-pdf";
+import { useAuth } from "@/context/AuthUserContext";
 import {
   computeYearsSinceStartDate,
   formatExperienceFromStart,
@@ -70,8 +82,17 @@ function buildServicesPayload({
       numberOfClients: null,
       keyServices: [
         meta?.label || "Insurance",
-        encodeCapacityMetadata(detail.professionalCapacity),
+        encodeCapacityMetadata(capacityIdForOnboarding(detail.professionalCapacity)),
       ].filter(Boolean),
+      license_holder_type: detail.licenseHolderType === "other" ? "other" : "self",
+      license_holder_name:
+        detail.licenseHolderType === "other" ? detail.licenseHolderName?.trim() || "" : "",
+      license_holder_relationship:
+        detail.licenseHolderType === "other"
+          ? detail.licenseHolderRelationship?.trim() || ""
+          : "",
+      license_holder_consent_url:
+        detail.licenseHolderType === "other" ? detail.consentLetterUrl?.trim() || "" : "",
     };
   });
 }
@@ -83,6 +104,7 @@ export default function SetupMyProfileFlow({
   onComplete,
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const isModal = variant === "modal";
   const [stepIndex, setStepIndex] = useState(0);
   const [roles, setRoles] = useState([]);
@@ -99,6 +121,7 @@ export default function SetupMyProfileFlow({
   const [paymentDone, setPaymentDone] = useState(false);
   const [paidPlanId, setPaidPlanId] = useState(null);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
+  const [licenseDeclarationAccepted, setLicenseDeclarationAccepted] = useState(false);
 
   const { payForPlan } = useRazorpayCheckout();
 
@@ -113,6 +136,16 @@ export default function SetupMyProfileFlow({
   const serviceOptions = useMemo(
     () => getServicesForCategory(categoryId),
     [categoryId],
+  );
+
+  const hasOtherLicenseHolder = useMemo(
+    () =>
+      selectedServices.some(
+        (serviceId) =>
+          (serviceDetails[serviceId] ?? createEmptyServiceDetail()).licenseHolderType ===
+          "other",
+      ),
+    [selectedServices, serviceDetails],
   );
 
   const getServiceMeta = useCallback(
@@ -258,6 +291,24 @@ export default function SetupMyProfileFlow({
             toast.error(`Add license number for ${label}`);
             return false;
           }
+          if (detail.licenseHolderType === "other") {
+            if (!detail.licenseHolderName?.trim()) {
+              toast.error(`Add licence holder name for ${label}`);
+              return false;
+            }
+            if (!detail.licenseHolderRelationship?.trim()) {
+              toast.error(`Select relationship for ${label}`);
+              return false;
+            }
+            if (!detail.consentLetterUrl?.trim() && !detail.consentLetterFile) {
+              toast.error(`Upload consent letter for ${label}`);
+              return false;
+            }
+          }
+        }
+        if (hasOtherLicenseHolder && !licenseDeclarationAccepted) {
+          toast.error("Please confirm the licence holder declaration");
+          return false;
         }
         return true;
       }
@@ -285,6 +336,93 @@ export default function SetupMyProfileFlow({
 
   const goBack = () => {
     setStepIndex((index) => Math.max(index - 1, 0));
+  };
+
+  const handleDownloadConsentForm = async (serviceId) => {
+    const detail = serviceDetails[serviceId] ?? createEmptyServiceDetail();
+    const serviceLabel = getServiceLabel(categoryId, serviceId);
+    const profileHolderName = user?.name?.trim() || "";
+    const profileHolderMobile = user?.phone?.trim() || user?.mobile?.trim() || "";
+    const place = [user?.city?.trim(), user?.state?.trim()].filter(Boolean).join(", ");
+
+    if (
+      !canGenerateLicenseHolderConsentPdf({
+        licenceHolderName: detail.licenseHolderName,
+        relationship: detail.licenseHolderRelationship,
+        companyName: detail.company,
+        profileHolderName,
+        profileHolderMobile,
+      })
+    ) {
+      if (!detail.licenseHolderName?.trim()) {
+        toast.error("Enter licence holder name before downloading the form");
+        return;
+      }
+      if (!detail.licenseHolderRelationship?.trim()) {
+        toast.error("Select relationship before downloading the form");
+        return;
+      }
+      if (!detail.company?.trim()) {
+        toast.error("Enter company name before downloading the form");
+        return;
+      }
+      if (!profileHolderName) {
+        toast.error("Complete YVITY registration with your full name first");
+        return;
+      }
+      if (!profileHolderMobile) {
+        toast.error("Your registered mobile number is required on the consent form");
+        return;
+      }
+      toast.error("Fill in the required fields before downloading the form");
+      return;
+    }
+
+    try {
+      await downloadLicenseHolderConsentPdf({
+        licenceHolderName: detail.licenseHolderName.trim(),
+        licenceNumber: detail.licenseNumber?.trim() || "",
+        companyName: detail.company.trim(),
+        serviceLabel,
+        relationship: detail.licenseHolderRelationship,
+        profileHolderName,
+        profileHolderMobile,
+        place: place || undefined,
+      });
+      toast.success("Consent form downloaded — get both signatures, then upload");
+    } catch {
+      toast.error("Could not generate consent form. Please try again.");
+    }
+  };
+
+  const uploadConsentLetters = async () => {
+    const nextDetails = { ...serviceDetails };
+    for (const serviceId of selectedServices) {
+      const detail = nextDetails[serviceId] ?? createEmptyServiceDetail();
+      if (detail.licenseHolderType !== "other") continue;
+      if (detail.consentLetterUrl || !detail.consentLetterFile) continue;
+
+      updateServiceDetail(serviceId, { consentUploading: true });
+      const formData = new FormData();
+      formData.append("file", detail.consentLetterFile);
+      const res = await fetch("/api/advisor/verification-documents", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.message || "Failed to upload consent letter");
+      }
+      nextDetails[serviceId] = {
+        ...detail,
+        consentLetterUrl: result.url,
+        consentLetterName: detail.consentLetterName || detail.consentLetterFile.name,
+        consentLetterFile: null,
+        consentUploading: false,
+      };
+      updateServiceDetail(serviceId, nextDetails[serviceId]);
+    }
+    return nextDetails;
   };
 
   const uploadDocuments = async () => {
@@ -345,13 +483,14 @@ export default function SetupMyProfileFlow({
       }
 
       setUploadingDocs(true);
+      const consentDetails = await uploadConsentLetters();
       const uploadedDocs = await uploadDocuments();
       setUploadingDocs(false);
 
       const services = buildServicesPayload({
         categoryId,
         selectedServices,
-        serviceDetails,
+        serviceDetails: consentDetails,
         getServiceMeta,
       });
 
@@ -629,30 +768,214 @@ export default function SetupMyProfileFlow({
 
                         <div>
                           <label className={labelClass}>
+                            Licence holder{" "}
+                            <span className="text-[#EF4444]">*</span>
+                          </label>
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateServiceDetail(serviceId, {
+                                  licenseHolderType: "self",
+                                  licenseHolderName: "",
+                                  licenseHolderRelationship: "",
+                                  consentLetterUrl: "",
+                                  consentLetterName: "",
+                                  consentLetterFile: null,
+                                })
+                              }
+                              className={`rounded-xl border px-3 py-2.5 text-left font-poppins text-xs font-semibold ${
+                                detail.licenseHolderType !== "other"
+                                  ? "border-[#0A4A4A] bg-[#F0FAFA] text-[#0A4A4A]"
+                                  : "border-[#E2E8F0] text-[#64748B]"
+                              }`}
+                            >
+                              Self — licence in my name
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateServiceDetail(serviceId, {
+                                  licenseHolderType: "other",
+                                })
+                              }
+                              className={`rounded-xl border px-3 py-2.5 text-left font-poppins text-xs font-semibold ${
+                                detail.licenseHolderType === "other"
+                                  ? "border-[#0A4A4A] bg-[#F0FAFA] text-[#0A4A4A]"
+                                  : "border-[#E2E8F0] text-[#64748B]"
+                              }`}
+                            >
+                              Other — e.g. spouse or family member
+                            </button>
+                          </div>
+                          <p className="mt-1 font-poppins text-[11px] text-[#94A3B8]">
+                            Choose Self when the IRDAI licence is in your name. Choose Other when
+                            you represent someone else&apos;s appointment for this company.
+                          </p>
+                        </div>
+
+                        {detail.licenseHolderType === "other" ? (
+                          <>
+                            <div>
+                              <label className={labelClass}>
+                                Licence holder name{" "}
+                                <span className="text-[#EF4444]">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={detail.licenseHolderName}
+                                onChange={(e) =>
+                                  updateServiceDetail(serviceId, {
+                                    licenseHolderName: e.target.value,
+                                  })
+                                }
+                                placeholder="As printed on the IRDAI certificate"
+                                className={fieldClass}
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>
+                                Relationship{" "}
+                                <span className="text-[#EF4444]">*</span>
+                              </label>
+                              <select
+                                value={detail.licenseHolderRelationship}
+                                onChange={(e) =>
+                                  updateServiceDetail(serviceId, {
+                                    licenseHolderRelationship: e.target.value,
+                                  })
+                                }
+                                className={selectClass}
+                                required
+                              >
+                                <option value="">Select relationship</option>
+                                {LICENSE_HOLDER_RELATIONSHIPS.map((option) => (
+                                  <option key={option.id} value={option.id}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="rounded-2xl border border-[#0A4A4A]/15 bg-[#F8FAFC] px-4 py-3.5">
+                              <p className="font-poppins text-xs font-semibold text-[#0F172A]">
+                                Step 1 — Download standard consent form
+                              </p>
+                              <p className="mt-1 font-poppins text-[11px] leading-relaxed text-[#64748B]">
+                                Read the form carefully. The{" "}
+                                <span className="font-semibold text-[#0F172A]">
+                                  licence holder
+                                </span>{" "}
+                                and{" "}
+                                <span className="font-semibold text-[#0F172A]">
+                                  you (profile holder)
+                                </span>{" "}
+                                must both sign. Relationship on the form:{" "}
+                                <span className="font-semibold text-[#0A4A4A]">
+                                  {detail.licenseHolderRelationship
+                                    ? relationshipLabel(detail.licenseHolderRelationship)
+                                    : "— select above"}
+                                </span>
+                                .
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadConsentForm(serviceId)}
+                                className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#0A4A4A] bg-white px-3.5 py-2 font-poppins text-xs font-semibold text-[#0A4A4A] transition hover:bg-[#F0FAFA]"
+                              >
+                                <Download size={15} aria-hidden />
+                                Download consent form (PDF)
+                              </button>
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>
+                                Step 2 — Upload signed consent letter{" "}
+                                <span className="text-[#EF4444]">*</span>
+                              </label>
+                              {detail.consentLetterUrl ? (
+                                <div className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-3 py-2.5">
+                                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F1F5F9] text-[#0A4A4A]">
+                                    <FileText size={18} />
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate font-poppins text-xs font-semibold text-[#0F172A]">
+                                      {detail.consentLetterName || "Consent letter uploaded"}
+                                    </p>
+                                    <p className="font-poppins text-[11px] text-[#64748B]">
+                                      Signed permission from licence holder
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateServiceDetail(serviceId, {
+                                        consentLetterUrl: "",
+                                        consentLetterName: "",
+                                        consentLetterFile: null,
+                                      })
+                                    }
+                                    className="rounded-lg p-2 text-[#64748B] transition hover:bg-[#FEF2F2] hover:text-[#EF4444]"
+                                    aria-label="Remove consent letter"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#0A4A4A]/20 bg-white/70 px-4 py-6 transition hover:border-[#F59E0B]/40 hover:bg-[#FFFBF2]">
+                                  <CloudUpload className="mb-2 h-7 w-7 text-[#64748B]" />
+                                  <span className="font-poppins text-xs font-semibold text-[#0F172A]">
+                                    {detail.consentUploading
+                                      ? "Uploading…"
+                                      : "Upload consent letter"}
+                                  </span>
+                                  <span className="mt-1 text-center font-poppins text-[11px] text-[#64748B]">
+                                    JPG, PNG, or PDF (max 5MB)
+                                  </span>
+                                  <input
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                    className="sr-only"
+                                    disabled={detail.consentUploading}
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      if (file.size > 5 * 1024 * 1024) {
+                                        toast.error("Consent letter must be 5MB or smaller");
+                                        return;
+                                      }
+                                      updateServiceDetail(serviceId, {
+                                        consentLetterFile: file,
+                                        consentLetterName: file.name,
+                                      });
+                                      e.target.value = "";
+                                    }}
+                                  />
+                                </label>
+                              )}
+                              <p className="mt-1 font-poppins text-[11px] text-[#94A3B8]">
+                                {LICENSE_HOLDER_CONSENT_HINT}
+                              </p>
+                            </div>
+                          </>
+                        ) : null}
+
+                        <div>
+                          <label className={labelClass}>
                             Account type{" "}
                             <span className="text-[#EF4444]">*</span>
                           </label>
-                          <select
-                            value={detail.professionalCapacity}
-                            onChange={(e) =>
+                          <ServiceAccountTypePicker
+                            variant="setup"
+                            value={detail.professionalCapacity || "individual_agent"}
+                            onChange={(capacityId) =>
                               updateServiceDetail(serviceId, {
-                                professionalCapacity: e.target.value,
+                                professionalCapacity: capacityId,
                               })
                             }
-                            className={selectClass}
-                            required
-                          >
-                            <option value="">Select account type</option>
-                            {SERVICE_CAPACITY_OPTIONS.map((option) => (
-                              <option key={option.id} value={option.id}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          <p className="mt-1 font-poppins text-[11px] text-[#94A3B8]">
-                            Individual Agent, Team Leader, or Firm account —
-                            each can manage a team except Individual Agent.
-                          </p>
+                          />
                         </div>
 
                         <div>
@@ -764,6 +1087,20 @@ export default function SetupMyProfileFlow({
                 );
               })}
             </div>
+
+            {hasOtherLicenseHolder ? (
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#E2E8F0] bg-[#FFFBF2]/80 px-4 py-3.5">
+                <input
+                  type="checkbox"
+                  checked={licenseDeclarationAccepted}
+                  onChange={(e) => setLicenseDeclarationAccepted(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 rounded border-[#CBD5E1] text-[#0A4A4A] focus:ring-[#F59E0B]"
+                />
+                <span className="font-poppins text-xs leading-relaxed text-[#475569]">
+                  {LICENSE_HOLDER_DECLARATION}
+                </span>
+              </label>
+            ) : null}
           </div>
         ) : null}
 

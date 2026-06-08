@@ -20,12 +20,13 @@ export function MySpaceSetupBanner({ variant, onSetup }: MySpaceSetupBannerProps
               <Clock className="size-5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-amber-100">Your account is under review</p>
+              <p className="text-sm font-bold text-amber-100">IRDAI license under review</p>
               <p className="mt-1 text-xs leading-relaxed text-amber-100/80 sm:text-sm">
-                Our team is verifying your services and documents. This usually takes{" "}
+                My Space setup is complete — we received your IRDAI certificate and are verifying
+                your license. This usually takes{" "}
                 <span className="font-semibold text-amber-50">24–48 hours</span>. You can keep
-                building your journey, achievements, and gallery — your public profile goes live
-                after approval.
+                building your journey, achievements, and gallery. Your YVITY Score, public profile,
+                and share points unlock after admin approval.
               </p>
             </div>
           </div>
@@ -45,8 +46,8 @@ export function MySpaceSetupBanner({ variant, onSetup }: MySpaceSetupBannerProps
             <div>
               <p className="font-cormorant text-xl font-bold sm:text-2xl">Setup My Space</p>
               <p className="mt-1 font-poppins text-xs leading-relaxed text-white/75 sm:text-sm">
-                Add your insurance services, professional details, and verification documents so
-                clients can discover and trust you on YVITY.
+                Add your insurance services and upload your IRDAI license certificate. Once verified
+                by our team, your public profile goes live and your full YVITY Score is calculated.
               </p>
             </div>
           </div>

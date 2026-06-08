@@ -21,6 +21,7 @@ import {
   DashboardStatCard,
   ProgressRing,
 } from "@/components/advisor/dashboard/dashboard-ui";
+import { usePlanLimits } from "@/hooks/use-plan-limits";
 import { useAdvisorInsightsModel } from "@/hooks/use-advisor-insights-model";
 import type { AdvisorProfileSection, AdvisorTopSection } from "@/lib/advisor-nav";
 import type {
@@ -47,7 +48,26 @@ export function AdvisorInsightsModule({
   onNavigateTop,
   onNavigateProfile,
 }: AdvisorInsightsModuleProps) {
+  const { canAccessAnalytics, planId } = usePlanLimits();
   const { model, loading } = useAdvisorInsightsModel();
+
+  if (!canAccessAnalytics) {
+    return (
+      <div className="rounded-2xl border border-white/10 glass-strong p-8 text-center space-y-3">
+        <Sparkles className="size-10 mx-auto text-[oklch(0.85_0.16_78)]" />
+        <h2 className="text-lg font-bold">Profile Analytics is a Gold feature</h2>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          Upgrade to Gold to unlock profile views, search appearances, lead insights, and credibility
+          analytics for your practice.
+        </p>
+        {onNavigateTop ? (
+          <Button type="button" className="rounded-full" onClick={() => onNavigateTop("membership")}>
+            View Gold plan
+          </Button>
+        ) : null}
+      </div>
+    );
+  }
 
   if (loading || !model) {
     return (

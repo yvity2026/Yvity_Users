@@ -38,8 +38,8 @@ export const SECTION_GUIDANCE: Record<ProfileHealthId, SectionGuidanceCopy> = {
   services: {
     title: "Services",
     description:
-      "List the insurance and financial services you offer. Each service should show the company name and your designation.",
-    goal: "At least one service listed",
+      "Your registration services appear here after approval. Card titles show the category (Life, Health, General). Use Edit to add company details, clients, claims, and areas — zeros mean that section still needs your input.",
+    goal: "Complete each service card via Edit",
   },
   testimonials: {
     title: "Client testimonials",

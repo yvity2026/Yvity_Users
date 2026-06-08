@@ -1,7 +1,9 @@
 import "server-only";
 
+import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { fetchSupabasePublicAdvisors } from "@/lib/advisors/fetch-supabase-advisors";
-import { getMockPublicAdvisors } from "@/lib/advisors/mock-public-advisors";
+import { loadLocalPublicAdvisors } from "@/lib/advisors/load-local-public-advisors";
+import { getMockPublicAdvisors, type PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
 import {
   compareAdvisors,
   filterAdvisors,
@@ -17,15 +19,18 @@ export type AdvisorSearchFilters = {
 };
 
 /** Public advisors — Supabase when configured, otherwise demo mocks. */
-export async function getPublicAdvisors() {
+export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
   const session = await getSessionUser();
 
   try {
     const fromSupabase = await fetchSupabasePublicAdvisors(session?.id ?? null);
-    if (fromSupabase) return fromSupabase;
+    if (fromSupabase?.length) return fromSupabase;
   } catch (error) {
-    console.warn("[advisors] Supabase fetch failed, using mocks:", error);
+    console.warn("[advisors] Supabase fetch failed, using local data:", error);
   }
+
+  const local = await loadLocalPublicAdvisors(session?.id ?? null);
+  if (local.length > 0) return local;
 
   const mocks = getMockPublicAdvisors();
   if (session?.id) {
@@ -45,5 +50,9 @@ export async function searchPublicAdvisors(filters: AdvisorSearchFilters = {}) {
     service: filters.service ?? "",
     company: filters.company ?? "",
     name: filters.name ?? "",
-  }).sort(compareAdvisors);
+  })
+    .filter((advisor: PublicAdvisorCard) =>
+      resolvePlanLimits(advisor.subscription_plan, advisor.account_status).searchAppearance,
+    )
+    .sort(compareAdvisors);
 }

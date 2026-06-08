@@ -40,6 +40,10 @@ export type DashboardAdvisor = {
   subscription_plan?: string;
   profile_slug?: string;
   approved_at?: string | null;
+  subscription_started_at?: string | null;
+  subscription_expires_at?: string | null;
+  iridai_certificate_url?: string | null;
+  irdai_rejected_reason?: string | null;
 } | null;
 
 export type IdentityRefreshData = ReturnType<typeof getIdentityRefreshStatus>;

@@ -101,6 +101,13 @@ export type ServiceDetailForm = {
   isActive: boolean;
   licenseNumber: string;
   professionalCapacity: string;
+  licenseHolderType: "self" | "other";
+  licenseHolderName: string;
+  licenseHolderRelationship: string;
+  consentLetterUrl: string;
+  consentLetterName: string;
+  consentLetterFile: null;
+  consentUploading: boolean;
 };
 
 export function createEmptyServiceDetail(): ServiceDetailForm {
@@ -111,7 +118,14 @@ export function createEmptyServiceDetail(): ServiceDetailForm {
     endDate: "",
     isActive: true,
     licenseNumber: "",
-    professionalCapacity: "",
+    professionalCapacity: "individual_agent",
+    licenseHolderType: "self",
+    licenseHolderName: "",
+    licenseHolderRelationship: "",
+    consentLetterUrl: "",
+    consentLetterName: "",
+    consentLetterFile: null,
+    consentUploading: false,
   };
 }
 

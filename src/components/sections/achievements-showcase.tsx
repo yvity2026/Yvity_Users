@@ -19,6 +19,8 @@ import { SectionEmptyCard } from "@/components/ui/section-empty-card";
 import { useAchievementsData } from "@/lib/sections/stores";
 import type { AchievementItem } from "@/lib/sections/types";
 import { uid } from "@/lib/section-store";
+import { formatMdrtStatusLabel } from "@/lib/sections/achievement-tiers";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { cn } from "@/lib/utils";
 
 function newAchievement(): AchievementItem {
@@ -42,6 +44,7 @@ export function AchievementsShowcase({
   embedded?: boolean;
 }) {
   const [items, setItems, loading] = useAchievementsData();
+  const advisorProfile = useAdvisorDisplayProfile();
   const [filter, setFilter] = useState<AchievementFilter>("all");
   const [editId, setEditId] = useState<string | null>(null);
   // Inline confirm-dialog (replaces window.confirm so the dismissal
@@ -126,7 +129,12 @@ export function AchievementsShowcase({
           </div>
         )}
 
-        <AchievementsBanner totalAwards={items.length} className="mb-8 sm:mb-10" />
+        <AchievementsBanner
+          totalAwards={items.length}
+          mdrtLabel={formatMdrtStatusLabel(items)}
+          experienceDisplay={advisorProfile.experienceDisplay}
+          className="mb-8 sm:mb-10"
+        />
 
         <AchievementsFilterBar active={filter} onChange={setFilter} items={items} />
 

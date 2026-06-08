@@ -20,6 +20,7 @@ import {
 } from "@/components/dashboard/home/DashboardHomeBelowFold";
 import { useAuth } from "@/context/AuthUserContext";
 import { getAdvisorWorkspaceSetupState } from "@/lib/advisor/workspaceSetupStatus";
+import { recordSearchImpressionsClient } from "@/lib/advisors/record-search-impressions";
 import { filterHomeAdvisors } from "@/lib/dashboard/homeAdvisors";
 import {
   getMySpaceNavHref,
@@ -138,6 +139,14 @@ export default function DashboardHome({ advisors = [] }) {
     if (!inlineVisible) return [];
     return filterHomeAdvisors(advisors, currentFilters).slice(0, 5);
   }, [advisors, currentFilters, inlineVisible]);
+
+  useEffect(() => {
+    if (!inlineVisible || inlineResults.length === 0) return;
+    void recordSearchImpressionsClient(
+      inlineResults.map((advisor) => advisor.id),
+      "dashboard_home",
+    );
+  }, [inlineResults, inlineVisible]);
 
   const exploreHref = useMemo(
     () =>

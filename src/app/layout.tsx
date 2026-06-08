@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   },
   description: `${COMPANY_TAGLINE}. Premium, verified career profiles for advisors and professionals.`,
   icons: {
-    icon: COMPANY_LOGO_PATH,
-    apple: COMPANY_LOGO_PATH,
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
   },
   openGraph: {
     title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,

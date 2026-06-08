@@ -89,7 +89,7 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const response = await fetch("/api/testimonials");
+        const response = await fetch("/api/platform-testimonials");
         const result = await response.json();
         if (result?.success && Array.isArray(result.data)) {
           setTestimonials(result.data);

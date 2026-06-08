@@ -2,18 +2,13 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { saveSelfieUpload } from "@/lib/server/uploads";
 import { saveSelfieUrl, normalizeIndianMobile } from "@/lib/server/registration";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SELFIE_DIR = path.join(process.cwd(), ".data", "selfies");
-
-function ensureSelfieDir() {
-  fs.mkdirSync(SELFIE_DIR, { recursive: true });
-}
-
-/** Registration selfie upload — persists JPEG to `.data/selfies` for profile photo. */
+/** Registration selfie upload — persists to Supabase Storage or `.data/selfies`. */
 export async function POST(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";
@@ -43,17 +38,19 @@ export async function POST(request: Request) {
 
     const safeMobile = normalizeIndianMobile(mobile) || "guest";
     const fileKey = `${safeMobile}-${randomUUID().slice(0, 8)}.jpg`;
-    const url = `/api/auth/selfie/${fileKey}`;
-
-    ensureSelfieDir();
-    fs.writeFileSync(path.join(SELFIE_DIR, fileKey), buffer);
-    saveSelfieUrl(safeMobile, url);
+    const saved = await saveSelfieUpload({
+      buffer,
+      fileKey,
+      ownerKey: safeMobile,
+      contentType: "image/jpeg",
+    });
+    saveSelfieUrl(safeMobile, saved.url);
 
     return NextResponse.json({
       success: true,
-      url,
-      key: url,
-      backend: "local",
+      url: saved.url,
+      key: saved.url,
+      backend: saved.backend,
     });
   } catch (error) {
     return NextResponse.json(
