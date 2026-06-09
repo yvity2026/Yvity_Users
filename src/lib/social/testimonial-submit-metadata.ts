@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { COMPANY_NAME } from "@/lib/brand";
 import {
   ADVISOR_ACTION_OG_IMAGE_SIZE,
-  loadAdvisorOgShareContext,
   testimonialSubmitOgImagePath,
 } from "@/lib/social/advisor-og-share";
+import { loadAdvisorOgShareContext } from "@/lib/social/advisor-og-share.server";
 import { getSiteOrigin } from "@/lib/social/site-origin";
 import {
   testimonialSubmitShareDescription,

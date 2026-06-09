@@ -1,9 +1,7 @@
 import { ImageResponse } from "next/og";
 import { COMPANY_LOGO_PATH } from "@/lib/brand";
-import {
-  ADVISOR_ACTION_OG_IMAGE_SIZE,
-  loadAdvisorOgShareContext,
-} from "@/lib/social/advisor-og-share";
+import { ADVISOR_ACTION_OG_IMAGE_SIZE } from "@/lib/social/advisor-og-share";
+import { loadAdvisorOgShareContext } from "@/lib/social/advisor-og-share.server";
 import {
   RecommendSubmitOgImage,
   RecommendSubmitOgImageFallback,

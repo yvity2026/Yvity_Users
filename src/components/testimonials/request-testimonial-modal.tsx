@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, MessageCircle, Share2, X } from "lucide-react";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { testimonialShareCopy } from "@/lib/testimonials/social-metadata";
+import { testimonialShareCopy } from "@/lib/testimonials/share-copy";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import {
   buildTestimonialSubmitSharePayload,
