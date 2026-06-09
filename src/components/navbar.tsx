@@ -62,7 +62,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0">
+      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0">
         <div className="yvity-dash-nav-flat border-b lg:hidden">
           <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
             <Link

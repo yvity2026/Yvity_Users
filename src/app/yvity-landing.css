@@ -45,9 +45,15 @@
     border-radius: calc(2rem - 1px) calc(2rem - 1px) 0 0;
   }
 
-  /* Desktop pill nav â€” flush under status bar / URL chrome */
+  /* Desktop pill nav — flush to viewport top on large screens */
   .app-top-nav-desktop-wrap {
     padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  @media (min-width: 1024px) {
+    .app-top-nav-desktop-wrap {
+      padding-top: 0;
+    }
   }
 
   /* Dashboard desktop top bar â€” same glass + gradient edge as mobile */

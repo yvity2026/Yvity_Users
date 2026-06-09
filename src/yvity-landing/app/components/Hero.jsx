@@ -153,7 +153,7 @@ const Hero = ({ advisor = [] }) => {
   return (
     <section
       id="home"
-      className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+0.75rem)] sm:pt-[calc(4rem+0.75rem)] md:pb-10 md:pt-24 lg:pt-[5.375rem] xl:pt-28 ${LANDING_SECTION_ANCHOR}`}
+      className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+0.75rem)] sm:pt-[calc(4rem+0.75rem)] md:pb-10 lg:pt-[calc(4.375rem+0.5rem)] xl:pt-[4.75rem] ${LANDING_SECTION_ANCHOR}`}
     >
       <div
         className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10`}

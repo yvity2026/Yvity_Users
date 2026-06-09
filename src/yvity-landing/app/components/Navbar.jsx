@@ -231,9 +231,9 @@ const Navbar = ({ initialLoginOpen = false }) => {
         </div>
       </div>
 
-      {/* Desktop: full-width brand nav aligned with page content */}
+      {/* Desktop: flush to viewport top — no extra band above the pill nav */}
       <div className="app-top-nav-desktop-wrap hidden lg:block">
-        <div className={`${LANDING_NAV_INNER} py-3 xl:py-4`}>
+        <div className={LANDING_NAV_INNER}>
           <div className="glass-nav-frame relative flex h-17.5 w-full items-center justify-between rounded-[100px] p-[1px]">
             <div className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-6 py-4 lg:px-8 xl:px-10">
               <div className="relative z-10 flex shrink-0 items-center">

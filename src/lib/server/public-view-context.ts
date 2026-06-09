@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import type { AdvisorProfileRecord } from "@/lib/server/advisor-profile-store";
 import { getAdvisorProfileForUser, loadAllAdvisorProfiles } from "@/lib/server/advisor-profile-store";
-import { loadRegistrationDb } from "@/lib/server/registration-store";
+import { loadRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
 import { slugMatches, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
 import { getSessionUser } from "@/lib/server/session";
 
@@ -100,13 +102,29 @@ export type PublicViewAdvisorPayload = {
   selfie_url?: string;
 };
 
+async function resolveRegisteredUserForPublicView(
+  userId: string,
+): Promise<RegisteredUser | null> {
+  const fromLocal = loadRegistrationDb().users.find((u) => u.id === userId);
+  if (fromLocal) return fromLocal;
+
+  if (!useSupabasePersistence()) return null;
+
+  try {
+    return await loadUserByIdFromDb(userId);
+  } catch (error) {
+    console.warn("[public-view] Supabase user lookup failed:", error);
+    return null;
+  }
+}
+
 export async function loadPublicViewAdvisorByUserId(
   userId: string,
 ): Promise<PublicViewAdvisorPayload | null> {
   const profile = await getAdvisorProfileForUser(userId);
   if (!profile) return null;
 
-  const user = loadRegistrationDb().users.find((u) => u.id === userId);
+  const user = await resolveRegisteredUserForPublicView(userId);
   if (!user) return null;
 
   return {

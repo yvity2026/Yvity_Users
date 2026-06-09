@@ -36,6 +36,20 @@ function mapUserRow(row: Record<string, unknown>): RegisteredUser {
   };
 }
 
+export async function loadUserByIdFromDb(userId: string): Promise<RegisteredUser | null> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase || !userId.trim()) return null;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapUserRow(data as Record<string, unknown>);
+}
+
 export async function loadAllUsersFromDb(): Promise<RegisteredUser[]> {
   const { data, error } = await client().from("users").select("*").order("created_at", { ascending: true });
   if (error) throw new Error(error.message);
