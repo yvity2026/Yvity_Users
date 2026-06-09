@@ -24,6 +24,8 @@ import {
   formatOtpResendTimer,
   useOtpResendCountdown,
 } from "@/hooks/use-otp-resend-countdown";
+import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { modalPanelMotion, stepSlideMotion } from "@/lib/ui/framer-reduced-motion";
 
 const loginSchema = z.object({
   mobile: z
@@ -41,6 +43,7 @@ const loginSchema = z.object({
 });
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
+  const reducedMotion = usePrefersReducedMotion();
   const [step, setStep] = useState(1);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
@@ -316,25 +319,13 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 24 }}
-        transition={{ type: "spring", damping: 28, stiffness: 340 }}
+        {...modalPanelMotion(reducedMotion)}
         className="relative flex max-h-[100dvh] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[24px] bg-white sm:max-h-[min(92dvh,720px)] sm:rounded-3xl"
         style={{ boxShadow: "0 0 8px 2px rgba(245, 158, 11, 0.25)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute left-3 top-3 z-20 rounded-full bg-white/20 p-1 text-white/80 transition hover:text-white"
-          aria-label="Close login"
-        >
-          <X size={22} />
-        </button>
-
         <div className="relative shrink-0 bg-[#0f4f4f] px-5 py-5 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-[#0A4A4A] before:via-[#F59E0B] before:to-[#0A4A4A] sm:px-6 sm:py-6">
-          <div className="flex items-start justify-between gap-3 pr-8">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 text-white">
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F59E0B]">
                 Welcome back
@@ -357,15 +348,25 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                     : `OTP sent to +91 ${mobileValue} on WhatsApp`}
               </p>
             </div>
-            <div className="shrink-0 rounded-lg bg-white p-1 shadow-sm">
-              <BrandMark
-                logoSize={44}
-                showName
-                layout="stack"
-                className="items-center"
-                logoClassName="h-10 w-10 object-contain"
-                nameClassName="font-cormorant text-[11px] font-bold leading-none text-[#0A4A4A]"
-              />
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full bg-white/20 p-1 text-white/80 transition hover:text-white"
+                aria-label="Close login"
+              >
+                <X size={22} />
+              </button>
+              <div className="rounded-lg bg-white p-1 shadow-sm">
+                <BrandMark
+                  logoSize={44}
+                  showName
+                  layout="stack"
+                  className="items-center"
+                  logoClassName="h-10 w-10 object-contain"
+                  nameClassName="font-cormorant text-[11px] font-bold leading-none text-[#0A4A4A]"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -374,12 +375,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <AnimatePresence mode="wait">
               {step === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: -14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 14 }}
-                >
+                <motion.div key="step1" {...stepSlideMotion(reducedMotion, "left")}>
                   <FieldLabel htmlFor="login-mobile" required>
                     Mobile number
                   </FieldLabel>
@@ -437,12 +433,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
               )}
 
               {step === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step2" {...stepSlideMotion(reducedMotion, "right")}>
                   <button
                     type="button"
                     onClick={() => {
@@ -529,12 +520,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
               )}
 
               {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step3" {...stepSlideMotion(reducedMotion, "right")}>
                   <button
                     type="button"
                     onClick={() => {

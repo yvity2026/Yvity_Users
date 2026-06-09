@@ -104,17 +104,25 @@ export function formatProfileExperienceDisplay(years: number | null): string {
   return `${years}+`;
 }
 
-export function resolveProfileExperienceDisplay(
+/**
+ * Insurance / financial services tenure for profile header, CTA chips, and
+ * public advisor cards — highest full years among visible service cards.
+ */
+export function resolveServiceExperienceDisplay(
   services: ServiceItem[],
   profileApproved = true,
-  career?: CareerData,
 ): string {
-  const fromCareer = career ? resolveCareerExperienceDisplay(career) : "";
-  if (fromCareer) return fromCareer;
-
   return formatProfileExperienceDisplay(
     computeProfessionExperienceYears(services, profileApproved),
   );
+}
+
+/** @deprecated Prefer `resolveServiceExperienceDisplay` — name kept for imports. */
+export function resolveProfileExperienceDisplay(
+  services: ServiceItem[],
+  profileApproved = true,
+): string {
+  return resolveServiceExperienceDisplay(services, profileApproved);
 }
 
 /** Highest `clients` count across visible registration services. */

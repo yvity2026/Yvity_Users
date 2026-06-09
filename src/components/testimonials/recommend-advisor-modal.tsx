@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, CheckCircle2, Loader2, ShieldCheck, Sparkles, Star, X } from "lucide-react";
 import { useAuth } from "@/context/AuthUserContext";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { RECOMMENDATION_TAGS, type RecommendationTag } from "@/lib/recommendations/types";
 import { validateMobile } from "@/lib/testimonials/submit-utils";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ function formatTimer(seconds: number): string {
  */
 export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalProps) {
   const { user } = useAuth();
+  const advisorProfile = useAdvisorDisplayProfile();
   const isLoggedIn = Boolean(user?.id);
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");

@@ -1,5 +1,3 @@
-import { getEmptyAnalytics } from "@/lib/advisor-dashboard/demo-analytics";
-import { getEmptyInsightsMetrics } from "@/lib/advisor-insights/demo-metrics";
 import type { CareerData } from "@/lib/career-types";
 import { formatMdrtStatusLabel, hasMdrtAchievement } from "@/lib/sections/achievement-tiers";
 import { normalizeCompanyName } from "@/lib/sections/service-display";
@@ -56,15 +54,17 @@ export function isIrdaiVerified(profileApproved: boolean): boolean {
 }
 
 export function buildSectionProfileBannerStats(input: {
-  experienceDisplay: string;
+  /** Full professional timeline (My Career / journey banner). */
+  journeyExperienceDisplay: string;
   avgRating: number | null;
   companyName: string;
   profileApproved: boolean;
 }): { value: string; label: string }[] {
-  const experienceValue = input.experienceDisplay
-    ? input.experienceDisplay.includes("year") || input.experienceDisplay.endsWith("+")
-      ? input.experienceDisplay
-      : `${input.experienceDisplay} yrs`
+  const experienceValue = input.journeyExperienceDisplay
+    ? input.journeyExperienceDisplay.includes("year") ||
+      input.journeyExperienceDisplay.endsWith("+")
+      ? input.journeyExperienceDisplay
+      : `${input.journeyExperienceDisplay} yrs`
     : "—";
 
   return [
@@ -81,80 +81,58 @@ export function buildSectionProfileBannerStats(input: {
   ];
 }
 
+/** Hide flat month-over-month deltas (e.g. `0%`) — only show meaningful movement. */
+function meaningfulMonthDelta(delta?: string): string | undefined {
+  const trimmed = delta?.trim();
+  if (!trimmed || trimmed === "0%" || trimmed === "0") return undefined;
+  return trimmed;
+}
+
 export function buildCommunityTrustStatsFromCounts(input: {
   testimonialCount: number;
   recommendationCount: number;
   profileApproved: boolean;
-  /** Optional real monthly profile views for this advisor. */
   profileViews?: number;
-  /** Optional real monthly unique client sharers for this advisor. */
   clientSharers?: number;
-  /** Optional preformatted month-over-month deltas. */
   profileViewsDelta?: string;
   sharesDelta?: string;
 }): CommunityTrustStat[] {
-  const demo = getEmptyAnalytics();
-  const metrics = getEmptyInsightsMetrics();
-
   const profileViews =
-    typeof input.profileViews === "number" ? Math.max(0, input.profileViews) : null;
+    typeof input.profileViews === "number" ? Math.max(0, input.profileViews) : 0;
   const clientSharers =
-    typeof input.clientSharers === "number" ? Math.max(0, input.clientSharers) : null;
+    typeof input.clientSharers === "number" ? Math.max(0, input.clientSharers) : 0;
+
+  const recommendationTrend =
+    input.recommendationCount > 0
+      ? `${input.recommendationCount} verified`
+      : undefined;
+  const testimonialTrend =
+    input.testimonialCount > 0 ? `${input.testimonialCount} received` : undefined;
 
   return [
     {
       id: "profileViews",
       label: "Profile Views",
-      value:
-        profileViews != null
-          ? profileViews
-          : input.profileApproved
-            ? demo.profileViews
-            : 0,
-      trend:
-        profileViews != null
-          ? input.profileViewsDelta
-          : input.profileApproved
-            ? demo.profileViewsDelta
-            : undefined,
+      value: profileViews,
+      trend: input.profileViewsDelta?.trim() || undefined,
     },
     {
       id: "recommendations",
       label: "Recommendations",
       value: input.recommendationCount,
-      trend:
-        input.recommendationCount > 0
-          ? `${input.recommendationCount} verified`
-          : input.profileApproved
-            ? demo.recommendationGrowth
-            : undefined,
+      trend: recommendationTrend,
     },
     {
       id: "testimonials",
       label: "Testimonials",
       value: input.testimonialCount,
-      trend:
-        input.testimonialCount > 0
-          ? `${input.testimonialCount} received`
-          : input.profileApproved
-            ? demo.testimonialGrowth
-            : undefined,
+      trend: testimonialTrend,
     },
     {
       id: "profileShares",
       label: "Profile Shares",
-      value:
-        clientSharers != null
-          ? clientSharers
-          : input.profileApproved
-            ? metrics.profileShares
-            : 0,
-      trend:
-        clientSharers != null
-          ? input.sharesDelta
-          : input.profileApproved
-            ? metrics.sharesDelta
-            : undefined,
+      value: clientSharers,
+      trend: meaningfulMonthDelta(input.sharesDelta),
     },
   ];
 }
@@ -202,6 +180,7 @@ export function buildPublicProfileBannerStats(input: {
   career: CareerData;
   profileApproved: boolean;
   experienceDisplay: string;
+  journeyExperienceDisplay: string;
   profileHeroStat: ProfileHeroStat;
   recommendationCount: number;
   phone: string;
@@ -226,7 +205,7 @@ export function buildPublicProfileBannerStats(input: {
     irdaiVerified: isIrdaiVerified(input.profileApproved),
     profileApproved: input.profileApproved,
     sectionBannerStats: buildSectionProfileBannerStats({
-      experienceDisplay: input.experienceDisplay,
+      journeyExperienceDisplay: input.journeyExperienceDisplay,
       avgRating,
       companyName,
       profileApproved: input.profileApproved,

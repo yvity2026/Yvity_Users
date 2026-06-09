@@ -6,6 +6,11 @@ import { toast } from "sonner";
 import SensitiveActionOtpGate from "@/components/identity/SensitiveActionOtpGate";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";
+import {
+  animatedModalOverlayClass,
+  animatedModalPanelClass,
+} from "@/components/ui/animated-modal-shell";
+import { cn } from "@/lib/utils";
 
 export default function ProfilePhotoModal({
   isOpen,
@@ -17,6 +22,7 @@ export default function ProfilePhotoModal({
   const [preview, setPreview] = useState(null);
   const [pendingFile, setPendingFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const panelRef = useRef(null);
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -96,7 +102,10 @@ export default function ProfilePhotoModal({
 
   return (
     <div
-      className="fixed inset-0 z-[250] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className={cn(
+        animatedModalOverlayClass,
+        "z-[250] bg-black/40 backdrop-blur-sm",
+      )}
       role="dialog"
       aria-modal="true"
       aria-labelledby="profile-photo-title"
@@ -104,7 +113,10 @@ export default function ProfilePhotoModal({
     >
       <div
         ref={panelRef}
-        className="max-h-[92vh] w-full overflow-y-auto rounded-t-[28px] bg-white shadow-xl sm:max-w-md sm:rounded-2xl"
+        className={cn(
+          animatedModalPanelClass,
+          "max-h-[92vh] w-full overflow-y-auto rounded-t-[28px] bg-white shadow-xl sm:max-w-md sm:rounded-2xl",
+        )}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[#E4E2DB] px-5 py-4">

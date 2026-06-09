@@ -3,11 +3,14 @@ import { PublicProfileFooterLayout } from "@/components/public-profile-footer-la
 import { SiteChrome } from "@/components/site-chrome";
 import { Providers } from "@/components/providers";
 import { brandFontClassName } from "@/lib/brand-fonts";
-import { COMPANY_LOGO_PATH, COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
+import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
+import { platformOpenGraphImage } from "@/lib/social/platform-public-metadata";
+import { getSiteOrigin } from "@/lib/social/site-origin";
 import "./globals.css";
 import "./yvity-landing.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteOrigin()),
   title: {
     default: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
     template: `%s — ${COMPANY_NAME}`,
@@ -21,7 +24,13 @@ export const metadata: Metadata = {
     title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
     description: `${COMPANY_TAGLINE}. Verified career profiles built for advisors and professionals.`,
     type: "website",
-    images: [{ url: COMPANY_LOGO_PATH, alt: `${COMPANY_NAME} logo` }],
+    images: [platformOpenGraphImage()],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
+    description: `${COMPANY_TAGLINE}. Verified career profiles built for advisors and professionals.`,
+    images: [platformOpenGraphImage().url],
   },
 };
 

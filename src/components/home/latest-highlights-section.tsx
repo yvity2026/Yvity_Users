@@ -6,6 +6,7 @@ import { ArrowRight, Award, MessageSquareQuote } from "lucide-react";
 import { AchievementDetailCard } from "@/components/sections/achievement-detail-card";
 import { TestimonialDetailCard } from "@/components/sections/testimonial-detail-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useAchievementsData, useTestimonialsData } from "@/lib/sections/stores";
 import { cn } from "@/lib/utils";
 
@@ -29,8 +30,11 @@ function ViewAllLink({ href, label }: { href: string; label: string }) {
 }
 
 export function LatestHighlightsSection() {
+  const { settings } = useAdvisorSettings();
   const [achievements, , achievementsLoading] = useAchievementsData();
   const [testimonials, , testimonialsLoading] = useTestimonialsData();
+  const showAchievements = settings.visibility.achievements;
+  const showTestimonials = true;
 
   const latestAchievement = useMemo(
     () => (achievements.length > 0 ? achievements[achievements.length - 1] : null),
@@ -46,6 +50,9 @@ export function LatestHighlightsSection() {
 
   if (loading) return null;
 
+  if (!showAchievements && !showTestimonials) return null;
+  if (!showAchievements && !latestTestimonial) return null;
+  if (!showTestimonials && !latestAchievement) return null;
   if (!latestAchievement && !latestTestimonial) return null;
 
   return (
@@ -66,38 +73,44 @@ export function LatestHighlightsSection() {
       <div
         className={cn(
           "mt-5 sm:mt-6 grid gap-5 sm:gap-6",
-          latestAchievement && latestTestimonial ? "md:grid-cols-2" : "max-w-xl",
+          showAchievements && showTestimonials && latestAchievement && latestTestimonial
+            ? "md:grid-cols-2"
+            : "max-w-xl",
         )}
       >
-        <div className="flex min-w-0 flex-col gap-4">
-          {latestAchievement ? (
-            <AchievementDetailCard item={latestAchievement} />
-          ) : (
-            <EmptyState
-              icon={Award}
-              title="No achievements yet"
-              description="As soon as the advisor adds awards or milestones, they will surface here."
-              size="sm"
-              className="min-h-[280px] flex flex-col items-center justify-center"
-            />
-          )}
-          <ViewAllLink href="/achievements" label="View All Achievements" />
-        </div>
+        {showAchievements ? (
+          <div className="flex min-w-0 flex-col gap-4">
+            {latestAchievement ? (
+              <AchievementDetailCard item={latestAchievement} />
+            ) : (
+              <EmptyState
+                icon={Award}
+                title="No achievements yet"
+                description="As soon as the advisor adds awards or milestones, they will surface here."
+                size="sm"
+                className="min-h-[280px] flex flex-col items-center justify-center"
+              />
+            )}
+            <ViewAllLink href="/achievements" label="View All Achievements" />
+          </div>
+        ) : null}
 
-        <div className="flex min-w-0 flex-col gap-4">
-          {latestTestimonial ? (
-            <TestimonialDetailCard item={latestTestimonial} index={0} />
-          ) : (
-            <EmptyState
-              icon={MessageSquareQuote}
-              title="No testimonials yet"
-              description="Client feedback will appear here once visitors submit verified testimonials."
-              size="sm"
-              className="min-h-[280px] flex flex-col items-center justify-center"
-            />
-          )}
-          <ViewAllLink href="/testimonials" label="View All Testimonials" />
-        </div>
+        {showTestimonials ? (
+          <div className="flex min-w-0 flex-col gap-4">
+            {latestTestimonial ? (
+              <TestimonialDetailCard item={latestTestimonial} index={0} />
+            ) : (
+              <EmptyState
+                icon={MessageSquareQuote}
+                title="No testimonials yet"
+                description="Client feedback will appear here once visitors submit verified testimonials."
+                size="sm"
+                className="min-h-[280px] flex flex-col items-center justify-center"
+              />
+            )}
+            <ViewAllLink href="/testimonials" label="View All Testimonials" />
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -7,6 +7,10 @@ import type { MonthlyScoreActivity } from "@/lib/advisor-score/decay";
 type PublicProfileStatsResponse = {
   recommendationCount?: number;
   testimonialCount?: number;
+  profileViews?: number;
+  profileViewsDelta?: string;
+  profileSharesByOthers?: number;
+  profileSharesDelta?: string;
   decayPenalty?: number;
   decayActive?: boolean;
   graceDaysRemaining?: number | null;
@@ -18,7 +22,9 @@ export function usePublicProfileStats(): {
   recommendationCount: number;
   testimonialCount: number;
   profileViews: number;
+  profileViewsDelta: string;
   profileSharesByOthers: number;
+  profileSharesDelta: string;
   decayPenalty: number;
   decayActive: boolean;
   graceDaysRemaining: number | null;
@@ -29,7 +35,9 @@ export function usePublicProfileStats(): {
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [testimonialCount, setTestimonialCount] = useState(0);
   const [profileViews, setProfileViews] = useState(0);
+  const [profileViewsDelta, setProfileViewsDelta] = useState("0%");
   const [profileSharesByOthers, setProfileSharesByOthers] = useState(0);
+  const [profileSharesDelta, setProfileSharesDelta] = useState("0%");
   const [decayPenalty, setDecayPenalty] = useState(0);
   const [decayActive, setDecayActive] = useState(false);
   const [graceDaysRemaining, setGraceDaysRemaining] = useState<number | null>(null);
@@ -63,7 +71,9 @@ export function usePublicProfileStats(): {
           setGraceDaysRemaining(null);
           setMonthlyActivity(null);
           setProfileViews(0);
+          setProfileViewsDelta("0%");
           setProfileSharesByOthers(0);
+          setProfileSharesDelta("0%");
         }
       })
       .finally(() => {
@@ -79,7 +89,9 @@ export function usePublicProfileStats(): {
     recommendationCount,
     testimonialCount,
     profileViews,
+    profileViewsDelta,
     profileSharesByOthers,
+    profileSharesDelta,
     decayPenalty,
     decayActive,
     graceDaysRemaining,

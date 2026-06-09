@@ -5,13 +5,28 @@ import LandingMobileBackBar from "./LandingMobileBackBar";
 import LandingSectionHub from "./LandingSectionHub";
 import { useLandingMobileNav } from "./LandingMobileNavContext";
 import { MOBILE_LANDING_SECTIONS } from "./mobileLandingSections";
+import { cn } from "@/lib/utils";
 
 const MOBILE_PANEL_IDS = new Set(
   MOBILE_LANDING_SECTIONS.map((section) => section.id),
 );
 
-function panelVisibility(activePanel, panelId) {
-  return activePanel === panelId ? "block" : "hidden lg:block";
+function LandingPanel({ activePanel, panelId, children, className }) {
+  const isActive = activePanel === panelId;
+
+  return (
+    <div className={cn(isActive ? "block" : "hidden", "lg:block", className)}>
+      <div
+        key={isActive ? `show-${panelId}` : `hide-${panelId}`}
+        className={cn(
+          isActive &&
+            "max-lg:animate-in max-lg:fade-in max-lg:duration-200 max-lg:motion-reduce:animate-none",
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function resolveSectionId(child) {
@@ -34,10 +49,10 @@ export default function LandingMobileExperience({ home, footer, children }) {
 
   return (
     <>
-      <div className={panelVisibility(activePanel, "home")}>
+      <LandingPanel activePanel={activePanel} panelId="home">
         {home}
         <LandingSectionHub />
-      </div>
+      </LandingPanel>
 
       {sectionSlots.map((slot) => {
         const id = resolveSectionId(slot);
@@ -54,15 +69,17 @@ export default function LandingMobileExperience({ home, footer, children }) {
         }
 
         return (
-          <div key={id} className={panelVisibility(activePanel, id)}>
+          <LandingPanel key={id} activePanel={activePanel} panelId={id}>
             <LandingMobileBackBar sectionId={id} />
             {slot}
-          </div>
+          </LandingPanel>
         );
       })}
 
       {footer ? (
-        <div className={panelVisibility(activePanel, "home")}>{footer}</div>
+        <LandingPanel activePanel={activePanel} panelId="home">
+          {footer}
+        </LandingPanel>
       ) : null}
     </>
   );

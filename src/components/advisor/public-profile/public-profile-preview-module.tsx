@@ -61,7 +61,7 @@ export function PublicProfilePreviewModule({
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className={cn("space-y-2 sm:space-y-2.5", viewMode === "desktop" && "space-y-2")}>
       {!canShare ? (
         <p className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
           Preview mode — your profile link goes live after admin approval. You can explore the layout

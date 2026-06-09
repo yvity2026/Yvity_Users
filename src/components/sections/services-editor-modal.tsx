@@ -27,6 +27,7 @@ import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
 import { markSubmitted } from "@/lib/verification/defaults";
 import { SERVICE_DOCUMENT_REQUIREMENTS } from "@/lib/verification/service-config";
 import type { VerificationDocument } from "@/lib/verification/types";
+import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
 
 type ServicesEditorModalProps = {
   item: ServiceItem;
@@ -161,13 +162,12 @@ export function ServicesEditorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in">
-      <button
-        type="button"
-        className="absolute inset-0 bg-background/95 backdrop-blur-xl"
-        onClick={onClose}
-      />
-      <div className="relative z-10 w-full max-w-lg glass-strong rounded-3xl border border-white/15 p-6 md:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+    <AnimatedModalShell
+      className="z-[100]"
+      onClose={onClose}
+      backdropTone="heavy"
+      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl p-5 sm:p-6 md:p-8 space-y-4 max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto"
+    >
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -495,8 +495,7 @@ export function ServicesEditorModal({
             <Trash2 className="size-4" /> {isNew ? "Discard" : "Delete"}
           </Button>
         </div>
-      </div>
-    </div>
+    </AnimatedModalShell>
   );
 }
 

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
 
 type AddLeadModalProps = {
   open: boolean;
@@ -116,24 +117,14 @@ export function AddLeadModal({ open, onClose, onSubmit }: AddLeadModalProps) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
-      role="dialog"
-      aria-modal="true"
+    <AnimatedModalShell
+      className="z-[120]"
+      onClose={handleClose}
+      closeDisabled={busy}
+      panelRef={panelRef}
       aria-labelledby="add-lead-title"
+      panelClassName="flex flex-col w-full sm:max-w-xl glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl max-h-[92dvh] sm:max-h-[94vh]"
     >
-      <button
-        type="button"
-        className="absolute inset-0 bg-background/85 backdrop-blur-md"
-        onClick={handleClose}
-        disabled={busy}
-        aria-label="Close"
-      />
-      <div
-        ref={panelRef}
-        className="relative z-10 flex flex-col w-full sm:max-w-xl glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl max-h-[92dvh] sm:max-h-[94vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Mobile drag handle (signals bottom-sheet on phones). */}
         <div className="sm:hidden flex justify-center pt-2.5" aria-hidden>
           <span className="h-1.5 w-10 rounded-full bg-white/20" />
@@ -312,8 +303,7 @@ export function AddLeadModal({ open, onClose, onSubmit }: AddLeadModalProps) {
             </div>
           </form>
         )}
-      </div>
-    </div>
+    </AnimatedModalShell>
   );
 }
 

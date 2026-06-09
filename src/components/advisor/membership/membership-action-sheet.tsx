@@ -9,6 +9,7 @@ import { MEMBERSHIP_PLANS } from "@/lib/advisor-membership/plans";
 import { useRazorpayCheckout } from "@/hooks/use-razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
 import { toast } from "sonner";
 
 type MembershipActionSheetProps = {
@@ -152,20 +153,14 @@ export function MembershipActionSheet({
     : target.priceLabel;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-background/85 backdrop-blur-md"
-        onClick={onClose}
-        aria-label="Close"
-      />
-      <div
-        className={cn(
-          "relative z-10 w-full sm:max-w-md glass-strong rounded-t-3xl sm:rounded-3xl",
-          "border border-white/15 shadow-2xl p-6",
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatedModalShell
+      className="z-[120]"
+      onClose={onClose}
+      panelClassName={cn(
+        "w-full sm:max-w-md glass-strong rounded-t-3xl sm:rounded-3xl",
+        "border border-white/15 shadow-2xl p-6",
+      )}
+    >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Membership</p>
@@ -282,8 +277,7 @@ export function MembershipActionSheet({
             Cancel
           </Button>
         </div>
-      </div>
-    </div>
+    </AnimatedModalShell>
   );
 }
 

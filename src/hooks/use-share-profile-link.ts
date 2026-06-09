@@ -3,11 +3,19 @@
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthUserContext";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { recordProfileShare } from "@/lib/profile-shares/record-share";
 import {
   canAdvisorSharePublicProfile,
   getPublicProfileLiveUrl,
 } from "@/lib/public-profile-url";
+import {
+  buildAdvisorProfileSharePayload,
+  canUseNativeShare,
+  invokeNativeShare,
+} from "@/lib/social/native-share-payload";
 
 type ShareProfileLinkOptions = {
   /** Advisor whose profile is being shared — defaults to the signed-in user. */
@@ -25,11 +33,14 @@ type ShareProfileLinkOptions = {
 export function useShareProfileLink(options?: ShareProfileLinkOptions) {
   const [copied, setCopied] = useState(false);
   const { advisor, user } = useAuth();
-  const slug = options?.profileSlug ?? advisor?.profile_slug ?? null;
+  const display = useAdvisorDisplayProfile();
+  const publicView = usePublicProfileView();
+  const slug = options?.profileSlug ?? display.slug ?? advisor?.profile_slug ?? null;
   const canShare = options?.livePublicProfile
     ? Boolean(slug?.trim())
     : canAdvisorSharePublicProfile(advisor);
   const advisorUserId = options?.advisorUserId ?? user?.id ?? null;
+  const isVisitorShare = Boolean(options?.livePublicProfile);
 
   const share = useCallback(async () => {
     if (!canShare || !slug) {
@@ -42,14 +53,21 @@ export function useShareProfileLink(options?: ShareProfileLinkOptions) {
     }
 
     const url = getPublicProfileLiveUrl(slug);
-    const name = user?.name?.trim() || "Advisor";
-    const text = options?.livePublicProfile
-      ? `Check out this verified YVITY advisor profile`
-      : `View my verified YVITY profile — ${name}`;
+    const verified = publicView
+      ? isAdvisorProfileApproved(publicView.profile)
+      : isAdvisorProfileApproved(advisor);
+    const payload = buildAdvisorProfileSharePayload({
+      name: display.name,
+      designation: display.title,
+      location: display.location,
+      verified,
+      url,
+      mode: isVisitorShare ? "visitor" : "self",
+    });
 
     try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: name, text, url });
+      if (canUseNativeShare()) {
+        await invokeNativeShare(payload);
         if (user?.id) void recordProfileShare(advisorUserId);
         return { mode: "native" as const };
       }
@@ -64,7 +82,18 @@ export function useShareProfileLink(options?: ShareProfileLinkOptions) {
     } catch {
       return { mode: "cancelled" as const };
     }
-  }, [canShare, slug, user?.name, user?.id, advisorUserId, options?.livePublicProfile]);
+  }, [
+    advisor,
+    advisorUserId,
+    canShare,
+    display.location,
+    display.name,
+    display.title,
+    isVisitorShare,
+    publicView,
+    slug,
+    user?.id,
+  ]);
 
-  return { share, copied, canShare } as const;
+  return { share, copied, canShare, canNativeShare: canUseNativeShare() } as const;
 }

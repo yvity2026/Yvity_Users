@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
 import { cn } from "@/lib/utils";
+import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
 import { uid } from "@/lib/section-store";
 
 type FieldDef = {
@@ -174,13 +175,12 @@ export function SectionListShowcase<T extends { id: string }>({
       </div>
 
       {editable && draft && editId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in">
-          <button
-            type="button"
-            className="absolute inset-0 bg-background/95 backdrop-blur-xl"
-            onClick={closeEdit}
-          />
-          <div className="relative z-10 w-full max-w-lg glass-strong rounded-3xl border border-white/15 p-6 md:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+        <AnimatedModalShell
+          className="z-[100]"
+          onClose={closeEdit}
+          backdropTone="heavy"
+          panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl p-5 sm:p-6 md:p-8 space-y-4 max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto"
+        >
             <EditorHeader title={getCardTitle(draft)} onClose={closeEdit} />
             {fields.map((f) => (
               <Field key={f.key} label={f.label}>
@@ -210,8 +210,7 @@ export function SectionListShowcase<T extends { id: string }>({
                 <Trash2 className="size-4" /> Delete
               </Button>
             </div>
-          </div>
-        </div>
+        </AnimatedModalShell>
       )}
     </div>
   );

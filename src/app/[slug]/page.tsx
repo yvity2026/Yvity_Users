@@ -8,6 +8,8 @@ import {
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/server/session";
+import { buildAdvisorPublicProfileMetadata } from "@/lib/social/advisor-public-profile-metadata";
+import { buildAdvisorProfileJsonLd } from "@/lib/social/advisor-json-ld";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -16,13 +18,15 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const payload = await loadPublicViewAdvisorBySlug(slug);
-  if (!payload) return { title: "Advisor profile | YVITY" };
 
-  return {
-    title: `${payload.name} | YVITY`,
-    description: `${payload.profession} — ${payload.city}`,
-  };
+  if (isReservedPublicProfileSlug(slug)) {
+    return { title: "Advisor profile" };
+  }
+
+  const payload = await loadPublicViewAdvisorBySlug(slug);
+  if (!payload) return { title: "Advisor profile" };
+
+  return buildAdvisorPublicProfileMetadata(payload, slug);
 }
 
 export default async function AdvisorPublicProfilePage({ params, searchParams }: PageProps) {
@@ -47,8 +51,14 @@ export default async function AdvisorPublicProfilePage({ params, searchParams }:
     notFound();
   }
 
+  const jsonLd = buildAdvisorProfileJsonLd(payload, slug);
+
   return (
     <PublicProfileViewProvider value={payload}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="relative flex min-h-[calc(100dvh-4rem)] max-md:min-h-[calc(100dvh-4rem-5.25rem)] flex-col overflow-x-hidden">
         <ProfileHomeHero />
       </main>

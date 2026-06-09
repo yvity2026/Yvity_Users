@@ -5,9 +5,19 @@ import type { LucideIcon } from "lucide-react";
 import { FileDown, MessageSquareQuote, QrCode, Star } from "lucide-react";
 import { toast } from "sonner";
 import { RecommendAdvisorModal } from "@/components/testimonials/recommend-advisor-modal";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { useAuth } from "@/context/AuthUserContext";
+import { buildHomeServiceChips } from "@/lib/home/home-service-chips";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { downloadProfilePdf, downloadProfileQrCode } from "@/lib/profile/profile-downloads";
+import {
+  downloadProfilePdf,
+  downloadProfileQrCode,
+  type ProfileDownloadInput,
+} from "@/lib/profile/profile-downloads";
+import { useServicesData } from "@/lib/sections/stores";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import { cn } from "@/lib/utils";
 
@@ -125,9 +135,33 @@ function QuickActionCard({
 export function HomeQuickActionsSection() {
   const { settings } = useAdvisorSettings();
   const { openGiveTestimonial } = useTestimonialSubmit();
+  const display = useAdvisorDisplayProfile();
+  const [services] = useServicesData();
+  const { advisor } = useAuth();
+  const publicView = usePublicProfileView();
   const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const [recommendOpen, setRecommendOpen] = useState(false);
   const [busyId, setBusyId] = useState<QuickActionId | null>(null);
+
+  const profileApproved = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
+
+  const buildDownloadInput = (): ProfileDownloadInput => ({
+    name: display.name,
+    title: display.title,
+    location: display.location,
+    companyName: display.companyName,
+    phone: display.phone,
+    email: display.email,
+    heroBio: display.home.heroBio,
+    rating: display.rating,
+    profileHeroStat: display.profileHeroStat,
+    experienceDisplay: display.experienceDisplay,
+    serviceLabels: buildHomeServiceChips(services, profileApproved).map((chip) => chip.label),
+    ctaDescription: display.ctaDescription,
+    profileSlug: display.slug,
+  });
 
   const visibleActions = actions.filter((action) => {
     if (isWorkspacePreview && (action.id === "recommend" || action.id === "testimonial")) {
@@ -172,8 +206,9 @@ export function HomeQuickActionsSection() {
 
     setBusyId(id);
     try {
-      if (id === "pdf") await downloadProfilePdf();
-      if (id === "qr") await downloadProfileQrCode();
+      const input = buildDownloadInput();
+      if (id === "pdf") await downloadProfilePdf(input);
+      if (id === "qr") await downloadProfileQrCode(input);
     } catch {
       toast.error("Download failed", {
         description: "Please check your connection and try again.",

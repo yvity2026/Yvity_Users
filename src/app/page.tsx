@@ -13,8 +13,8 @@ import FAQ from "@/yvity-landing/app/components/home/FAQ";
 import LandingMobileShell from "@/yvity-landing/app/components/home/LandingMobileShell";
 import LandingMobileExperience from "@/yvity-landing/app/components/home/LandingMobileExperience";
 import LandingMobileSectionSlot from "@/yvity-landing/app/components/home/LandingMobileSectionSlot";
-import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
 import { getPublicAdvisors } from "@/lib/advisors";
+import { buildPlatformHomeMetadata } from "@/lib/social/platform-public-metadata";
 import {
   pickHeroAdvisors,
   pickLandingFeaturedAdvisors,
@@ -25,11 +25,7 @@ function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
 }
 
-export const metadata: Metadata = {
-  title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
-  description:
-    "Build a verified, scored and shareable profile for insurance advisors. Credibility that connects advisors and clients.",
-};
+export const metadata: Metadata = buildPlatformHomeMetadata();
 
 type LandingSection = { id: string; content: ReactNode };
 

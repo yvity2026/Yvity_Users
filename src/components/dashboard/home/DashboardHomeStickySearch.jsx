@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, SlidersHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function DashboardHomeStickySearch({
   visible = false,
@@ -9,13 +10,18 @@ export default function DashboardHomeStickySearch({
   onSubmitSearch,
   onOpenFilters,
 }) {
-  if (!visible) return null;
-
   return (
     <div
-      className="home-sticky-search fixed inset-x-0 top-0 z-[120] px-3 pt-[max(0.5rem,env(safe-area-inset-top))] lg:hidden"
+      className={cn(
+        "home-sticky-search fixed inset-x-0 top-0 z-[120] px-3 pt-[max(0.5rem,env(safe-area-inset-top))] lg:hidden",
+        "transition-all duration-200 ease-out motion-reduce:transition-none",
+        visible
+          ? "translate-y-0 opacity-100 pointer-events-auto"
+          : "-translate-y-full opacity-0 pointer-events-none",
+      )}
       role="search"
       aria-label="Quick search"
+      aria-hidden={!visible}
     >
       <form
         onSubmit={(event) => {

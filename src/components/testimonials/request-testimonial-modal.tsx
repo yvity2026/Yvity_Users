@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Check, Copy, MessageCircle, Share2, X } from "lucide-react";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { testimonialShareCopy } from "@/lib/testimonials/social-metadata";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
+import {
+  buildTestimonialSubmitSharePayload,
+  canUseNativeShare,
+  invokeNativeShare,
+} from "@/lib/social/native-share-payload";
+import { testimonialSubmitShareDescription } from "@/lib/social/share-copy";
 import {
   buildWhatsAppTestimonialShareMessage,
   getTestimonialSubmitUrl,
@@ -16,13 +22,21 @@ import { cn } from "@/lib/utils";
 
 export function RequestTestimonialModal() {
   const { requestOpen, closeRequestTestimonial } = useTestimonialSubmit();
+  const advisorProfile = useAdvisorDisplayProfile();
   const [link, setLink] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [nativeShareAvailable, setNativeShareAvailable] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && requestOpen) {
-      setLink(getTestimonialSubmitUrl(window.location.origin));
+    if (typeof window !== "undefined" && requestOpen && advisorProfile.slug.trim()) {
+      setLink(getTestimonialSubmitUrl(window.location.origin, advisorProfile.slug));
+    }
+  }, [requestOpen, advisorProfile.slug]);
+
+  useEffect(() => {
+    if (requestOpen) {
+      setNativeShareAvailable(canUseNativeShare());
     }
   }, [requestOpen]);
 
@@ -38,7 +52,12 @@ export function RequestTestimonialModal() {
 
   if (!requestOpen) return null;
 
-  const shareMessage = link ? buildWhatsAppTestimonialShareMessage(link) : "";
+  const shareMessage = link
+    ? buildWhatsAppTestimonialShareMessage(link, {
+        name: advisorProfile.name,
+        title: advisorProfile.title,
+      })
+    : "";
 
   const copyLink = async () => {
     setError(null);
@@ -56,6 +75,22 @@ export function RequestTestimonialModal() {
     setError(null);
     if (!link) return;
     window.open(whatsAppShareTextUrl(shareMessage), "_blank", "noopener,noreferrer");
+  };
+
+  const shareNative = async () => {
+    setError(null);
+    if (!link) return;
+    try {
+      await invokeNativeShare(
+        buildTestimonialSubmitSharePayload({
+          name: advisorProfile.name,
+          designation: advisorProfile.title,
+          url: link,
+        }),
+      );
+    } catch {
+      setError("Could not open the share sheet. Try WhatsApp or copy the link.");
+    }
   };
 
   const initials = advisorProfile.name
@@ -128,7 +163,7 @@ export function RequestTestimonialModal() {
                   {testimonialShareCopy.ogTitle}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {advisorProfile.name} · {testimonialShareCopy.ogDescription}
+                  {testimonialSubmitShareDescription(advisorProfile.name, advisorProfile.title)}
                 </p>
               </div>
             </div>
@@ -152,6 +187,19 @@ export function RequestTestimonialModal() {
               <MessageCircle className="size-5" />
               Send WhatsApp
             </Button>
+
+            {nativeShareAvailable ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-full rounded-2xl text-base font-semibold gap-2 border-white/15 bg-white/[0.04]"
+                onClick={() => void shareNative()}
+                disabled={!link}
+              >
+                <Share2 className="size-5" />
+                Share Link
+              </Button>
+            ) : null}
 
             <Button
               type="button"

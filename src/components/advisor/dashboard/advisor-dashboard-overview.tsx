@@ -14,6 +14,7 @@ import {
   Search,
   Share2,
   Sparkles,
+  Star,
   Target,
   TrendingUp,
   UserPlus,
@@ -39,6 +40,7 @@ import { useTestimonialVisibility } from "@/hooks/use-content-visibility";
 import { useTestimonialsData } from "@/lib/sections/stores";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useShareProfileLink } from "@/hooks/use-share-profile-link";
+import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
 import type { AdvisorProfileSection, AdvisorTopSection } from "@/lib/advisor-nav";
 import type { DashboardAction } from "@/lib/advisor-dashboard/types";
@@ -74,6 +76,7 @@ export function AdvisorDashboardOverview({
     useTestimonialVisibility(testimonials);
   const { settings } = useAdvisorSettings();
   const { share, copied: shareDone, canShare } = useShareProfileLink();
+  const { openRequestRecommend } = useTestimonialSubmit();
   const { previewPath } = usePublicProfileUrls();
   const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
 
@@ -429,6 +432,11 @@ export function AdvisorDashboardOverview({
             icon={MessageCircle}
             label="Request Testimonial"
             onClick={onOpenRequestTestimonial}
+          />
+          <QuickAction
+            icon={Star}
+            label="Request Recommendation"
+            onClick={openRequestRecommend}
           />
           <QuickAction
             icon={Award}

@@ -11,7 +11,7 @@ export default function Error({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+      <div className="max-w-md text-center animate-in fade-in slide-in-from-bottom-2 duration-500 motion-reduce:animate-none">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn&apos;t load
         </h1>

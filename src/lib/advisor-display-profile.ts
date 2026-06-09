@@ -74,6 +74,7 @@ export function buildAdvisorDisplayProfile(input: {
   const city = input.user?.city?.trim() || "";
   const state = input.user?.state?.trim() || "";
   const location = [city, state].filter(Boolean).join(", ") || "Add your city in profile settings";
+  const officeLabel = [city, state].filter(Boolean).join(", ");
   const whatsapp = phone ? `91${phone.replace(/\D/g, "").slice(-10)}` : "";
   const aboutText = input.user?.about?.trim() || "";
 
@@ -97,7 +98,7 @@ export function buildAdvisorDisplayProfile(input: {
     phone: phone ? `+91 ${phone}` : "Add mobile number",
     email: email || "Add email",
     location,
-    officeLocation: undefined,
+    officeLocation: officeLabel ? { label: officeLabel } : undefined,
     companyName: "",
     mdrtMember: false,
     experienceDisplay: "",

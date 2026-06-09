@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Clock,
+  Gauge,
   MapPin,
   Phone,
   PhoneIncoming,
@@ -18,6 +19,7 @@ import {
 import { ContactTrigger } from "@/components/contact/contact-trigger";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { usePublicYvityScore } from "@/hooks/use-public-yvity-score";
 import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
@@ -31,6 +33,7 @@ import { useAuth } from "@/context/AuthUserContext";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { YvityVerificationSeal } from "@/components/brand/yvity-verification-seal";
 import { CommunityTrustSection } from "@/components/home/community-trust-section";
+import { HomeCareerTeaserSection } from "@/components/home/home-career-teaser-section";
 import { HomeQuickActionsSection } from "@/components/home/home-quick-actions-section";
 import { LatestHighlightsSection } from "@/components/home/latest-highlights-section";
 import { PublicProfileMobileCtaBar } from "@/components/home/public-profile-mobile-cta-bar";
@@ -149,6 +152,7 @@ function ProfileHeaderBanner() {
     profileSlug: advisorProfile.slug,
     livePublicProfile: Boolean(publicView?.userId),
   });
+  const { score: yvityScore, loading: scoreLoading } = usePublicYvityScore();
   const { leading, accent } = splitDisplayName(advisorProfile.name);
   const mdrtLabel = formatMdrtMemberLabel(achievements);
   const showIrdaiBadge = publicView
@@ -172,6 +176,7 @@ function ProfileHeaderBanner() {
       className={cn(
         "relative overflow-hidden rounded-2xl sm:rounded-3xl",
         "glass-strong border border-white/10",
+        "animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both motion-reduce:animate-none",
       )}
     >
       <div
@@ -180,7 +185,7 @@ function ProfileHeaderBanner() {
       />
 
       <div className="relative p-4 sm:p-5 md:p-6 lg:p-7">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-6 xl:gap-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-5 xl:gap-6">
           <HomeAdvisorPhoto
             className="lg:shrink-0"
             showVerifiedSeal={showIrdaiBadge}
@@ -243,6 +248,14 @@ function ProfileHeaderBanner() {
                 <FactPill
                   icon={Users}
                   label={`${advisorProfile.profileHeroStat.value} ${advisorProfile.profileHeroStat.label}`}
+                />
+              ) : null}
+              {showIrdaiBadge ? (
+                <FactPill
+                  icon={Gauge}
+                  label={
+                    scoreLoading ? "YVITY Score …" : `YVITY Score ${yvityScore}/100`
+                  }
                 />
               ) : null}
             </ul>
@@ -423,13 +436,14 @@ export function ProfileHomeHero() {
         <div className="absolute bottom-[20%] right-[5%] size-48 rounded-full bg-[oklch(0.85_0.16_78/0.08)] blur-[90px]" />
       </div>
 
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col justify-start px-4 pt-4 pb-6 sm:px-6 sm:pt-5 sm:pb-8 lg:px-6 lg:pt-3 lg:pb-8">
         <div className="flex flex-col gap-6 sm:gap-8 lg:gap-9">
           <ProfileHeaderBanner />
           <HeroServicesSection />
           <CommunityTrustSection />
           <HomeQuickActionsSection />
           <WhyChooseMeSection />
+          <HomeCareerTeaserSection />
           <LatestHighlightsSection />
           <SectionAdvisorCta />
         </div>

@@ -61,7 +61,9 @@ export function CommunityTrustSection() {
     recommendationCount,
     testimonialCount,
     profileViews,
+    profileViewsDelta,
     profileSharesByOthers,
+    profileSharesDelta,
     loading: statsLoading,
   } = usePublicProfileStats();
   const { advisor } = useAuth();
@@ -76,10 +78,20 @@ export function CommunityTrustSection() {
         testimonialCount,
         recommendationCount,
         profileViews,
+        profileViewsDelta,
         profileSharesByOthers,
+        profileSharesDelta,
         profileApproved,
       }),
-    [testimonialCount, recommendationCount, profileViews, profileSharesByOthers, profileApproved],
+    [
+      testimonialCount,
+      recommendationCount,
+      profileViews,
+      profileViewsDelta,
+      profileSharesByOthers,
+      profileSharesDelta,
+      profileApproved,
+    ],
   );
 
   const loading = statsLoading;

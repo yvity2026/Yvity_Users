@@ -5,6 +5,7 @@ import { ContactSheet } from "@/components/contact/contact-sheet";
 import { PublicProfileGate } from "@/components/public-profile-gate";
 import { PublicProfileViewCookieSync } from "@/components/public-profile-view-cookie-sync";
 import { GiveTestimonialModal } from "@/components/testimonials/give-testimonial-modal";
+import { RequestRecommendModal } from "@/components/testimonials/request-recommend-modal";
 import { RequestTestimonialModal } from "@/components/testimonials/request-testimonial-modal";
 import { ProfileThemeProvider } from "@/components/profile-theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -34,6 +35,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 <ContactSheet />
                 <GiveTestimonialModal />
                 <RequestTestimonialModal />
+                <RequestRecommendModal />
                 <Toaster position="top-center" richColors closeButton duration={4000} />
               </TestimonialSubmitProvider>
             </ContactProvider>

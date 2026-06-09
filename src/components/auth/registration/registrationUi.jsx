@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import BrandMark from "@/components/brand/BrandMark";
 
 export const PROGRESS_STEPS = [
@@ -22,10 +22,10 @@ export function RegistrationLogo({ className = "h-9 w-9" }) {
   );
 }
 
-export function RegistrationHeader({ title, subtitle }) {
+export function RegistrationHeader({ title, subtitle, onClose }) {
   return (
     <div className="relative shrink-0 bg-[#0f4f4f] px-4 pb-4 pt-5 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-[#0A4A4A] before:via-[#F59E0B] before:to-[#0A4A4A]">
-      <div className="flex items-start justify-between gap-3 pr-8">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 text-left text-white">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F59E0B]">
             Join YVITY
@@ -39,15 +39,27 @@ export function RegistrationHeader({ title, subtitle }) {
             </p>
           ) : null}
         </div>
-        <div className="shrink-0 rounded-lg bg-white p-1 shadow-sm">
-          <BrandMark
-            logoSize={44}
-            showName
-            layout="stack"
-            className="items-center"
-            logoClassName="h-10 w-10 object-contain"
-            nameClassName="font-cormorant text-[11px] font-bold leading-none text-[#0A4A4A]"
-          />
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full bg-white/20 p-1 text-white/80 transition hover:text-white"
+              aria-label="Close registration"
+            >
+              <X className="h-5 w-5" strokeWidth={2} />
+            </button>
+          ) : null}
+          <div className="rounded-lg bg-white p-1 shadow-sm">
+            <BrandMark
+              logoSize={44}
+              showName
+              layout="stack"
+              className="items-center"
+              logoClassName="h-10 w-10 object-contain"
+              nameClassName="font-cormorant text-[11px] font-bold leading-none text-[#0A4A4A]"
+            />
+          </div>
         </div>
       </div>
     </div>

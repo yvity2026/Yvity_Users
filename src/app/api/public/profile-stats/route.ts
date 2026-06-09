@@ -7,6 +7,7 @@ import { evaluateAdvisorScoreDecay } from "@/lib/server/evaluate-score-decay";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { loadRecommendations } from "@/lib/server/recommendations-persistence";
 import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
+import { loadPublicProfileEngagementTelemetry } from "@/lib/server/score-activity-persistence";
 import { loadTestimonials } from "@/lib/server/testimonials-persistence";
 
 export const runtime = "nodejs";
@@ -27,12 +28,14 @@ export async function GET() {
 
   const profile = await getAdvisorProfileForUser(userId);
   const limits = resolvePlanLimits(profile?.subscription_plan, profile?.account_status);
-  const [testimonials, recommendations, decayState] = await Promise.all([
+  const approved = isAdvisorProfileApproved(profile);
+  const [testimonials, recommendations, decayState, engagement] = await Promise.all([
     loadTestimonials(),
     loadRecommendations(userId),
     evaluateAdvisorScoreDecay(userId, {
-      profileApproved: isAdvisorProfileApproved(profile),
+      profileApproved: approved,
     }),
+    approved ? loadPublicProfileEngagementTelemetry(userId) : null,
   ]);
 
   const visibleTestimonials = filterTestimonialsForPublicDisplay(limits, testimonials);
@@ -41,6 +44,10 @@ export async function GET() {
   return NextResponse.json({
     recommendationCount: Math.max(0, recommendationCount),
     testimonialCount: visibleTestimonials.length,
+    profileViews: engagement?.profileViews ?? 0,
+    profileViewsDelta: engagement?.profileViewsDelta ?? "0%",
+    profileSharesByOthers: engagement?.clientSharers ?? 0,
+    profileSharesDelta: engagement?.clientSharersDelta ?? "0%",
     decayPenalty: decayState.penalty,
     decayActive: decayState.active,
     graceDaysRemaining: decayState.graceDaysRemaining,

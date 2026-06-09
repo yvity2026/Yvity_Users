@@ -20,17 +20,9 @@ import { useAuth } from "@/lib/auth-store";
 import { LANDING_PATH } from "@/lib/landing/paths";
 import { useShowPublicVisitorNav } from "@/lib/use-public-visitor-nav";
 import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
+import { useVisiblePublicNavLinks } from "@/hooks/use-visible-public-nav-links";
 import { isPublicAdvisorSlugPath } from "@/lib/advisor/public-profile-slug";
 import { ADVISOR_MY_SPACE_DASHBOARD_PATH } from "@/lib/dashboard/advisorWorkspace";
-
-const links = [
-  { href: "/profile", label: "Home", icon: Home },
-  { href: "/my-career", label: "My Career", icon: Briefcase },
-  { href: "/services", label: "Services", icon: Sparkles },
-  { href: "/achievements", label: "Achievements", icon: Trophy },
-  { href: "/testimonials", label: "Testimonials", icon: Quote },
-  { href: "/gallery", label: "Gallery", icon: ImageIcon },
-] as const;
 
 function navLinkClass(active: boolean, base: string) {
   return cn(base, active && "yvity-dash-nav-link--active");
@@ -51,6 +43,7 @@ export function Navbar() {
   const showVisitorNav = useShowPublicVisitorNav();
   const showAuthed = isAuthed && !showVisitorNav;
   const homeHref = usePublicProfileNavHome();
+  const links = useVisiblePublicNavLinks();
 
   useEffect(() => {
     setExpanded(false);
@@ -144,7 +137,10 @@ export function Navbar() {
       </header>
 
       {/* Reserve space so fixed header does not overlap page content */}
-      <div className="h-[3.75rem] shrink-0 sm:h-16" aria-hidden />
+      <div
+        className="h-[calc(3.75rem+env(safe-area-inset-top,0px))] shrink-0 sm:h-[calc(4rem+env(safe-area-inset-top,0px))] lg:h-16"
+        aria-hidden
+      />
 
       <MobileBottomBar
         expanded={expanded}

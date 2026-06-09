@@ -238,6 +238,39 @@ export async function saveScoreDecayLedger(ledger: ScoreDecayLedger): Promise<vo
   await saveDecayDb(next);
 }
 
+export async function loadPublicProfileEngagementTelemetry(
+  advisorUserId: string,
+  now: Date = new Date(),
+): Promise<{
+  profileViews: number;
+  profileViewsDelta: string;
+  clientSharers: number;
+  clientSharersDelta: string;
+}> {
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const prev = month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 };
+
+  const countViews = (y: number, m: number) =>
+    useSupabasePersistence()
+      ? countUniqueProfileViewsInMonthDb(advisorUserId, y, m)
+      : countUniqueProfileViewsInMonthJson(advisorUserId, y, m);
+
+  const [profileCurrent, profilePrevious, sharesCurrent, sharesPrevious] = await Promise.all([
+    countViews(year, month),
+    countViews(prev.year, prev.month),
+    countUniqueClientProfileSharersInMonth(advisorUserId, year, month),
+    countUniqueClientProfileSharersInMonth(advisorUserId, prev.year, prev.month),
+  ]);
+
+  return {
+    profileViews: profileCurrent,
+    profileViewsDelta: formatMonthOverMonthDelta(profileCurrent, profilePrevious),
+    clientSharers: sharesCurrent,
+    clientSharersDelta: formatMonthOverMonthDelta(sharesCurrent, sharesPrevious),
+  };
+}
+
 export async function loadAdvisorPerformanceTelemetry(
   advisorUserId: string,
   now: Date = new Date(),

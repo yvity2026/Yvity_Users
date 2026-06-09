@@ -1,4 +1,3 @@
-import { advisorProfile } from "@/lib/advisor-profile";
 import type { TestimonialService, TestimonialType } from "@/lib/sections/types";
 
 export type GiveTestimonialDraft = {
@@ -90,23 +89,31 @@ export function formatMediaDuration(seconds: number): string {
 }
 
 /** Advisor-specific public submit URL (path + query). */
-/** Canonical short path; redirects to testimonials page with submit query. */
-export function getTestimonialSubmitShortPath(advisorSlug = advisorProfile.slug): string {
-  return `/testimonials/submit?advisor=${encodeURIComponent(advisorSlug)}`;
+export function getTestimonialSubmitShortPath(advisorSlug: string): string {
+  const slug = advisorSlug.trim();
+  if (!slug) return "/testimonials/submit";
+  return `/testimonials/submit?advisor=${encodeURIComponent(slug)}`;
 }
 
-export function getTestimonialSubmitPath(advisorSlug = advisorProfile.slug): string {
-  return `/testimonials?submit=1&advisor=${encodeURIComponent(advisorSlug)}`;
+export function getTestimonialSubmitPath(advisorSlug: string): string {
+  const slug = advisorSlug.trim();
+  if (!slug) return "/testimonials?submit=1";
+  return `/testimonials?submit=1&advisor=${encodeURIComponent(slug)}`;
 }
 
-export function getTestimonialSubmitUrl(origin: string, advisorSlug = advisorProfile.slug): string {
+export function getTestimonialSubmitUrl(origin: string, advisorSlug: string): string {
   return `${origin.replace(/\/$/, "")}${getTestimonialSubmitShortPath(advisorSlug)}`;
 }
+
+export type TestimonialShareAdvisor = {
+  name: string;
+  title: string;
+};
 
 /** Prefilled message when advisor shares testimonial link via WhatsApp. */
 export function buildWhatsAppTestimonialShareMessage(
   link: string,
-  advisor = advisorProfile,
+  advisor: TestimonialShareAdvisor,
 ): string {
   return `Hello,
 

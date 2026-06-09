@@ -1,12 +1,13 @@
 "use client";
 
 import { ArrowRight, MapPin } from "lucide-react";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { googleMapsDirectionsUrl, hasOfficeLocation } from "@/lib/advisor-office-location";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function ReachOutToAdvisorSection() {
+  const advisorProfile = useAdvisorDisplayProfile();
   const office = advisorProfile.officeLocation;
 
   if (!hasOfficeLocation(office)) return null;

@@ -2,8 +2,8 @@ import { YvityLogo } from "@/components/brand/yvity-logo";
 
 export function PublicProfileFooter() {
   return (
-    <footer className="w-full border-t border-white/10 pt-6 sm:pt-8 pb-2">
-      <div className="flex flex-col items-center gap-3">
+    <footer className="w-full border-t border-white/10 pt-4 sm:pt-5 lg:pt-4 pb-1">
+      <div className="flex flex-col items-center gap-2 sm:gap-2.5">
         <YvityLogo
           size={28}
           showTagline

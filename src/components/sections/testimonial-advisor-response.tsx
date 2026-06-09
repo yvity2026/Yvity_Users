@@ -1,5 +1,7 @@
+"use client";
+
 import { BadgeCheck, Quote } from "lucide-react";
-import { advisorProfile } from "@/lib/advisor-profile";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import type { TestimonialAdvisorReply } from "@/lib/sections/types";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +12,8 @@ export function TestimonialAdvisorResponse({
   reply: TestimonialAdvisorReply;
   className?: string;
 }) {
+  const advisorProfile = useAdvisorDisplayProfile();
+
   return (
     <div
       className={cn(

@@ -189,7 +189,7 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
         className={cn(
           "mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8",
           activeKey !== null && "pb-24 max-lg:pb-28",
-          isPublicDesktop && "max-w-[1600px] px-3 py-3 md:px-4 md:py-4",
+          isPublicDesktop && "max-w-[1600px] px-2 py-2 md:px-3 md:py-2",
         )}
       >
         {activeKey === null ? (

@@ -10,7 +10,7 @@ type PageProps = {
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams;
-  return buildTestimonialSubmitMetadata(params.advisor);
+  return await buildTestimonialSubmitMetadata(params.advisor);
 }
 
 /** Canonical share URL — opens public Give Testimonial form with rich link previews. */

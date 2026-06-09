@@ -16,14 +16,11 @@ export function PublicProfileFooterLayout() {
     <div
       className={cn(
         "mx-auto w-full max-w-6xl px-4 sm:px-6",
-        // Tight top padding — the previous page already ends with a CTA card,
-        // so we only need a small breathing room before the Reach Out card.
-        "pt-3 sm:pt-4",
-        // Bottom padding doubles as floating-nav clearance on mobile (the
-        // public site's bottom nav bubble is ~80px tall). On `md+` there is
-        // no floating nav so a smaller spacer is plenty.
-        "pb-24 md:pb-12",
-        "space-y-4 sm:space-y-6",
+        // Small gap after the last home CTA — no extra air on desktop.
+        "pt-2 sm:pt-3 lg:pt-2",
+        // Mobile: clearance for the floating bottom nav (~80px).
+        "pb-24 lg:pb-6",
+        "space-y-3 sm:space-y-4",
       )}
     >
       <ReachOutToAdvisorSection />

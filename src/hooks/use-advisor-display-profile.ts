@@ -4,8 +4,9 @@ import { useMemo } from "react";
 import { useAuth } from "@/context/AuthUserContext";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import {
-  resolveProfileExperienceDisplay,
+  resolveCareerExperienceDisplay,
   resolveProfileHeroStat,
+  resolveServiceExperienceDisplay,
 } from "@/lib/advisor/profession-experience";
 import { buildDisplayProfileFromPublicView } from "@/context/public-profile-view-context";
 import {
@@ -58,11 +59,8 @@ export function useAdvisorDisplayProfile(
       : publicAdvisor?.about?.trim() || user?.about?.trim() || "";
     base = applyAboutToDisplayProfile(base, aboutText);
 
-    const experienceDisplay = resolveProfileExperienceDisplay(
-      services,
-      profileApproved,
-      career,
-    );
+    const experienceDisplay = resolveServiceExperienceDisplay(services, profileApproved);
+    const journeyExperienceDisplay = resolveCareerExperienceDisplay(career);
     const profileHeroStat = resolveProfileHeroStat(services, profileApproved);
 
     const bannerStats = buildPublicProfileBannerStats({
@@ -72,6 +70,7 @@ export function useAdvisorDisplayProfile(
       career,
       profileApproved,
       experienceDisplay,
+      journeyExperienceDisplay,
       profileHeroStat,
       recommendationCount,
       phone: base.phone,

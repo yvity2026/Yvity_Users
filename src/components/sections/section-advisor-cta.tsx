@@ -69,6 +69,7 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
         "yvity-on-dark relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/12",
         "bg-gradient-to-br from-primary via-[oklch(0.28_0.055_232)] to-brand-soft",
         "shadow-xl shadow-black/35",
+        "animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both motion-reduce:animate-none",
         className,
       )}
     >

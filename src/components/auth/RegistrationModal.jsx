@@ -10,7 +10,6 @@ import {
   Mail,
   MapPin,
   User,
-  X,
 } from "lucide-react";
 import {
   ComplianceFooter,
@@ -44,6 +43,13 @@ import { notifyAuthChanged } from "@/lib/auth-store";
 import { clearStoredReferralCode, readStoredReferralCode } from "@/lib/referral/attribution";
 import { useRegistrationIdentityVerification } from "@/hooks/useRegistrationIdentityVerification";
 import RegistrationIdentityVerification from "@/components/auth/registration/RegistrationIdentityVerification";
+import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import {
+  collapseMotion,
+  fadeUpMotion,
+  modalPanelMotion,
+  stepSlideMotion,
+} from "@/lib/ui/framer-reduced-motion";
 import {
   formatOtpResendTimer,
   useOtpResendCountdown,
@@ -122,6 +128,7 @@ const REG_STEP_META = {
 };
 
 const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = null }) => {
+  const reducedMotion = usePrefersReducedMotion();
   const [step, setStep] = useState(1);
   const [isSendingPhoneOtp, setIsSendingPhoneOtp] = useState(false);
   const [isResendingPhoneOtp, setIsResendingPhoneOtp] = useState(false);
@@ -613,26 +620,15 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
         role="dialog"
         aria-modal="true"
         aria-labelledby="registration-modal-title"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 24 }}
-        transition={{ type: "spring", damping: 28, stiffness: 340 }}
+        {...modalPanelMotion(reducedMotion)}
         className="relative flex max-h-[100dvh] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[24px] bg-white sm:max-h-[min(92dvh,720px)] sm:rounded-3xl"
         style={{ boxShadow: "0 0 8px 2px rgba(245, 158, 11, 0.25)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute left-3 top-3 z-20 rounded-full bg-white/20 p-1 text-white/80 transition hover:text-white"
-          aria-label="Close registration"
-        >
-          <X className="h-5 w-5" strokeWidth={2} />
-        </button>
-
         <RegistrationHeader
           title={headerMeta.title}
           subtitle={headerMeta.subtitle}
+          onClose={onClose}
         />
         <h2 id="registration-modal-title" className="sr-only">
           YVITY registration — {headerMeta.title}
@@ -660,12 +656,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
           >
             <AnimatePresence mode="wait">
               {step === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 12 }}
-                >
+                <motion.div key="step1" {...stepSlideMotion(reducedMotion, "left")}>
                   <StepHero
                     icon={Phone}
                     subtitle="We'll send a one-time password to confirm your number on WhatsApp."
@@ -775,9 +766,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                     <AnimatePresence>
                       {isPhoneOtpSent && (
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
+                          {...collapseMotion(reducedMotion)}
                           className="overflow-hidden border-t border-stone-100 pt-3"
                         >
                           <OtpInputs
@@ -950,12 +939,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
               )}
 
               {step === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step2" {...stepSlideMotion(reducedMotion, "right")}>
                   <button
                     type="button"
                     onClick={() => setStep(1)}
@@ -1098,9 +1082,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                     <AnimatePresence>
                       {isEmailOtpSent && (
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
+                          {...collapseMotion(reducedMotion)}
                           className="mt-3 overflow-hidden border-t border-stone-100 pt-3 sm:mt-5 sm:pt-5"
                         >
                           {!isEmailVerified && (
@@ -1274,8 +1256,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
 
                           {isEmailVerified && (
                             <motion.div
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: 0 }}
+                              {...fadeUpMotion(reducedMotion)}
                               className="rounded-lg border border-emerald-200/80 bg-emerald-50/80 p-2.5 sm:rounded-xl sm:p-4"
                             >
                               <div className="flex items-start gap-2 sm:gap-3">
@@ -1322,12 +1303,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
               )}
 
               {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step3" {...stepSlideMotion(reducedMotion, "right")}>
                   <button
                     type="button"
                     onClick={() => setStep(2)}
@@ -1420,12 +1396,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
               )}
 
               {step === 4 && !BYPASS_SELFIE_VERIFICATION && (
-                <motion.div
-                  key="step4"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step4" {...stepSlideMotion(reducedMotion, "right")}>
                   <RegistrationIdentityVerification
                     identity={identity}
                     onBack={() => setStep(3)}
@@ -1435,12 +1406,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
               )}
 
               {step === 4 && BYPASS_SELFIE_VERIFICATION && (
-                <motion.div
-                  key="step4-bypass"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                >
+                <motion.div key="step4-bypass" {...stepSlideMotion(reducedMotion, "right")}>
                   <p className="mb-4 text-center text-sm text-[#6B7280]">
                     Identity check skipped (dev mode).
                   </p>

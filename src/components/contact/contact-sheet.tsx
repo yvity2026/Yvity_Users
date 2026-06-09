@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -140,20 +141,14 @@ export function ContactSheet() {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-      role="dialog"
-      aria-modal="true"
+    <AnimatedModalShell
+      className="z-[100]"
+      onClose={handleClose}
+      backdropTone="light"
+      closeLabel="Close contact form"
       aria-labelledby="contact-sheet-title"
+      panelClassName="flex w-full max-h-[94dvh] sm:max-h-[90vh] flex-col sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl"
     >
-      <button
-        type="button"
-        className="absolute inset-0 bg-background/80 backdrop-blur-md"
-        onClick={handleClose}
-        aria-label="Close contact form"
-      />
-
-      <div className="relative z-10 flex w-full max-h-[94dvh] sm:max-h-[90vh] flex-col sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
         <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 sm:px-6 shrink-0">
           <div className="min-w-0 text-left">
             <h2 id="contact-sheet-title" className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -338,7 +333,6 @@ export function ContactSheet() {
             </>
           )}
         </div>
-      </div>
-    </div>
+    </AnimatedModalShell>
   );
 }
