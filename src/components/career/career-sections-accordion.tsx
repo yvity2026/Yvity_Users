@@ -43,6 +43,7 @@ export function CareerSectionsAccordion({
   editable,
   showCareerJourney = true,
   showEducationalJourney = true,
+  profileApproved = false,
 }: {
   experiences: Experience[];
   certifications: Certification[];
@@ -50,19 +51,24 @@ export function CareerSectionsAccordion({
   editable?: CareerAccordionEditable;
   showCareerJourney?: boolean;
   showEducationalJourney?: boolean;
+  profileApproved?: boolean;
 }) {
+  const showJourneyVerifiedBadge = profileApproved && experiences.length > 0;
+  const showEducationVerifiedBadge = profileApproved && education.length > 0;
+
   return (
     <Accordion type="multiple" className="space-y-3 sm:space-y-4">
       {showCareerJourney && (
         <AccordionItem value="professional-journey" className={cardClass}>
           <AccordionTrigger className={triggerClass}>
-            <ProfessionalJourneyHeader compact />
+            <ProfessionalJourneyHeader compact showVerifiedBadge={showJourneyVerifiedBadge} />
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <ProfessionalJourneySection
               experiences={experiences}
               embedded
               editable={editable?.experiences}
+              showVerifiedBadge={showJourneyVerifiedBadge}
             />
           </AccordionContent>
         </AccordionItem>
@@ -86,7 +92,7 @@ export function CareerSectionsAccordion({
       {showEducationalJourney && (
         <AccordionItem value="education" className={cardClass}>
           <AccordionTrigger className={triggerClass}>
-            <EducationHeader compact />
+            <EducationHeader compact showVerifiedBadge={showEducationVerifiedBadge} />
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <EducationSection items={education} embedded editable={editable?.education} />

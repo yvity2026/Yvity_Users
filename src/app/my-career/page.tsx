@@ -6,10 +6,19 @@ import { CareerSectionsAccordion } from "@/components/career/career-sections-acc
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useAuth } from "@/context/AuthUserContext";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
 
 export default function MyCareerPage() {
   const [data, , loading] = useCareerData();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
+  const { advisor } = useAuth();
+  const publicAdvisor = useResolvedPublicAdvisorPayload();
+  const profileApproved = publicAdvisor
+    ? isAdvisorProfileApproved(publicAdvisor.profile)
+    : isAdvisorProfileApproved(advisor);
 
   if (loading || settingsLoading) {
     return (
@@ -40,6 +49,7 @@ export default function MyCareerPage() {
             education={data.education}
             showCareerJourney={settings.visibility.careerJourney}
             showEducationalJourney={settings.visibility.educationalJourney}
+            profileApproved={profileApproved}
           />
         )}
         <SectionAdvisorCta className="mt-8 sm:mt-10" />

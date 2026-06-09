@@ -61,7 +61,7 @@ function ServicePill({ label, compact = false }) {
       className={
         compact
           ? "advisor-card-gold-glass-pill inline-flex items-center gap-1 px-2 py-1 font-poppins text-[10px] font-bold leading-tight text-[#0A4A4A]"
-          : "advisor-card-gold-glass-pill flex w-full items-center justify-center gap-1 px-1 py-1.5 font-poppins text-[11px] font-bold leading-tight tracking-[0.01em] text-[#0A4A4A] md:gap-1.5 md:px-2 md:py-1.5 md:text-[10px]"
+          : "advisor-card-gold-glass-pill inline-flex items-center justify-center gap-1 px-2.5 py-1.5 font-poppins text-[11px] font-bold leading-tight tracking-[0.01em] text-[#0A4A4A] md:gap-1.5 md:px-3 md:py-1.5 md:text-[10px]"
       }
     >
       <Icon
@@ -81,7 +81,7 @@ function AchievementBadge({ label, compact = false }) {
       className={
         compact
           ? "advisor-card-gold-glass-pill inline-flex items-center gap-1 bg-[#FFF9E8] px-2 py-1 font-poppins text-[10px] font-bold leading-tight text-[#0A4A4A] ring-1 ring-[#F59E0B]/25"
-          : "advisor-card-gold-glass-pill inline-flex w-full items-center justify-center gap-1.5 px-2 py-1.5 font-poppins text-[11px] font-bold leading-tight text-[#0A4A4A] md:text-[10px]"
+          : "advisor-card-gold-glass-pill inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 font-poppins text-[11px] font-bold leading-tight text-[#0A4A4A] md:text-[10px]"
       }
     >
       <Trophy className="h-3.5 w-3.5 shrink-0 text-[#F59E0B]" strokeWidth={2} />
@@ -286,16 +286,11 @@ function AdvisorCardGoldCompact({
               </div>
             </div>
 
-            {servicePills.length > 0 ? (
-              <div className="flex flex-wrap justify-center gap-1">
+            {(servicePills.length > 0 || achievementTags.length > 0) ? (
+              <div className="flex flex-wrap justify-center gap-1.5">
                 {servicePills.map((tag) => (
                   <ServicePill key={tag} label={tag} compact />
                 ))}
-              </div>
-            ) : null}
-
-            {achievementTags.length > 0 ? (
-              <div className="flex flex-wrap justify-center gap-1">
                 {achievementTags.slice(0, 2).map((tag) => (
                   <AchievementBadge key={tag} label={tag} compact />
                 ))}
@@ -431,23 +426,11 @@ export function AdvisorCardGold({
           </div>
 
           <div className="relative z-10 flex flex-col gap-2.5 p-3.5 sm:gap-3 sm:p-4">
-            {servicePills.length > 0 ? (
-              <div className="flex flex-col gap-1">
-                <div className="grid grid-cols-2 gap-1">
-                  {servicePills.slice(0, 2).map((tag) => (
-                    <ServicePill key={tag} label={tag} />
-                  ))}
-                </div>
-                {servicePills.length > 2 ? (
-                  <div className="mx-auto w-[calc(50%-2px)]">
-                    <ServicePill label={servicePills[2]} />
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
-            {achievementTags.length > 0 ? (
-              <div className="grid grid-cols-2 gap-1">
+            {(servicePills.length > 0 || achievementTags.length > 0) ? (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {servicePills.map((tag) => (
+                  <ServicePill key={tag} label={tag} />
+                ))}
                 {achievementTags.slice(0, 2).map((tag) => (
                   <AchievementBadge key={tag} label={tag} />
                 ))}

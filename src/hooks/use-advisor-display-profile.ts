@@ -60,7 +60,9 @@ export function useAdvisorDisplayProfile(
     base = applyAboutToDisplayProfile(base, aboutText);
 
     const experienceDisplay = resolveServiceExperienceDisplay(services, profileApproved);
-    const journeyExperienceDisplay = resolveCareerExperienceDisplay(career);
+    const careerJourneyDisplay = resolveCareerExperienceDisplay(career);
+    const journeyExperienceDisplay =
+      careerJourneyDisplay || experienceDisplay;
     const profileHeroStat = resolveProfileHeroStat(services, profileApproved);
 
     const bannerStats = buildPublicProfileBannerStats({

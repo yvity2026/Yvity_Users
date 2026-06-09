@@ -93,7 +93,13 @@ function JourneyVerifiedBadge() {
   );
 }
 
-export function ProfessionalJourneyHeader({ compact = false }: { compact?: boolean }) {
+export function ProfessionalJourneyHeader({
+  compact = false,
+  showVerifiedBadge = false,
+}: {
+  compact?: boolean;
+  showVerifiedBadge?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -124,7 +130,7 @@ export function ProfessionalJourneyHeader({ compact = false }: { compact?: boole
           </p>
         </div>
       </div>
-      <JourneyVerifiedBadge />
+      {showVerifiedBadge ? <JourneyVerifiedBadge /> : null}
     </div>
   );
 }
@@ -133,10 +139,12 @@ export function ProfessionalJourneySection({
   experiences,
   embedded = false,
   editable,
+  showVerifiedBadge = false,
 }: {
   experiences: Experience[];
   embedded?: boolean;
   editable?: CareerSectionEditable;
+  showVerifiedBadge?: boolean;
 }) {
   const body = (
     <>
@@ -314,11 +322,13 @@ export function ProfessionalJourneySection({
         </div>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground mt-8">
-        <span className="inline-flex items-center gap-1.5">
-          <BadgeCheck className="size-3.5" /> Verified by YVITY for authenticity and credibility.
-        </span>
-      </p>
+      {showVerifiedBadge ? (
+        <p className="text-center text-xs text-muted-foreground mt-8">
+          <span className="inline-flex items-center gap-1.5">
+            <BadgeCheck className="size-3.5" /> Verified by YVITY for authenticity and credibility.
+          </span>
+        </p>
+      ) : null}
     </>
   );
 
@@ -342,7 +352,7 @@ export function ProfessionalJourneySection({
             </p>
           </div>
         </div>
-        <JourneyVerifiedBadge />
+        {showVerifiedBadge ? <JourneyVerifiedBadge /> : null}
       </header>
       {body}
     </section>

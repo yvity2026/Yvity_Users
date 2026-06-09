@@ -15,6 +15,8 @@ import { uid } from "@/lib/career-store";
 import type { CareerData, Certification, Education, Experience } from "@/lib/career-types";
 import { Button } from "@/components/ui/button";
 import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
+import { useAuth } from "@/context/AuthUserContext";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 
 type EditTarget =
   | { kind: "experience"; item: Experience }
@@ -29,6 +31,8 @@ export function AdvisorCareerProfile({
   setData: (data: CareerData) => void;
 }) {
   const { previewPath } = usePublicProfileUrls();
+  const { advisor } = useAuth();
+  const profileApproved = isAdvisorProfileApproved(advisor);
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   const saveExperience = (item: Experience) => {
@@ -159,6 +163,7 @@ export function AdvisorCareerProfile({
             onDelete: deleteEducation,
           },
         }}
+        profileApproved={profileApproved}
       />
 
       <div className="mt-8 flex items-center gap-2 rounded-2xl glass border border-white/10 p-4 text-xs text-muted-foreground">

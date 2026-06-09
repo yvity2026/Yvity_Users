@@ -110,6 +110,34 @@
     box-shadow:
       0 2px 12px rgba(10, 74, 74, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .landing-hero-badge-text {
+    text-wrap: balance;
+    line-height: 1.35;
+  }
+
+  .landing-hero-intro {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  @media (min-width: 640px) {
+    .landing-hero-intro {
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .landing-hero-intro {
+      align-items: flex-start;
+      gap: 1.125rem;
+    }
   }
 
   .landing-hero-headline-primary {

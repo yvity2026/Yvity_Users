@@ -18,6 +18,8 @@ const PUBLIC_SECTION_REFRESH_EVENTS = [
   "career-data-updated",
 ] as const;
 
+export const PUBLIC_VIEW_USER_STORAGE_KEY = "yvity-public-view-user";
+
 function refreshPublicSectionStores() {
   for (const evt of PUBLIC_SECTION_REFRESH_EVENTS) {
     window.dispatchEvent(new CustomEvent(evt));
@@ -34,6 +36,15 @@ export function PublicProfileViewProvider({
   children: ReactNode;
 }) {
   const [ready, setReady] = useState(!value || !isAdvisorProfileApproved(value.profile));
+
+  useEffect(() => {
+    if (!value?.userId) return;
+    try {
+      sessionStorage.setItem(PUBLIC_VIEW_USER_STORAGE_KEY, value.userId);
+    } catch {
+      // ignored — private mode / storage blocked
+    }
+  }, [value?.userId]);
 
   useEffect(() => {
     if (!value || !isAdvisorProfileApproved(value.profile)) {

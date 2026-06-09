@@ -22,7 +22,13 @@ const tones = [
   { text: "text-[oklch(0.82_0.13_205)]", ring: "ring-glow-cyan", dot: "bg-[oklch(0.82_0.13_205)]" },
 ];
 
-export function EducationHeader({ compact = false }: { compact?: boolean }) {
+export function EducationHeader({
+  compact = false,
+  showVerifiedBadge = false,
+}: {
+  compact?: boolean;
+  showVerifiedBadge?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -53,9 +59,11 @@ export function EducationHeader({ compact = false }: { compact?: boolean }) {
           </p>
         </div>
       </div>
-      <span className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-semibold bg-[oklch(0.78_0.15_295/0.15)] text-[oklch(0.85_0.13_295)] border border-[oklch(0.78_0.15_295/0.4)] ring-glow-violet shrink-0">
-        <BadgeCheck className="size-3.5" /> YVITY VERIFIED
-      </span>
+      {showVerifiedBadge ? (
+        <span className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-semibold bg-[oklch(0.78_0.15_295/0.15)] text-[oklch(0.85_0.13_295)] border border-[oklch(0.78_0.15_295/0.4)] ring-glow-violet shrink-0">
+          <BadgeCheck className="size-3.5" /> YVITY VERIFIED
+        </span>
+      ) : null}
     </div>
   );
 }

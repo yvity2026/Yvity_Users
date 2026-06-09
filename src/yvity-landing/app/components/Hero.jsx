@@ -153,14 +153,14 @@ const Hero = ({ advisor = [] }) => {
   return (
     <section
       id="home"
-      className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+0.75rem)] sm:pt-[calc(4rem+0.75rem)] md:pb-10 lg:pt-[calc(4.375rem+0.5rem)] xl:pt-[4.75rem] ${LANDING_SECTION_ANCHOR}`}
+      className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+1rem)] sm:pt-[calc(4rem+1.125rem)] md:pb-10 lg:pt-[calc(4.375rem+1.25rem)] xl:pt-[calc(4.375rem+1.5rem)] ${LANDING_SECTION_ANCHOR}`}
     >
       <div
         className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10`}
       >
         {/* Left side Panel */}
         <motion.div
-          className="relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-5 text-center md:gap-6 lg:col-span-6 lg:items-start lg:text-left xl:col-span-7"
+          className="relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-6 text-center md:gap-7 lg:col-span-6 lg:items-start lg:text-left xl:col-span-7"
           {...(reducedMotion
             ? {}
             : {
@@ -170,49 +170,55 @@ const Hero = ({ advisor = [] }) => {
                 viewport: { once: true, margin: "-100px" },
               })}
         >
-          <span className="landing-hero-badge flex max-w-full items-center justify-center gap-2 rounded-[30px] px-3 py-1.5 lg:justify-start">
-            {reducedMotion ? (
-              <span className="h-2 w-2 shrink-0 rounded-full bg-[#F59E0B]" />
-            ) : (
-            <motion.span
-              className="h-2 w-2 shrink-0 rounded-full bg-[#F59E0B]"
-              animate={{ scale: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-            />
-            )}
-            <p className="font-poppins text-[11px] font-semibold leading-snug text-[#0A4A4A] sm:text-[12px] lg:text-[14px]">
-              India&apos;s first credibility platform for insurance — advisors &amp; clients
-            </p>
-          </span>
+          <div className="landing-hero-intro">
+            <span className="landing-hero-badge inline-flex max-w-full items-center justify-center gap-2.5 rounded-[30px] px-3.5 py-2 sm:px-4 sm:py-2.5 lg:justify-start">
+              {reducedMotion ? (
+                <span className="h-2 w-2 shrink-0 rounded-full bg-[#F59E0B]" />
+              ) : (
+                <motion.span
+                  className="h-2 w-2 shrink-0 rounded-full bg-[#F59E0B]"
+                  animate={{ scale: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
+                />
+              )}
+              <p className="landing-hero-badge-text font-poppins text-[11px] font-semibold text-[#0A4A4A] sm:text-[12px] lg:text-[13px]">
+                <span className="block sm:inline">India&apos;s first credibility platform</span>
+                <span className="hidden sm:inline text-[#0A4A4A]/70"> — </span>
+                <span className="block sm:inline text-[#0A4A4A]/90">
+                  for insurance advisors &amp; clients
+                </span>
+              </p>
+            </span>
 
-          {/* Audience toggle — single segmented control (no separate "I am" label) */}
-          <div
-            className="landing-hero-audience-toggle"
-            role="tablist"
-            aria-label="Choose your path"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={audience === "customer"}
-              onClick={() => setAudience("customer")}
-              className={`landing-hero-audience-pill font-poppins text-[11px] font-semibold sm:text-[12px] ${
-                audience === "customer" ? "is-active" : ""
-              }`}
+            {/* Audience toggle — single segmented control (no separate "I am" label) */}
+            <div
+              className="landing-hero-audience-toggle"
+              role="tablist"
+              aria-label="Choose your path"
             >
-              Looking for an advisor
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={audience === "advisor"}
-              onClick={() => setAudience("advisor")}
-              className={`landing-hero-audience-pill font-poppins text-[11px] font-semibold sm:text-[12px] ${
-                audience === "advisor" ? "is-active" : ""
-              }`}
-            >
-              I&apos;m an advisor
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={audience === "customer"}
+                onClick={() => setAudience("customer")}
+                className={`landing-hero-audience-pill font-poppins text-[11px] font-semibold sm:text-[12px] ${
+                  audience === "customer" ? "is-active" : ""
+                }`}
+              >
+                Looking for an advisor
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={audience === "advisor"}
+                onClick={() => setAudience("advisor")}
+                className={`landing-hero-audience-pill font-poppins text-[11px] font-semibold sm:text-[12px] ${
+                  audience === "advisor" ? "is-active" : ""
+                }`}
+              >
+                I&apos;m an advisor
+              </button>
+            </div>
           </div>
 
           <span className="flex w-full min-w-0 flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[40px] sm:leading-[1.12] md:text-[52px] md:gap-2 lg:text-[56px] lg:leading-[1.1] xl:text-[64px]">
