@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, MapPin, Pencil } from "lucide-react";
 import { FiLogOut } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import LandingSectionHeader from "@/yvity-landing/app/components/home/LandingSectionHeader";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";
 import ProfilePhotoModal from "@/components/dashboard/ProfilePhotoModal";

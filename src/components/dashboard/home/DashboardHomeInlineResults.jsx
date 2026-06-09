@@ -82,8 +82,11 @@ export default function DashboardHomeInlineResults({
             Quick preview
           </p>
           <h2 className="font-cormorant text-xl font-bold text-[#0A4A4A]">
-            {results.length} match{results.length === 1 ? "" : "es"} found
+            Showing {results.length} result{results.length === 1 ? "" : "s"}
           </h2>
+          <p className="mt-0.5 font-poppins text-xs text-[#9CA3AF]">
+            See all matches on Explore
+          </p>
         </div>
         {onViewAll ? (
           <button

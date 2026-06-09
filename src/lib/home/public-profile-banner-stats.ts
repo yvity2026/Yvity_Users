@@ -163,6 +163,7 @@ export function buildAdvisorHighlightLabels(input: {
   experienceDisplay: string;
   profileHeroStat: ProfileHeroStat;
   phone: string;
+  profileApproved: boolean;
 }): { label: string }[] {
   const highlights: { label: string }[] = [];
 
@@ -185,7 +186,9 @@ export function buildAdvisorHighlightLabels(input: {
   }
 
   while (highlights.length < 3) {
-    highlights.push({ label: "Verified by YVITY" });
+    highlights.push({
+      label: input.profileApproved ? "Verified by YVITY" : "Flexible consultation",
+    });
   }
 
   return highlights.slice(0, 3);
@@ -237,6 +240,7 @@ export function buildPublicProfileBannerStats(input: {
       experienceDisplay: input.experienceDisplay,
       profileHeroStat: input.profileHeroStat,
       phone: input.phone,
+      profileApproved: input.profileApproved,
     }),
   };
 }

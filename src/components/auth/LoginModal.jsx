@@ -1,20 +1,30 @@
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import BrandMark from "@/yvity-landing/components/brand/BrandMark";
-// 1. Added X to the lucide-react import
-import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
+import {
+  ComplianceFooter,
+  FieldError,
+  FieldLabel,
+  OtpInputs,
+  PrimaryButton,
+} from "@/components/auth/registration/registrationUi";
 import { sendOtp } from "@/lib/api/auth/sendOtp";
 import { verifyOtp } from "@/lib/api/auth/verifyOtp";
 import { createFreshDeviceToken } from "@/lib/deviceToken";
 import { notifyAuthChanged } from "@/lib/auth-store";
+import {
+  formatOtpResendTimer,
+  useOtpResendCountdown,
+} from "@/hooks/use-otp-resend-countdown";
 
-// Zod Validation Schema
 const loginSchema = z.object({
   mobile: z
     .string()
@@ -24,7 +34,7 @@ const loginSchema = z.object({
     ),
   otp: z
     .string()
-    .length(6, "OTP must be 6 digits")
+    .length(6, "6-digit OTP required")
     .optional()
     .or(z.literal("")),
   rememberMe: z.boolean().default(true),
@@ -38,13 +48,18 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
   const [deactivatedAccount, setDeactivatedAccount] = useState(null);
   const otpRefs = useRef([]);
   const authDeviceTokenRef = useRef("");
+  const modalPanelRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
-  // Local state purely for the individual OTP boxes to keep focus/paste logic intact
   const [otpArray, setOtpArray] = useState(["", "", "", "", "", ""]);
-
-  // React Hook Form setup
   const {
-    register,
+    otpSecondsLeft,
+    canResend,
+    startCountdown,
+    resetCountdown,
+  } = useOtpResendCountdown();
+
+  const {
     handleSubmit,
     setValue,
     watch,
@@ -60,7 +75,6 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
   const mobileValue = watch("mobile") || "";
   const otpValue = watch("otp") || "";
 
-  // Reset state and manage body scroll when opened
   useEffect(() => {
     if (isOpen) {
       setStep(1);
@@ -69,32 +83,84 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
       setIsVerifyingOtp(false);
       setDeactivatedAccount(null);
       authDeviceTokenRef.current = "";
-      reset(); // Resets React Hook Form
+      reset();
       setOtpArray(["", "", "", "", "", ""]);
+      resetCountdown();
 
       const prefilledPhone = sessionStorage.getItem("yvity_login_phone");
       if (prefilledPhone && /^[6-9]\d{9}$/.test(prefilledPhone)) {
         setValue("mobile", prefilledPhone, { shouldValidate: true });
         sessionStorage.removeItem("yvity_login_phone");
       }
+    }
+  }, [isOpen, reset, resetCountdown, setValue]);
 
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    previouslyFocusedRef.current =
+      typeof document !== "undefined" ? document.activeElement : null;
+
+    const panel = modalPanelRef.current;
+    const focusable = panel?.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    const first = focusable?.[0];
+    if (first && typeof first.focus === "function") {
+      window.setTimeout(() => first.focus(), 0);
     }
 
-    return () => {
-      document.body.style.overflow = "unset";
+    const handleKeyDown = (e) => {
+      if (e.key !== "Tab" || !panel) return;
+      const nodes = panel.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (nodes.length === 0) return;
+      const list = Array.from(nodes);
+      const firstEl = list[0];
+      const lastEl = list[list.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else if (document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
     };
-  }, [isOpen, reset]);
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === "function") {
+        prev.focus();
+      }
+    };
+  }, [isOpen, step]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   const handleMobileChange = (e) => {
-    // 1. \D completely removes non-numbers
-    // 2. ^[0-5]+ instantly removes 0-5 if they are at the start
     const val = e.target.value.replace(/\D/g, "").replace(/^[0-5]+/, "");
-
     if (val.length <= 10) {
       setValue("mobile", val, { shouldValidate: true });
     }
@@ -109,7 +175,6 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     setOtpArray(newOtp);
     setValue("otp", newOtp.join(""), { shouldValidate: true });
 
-    // Auto focus next
     if (value && index < otpArray.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
@@ -130,7 +195,6 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     setOtpArray(newOtp);
     setValue("otp", pasteData, { shouldValidate: true });
 
-    // Focus last input
     setTimeout(() => {
       otpRefs.current[5]?.focus();
     }, 0);
@@ -165,7 +229,6 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     e.stopPropagation();
     if (isSendingOtp) return;
 
-    console.info("[login] continue/send otp clicked");
     const isMobileValid = await trigger("mobile");
     if (!isMobileValid) return;
 
@@ -177,7 +240,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
       return;
     }
 
-    toast.success("OTP sent");
+    toast.success("OTP sent successfully");
+    startCountdown();
     setStep(2);
   };
 
@@ -193,21 +257,17 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     }
 
     toast.success("Account reactivated. OTP sent");
+    startCountdown();
     setStep(2);
   };
 
   const handleKeepDeactivated = () => {
     setDeactivatedAccount(null);
     setStep(1);
-    toast("Account remains deactivated");
+    toast.message("Account remains deactivated");
   };
 
   const onSubmit = async (data) => {
-    console.info("[login] verify form submitted", {
-      mobile: data.mobile,
-      otpLength: String(data.otp || "").length,
-    });
-
     if (!authDeviceTokenRef.current) {
       authDeviceTokenRef.current = createFreshDeviceToken();
     }
@@ -237,135 +297,141 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
       onClose?.();
       window.location.assign(result.redirectUrl || "/dashboard");
     } catch (error) {
-      console.error("[login] OTP verification failed", error);
       toast.error(error.message || "Unable to complete login right now");
     } finally {
       setIsVerifyingOtp(false);
     }
   };
 
+  const titleId = "login-modal-title";
+
   return (
     <div
       role="presentation"
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-6 font-poppins md:p-4"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/45 p-0 font-poppins sm:items-center sm:p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative flex max-h-[90vh] w-full max-w-[450px] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl md:max-h-[95vh]"
-        style={{
-          boxShadow: "0 0 8px 2px rgba(245, 158, 11, 0.25)",
-        }}
+        ref={modalPanelRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
+        transition={{ type: "spring", damping: 28, stiffness: 340 }}
+        className="relative flex max-h-[100dvh] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[24px] bg-white sm:max-h-[min(92dvh,720px)] sm:rounded-3xl"
+        style={{ boxShadow: "0 0 8px 2px rgba(245, 158, 11, 0.25)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 2. Added Top Right 'X' Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 left-4 z-10 text-white/80 hover:text-white transition-colors cursor-pointer p-1 bg-white/20 rounded-full"
-          aria-label="Close modal"
+          className="absolute left-3 top-3 z-20 rounded-full bg-white/20 p-1 text-white/80 transition hover:text-white"
+          aria-label="Close login"
         >
-          <X size={24} className="text-white hover:text-red-400" />
+          <X size={22} />
         </button>
 
-        {/* Header */}
-        <div className="bg-[#0f4f4f] px-6 py-4 md:py-8 relative w-full shrink-0 before:content-[''] before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[6px] before:bg-gradient-to-r before:from-[#0A4A4A] before:via-[#F59E0B] before:to-[#0A4A4A]">
-          <div className="flex justify-between items-start">
-            <div className="text-white">
-              <h2 className="text-[clamp(24px,4vw,32px)] font-semibold font-cormorant tracking-wide mt-7 md:mt-4">
+        <div className="relative shrink-0 bg-[#0f4f4f] px-5 py-5 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-[#0A4A4A] before:via-[#F59E0B] before:to-[#0A4A4A] sm:px-6 sm:py-6">
+          <div className="flex items-start justify-between gap-3 pr-8">
+            <div className="min-w-0 text-white">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#F59E0B]">
+                Welcome back
+              </p>
+              <h2
+                id={titleId}
+                className="mt-0.5 font-cormorant text-[22px] font-semibold leading-tight tracking-wide sm:text-[26px]"
+              >
                 {step === 1
-                  ? "Welcome"
+                  ? "Log in"
                   : step === 3
-                    ? "Reactivate Account"
-                    : "Verify Your Number"}
+                    ? "Reactivate account"
+                    : "Verify your number"}
               </h2>
-              <p className="text-[clamp(12px,1.5vw,16px)] text-[#A9A9A9] text-sm mt-1 pr-6">
+              <p className="mt-1 text-[11px] leading-snug text-white/75 sm:text-xs">
                 {step === 1
                   ? "Enter your mobile number to continue"
                   : step === 3
                     ? `Account found for +91 ${mobileValue}`
-                    : `OTP sent to +91 ${mobileValue}`}
+                    : `OTP sent to +91 ${mobileValue} on WhatsApp`}
               </p>
             </div>
-            <div className="rounded bg-white p-1 mt-4">
+            <div className="shrink-0 rounded-lg bg-white p-1 shadow-sm">
               <BrandMark
-                logoSize={56}
+                logoSize={44}
                 showName
                 layout="stack"
                 className="items-center"
-                logoClassName="h-12 w-12 object-contain md:h-14 md:w-14"
-                nameClassName="font-cormorant text-lg font-bold text-[#0A4A4A]"
+                logoClassName="h-10 w-10 object-contain"
+                nameClassName="font-cormorant text-[11px] font-bold leading-none text-[#0A4A4A]"
               />
             </div>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 md:p-8 overflow-y-auto min-h-0 custom-scrollbar flex-1">
-          {/* Form tag wrapped around the AnimatePresence */}
+        <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6 custom-scrollbar">
           <form onSubmit={handleSubmit(onSubmit)}>
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  exit={{ opacity: 0, x: 14 }}
                 >
-                  <div className="mb-6">
-                    <label className="block text-[#374151] font-semibold mb-2 ml-1 text-xs">
-                      Mobile Number
-                    </label>
-                    <div className="flex bg-[#F8F6F1] rounded-lg overflow-hidden border border-[#E6E6E6] focus-within:border-[#0f4f4f] transition-colors outline-none">
-                      <span className="flex items-center justify-center px-4 font-bold text-[#374151] text-xs">
-                        +91
-                      </span>
-                      <input
-                        type="text"
-                        className="w-full py-4 bg-[#F7F4ED] outline-none text-gray-800 tracking-wider font-medium placeholder-[#6B7280] text-xs"
-                        placeholder="9876543210"
-                        value={mobileValue}
-                        onChange={handleMobileChange}
-                      />
-                    </div>
-                    {errors.mobile && (
-                      <p className="text-red-500 text-xs mt-1 ml-1">
-                        {errors.mobile.message}
-                      </p>
-                    )}
+                  <FieldLabel htmlFor="login-mobile" required>
+                    Mobile number
+                  </FieldLabel>
+                  <div className="flex overflow-hidden rounded-xl border border-[#E6E6E6] bg-[#F8F6F1] transition focus-within:border-[#F59E0B] focus-within:ring-2 focus-within:ring-[#F59E0B]/20">
+                    <span className="flex items-center border-r border-[#E6E6E6] bg-[#F8F6F1] px-2.5 text-[12px] font-bold text-[#374151]">
+                      +91
+                    </span>
+                    <input
+                      id="login-mobile"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="tel-national"
+                      className="min-h-[42px] w-full flex-1 bg-[#F7F4ED] px-2 py-2 text-[13px] text-[#374151] outline-none placeholder:text-[#6B7280]"
+                      placeholder="9876543210"
+                      value={mobileValue}
+                      onChange={handleMobileChange}
+                    />
                   </div>
+                  <FieldError message={errors.mobile?.message} />
 
-                  <p className="text-xs text-[#6B7280] mb-4 md:mb-8 ml-1">
-                    We&apos;ll send an OTP - no Passwords needed
+                  <p className="mt-3 text-[11px] text-[#6B7280]">
+                    We&apos;ll send a one-time code — no password needed.
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    disabled={mobileValue.length !== 10 || isSendingOtp}
-                    className="w-full bg-[#0A4A4A] hover:bg-[#0a3a3a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 md:py-4 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs"
-                  >
-                    {isSendingOtp ? "Sending OTP..." : "Continue"}{" "}
-                    <ArrowRight size={18} />
-                  </button>
+                  <div className="mt-4">
+                    <PrimaryButton
+                      onClick={handleNextStep}
+                      disabled={mobileValue.length !== 10 || isSendingOtp}
+                    >
+                      {isSendingOtp ? (
+                        "Sending OTP…"
+                      ) : (
+                        <>
+                          Continue <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </PrimaryButton>
+                  </div>
 
-                  <div
-                    className="mt-6 text-center text-xs
- text-[#6B7280]"
-                  >
+                  <p className="mt-4 text-center text-[11px] text-[#6B7280]">
                     Don&apos;t have an account?{" "}
                     <button
                       type="button"
                       onClick={onSwitchToRegister}
-                      className="font-bold text-[#0A4A4A] hover:transform-stroke hover:text-[#0a3a3a] cursor-pointer ml-2 text-xs"
+                      className="font-bold text-[#0A4A4A] transition hover:text-[#F59E0B]"
                     >
-                      Register Now
+                      Register now →
                     </button>
-                    {/* 3. Removed Cancel text button from here */}
+                  </p>
+
+                  <div className="mt-5">
+                    <ComplianceFooter />
                   </div>
                 </motion.div>
               )}
@@ -373,79 +439,61 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
               {step === 2 && (
                 <motion.div
                   key="step2"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  exit={{ opacity: 0, x: -14 }}
                 >
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
+                    onClick={() => {
+                      resetCountdown();
+                      setStep(1);
+                    }}
                     disabled={isVerifyingOtp}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors mb-6 text-xs cursor-pointer"
+                    className="mb-4 flex items-center gap-1.5 text-[11px] font-medium text-[#6B7280] transition hover:text-[#F59E0B] disabled:opacity-50"
                   >
-                    <ArrowLeft size={16} /> Change Number
+                    <ArrowLeft className="h-4 w-4" /> Change number
                   </button>
 
-                  <div className="text-center mb-6">
-                    <p className="text-[#0f4f4f] font-semibold mb-2 md:mb-4 text-xs">
-                      Enter 6-digit OTP sended to Whatsapp
-                    </p>
-                    <div className="flex justify-center gap-1 md:gap-3 ">
-                      {otpArray.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          ref={(element) => {
-                            otpRefs.current[idx] = element;
-                          }}
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          autoComplete="one-time-code"
-                          className="w-10 h-12 md:w-12 md:h-14 rounded-[10px] border bg-[#F8F6F1] text-center text-[clamp(16px,2.5vw,20px)] font-bold text-gray-800 outline-none focus:border-[#F49F0F] focus:ring-1 focus:ring-[#F49F0F] transition-all"
-                          value={digit}
-                          onChange={(e) => handleOtpChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                          onPaste={handlePaste}
-                          style={{
-                            borderColor: digit ? "#F49F0F" : "#B7B7B7",
-                            boxShadow: digit
-                              ? "0 0 4px 2px rgba(245, 158, 11, 0.25)"
-                              : "none",
-                            background: digit ? "#FFF" : "#F7F4ED",
-                          }}
-                        />
-                      ))}
-                    </div>
-                    {errors.otp && (
-                      <p className="text-red-500 text-xs mt-2">
-                        {errors.otp.message}
-                      </p>
-                    )}
+                  <div className="mb-2 flex flex-col items-center gap-1">
+                    {otpSecondsLeft > 0 ? (
+                      <span className="tabular-nums text-[10px] font-medium text-[#F59E0B] sm:text-[11px]">
+                        Resend in {formatOtpResendTimer(otpSecondsLeft)}
+                      </span>
+                    ) : null}
                   </div>
 
-                  <div className="flex flex-col items-center gap-4">
-                    <button
+                  <OtpInputs
+                    digits={otpArray}
+                    inputRefs={otpRefs}
+                    idPrefix="login-otp"
+                    hint="Enter the 6-digit code from WhatsApp"
+                    onChange={handleOtpChange}
+                    onKeyDown={handleOtpKeyDown}
+                    onPaste={handlePaste}
+                  />
+                  <FieldError message={errors.otp?.message} />
+
+                  <div className="mt-4 space-y-3">
+                    <PrimaryButton
                       type="submit"
                       disabled={otpValue.length !== 6 || isVerifyingOtp}
-                      className="w-full bg-[#0f4f4f] hover:bg-[#0a3a3a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 md:py-4 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs"
                     >
-                      {isVerifyingOtp ? "Verifying..." : "Verify & Continue"}{" "}
-                      {!isVerifyingOtp && <ArrowRight size={18} />}
-                    </button>
-
-                    {/* <label className="flex items-center gap-3 text-[clamp(10px,1vw,14px)] text-gray-600 mt-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        {...register("rememberMe")}
-                        className="w-5 h-5 rounded border-gray-300 text-[#0f4f4f] focus:ring-[#0f4f4f]"
-                      />
-                      Remember this device for 30 days
-                    </label> */}
+                      {isVerifyingOtp ? (
+                        "Verifying…"
+                      ) : (
+                        <>
+                          Verify &amp; continue <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </PrimaryButton>
 
                     <button
                       type="button"
                       onClick={async () => {
-                        if (isResendingOtp || isVerifyingOtp) return;
+                        if (isResendingOtp || isVerifyingOtp || !canResend) {
+                          return;
+                        }
 
                         const isMobileValid = await trigger("mobile");
                         if (!isMobileValid) {
@@ -461,14 +509,21 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                           return;
                         }
 
-                        toast.success("OTP resent");
+                        toast.success("OTP resent successfully");
+                        startCountdown();
+                        setOtpArray(["", "", "", "", "", ""]);
+                        setValue("otp", "", { shouldValidate: false });
+                        otpRefs.current[0]?.focus();
                       }}
-                      disabled={isResendingOtp || isVerifyingOtp}
-                      className="text-gray-500 text-xs mt-0 md:mt-2 hover:text-[#0A4A4A] font-semibold cursor-pointer disabled:text-gray-400"
+                      disabled={isResendingOtp || isVerifyingOtp || !canResend}
+                      className="w-full text-center text-[11px] font-semibold text-[#6B7280] underline-offset-2 transition hover:text-[#F59E0B] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {isResendingOtp ? "Resending..." : "Resend OTP"}
+                      {isResendingOtp
+                        ? "Resending…"
+                        : canResend
+                          ? "Resend OTP"
+                          : `Resend in ${formatOtpResendTimer(otpSecondsLeft)}`}
                     </button>
-                    {/* 4. Removed Cancel text button from here */}
                   </div>
                 </motion.div>
               )}
@@ -476,29 +531,32 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
               {step === 3 && (
                 <motion.div
                   key="step3"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  exit={{ opacity: 0, x: -14 }}
                 >
                   <button
                     type="button"
-                    onClick={handleKeepDeactivated}
+                    onClick={() => {
+                      setDeactivatedAccount(null);
+                      setStep(1);
+                    }}
                     disabled={isSendingOtp}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors mb-6 text-[clamp(10px,1vw,14px)] cursor-pointer disabled:text-gray-400"
+                    className="mb-4 flex items-center gap-1.5 text-[11px] font-medium text-[#6B7280] transition hover:text-[#F59E0B] disabled:opacity-50"
                   >
-                    <ArrowLeft size={16} /> Change Number
+                    <ArrowLeft className="h-4 w-4" /> Go back
                   </button>
 
-                  <div className="mb-6 rounded-[8px] border border-[#E6E6E6] bg-[#F8F6F1] p-4">
-                    <p className="text-[#0f4f4f] font-semibold text-[clamp(14px,1.5vw,18px)]">
+                  <div className="mb-5 rounded-xl border border-[#E6E6E6] bg-[#F8F6F1] p-4">
+                    <p className="text-[14px] font-semibold text-[#0f4f4f]">
                       Reactivate account?
                     </p>
-                    <p className="mt-2 text-[#6B7280] leading-6 text-[clamp(12px,1.5vw,14px)]">
+                    <p className="mt-2 text-[12px] leading-relaxed text-[#6B7280]">
                       This mobile number belongs to a deactivated account. You
                       can reactivate it now and continue with OTP login.
                     </p>
-                    {deactivatedAccount?.deactivatedUntil && (
-                      <p className="mt-3 text-[#6B7280] text-[clamp(11px,1vw,13px)]">
+                    {deactivatedAccount?.deactivatedUntil ? (
+                      <p className="mt-3 text-[11px] text-[#6B7280]">
                         Reactivation available until{" "}
                         {new Date(
                           deactivatedAccount.deactivatedUntil,
@@ -508,25 +566,29 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                         })}
                         .
                       </p>
-                    )}
+                    ) : null}
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    <button
-                      type="button"
+                  <div className="space-y-3">
+                    <PrimaryButton
                       onClick={handleReactivateAccount}
                       disabled={isSendingOtp}
-                      className="w-full bg-[#0f4f4f] hover:bg-[#0a3a3a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 md:py-4 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer text-[clamp(10px,1vw,14px)]"
                     >
-                      {isSendingOtp ? "Reactivating..." : "Reactivate & Send OTP"}
-                      {!isSendingOtp && <ArrowRight size={18} />}
-                    </button>
+                      {isSendingOtp ? (
+                        "Reactivating…"
+                      ) : (
+                        <>
+                          Reactivate &amp; send OTP{" "}
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </PrimaryButton>
 
                     <button
                       type="button"
                       onClick={handleKeepDeactivated}
                       disabled={isSendingOtp}
-                      className="w-full border border-[#D1D5DB] text-[#374151] hover:border-[#0f4f4f] hover:text-[#0f4f4f] disabled:text-gray-400 disabled:cursor-not-allowed font-medium py-2 md:py-4 rounded-[8px] transition-colors cursor-pointer text-[clamp(10px,1vw,14px)]"
+                      className="w-full rounded-xl border border-[#D1D5DB] py-3 text-[12px] font-semibold text-[#374151] transition hover:border-[#0f4f4f] hover:text-[#0f4f4f] disabled:opacity-50"
                     >
                       No, keep deactivated
                     </button>

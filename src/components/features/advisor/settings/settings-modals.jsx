@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/context/AuthUserContext";
 
 export function SettingsModal({ isOpen, onClose, title, icon, children }) {

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bell, CheckCircle2, ExternalLink, PartyPopper, Sparkles } from "lucide-react";
+import { DashboardPageEmpty } from "@/components/dashboard/dashboard-page-states";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/use-notifications";
 
@@ -63,26 +64,21 @@ export default function DashboardNotifications({ showHeader = true, className = 
       ) : null}
 
       {loading ? (
-        <section className="space-y-3">
+        <section className="space-y-3" role="status" aria-busy="true" aria-label="Loading notifications">
           {Array.from({ length: 2 }).map((_, i) => (
             <div
               key={i}
               className="h-24 animate-pulse rounded-[24px] border border-[#E4E2DB] bg-white"
             />
           ))}
+          <span className="sr-only">Loading notifications</span>
         </section>
       ) : notifications.length === 0 ? (
-        <section className="rounded-[28px] border border-[#E4E2DB] bg-white px-6 py-16 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F8F6F1] text-[#0A4A4A]">
-            <Bell size={24} />
-          </div>
-          <h2 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">
-            No notifications yet
-          </h2>
-          <p className="mx-auto mt-2 max-w-md font-poppins text-sm text-[#6B7280]">
-            When your profile is approved or something needs your attention, it will appear here.
-          </p>
-        </section>
+        <DashboardPageEmpty
+          icon={Bell}
+          title="No notifications yet"
+          description="When your profile is approved or something needs your attention, it will appear here."
+        />
       ) : (
         <section className="space-y-3">
           {notifications.map((item) => {

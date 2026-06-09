@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -32,6 +33,15 @@ export function SetupProfileLuxuryModal({
   children,
   footer,
 }) {
+  const panelRef = useRef(null);
+
+  useModalFocusTrap({
+    isOpen,
+    panelRef,
+    onEscape: onClose,
+    focusKey: stepIndex,
+  });
+
   useEffect(() => {
     if (!isOpen) return undefined;
     const previous = document.body.style.overflow;
@@ -59,6 +69,7 @@ export function SetupProfileLuxuryModal({
           />
 
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="setup-profile-title"

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Calendar, CloudUpload, Download, FileText, Lock, Trash2 } from "lucide-react";
 import {
   createEmptyServiceDetail,
@@ -52,10 +52,16 @@ import {
 } from "./setup-profile-ui";
 import { SetupPlanStep } from "./SetupPlanStep";
 
+const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+
 function formatFileSize(bytes) {
   if (!bytes) return "0 KB";
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fieldKey(serviceId, field) {
+  return `${serviceId}.${field}`;
 }
 
 function buildServicesPayload({
@@ -118,6 +124,9 @@ export default function SetupMyProfileFlow({
   const [expandedServiceId, setExpandedServiceId] = useState("");
   const [documents, setDocuments] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("free");
+  const [stepAlert, setStepAlert] = useState("");
+  const [invalidFields, setInvalidFields] = useState({});
+  const stepContentRef = useRef(null);
   const [paymentDone, setPaymentDone] = useState(false);
   const [paidPlanId, setPaidPlanId] = useState(null);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
@@ -195,7 +204,27 @@ export default function SetupMyProfileFlow({
     });
   };
 
+  const clearFieldInvalid = (key) => {
+    setInvalidFields((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const clearValidation = () => {
+    setStepAlert("");
+    setInvalidFields({});
+  };
+
+  const invalidClass = (key) =>
+    invalidFields[key] ? "border-red-400 ring-1 ring-red-200/80" : "";
+
   const updateServiceDetail = (serviceId, patch) => {
+    Object.keys(patch).forEach((field) => {
+      clearFieldInvalid(fieldKey(serviceId, field));
+    });
     setServiceDetails((prev) => ({
       ...prev,
       [serviceId]: { ...(prev[serviceId] ?? createEmptyServiceDetail()), ...patch },
@@ -206,7 +235,20 @@ export default function SetupMyProfileFlow({
     const incoming = Array.from(fileList || []);
     if (!incoming.length) return;
 
-    const nextDocs = incoming.map((file) => ({
+    const accepted = [];
+    for (const file of incoming) {
+      if (file.size > MAX_DOCUMENT_BYTES) {
+        toast.error(`${file.name} must be 5MB or smaller`);
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (!accepted.length) return;
+
+    clearFieldInvalid("documents");
+    setStepAlert("");
+
+    const nextDocs = accepted.map((file) => ({
       id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
       file,
       name: file.name,
@@ -237,6 +279,7 @@ export default function SetupMyProfileFlow({
   };
 
   const toggleService = (serviceId) => {
+    clearFieldInvalid("services");
     setSelectedServices((prev) => {
       const exists = prev.includes(serviceId);
       const next = exists
@@ -248,95 +291,102 @@ export default function SetupMyProfileFlow({
   };
 
   const validateStep = () => {
+    const nextInvalid = {};
+    let message = "";
+
     switch (currentStep.id) {
       case "scope":
         if (!industryId) {
-          toast.error("Please select an industry");
-          return false;
+          nextInvalid.industry = true;
+          message = "Please select an industry.";
+        } else if (!categoryId) {
+          nextInvalid.category = true;
+          message = "Please select a category.";
+        } else if (!selectedServices.length) {
+          nextInvalid.services = true;
+          message = "Select at least one service.";
         }
-        if (!categoryId) {
-          toast.error("Please select a category");
-          return false;
-        }
-        if (!selectedServices.length) {
-          toast.error("Select at least one service");
-          return false;
-        }
-        return true;
+        break;
       case "details": {
         for (const serviceId of selectedServices) {
           const detail = serviceDetails[serviceId] ?? createEmptyServiceDetail();
           const label = getServiceLabel(categoryId, serviceId);
-          if (!detail.startDate) {
-            toast.error(`Add service start date for ${label}`);
-            return false;
-          }
-          if (!detail.isActive && !detail.endDate) {
-            toast.error(`Add service end date for ${label}`);
-            return false;
-          }
-          if (!detail.designation?.trim()) {
-            toast.error(`Add designation for ${label}`);
-            return false;
-          }
-          if (!detail.company?.trim()) {
-            toast.error(`Add company name for ${label}`);
-            return false;
-          }
-          if (!detail.professionalCapacity?.trim()) {
-            toast.error(`Select your capacity for ${label}`);
-            return false;
-          }
-          if (!detail.licenseNumber?.trim()) {
-            toast.error(`Add license number for ${label}`);
-            return false;
-          }
-          if (detail.licenseHolderType === "other") {
+          const mark = (field, text) => {
+            nextInvalid[fieldKey(serviceId, field)] = true;
+            if (!message) message = `${text} (${label})`;
+          };
+
+          if (!detail.startDate) mark("startDate", "Add service start date");
+          else if (!detail.isActive && !detail.endDate) mark("endDate", "Add service end date");
+          else if (!detail.designation?.trim()) mark("designation", "Add designation");
+          else if (!detail.company?.trim()) mark("company", "Add company name");
+          else if (!detail.professionalCapacity?.trim()) {
+            mark("professionalCapacity", "Select your capacity");
+          } else if (!detail.licenseNumber?.trim()) {
+            mark("licenseNumber", "Add license number");
+          } else if (detail.licenseHolderType === "other") {
             if (!detail.licenseHolderName?.trim()) {
-              toast.error(`Add licence holder name for ${label}`);
-              return false;
-            }
-            if (!detail.licenseHolderRelationship?.trim()) {
-              toast.error(`Select relationship for ${label}`);
-              return false;
-            }
-            if (!detail.consentLetterUrl?.trim() && !detail.consentLetterFile) {
-              toast.error(`Upload consent letter for ${label}`);
-              return false;
+              mark("licenseHolderName", "Add licence holder name");
+            } else if (!detail.licenseHolderRelationship?.trim()) {
+              mark("licenseHolderRelationship", "Select relationship");
+            } else if (!detail.consentLetterUrl?.trim() && !detail.consentLetterFile) {
+              mark("consentLetter", "Upload consent letter");
             }
           }
         }
-        if (hasOtherLicenseHolder && !licenseDeclarationAccepted) {
-          toast.error("Please confirm the licence holder declaration");
-          return false;
+        if (!message && hasOtherLicenseHolder && !licenseDeclarationAccepted) {
+          nextInvalid.declaration = true;
+          message = "Please confirm the licence holder declaration.";
         }
-        return true;
+        break;
       }
       case "documents":
         if (!documents.length) {
-          toast.error("Upload at least one verification document");
-          return false;
+          nextInvalid.documents = true;
+          message = "Upload at least one verification document.";
         }
-        return true;
+        break;
       case "plan":
         if (!selectedPlan) {
-          toast.error("Please select a membership plan");
-          return false;
+          nextInvalid.plan = true;
+          message = "Please select a membership plan.";
         }
-        return true;
+        break;
       default:
-        return true;
+        break;
     }
+
+    if (message) {
+      setStepAlert(message);
+      setInvalidFields(nextInvalid);
+      if (currentStep.id === "details") {
+        const firstService = Object.keys(nextInvalid)
+          .find((key) => key.includes("."))
+          ?.split(".")[0];
+        if (firstService) setExpandedServiceId(firstService);
+      }
+      stepContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return false;
+    }
+
+    clearValidation();
+    return true;
   };
 
   const goNext = () => {
     if (!validateStep()) return;
+    clearValidation();
     setStepIndex((index) => Math.min(index + 1, totalSteps - 1));
   };
 
   const goBack = () => {
+    clearValidation();
     setStepIndex((index) => Math.max(index - 1, 0));
   };
+
+  useEffect(() => {
+    clearValidation();
+  }, [stepIndex]);
 
   const handleDownloadConsentForm = async (serviceId) => {
     const detail = serviceDetails[serviceId] ?? createEmptyServiceDetail();
@@ -611,6 +661,18 @@ export default function SetupMyProfileFlow({
 
   const stepContent = (
     <>
+        {stepAlert ? (
+          <div
+            ref={stepContentRef}
+            role="alert"
+            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 font-poppins text-xs leading-relaxed text-red-700"
+          >
+            {stepAlert}
+          </div>
+        ) : (
+          <div ref={stepContentRef} className="sr-only" aria-hidden />
+        )}
+
         {currentStep.id === "scope" ? (
           <div className="space-y-4">
             <div>
@@ -620,8 +682,11 @@ export default function SetupMyProfileFlow({
               <select
                 id="setup-industry"
                 value={industryId}
-                onChange={(e) => handleIndustryChange(e.target.value)}
-                className={selectClass}
+                onChange={(e) => {
+                  clearFieldInvalid("industry");
+                  handleIndustryChange(e.target.value);
+                }}
+                className={`${selectClass} ${invalidClass("industry")}`}
               >
                 <option value="">Select industry</option>
                 {ONBOARDING_INDUSTRIES.map((item) => (
@@ -639,9 +704,12 @@ export default function SetupMyProfileFlow({
               <select
                 id="setup-category"
                 value={categoryId}
-                onChange={(e) => handleCategoryChange(e.target.value)}
+                onChange={(e) => {
+                  clearFieldInvalid("category");
+                  handleCategoryChange(e.target.value);
+                }}
                 disabled={!industryId}
-                className={`${selectClass} disabled:cursor-not-allowed disabled:bg-[#F1F5F9]/80`}
+                className={`${selectClass} disabled:cursor-not-allowed disabled:bg-[#F1F5F9]/80 ${invalidClass("category")}`}
               >
                 <option value="">Select category</option>
                 {categories.map((item) => (
@@ -652,9 +720,11 @@ export default function SetupMyProfileFlow({
               </select>
             </div>
 
-            <div>
+            <div className={invalidFields.services ? "rounded-xl ring-1 ring-red-200/80 p-1" : ""}>
               <div className="mb-2 flex items-center justify-between gap-2">
-                <label className={labelClass}>Services</label>
+                <label className={labelClass}>
+                  Services <span className="text-[#EF4444]">*</span>
+                </label>
                 {selectedServices.length > 0 ? (
                   <span className="rounded-full bg-[#0A4A4A] px-2.5 py-0.5 font-poppins text-[10px] font-bold text-[#F59E0B]">
                     {selectedServices.length} selected
@@ -979,7 +1049,10 @@ export default function SetupMyProfileFlow({
                         </div>
 
                         <div>
-                          <label className={labelClass}>Service Start Date</label>
+                          <label className={labelClass}>
+                            Service Start Date{" "}
+                            <span className="text-[#EF4444]">*</span>
+                          </label>
                           <div className="relative">
                             <input
                               type="date"
@@ -989,7 +1062,7 @@ export default function SetupMyProfileFlow({
                                   startDate: e.target.value,
                                 })
                               }
-                              className={`${fieldClass} pr-10`}
+                              className={`${fieldClass} pr-10 ${invalidClass(fieldKey(serviceId, "startDate"))}`}
                             />
                             <Calendar
                               size={16}
@@ -1070,7 +1143,10 @@ export default function SetupMyProfileFlow({
                         ) : null}
 
                         <div>
-                          <label className={labelClass}>License Number</label>
+                          <label className={labelClass}>
+                            License Number{" "}
+                            <span className="text-[#EF4444]">*</span>
+                          </label>
                           <input
                             type="text"
                             value={detail.licenseNumber}
@@ -1080,7 +1156,7 @@ export default function SetupMyProfileFlow({
                               })
                             }
                             placeholder="IRDAI License Number"
-                            className={fieldClass}
+                            className={`${fieldClass} ${invalidClass(fieldKey(serviceId, "licenseNumber"))}`}
                           />
                         </div>
                   </AccordionSection>
@@ -1106,7 +1182,13 @@ export default function SetupMyProfileFlow({
 
         {currentStep.id === "documents" ? (
           <div>
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#0A4A4A]/20 bg-white/70 px-4 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:border-[#F59E0B]/40 hover:bg-[#FFFBF2]">
+            <label
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed bg-white/70 px-4 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition duration-300 hover:border-[#F59E0B]/40 hover:bg-[#FFFBF2] ${
+                invalidFields.documents
+                  ? "border-red-300 bg-red-50/40"
+                  : "border-[#0A4A4A]/20"
+              }`}
+            >
               <CloudUpload className="mb-2 h-8 w-8 text-[#64748B]" />
               <span className="font-poppins text-sm font-semibold text-[#0F172A]">
                 Choose Files

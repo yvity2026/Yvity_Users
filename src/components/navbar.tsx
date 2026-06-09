@@ -21,6 +21,7 @@ import { LANDING_PATH } from "@/lib/landing/paths";
 import { useShowPublicVisitorNav } from "@/lib/use-public-visitor-nav";
 import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 import { isPublicAdvisorSlugPath } from "@/lib/advisor/public-profile-slug";
+import { ADVISOR_MY_SPACE_DASHBOARD_PATH } from "@/lib/dashboard/advisorWorkspace";
 
 const links = [
   { href: "/profile", label: "Home", icon: Home },
@@ -62,7 +63,7 @@ export function Navbar() {
     };
   }, [expanded]);
 
-  const ctaHref = showAuthed ? "/advisor" : LANDING_PATH;
+  const ctaHref = showAuthed ? ADVISOR_MY_SPACE_DASHBOARD_PATH : LANDING_PATH;
   const ctaLabel = showAuthed ? "Dashboard" : "Login";
   const CtaIcon = showAuthed ? LayoutDashboard : LogIn;
 
@@ -98,10 +99,10 @@ export function Navbar() {
         </div>
 
         <div className="yvity-dash-nav-flat hidden border-b lg:block">
-          <nav className="mx-auto flex h-16 w-full max-w-[1536px] items-center justify-between gap-4 px-6">
+          <nav className="mx-auto grid h-16 w-full max-w-[1536px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6">
             <Link
               href={homeHref}
-              className="flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
+              className="flex shrink-0 items-center justify-self-start rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
               aria-label="YVITY home"
             >
               <BrandMark
@@ -115,7 +116,7 @@ export function Navbar() {
               />
             </Link>
 
-            <ul className="flex min-w-0 flex-1 items-center justify-center gap-0.5 sm:gap-1">
+            <ul className="flex items-center justify-center gap-0.5 sm:gap-1">
               {links.map((l) => (
                 <li key={l.href}>
                   <Link
@@ -134,7 +135,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => router.push(ctaHref)}
-              className="yvity-dash-nav-cta inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+              className="yvity-dash-nav-cta inline-flex shrink-0 items-center justify-self-end gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
             >
               <CtaIcon className="size-3.5" /> {ctaLabel}
             </button>

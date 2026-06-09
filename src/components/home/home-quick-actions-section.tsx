@@ -65,11 +65,13 @@ const actions: QuickActionDef[] = [
 function QuickActionCard({
   action,
   disabled,
+  disabledReason,
   busy,
   onClick,
 }: {
   action: QuickActionDef;
   disabled?: boolean;
+  disabledReason?: string;
   busy?: boolean;
   onClick: () => void;
 }) {
@@ -80,7 +82,9 @@ function QuickActionCard({
       <button
         type="button"
         onClick={onClick}
-        disabled={disabled || busy}
+        disabled={busy}
+        aria-disabled={disabled || busy}
+        title={disabled ? disabledReason : undefined}
         className={cn(
           "group relative flex h-full w-full flex-col items-center gap-3 overflow-hidden rounded-2xl border border-white/10 p-4 sm:p-[1.125rem]",
           "glass-strong text-center transition duration-200",
@@ -110,7 +114,7 @@ function QuickActionCard({
             {busy ? "Preparing…" : action.label}
           </span>
           <span className="mt-1 block text-[10px] sm:text-[11px] text-muted-foreground leading-snug">
-            {action.description}
+            {disabled && disabledReason ? disabledReason : action.description}
           </span>
         </span>
       </button>
@@ -138,8 +142,24 @@ export function HomeQuickActionsSection() {
     return false;
   };
 
+  const getDisabledReason = (id: QuickActionId): string | undefined => {
+    if (id === "recommend" && !settings.leads.recommendationRequests) {
+      return "This advisor has paused recommendation requests.";
+    }
+    if (id === "testimonial" && !settings.leads.testimonialRequests) {
+      return "This advisor has paused testimonial requests.";
+    }
+    return undefined;
+  };
+
   const handleAction = async (id: QuickActionId) => {
-    if (isDisabled(id)) return;
+    if (isDisabled(id)) {
+      const reason = getDisabledReason(id);
+      if (reason) {
+        toast.message("Not available", { description: reason });
+      }
+      return;
+    }
 
     if (id === "recommend") {
       setRecommendOpen(true);
@@ -185,6 +205,7 @@ export function HomeQuickActionsSection() {
               key={action.id}
               action={action}
               disabled={isDisabled(action.id)}
+              disabledReason={getDisabledReason(action.id)}
               busy={busyId === action.id}
               onClick={() => void handleAction(action.id)}
             />

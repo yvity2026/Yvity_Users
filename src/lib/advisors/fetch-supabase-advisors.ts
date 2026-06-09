@@ -115,7 +115,7 @@ function mapAdvisorToCard(
   return {
     id: profile.advisor_id,
     name: String(user.name || "Advisor"),
-    title: String(user.profession || profile.designation || "Insurance Advisor"),
+    title: String(profile.designation || user.profession || "Insurance Advisor"),
     location: city,
     state: extractStateFromLocation(city),
     avatarUrl: (user.selfie_url as string) || null,

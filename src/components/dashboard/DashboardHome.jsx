@@ -11,6 +11,7 @@ import DashboardHomeInlineResults from "@/components/dashboard/home/DashboardHom
 import DashboardHomeStickySearch from "@/components/dashboard/home/DashboardHomeStickySearch";
 import DashboardHomeTrustStrip from "@/components/dashboard/home/DashboardHomeTrustStrip";
 import DashboardHomeEmptyState from "@/components/dashboard/home/DashboardHomeEmptyState";
+import { DashboardPageLoading } from "@/components/dashboard/dashboard-page-states";
 import {
   DashboardHomeFeatured,
   DashboardHomeRecentReviews,
@@ -306,11 +307,7 @@ export default function DashboardHome({ advisors = [] }) {
   }, []);
 
   if (authLoading) {
-    return (
-      <div className="mx-auto w-full max-w-[1200px] animate-pulse px-3 py-8 sm:px-4">
-        <div className="h-48 rounded-[28px] bg-[#E4E2DB]" />
-      </div>
-    );
+    return <DashboardPageLoading label="Loading your dashboard" />;
   }
 
   return (

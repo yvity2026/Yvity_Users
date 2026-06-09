@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, ImagePlus, X } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import SensitiveActionOtpGate from "@/components/identity/SensitiveActionOtpGate";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";
 
 export default function ProfilePhotoModal({
@@ -33,18 +34,19 @@ export default function ProfilePhotoModal({
     onClose();
   }, [onClose, resetSelection]);
 
+  useModalFocusTrap({
+    isOpen,
+    panelRef,
+    onEscape: handleClose,
+  });
+
   useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
+    if (!isOpen) return undefined;
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [isOpen, handleClose]);
+  }, [isOpen]);
 
   const handleFile = (file) => {
     if (!file) return;
@@ -101,6 +103,7 @@ export default function ProfilePhotoModal({
       onClick={handleClose}
     >
       <div
+        ref={panelRef}
         className="max-h-[92vh] w-full overflow-y-auto rounded-t-[28px] bg-white shadow-xl sm:max-w-md sm:rounded-2xl"
         onClick={(event) => event.stopPropagation()}
       >

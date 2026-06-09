@@ -4,7 +4,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import AdvisorCardWithSave from "@/components/advisor/AdvisorCardWithSave";
+import {
+  DashboardPageEmpty,
+  DashboardPageLoading,
+} from "@/components/dashboard/dashboard-page-states";
 import { useFetchSavedProfiles } from "@/hooks/useSavedProfiles";
+import { Bookmark } from "lucide-react";
 
 export default function DashboardSavedProfiles() {
   const { profiles, isLoading, error, fetchProfiles } = useFetchSavedProfiles();
@@ -35,29 +40,26 @@ export default function DashboardSavedProfiles() {
 
       <div className="rounded-[2rem] border border-[#E4E2DB] bg-white p-6 shadow-sm min-h-[280px]">
         {isLoading ? (
-          <div className="flex min-h-[220px] items-center justify-center font-poppins text-sm text-[#6B7280]">
-            Loading saved profiles...
-          </div>
+          <DashboardPageLoading className="px-0 py-0" label="Loading saved profiles" />
         ) : error ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center font-poppins text-sm text-[#DC2626]">
             <p className="font-medium">Unable to load saved profiles.</p>
             <p className="mt-2 text-[#6B7280]">{error}</p>
           </div>
         ) : isEmpty ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
-            <h2 className="font-poppins text-lg font-medium text-[#374151]">
-              No saved profiles yet
-            </h2>
-            <p className="mt-2 max-w-sm font-poppins text-sm text-[#6B7280]">
-              Browse advisors on Home or Explore and save profiles to see them here.
-            </p>
-            <Link
-              href="/dashboard/explore"
-              className="mt-5 rounded-xl bg-[#0A4A4A] px-5 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B]"
-            >
-              Explore advisors
-            </Link>
-          </div>
+          <DashboardPageEmpty
+            icon={Bookmark}
+            title="No saved profiles yet"
+            description="Browse advisors on Home or Explore and save profiles to see them here."
+            action={
+              <Link
+                href="/dashboard/explore"
+                className="inline-flex rounded-xl bg-[#0A4A4A] px-5 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B]"
+              >
+                Explore advisors
+              </Link>
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {profiles.map((advisor) => (

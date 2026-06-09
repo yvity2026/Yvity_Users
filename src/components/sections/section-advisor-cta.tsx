@@ -3,7 +3,10 @@
 import { BadgeCheck, Calendar, Phone, Shield } from "lucide-react";
 import { AdvisorCtaButtons } from "@/components/contact/advisor-cta-buttons";
 import { StarRating } from "@/components/ui/star-rating";
+import { useAuth } from "@/context/AuthUserContext";
+import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { VERIFIED_BY_YVITY_LABEL } from "@/lib/verification/copy";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +48,11 @@ function AdvisorAvatar({ name }: { name: string }) {
 
 export function SectionAdvisorCta({ className }: { className?: string }) {
   const advisorProfile = useAdvisorDisplayProfile();
+  const publicView = usePublicProfileView();
+  const { advisor } = useAuth();
+  const showVerifiedBadge = publicView
+    ? isAdvisorProfileApproved(publicView.profile)
+    : isAdvisorProfileApproved(advisor);
   const highlightItems = HIGHLIGHT_ICONS.map((icon, index) => ({
     icon,
     label: advisorProfile.highlights[index]?.label ?? "",
@@ -73,9 +81,11 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
 
         <div className="flex flex-1 flex-col justify-center px-5 pb-4 sm:px-6 md:px-8 lg:py-8">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.82_0.16_78/0.45)] bg-[oklch(0.82_0.16_78/0.12)] px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-[oklch(0.88_0.14_78)]">
-              <BadgeCheck className="size-3.5" /> {VERIFIED_BY_YVITY_LABEL}
-            </span>
+            {showVerifiedBadge ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.82_0.16_78/0.45)] bg-[oklch(0.82_0.16_78/0.12)] px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-[oklch(0.88_0.14_78)]">
+                <BadgeCheck className="size-3.5" /> {VERIFIED_BY_YVITY_LABEL}
+              </span>
+            ) : null}
             {advisorProfile.rating != null ? (
               <StarRating
                 value={advisorProfile.rating}

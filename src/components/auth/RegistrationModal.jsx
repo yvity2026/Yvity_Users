@@ -28,7 +28,7 @@ import {
   ExistingAccountNotice,
 } from "@/components/auth/registration/registrationUi";
 import { motion, AnimatePresence } from "framer-motion";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -44,6 +44,10 @@ import { notifyAuthChanged } from "@/lib/auth-store";
 import { clearStoredReferralCode, readStoredReferralCode } from "@/lib/referral/attribution";
 import { useRegistrationIdentityVerification } from "@/hooks/useRegistrationIdentityVerification";
 import RegistrationIdentityVerification from "@/components/auth/registration/RegistrationIdentityVerification";
+import {
+  formatOtpResendTimer,
+  useOtpResendCountdown,
+} from "@/hooks/use-otp-resend-countdown";
 
 // Zod Validation Schema
 const registrationSchema = z.object({
@@ -145,6 +149,18 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
 
   const [isSubmittingRegistration, setIsSubmittingRegistration] =
     useState(false);
+  const {
+    otpSecondsLeft: phoneOtpSecondsLeft,
+    canResend: canResendPhoneOtp,
+    startCountdown: startPhoneOtpCountdown,
+    resetCountdown: resetPhoneOtpCountdown,
+  } = useOtpResendCountdown();
+  const {
+    otpSecondsLeft: emailOtpSecondsLeft,
+    canResend: canResendEmailOtp,
+    startCountdown: startEmailOtpCountdown,
+    resetCountdown: resetEmailOtpCountdown,
+  } = useOtpResendCountdown();
 
   const authDeviceTokenRef = useRef("");
   const completeRegistrationRef = useRef(null);
@@ -196,6 +212,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
     setValue("emailOtp", "", { shouldValidate: false });
     setIsEmailOtpSent(false);
     setIsEmailVerified(false);
+    resetEmailOtpCountdown();
   };
 
   useEffect(() => {
@@ -218,6 +235,8 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
       setDoesEmailExist(false);
       setExistingPhoneMessage("");
       setExistingEmailMessage("");
+      resetPhoneOtpCountdown();
+      resetEmailOtpCountdown();
       lastPhoneExistToastRef.current = "";
       lastEmailExistToastRef.current = "";
       setIsSubmittingRegistration(false);
@@ -378,6 +397,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
         setPhoneOtp(["", "", "", "", "", ""]);
         setIsPhoneOtpSent(false);
         setIsPhoneVerified(false);
+        resetPhoneOtpCountdown();
         setDoesPhoneExist(false);
         setExistingPhoneMessage("");
         setValue("phoneOtp", "", { shouldValidate: false });
@@ -742,6 +762,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                             toast.success("OTP sent successfully");
                             setIsPhoneOtpSent(true);
                             setIsPhoneVerified(false);
+                            startPhoneOtpCountdown();
                           }}
                           disabled={isSendingPhoneOtp}
                           className="text-[11px] font-semibold text-[#F59E0B] underline-offset-2 transition hover:text-[#D97706] hover:underline disabled:opacity-50"
@@ -769,10 +790,19 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                             onPaste={handlePhonePaste}
                           />
                           <FieldError message={errors.phoneOtp?.message} />
-                          <div className="mt-2 flex justify-center sm:mt-3">
+                          <div className="mt-2 flex flex-col items-center gap-1 sm:mt-3">
+                            {phoneOtpSecondsLeft > 0 ? (
+                              <span className="tabular-nums text-[10px] font-medium text-[#F59E0B] sm:text-[11px]">
+                                Resend in {formatOtpResendTimer(phoneOtpSecondsLeft)}
+                              </span>
+                            ) : null}
                             <button
                               type="button"
                               onClick={async () => {
+                                if (isResendingPhoneOtp || !canResendPhoneOtp) {
+                                  return;
+                                }
+
                                 const isPhoneValid = await trigger("phone");
                                 if (!isPhoneValid) {
                                   toast.error("Enter valid phone number");
@@ -811,14 +841,22 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                                 }
 
                                 setIsPhoneVerified(false);
+                                setPhoneOtp(["", "", "", "", "", ""]);
+                                setValue("phoneOtp", "", {
+                                  shouldValidate: false,
+                                });
+                                phoneOtpRefs.current[0]?.focus();
+                                startPhoneOtpCountdown();
                                 toast.success("OTP resent successfully");
                               }}
-                              disabled={isResendingPhoneOtp}
+                              disabled={isResendingPhoneOtp || !canResendPhoneOtp}
                               className="text-[11px] font-semibold text-[#6B7280] underline-offset-2 transition hover:text-[#F59E0B] hover:underline disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                               >
                               {isResendingPhoneOtp
                                 ? "Resending…"
-                                : "Resend OTP"}
+                                : canResendPhoneOtp
+                                  ? "Resend OTP"
+                                  : `Resend in ${formatOtpResendTimer(phoneOtpSecondsLeft)}`}
                             </button>
                           </div>
                         </motion.div>
@@ -830,7 +868,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                     <PrimaryButton
                       onClick={async (event) => {
                         event?.preventDefault?.();
-                        if (isVerifyingPhoneOtp || isPhoneVerified) return;
+                        if (isVerifyingPhoneOtp) return;
+
+                        if (isPhoneVerified) {
+                          setStep(2);
+                          return;
+                        }
 
                         const isValid = await trigger(["fullName", "phone"]);
                         if (!isValid || phoneOtp.join("").length !== 6) {
@@ -872,13 +915,19 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                         setStep(2);
                       }}
                       disabled={
-                        !isPhoneOtpSent ||
-                        phoneOtp.join("").length !== 6 ||
-                        isVerifyingPhoneOtp
+                        isPhoneVerified
+                          ? isVerifyingPhoneOtp
+                          : !isPhoneOtpSent ||
+                            phoneOtp.join("").length !== 6 ||
+                            isVerifyingPhoneOtp
                       }
                     >
                       {isVerifyingPhoneOtp ? (
                         "Verifying…"
+                      ) : isPhoneVerified ? (
+                        <>
+                          <ArrowRight className="h-4 w-4" /> Continue
+                        </>
                       ) : (
                         <>
                           <ArrowRight className="h-4 w-4" /> Verify &amp; continue
@@ -1056,12 +1105,20 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                         >
                           {!isEmailVerified && (
                             <>
-                              <p
-                                id="email-otp-hint"
-                                className="mb-2 text-center text-[11px] font-semibold text-[#0f4f4f] sm:mb-4 sm:text-sm"
-                              >
-                                Enter the 6-digit code sent to your email
-                              </p>
+                              <div className="mb-2 flex flex-col items-center gap-1 sm:mb-4">
+                                <p
+                                  id="email-otp-hint"
+                                  className="text-center text-[11px] font-semibold text-[#0f4f4f] sm:text-sm"
+                                >
+                                  Enter the 6-digit code sent to your email
+                                </p>
+                                {emailOtpSecondsLeft > 0 ? (
+                                  <span className="tabular-nums text-[10px] font-medium text-[#F59E0B] sm:text-[11px]">
+                                    Resend in{" "}
+                                    {formatOtpResendTimer(emailOtpSecondsLeft)}
+                                  </span>
+                                ) : null}
+                              </div>
                               <div
                                 className="flex justify-center gap-1 sm:gap-2.5"
                                 role="group"
@@ -1147,7 +1204,12 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    if (isResendingEmailOtp) return;
+                                    if (
+                                      isResendingEmailOtp ||
+                                      !canResendEmailOtp
+                                    ) {
+                                      return;
+                                    }
 
                                     const isEmailValid =
                                       await trigger("email");
@@ -1191,14 +1253,20 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                                     setValue("emailOtp", "", {
                                       shouldValidate: false,
                                     });
+                                    otpRefs.current[0]?.focus();
+                                    startEmailOtpCountdown();
                                     toast.success("A new code has been sent");
                                   }}
-                                  disabled={isResendingEmailOtp}
+                                  disabled={
+                                    isResendingEmailOtp || !canResendEmailOtp
+                                  }
                                   className="text-[11px] font-semibold text-[#6B7280] underline-offset-2 transition hover:text-[#F59E0B] hover:underline disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                                   >
                                   {isResendingEmailOtp
                                     ? "Resending…"
-                                    : "Resend OTP"}
+                                    : canResendEmailOtp
+                                      ? "Resend OTP"
+                                      : `Resend in ${formatOtpResendTimer(emailOtpSecondsLeft)}`}
                                 </button>
                               </div>
                             </>

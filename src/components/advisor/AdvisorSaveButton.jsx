@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Heart } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useSavedProfiles } from "@/hooks/useSavedProfiles";
 
 export default function AdvisorSaveButton({

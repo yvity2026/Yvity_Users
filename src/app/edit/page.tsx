@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function EditPage() {
-  redirect("/advisor");
+  redirect("/dashboard/my-space");
 }

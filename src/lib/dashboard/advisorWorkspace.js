@@ -1,8 +1,8 @@
-export const ADVISOR_DASHBOARD_PATH = "/advisor/dashboard";
+export const ADVISOR_DASHBOARD_PATH = "/advisor";
 export const ADVISOR_MY_SPACE_DASHBOARD_PATH = "/dashboard/my-space";
 
 /**
- * Whether the user can open the full advisor dashboard (/advisor/dashboard).
+ * Whether the user can open the full advisor workspace (/advisor).
  * Matches advisor layout gate — role + active account (not profile_status boolean).
  */
 export function canAccessAdvisorDashboard(user, advisor) {
@@ -24,16 +24,8 @@ export function canAccessAdvisorDashboard(user, advisor) {
   return advisor?.account_status === "active";
 }
 
-/** Primary advisor dashboard route (active → /advisor/dashboard, in review → My Space). */
-export function getAdvisorDashboardHref(user, advisor) {
-  if (canAccessAdvisorDashboard(user, advisor)) {
-    return ADVISOR_DASHBOARD_PATH;
-  }
-
-  if (advisor?.account_status === "under_review") {
-    return ADVISOR_MY_SPACE_DASHBOARD_PATH;
-  }
-
+/** Primary advisor hub (My Space for all advisor lifecycle states). */
+export function getAdvisorDashboardHref(_user, _advisor) {
   return ADVISOR_MY_SPACE_DASHBOARD_PATH;
 }
 
@@ -46,9 +38,8 @@ export function isAdvisorDashboardRoute(pathname, user, advisor) {
   }
 
   if (
-    advisor?.account_status === "under_review" &&
-    (pathname === ADVISOR_DASHBOARD_PATH ||
-      pathname.startsWith(`${ADVISOR_DASHBOARD_PATH}/`))
+    pathname === ADVISOR_DASHBOARD_PATH ||
+    pathname.startsWith(`${ADVISOR_DASHBOARD_PATH}/`)
   ) {
     return true;
   }

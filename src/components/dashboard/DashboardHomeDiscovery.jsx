@@ -87,6 +87,13 @@ export default function DashboardHomeDiscovery({
           </div>
 
           <button
+            type="submit"
+            className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98] sm:px-5"
+          >
+            Search
+          </button>
+
+          <button
             type="button"
             onClick={onToggleFilters}
             aria-label="Open advanced filters"
@@ -96,6 +103,10 @@ export default function DashboardHomeDiscovery({
             <SlidersHorizontal size={22} strokeWidth={2} aria-hidden />
           </button>
         </div>
+
+        <p className="font-poppins text-[11px] text-[#9CA3AF]">
+          Home shows up to 5 matches — use Explore for the full directory.
+        </p>
 
         {showFilters ? (
           <div className="home-discovery-advanced rounded-[24px] border border-[#E4E2DB]/90 bg-white/90 p-4 shadow-[0_8px_32px_rgba(10,74,74,0.08)] backdrop-blur-md sm:p-5">

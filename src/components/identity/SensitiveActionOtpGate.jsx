@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { IDENTITY_COPY } from "@/lib/identity/messages";
 

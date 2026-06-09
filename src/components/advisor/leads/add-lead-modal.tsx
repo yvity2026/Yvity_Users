@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { Check, X } from "lucide-react";
 import { SelectionCard } from "@/components/advisor/leads/selection-card";
 import { LEAD_PRIORITIES, SELF_LEAD_SOURCES } from "@/lib/leads/config";
@@ -34,6 +35,15 @@ export function AddLeadModal({ open, onClose, onSubmit }: AddLeadModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useModalFocusTrap({
+    isOpen: open,
+    panelRef,
+    onEscape: () => {
+      if (!busy) onClose();
+    },
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -53,18 +63,10 @@ export function AddLeadModal({ open, onClose, onSubmit }: AddLeadModalProps) {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    // Escape closes the modal — matches the rest of the workspace
-    // (Edit Lead, IntroVideoUploadModal, MenuSheet). Ignored while a
-    // submission is in-flight to avoid orphaning the network request.
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
-    };
-    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
     };
-  }, [open, busy, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -128,6 +130,7 @@ export function AddLeadModal({ open, onClose, onSubmit }: AddLeadModalProps) {
         aria-label="Close"
       />
       <div
+        ref={panelRef}
         className="relative z-10 flex flex-col w-full sm:max-w-xl glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl max-h-[92dvh] sm:max-h-[94vh]"
         onClick={(e) => e.stopPropagation()}
       >

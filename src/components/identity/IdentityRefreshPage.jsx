@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Camera, ShieldCheck } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { IDENTITY_COPY } from "@/lib/identity/messages";
 import { StepWhy } from "@/components/auth/registration/registrationUi";

@@ -33,6 +33,7 @@ import { YvityVerificationSeal } from "@/components/brand/yvity-verification-sea
 import { CommunityTrustSection } from "@/components/home/community-trust-section";
 import { HomeQuickActionsSection } from "@/components/home/home-quick-actions-section";
 import { LatestHighlightsSection } from "@/components/home/latest-highlights-section";
+import { PublicProfileMobileCtaBar } from "@/components/home/public-profile-mobile-cta-bar";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { WhyChooseMeSection } from "@/components/home/why-choose-me-section";
 import { IntroVideoHeroBlock } from "@/components/intro-video/intro-video-hero-block";
@@ -50,7 +51,13 @@ function splitDisplayName(fullName: string): { leading: string; accent: string }
   return { leading: parts.join(" "), accent };
 }
 
-function HomeAdvisorPhoto({ className }: { className?: string }) {
+function HomeAdvisorPhoto({
+  className,
+  showVerifiedSeal = false,
+}: {
+  className?: string;
+  showVerifiedSeal?: boolean;
+}) {
   const { user } = useAuth();
   const advisorProfile = useAdvisorDisplayProfile();
   const initials = advisorProfile.name
@@ -122,7 +129,9 @@ function HomeAdvisorPhoto({ className }: { className?: string }) {
         </div>
       </div>
 
-      <YvityVerificationSeal className="absolute bottom-0 right-0 z-10 translate-x-0.5 translate-y-0.5 sm:translate-x-1 sm:translate-y-1" />
+      {showVerifiedSeal ? (
+        <YvityVerificationSeal className="absolute bottom-0 right-0 z-10 translate-x-0.5 translate-y-0.5 sm:translate-x-1 sm:translate-y-1" />
+      ) : null}
     </div>
   );
 }
@@ -172,14 +181,19 @@ function ProfileHeaderBanner() {
 
       <div className="relative p-4 sm:p-5 md:p-6 lg:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-6 xl:gap-8">
-          <HomeAdvisorPhoto className="lg:shrink-0" />
+          <HomeAdvisorPhoto
+            className="lg:shrink-0"
+            showVerifiedSeal={showIrdaiBadge}
+          />
 
           <div className="min-w-0 flex-1 text-center lg:text-left">
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.1)] px-2.5 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[oklch(0.92_0.14_78)]">
-                <BadgeCheck className="size-3.5" />
-                {VERIFIED_BY_YVITY_LABEL}
-              </span>
+              {showIrdaiBadge ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.1)] px-2.5 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[oklch(0.92_0.14_78)]">
+                  <BadgeCheck className="size-3.5" />
+                  {VERIFIED_BY_YVITY_LABEL}
+                </span>
+              ) : null}
               <span className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[oklch(0.85_0.16_78)]">
                 <Star className="size-3 fill-current" />
                 {mdrtLabel}
@@ -400,7 +414,10 @@ function HeroServicesSection() {
 
 export function ProfileHomeHero() {
   return (
-    <section id="home" className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+    <section
+      id="home"
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+    >
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[6%] left-[8%] size-56 rounded-full bg-primary/15 blur-[100px]" />
         <div className="absolute bottom-[20%] right-[5%] size-48 rounded-full bg-[oklch(0.85_0.16_78/0.08)] blur-[90px]" />
@@ -417,6 +434,7 @@ export function ProfileHomeHero() {
           <SectionAdvisorCta />
         </div>
       </div>
+      <PublicProfileMobileCtaBar />
     </section>
   );
 }
