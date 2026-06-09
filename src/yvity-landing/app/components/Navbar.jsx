@@ -235,8 +235,8 @@ const Navbar = ({ initialLoginOpen = false }) => {
       <div className="app-top-nav-desktop-wrap hidden lg:block">
         <div className={`${LANDING_NAV_INNER} py-3 xl:py-4`}>
           <div className="glass-nav-frame relative flex h-17.5 w-full items-center justify-between rounded-[100px] p-[1px]">
-            <div className="glass-nav-desktop relative z-10 grid h-full w-full grid-cols-[1fr_auto_1fr] items-center rounded-[100px] px-6 py-4 lg:px-8 xl:px-10">
-              <div className="flex shrink-0 items-center justify-self-start">
+            <div className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-6 py-4 lg:px-8 xl:px-10">
+              <div className="relative z-10 flex shrink-0 items-center">
                 <BrandMark
                   logoSize={48}
                   showName
@@ -247,9 +247,9 @@ const Navbar = ({ initialLoginOpen = false }) => {
                 />
               </div>
 
-              <ul className="flex items-center justify-center gap-4 font-poppins text-[#0A4A4A] md:text-xs lg:text-sm xl:gap-8 xl:text-[15px]">
+              <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-4 font-poppins text-[#0A4A4A] md:text-xs lg:text-sm xl:gap-8 xl:text-[15px]">
                 {Navitems.map((item, index) => (
-                  <li key={index}>
+                  <li key={index} className="pointer-events-auto">
                     <button
                       type="button"
                       onClick={() => scrollToSection(item.link)}
@@ -262,7 +262,7 @@ const Navbar = ({ initialLoginOpen = false }) => {
                 ))}
               </ul>
 
-              <div className="flex items-center justify-self-end gap-3 font-poppins font-medium lg:gap-4">
+              <div className="relative z-10 flex shrink-0 items-center gap-3 font-poppins font-medium lg:gap-4">
                 <button
                   type="button"
                   onClick={goLogin}

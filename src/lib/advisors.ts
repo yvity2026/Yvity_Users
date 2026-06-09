@@ -65,9 +65,9 @@ export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
 
   try {
     const fromSupabase = await fetchSupabasePublicAdvisors(session?.id ?? null);
-    if (fromSupabase?.length) {
+    if (fromSupabase !== null) {
       advisors = await mergeLocalAdvisorCardMetrics(fromSupabase);
-      return advisors;
+      if (advisors.length > 0) return advisors;
     }
   } catch (error) {
     console.warn("[advisors] Supabase fetch failed, using local data:", error);

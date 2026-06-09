@@ -99,10 +99,10 @@ export function Navbar() {
         </div>
 
         <div className="yvity-dash-nav-flat hidden border-b lg:block">
-          <nav className="mx-auto grid h-16 w-full max-w-[1536px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6">
+          <nav className="relative mx-auto flex h-16 w-full max-w-[1536px] items-center justify-between px-6">
             <Link
               href={homeHref}
-              className="flex shrink-0 items-center justify-self-start rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
+              className="relative z-10 flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
               aria-label="YVITY home"
             >
               <BrandMark
@@ -116,9 +116,9 @@ export function Navbar() {
               />
             </Link>
 
-            <ul className="flex items-center justify-center gap-0.5 sm:gap-1">
+            <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 sm:gap-1">
               {links.map((l) => (
-                <li key={l.href}>
+                <li key={l.href} className="pointer-events-auto">
                   <Link
                     href={l.href === "/profile" ? homeHref : l.href}
                     className={navLinkClass(
@@ -135,7 +135,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => router.push(ctaHref)}
-              className="yvity-dash-nav-cta inline-flex shrink-0 items-center justify-self-end gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+              className="yvity-dash-nav-cta relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
             >
               <CtaIcon className="size-3.5" /> {ctaLabel}
             </button>
