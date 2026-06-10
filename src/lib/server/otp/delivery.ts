@@ -58,14 +58,21 @@ export function buildOtpEmailContent(code: string): { subject: string; text: str
   return { subject, text, html };
 }
 
-function buildMetaOtpPayload(to: string, code: string, includeButton: boolean) {
+function buildMetaOtpPayload(
+  to: string,
+  code: string,
+  options: { includeButton: boolean; buttonSubType?: "url" | "copy_code" },
+) {
   const templateName = getOtpTemplateName();
   if (!templateName) {
     throw new Error("WHATSAPP_OTP_TEMPLATE_NAME is not configured");
   }
 
   const language = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE?.trim() || "en";
-  const buttonSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() || "copy_code";
+  const buttonSubType =
+    options.buttonSubType ||
+    (process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() as "url" | "copy_code" | undefined) ||
+    "url";
   const buttonParamType = buttonSubType === "copy_code" ? "coupon_code" : "text";
   const buttonParameter =
     buttonParamType === "coupon_code"
@@ -79,7 +86,7 @@ function buildMetaOtpPayload(to: string, code: string, includeButton: boolean) {
     },
   ];
 
-  if (includeButton) {
+  if (options.includeButton) {
     components.push({
       type: "button",
       sub_type: buttonSubType,
@@ -197,36 +204,65 @@ async function sendMetaOtpTemplate(input: {
   apiToken: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const includeButtonEnv = process.env.WHATSAPP_OTP_INCLUDE_BUTTON?.trim();
-  const attempts =
-    includeButtonEnv === "true"
-      ? [true]
-      : includeButtonEnv === "false"
-        ? [false]
-        : [false, true];
+  const explicitSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() as
+    | "url"
+    | "copy_code"
+    | undefined;
+
+  type MetaOtpAttempt = { includeButton: boolean; buttonSubType?: "url" | "copy_code" };
+
+  let attempts: MetaOtpAttempt[];
+  if (includeButtonEnv === "false") {
+    attempts = [{ includeButton: false }];
+  } else if (explicitSubType) {
+    attempts = [{ includeButton: false }, { includeButton: true, buttonSubType: explicitSubType }];
+  } else if (includeButtonEnv === "true") {
+    attempts = [{ includeButton: true, buttonSubType: "url" }];
+  } else {
+    attempts = [
+      { includeButton: false },
+      { includeButton: true, buttonSubType: "url" },
+      { includeButton: true, buttonSubType: "copy_code" },
+    ];
+  }
 
   let lastError: string | undefined;
 
-  for (const includeButton of attempts) {
-    const payload = buildMetaOtpPayload(input.phone, input.code, includeButton);
+  for (const attempt of attempts) {
+    const payload = buildMetaOtpPayload(input.phone, input.code, attempt);
+    const label = attempt.includeButton
+      ? `+button:${attempt.buttonSubType || "url"}`
+      : "+body";
     const result = await postWhatsAppRequest({
       url: input.apiUrl,
       token: input.apiToken,
       body: payload,
-      preview: `template:${payload.template.name}${includeButton ? "+button" : ""}`,
+      preview: `template:${payload.template.name}${label}`,
       to: input.phone,
     });
 
     if (result.ok) return result;
     lastError = result.error;
 
-    const retryable =
-      !includeButton &&
-      (result.error?.toLowerCase().includes("button") ||
-        result.error?.toLowerCase().includes("component") ||
-        result.error?.includes("132000") ||
-        result.error?.toLowerCase().includes("parameter"));
+    const errorText = (result.error || "").toLowerCase();
+    const needsUrlButton = errorText.includes("type url");
+    const needsCopyButton = errorText.includes("copy_code") || errorText.includes("copy code");
 
-    if (!retryable || includeButtonEnv !== undefined) {
+    if (needsUrlButton && attempt.includeButton && attempt.buttonSubType !== "url") {
+      continue;
+    }
+    if (needsCopyButton && attempt.includeButton && attempt.buttonSubType !== "copy_code") {
+      continue;
+    }
+
+    const retryable =
+      !attempt.includeButton &&
+      (errorText.includes("button") ||
+        errorText.includes("component") ||
+        (result.error || "").includes("132000") ||
+        errorText.includes("parameter"));
+
+    if (!retryable || includeButtonEnv !== undefined || explicitSubType) {
       return result;
     }
   }
