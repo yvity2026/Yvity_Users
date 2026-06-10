@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import {
   EXISTING_PHONE_MESSAGE,
-  findUserByPhone,
+  findUserByPhoneAsync,
   normalizeIndianMobile,
-  phoneExists,
+  phoneExistsAsync,
   storeOtp,
 } from "@/lib/server/registration";
 import { isValidIdentifier, type AuthMethod } from "@/lib/server/auth";
@@ -41,7 +41,7 @@ async function handleRegistrationPhoneOtp(body: Record<string, unknown>) {
     return NextResponse.json({ error: "Enter a valid 10-digit phone number" }, { status: 400 });
   }
 
-  if (flow === "login" && !findUserByPhone(mobile)) {
+  if (flow === "login" && !(await findUserByPhoneAsync(mobile))) {
     return NextResponse.json(
       {
         error: "No account found with this mobile number",
@@ -51,7 +51,7 @@ async function handleRegistrationPhoneOtp(body: Record<string, unknown>) {
     );
   }
 
-  if (flow === "register" && phoneExists(mobile)) {
+  if (flow === "register" && (await phoneExistsAsync(mobile))) {
     return NextResponse.json(
       { error: EXISTING_PHONE_MESSAGE, phoneExists: true },
       { status: 409 },

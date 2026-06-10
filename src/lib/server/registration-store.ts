@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { canUseLocalDataFiles } from "@/lib/server/json-store";
 import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
 import { upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
@@ -39,7 +40,12 @@ function emptyDb(): RegistrationDb {
 }
 
 function ensureDataDir() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!canUseLocalDataFiles()) return;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch {
+    // Vercel read-only filesystem
+  }
 }
 
 export function loadRegistrationDb(): RegistrationDb {

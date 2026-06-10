@@ -13,10 +13,15 @@ import {
 export { isWhatsAppOtpConfigured } from "@/lib/server/otp/whatsapp-config";
 
 export function normalizeIndianPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 10) return `91${digits}`;
-  if (digits.startsWith("91") && digits.length === 12) return digits;
-  return digits;
+  const digits = String(phone || "").replace(/\D/g, "");
+  const mobile =
+    digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits.slice(-10);
+
+  if (!/^[6-9]\d{9}$/.test(mobile)) {
+    throw new Error("Invalid Indian mobile number for WhatsApp OTP");
+  }
+
+  return `91${mobile}`;
 }
 
 function getSmtpConfig() {
@@ -111,6 +116,15 @@ function parseWhatsAppApiError(responseText: string): string {
   }
 }
 
+function hasMetaMessageId(responseText: string): boolean {
+  try {
+    const data = JSON.parse(responseText) as { messages?: Array<{ id?: string }> };
+    return Boolean(data.messages?.[0]?.id);
+  } catch {
+    return false;
+  }
+}
+
 async function postWhatsAppRequest(input: {
   url: string;
   token: string;
@@ -118,43 +132,62 @@ async function postWhatsAppRequest(input: {
   preview: string;
   to: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const res = await fetch(input.url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${input.token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(input.body),
-    });
+  let lastError: string | undefined;
 
-    const responseText = await res.text();
-    const apiError = res.ok ? undefined : parseWhatsAppApiError(responseText);
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const res = await fetch(input.url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${input.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(input.body),
+      });
 
-    await appendOutboundLog({
-      channel: "whatsapp",
-      to: input.to,
-      preview: input.preview.slice(0, 180),
-      status: res.ok ? "sent" : "failed",
-      error: apiError,
-    });
+      const responseText = await res.text();
+      const isMeta = input.url.includes("graph.facebook.com");
+      const metaAccepted = !isMeta || hasMetaMessageId(responseText);
+      const apiError = res.ok
+        ? metaAccepted
+          ? undefined
+          : "Meta API accepted request but returned no message id"
+        : parseWhatsAppApiError(responseText);
 
-    if (!res.ok) {
-      console.error("[YVITY otp whatsapp]", res.status, responseText.slice(0, 800));
+      await appendOutboundLog({
+        channel: "whatsapp",
+        to: input.to,
+        preview: input.preview.slice(0, 180),
+        status: res.ok && metaAccepted ? "sent" : "failed",
+        error: apiError,
+      });
+
+      if (res.ok && metaAccepted) {
+        console.info("[YVITY otp whatsapp:ok]", responseText.slice(0, 300));
+        return { ok: true };
+      }
+
+      lastError = apiError;
+      console.error(
+        `[YVITY otp whatsapp:attempt-${attempt}]`,
+        res.status,
+        responseText.slice(0, 800),
+      );
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "send failed";
+      console.error(`[YVITY otp whatsapp:attempt-${attempt}]`, lastError);
     }
-
-    return { ok: res.ok, error: apiError };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "send failed";
-    await appendOutboundLog({
-      channel: "whatsapp",
-      to: input.to,
-      preview: input.preview.slice(0, 180),
-      status: "failed",
-      error: message,
-    });
-    return { ok: false, error: message };
   }
+
+  await appendOutboundLog({
+    channel: "whatsapp",
+    to: input.to,
+    preview: input.preview.slice(0, 180),
+    status: "failed",
+    error: lastError,
+  });
+
+  return { ok: false, error: lastError };
 }
 
 async function sendMetaOtpTemplate(input: {

@@ -23,7 +23,9 @@ function mapUserRow(row: Record<string, unknown>): RegisteredUser {
   return {
     id: String(row.id),
     fullName: String(row.name || ""),
-    phone: String(row.mobile || ""),
+    phone: String(row.mobile || "")
+      .replace(/\D/g, "")
+      .slice(-10),
     email: String(row.email || ""),
     dob: row.dob ? String(row.dob) : "",
     gender: String(row.gender || ""),
@@ -34,6 +36,25 @@ function mapUserRow(row: Record<string, unknown>): RegisteredUser {
     identity_verified_at: row.mobile_verified ? String(row.updated_at || row.created_at || "") : undefined,
     createdAt: row.created_at ? new Date(String(row.created_at)).getTime() : Date.now(),
   };
+}
+
+export async function loadUserByMobileFromDb(mobile: string): Promise<RegisteredUser | null> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return null;
+
+  const normalized = String(mobile || "")
+    .replace(/\D/g, "")
+    .slice(-10);
+  if (!/^[6-9]\d{9}$/.test(normalized)) return null;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("mobile", normalized)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapUserRow(data as Record<string, unknown>);
 }
 
 export async function loadUserByIdFromDb(userId: string): Promise<RegisteredUser | null> {

@@ -130,11 +130,16 @@ export async function issueOtp(input: {
     if (channel === "whatsapp" && "error" in delivery && delivery.error) {
       console.error("[YVITY otp:whatsapp-delivery-failed]", delivery.error);
     }
+    const deliveryError =
+      "error" in delivery && typeof delivery.error === "string" ? delivery.error : undefined;
+
     return {
       ok: false,
       error:
         channel === "whatsapp"
-          ? "Could not send WhatsApp verification code. Please try again."
+          ? deliveryError
+            ? `Could not send WhatsApp verification code: ${deliveryError}`
+            : "Could not send WhatsApp verification code. Please try again."
           : "Could not send email verification code. Please try again.",
     };
   }

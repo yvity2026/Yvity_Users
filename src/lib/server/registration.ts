@@ -5,6 +5,8 @@ import { inferOtpChannel } from "@/lib/server/otp/purposes";
 import { normalizeEmail, normalizeIndianMobile } from "@/lib/server/normalize-identifier";
 import { loadRegistrationDb, mutateRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
 import { recordReferralOnRegistration } from "@/lib/server/referrals-store";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadUserByMobileFromDb } from "@/lib/server/supabase/platform-supabase";
 
 export type { RegisteredUser } from "@/lib/server/registration-store";
 export { normalizeEmail, normalizeIndianMobile } from "@/lib/server/normalize-identifier";
@@ -65,6 +67,21 @@ export function findUserByPhone(phone: string): RegisteredUser | null {
   return loadRegistrationDb().users.find((user) => user.phone === normalized) ?? null;
 }
 
+export async function findUserByPhoneAsync(phone: string): Promise<RegisteredUser | null> {
+  const normalized = normalizeIndianMobile(phone);
+
+  if (useSupabasePersistence()) {
+    try {
+      const fromDb = await loadUserByMobileFromDb(normalized);
+      if (fromDb) return fromDb;
+    } catch (error) {
+      console.error("[registration] Supabase phone lookup failed:", error);
+    }
+  }
+
+  return findUserByPhone(normalized);
+}
+
 export function findUserByEmail(email: string): RegisteredUser | null {
   const normalized = normalizeEmail(email);
   return loadRegistrationDb().users.find((user) => user.email === normalized) ?? null;
@@ -72,6 +89,10 @@ export function findUserByEmail(email: string): RegisteredUser | null {
 
 export function phoneExists(phone: string): boolean {
   return !!findUserByPhone(phone);
+}
+
+export async function phoneExistsAsync(phone: string): Promise<boolean> {
+  return Boolean(await findUserByPhoneAsync(phone));
 }
 
 export function emailExists(email: string): boolean {

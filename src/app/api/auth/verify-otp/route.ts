@@ -4,10 +4,10 @@ import {
   PHONE_VERIFIED_COOKIE,
   consumeOtp,
   createVerifiedPayload,
-  findUserByPhone,
+  findUserByPhoneAsync,
   normalizeIndianMobile,
   packVerifiedPayload,
-  phoneExists,
+  phoneExistsAsync,
   toAuthUser,
 } from "@/lib/server/registration";
 import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
@@ -37,14 +37,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
     }
 
-    if (flow === "register" && phoneExists(mobile)) {
+    if (flow === "register" && (await phoneExistsAsync(mobile))) {
       return NextResponse.json(
         { error: EXISTING_PHONE_MESSAGE, phoneExists: true },
         { status: 409 },
       );
     }
 
-    if (flow === "login" && !findUserByPhone(mobile)) {
+    if (flow === "login" && !(await findUserByPhoneAsync(mobile))) {
       return NextResponse.json(
         {
           error: "No account found with this mobile number",
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = findUserByPhone(mobile);
+    const existing = await findUserByPhoneAsync(mobile);
 
     const response = NextResponse.json({
       success: true,
