@@ -1,29 +1,30 @@
 "use client";
 
 import type { WhyChooseMeStrength } from "@/lib/home/why-choose-me-strengths";
-import { getWhyChooseMeStrengths } from "@/lib/home/why-choose-me-strengths";
+import {
+  buildWhyChooseMeIntro,
+  getWhyChooseMeStrengths,
+} from "@/lib/home/why-choose-me-strengths";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { useAchievementsData, useServicesData } from "@/lib/sections/stores";
+import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
+import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
+import { useAuth } from "@/context/AuthUserContext";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { resolveCareerExperienceDisplay } from "@/lib/advisor/profession-experience";
+import { useCareerData } from "@/lib/career-store";
+import {
+  useAchievementsData,
+  useServicesData,
+  useTestimonialsData,
+} from "@/lib/sections/stores";
 import { cn } from "@/lib/utils";
 
-/**
- * Single "Why Choose Me" point — rendered as a clean text row, not a
- * card. No glass background, no border-radius, no hover lift; just the
- * coloured icon chip beside the strength label, with a hairline divider
- * separating consecutive items.
- *
- * The icon chip (gradient + ring) is preserved exactly as before so the
- * brand palette still shows through.
- */
 function StrengthRow({ strength, index }: { strength: WhyChooseMeStrength; index: number }) {
   const Icon = strength.icon;
 
   return (
     <li
       className={cn(
-        // Hairline divider beneath every row, removed for the very last
-        // item on mobile and the bottom two items in the 2-column desktop
-        // layout so the list never ends with a trailing rule.
         "border-b border-white/8",
         "last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0",
         "py-3 sm:py-3.5",
@@ -53,10 +54,48 @@ function StrengthRow({ strength, index }: { strength: WhyChooseMeStrength; index
 export function WhyChooseMeSection() {
   const [achievements] = useAchievementsData();
   const [services] = useServicesData();
+  const [testimonials] = useTestimonialsData();
+  const [career] = useCareerData();
   const advisorProfile = useAdvisorDisplayProfile();
-  const strengths = getWhyChooseMeStrengths(achievements, {
+  const { user, advisor } = useAuth();
+  const publicAdvisor = useResolvedPublicAdvisorPayload();
+  const { recommendationCount } = usePublicProfileStats();
+
+  const profileApproved = publicAdvisor
+    ? isAdvisorProfileApproved(publicAdvisor.profile)
+    : isAdvisorProfileApproved(advisor);
+
+  const city = publicAdvisor?.city?.trim() || user?.city?.trim() || "";
+  const state = publicAdvisor?.state?.trim() || user?.state?.trim() || "";
+  const profession =
+    publicAdvisor?.profession?.trim() || user?.profession?.trim() || advisorProfile.title;
+  const about = advisorProfile.home.heroBio || advisorProfile.ctaDescription;
+
+  const journeyExperienceDisplay = resolveCareerExperienceDisplay(career);
+
+  const strengths = getWhyChooseMeStrengths({
+    achievements,
+    services,
+    career,
+    profileApproved,
     experienceDisplay: advisorProfile.experienceDisplay,
-    serviceCount: services.length,
+    journeyExperienceDisplay,
+    avgRating: advisorProfile.rating,
+    testimonialCount: testimonials.length,
+    recommendationCount,
+    city,
+    state,
+    profession,
+    about,
+    companyName: advisorProfile.companyName,
+  });
+
+  const intro = buildWhyChooseMeIntro({
+    about,
+    profession,
+    city,
+    state,
+    experienceDisplay: advisorProfile.experienceDisplay,
   });
 
   return (
@@ -70,13 +109,8 @@ export function WhyChooseMeSection() {
       >
         <span className="text-gradient-brand">Why Choose Me</span>
       </h2>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground leading-relaxed">
-        Licensed expertise, hands-on support, and guidance built around your goals — not generic
-        sales pitches.
-      </p>
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground leading-relaxed">{intro}</p>
 
-      {/* Plain text list — one column on phones, two on `sm+`.
-          Items are separated by hairline rules, no card chrome. */}
       <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
         {strengths.map((strength, i) => (
           <StrengthRow key={strength.id} strength={strength} index={i} />
