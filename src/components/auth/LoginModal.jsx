@@ -271,6 +271,21 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
   };
 
   const onSubmit = async (data) => {
+    if (isVerifyingOtp) return;
+
+    const otp = (otpValue || data.otp || otpArray.join("")).trim();
+    const mobile = (mobileValue || data.mobile || "").trim();
+
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error("Enter the 6-digit OTP");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      toast.error("Enter a valid mobile number");
+      return;
+    }
+
     if (!authDeviceTokenRef.current) {
       authDeviceTokenRef.current = createFreshDeviceToken();
     }
@@ -279,8 +294,8 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
     try {
       const result = await verifyOtp(
-        data.mobile,
-        data.otp,
+        mobile,
+        otp,
         authDeviceTokenRef.current,
         "login",
       );

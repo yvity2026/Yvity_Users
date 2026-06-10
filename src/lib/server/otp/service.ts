@@ -24,6 +24,8 @@ const OTP_TTL_MS = 10 * 60 * 1000;
 type OtpRecord = { code: string; expiresAt: number };
 
 const memoryStore = new Map<string, OtpRecord>();
+const lastIssueAt = new Map<string, number>();
+const ISSUE_DEBOUNCE_MS = 3000;
 
 export function isOtpDeliveryConfigured(): boolean {
   return isWhatsAppOtpConfigured() || isEmailOtpConfigured();
@@ -47,6 +49,9 @@ function normalizeOtpIdentifier(identifier: string, channel: OtpChannel): string
 
 async function persistOtp(purposeKey: string, identifier: string, purpose: string, code: string) {
   const expiresAt = Date.now() + OTP_TTL_MS;
+  const record = { code, expiresAt };
+  memoryStore.set(purposeKey, record);
+
   const savedToDb = await upsertOtpInDb({
     purposeKey,
     identifier,
@@ -54,22 +59,29 @@ async function persistOtp(purposeKey: string, identifier: string, purpose: strin
     code,
     expiresAt,
   });
+
   if (!savedToDb) {
-    memoryStore.set(purposeKey, { code, expiresAt });
+    console.warn("[YVITY otp] Supabase persist failed; using in-memory fallback for", purposeKey);
   }
 }
 
 async function readOtp(purposeKey: string): Promise<OtpRecord | null> {
-  const fromDb = await readOtpFromDb(purposeKey);
-  if (fromDb) return fromDb;
-
   const fromMemory = memoryStore.get(purposeKey);
-  if (!fromMemory) return null;
-  if (Date.now() > fromMemory.expiresAt) {
-    memoryStore.delete(purposeKey);
-    return null;
+  if (fromMemory) {
+    if (Date.now() > fromMemory.expiresAt) {
+      memoryStore.delete(purposeKey);
+    } else {
+      return fromMemory;
+    }
   }
-  return fromMemory;
+
+  const fromDb = await readOtpFromDb(purposeKey);
+  if (fromDb) {
+    memoryStore.set(purposeKey, fromDb);
+    return fromDb;
+  }
+
+  return null;
 }
 
 async function deleteOtp(purposeKey: string) {
@@ -92,6 +104,22 @@ export async function issueOtp(input: {
   const channel = input.channel ?? inferOtpChannel(input.identifier);
   const identifier = normalizeOtpIdentifier(input.identifier, channel);
   const purposeKey = otpPurposeKey(identifier, input.purpose);
+  const now = Date.now();
+
+  const recentIssueAt = lastIssueAt.get(purposeKey) ?? 0;
+  if (now - recentIssueAt < ISSUE_DEBOUNCE_MS) {
+    const existing = await readOtp(purposeKey);
+    if (existing && now < existing.expiresAt) {
+      return {
+        ok: true,
+        message:
+          channel === "whatsapp"
+            ? "Verification code sent on WhatsApp."
+            : "Verification code sent to your email.",
+      };
+    }
+  }
+  lastIssueAt.set(purposeKey, now);
 
   const useDemo = isDemoOtpEnabled();
   const code = useDemo ? DUMMY_OTP : generateOtpCode();
@@ -109,9 +137,8 @@ export async function issueOtp(input: {
     }
   }
 
-  await persistOtp(purposeKey, identifier, input.purpose, code);
-
   if (useDemo) {
+    await persistOtp(purposeKey, identifier, input.purpose, code);
     console.info(`[YVITY otp:demo] ${input.purpose} → ${identifier} (${DUMMY_OTP})`);
     return {
       ok: true,
@@ -126,7 +153,6 @@ export async function issueOtp(input: {
       : await sendOtpEmail({ to: identifier, code });
 
   if (!delivery.ok) {
-    await deleteOtp(purposeKey);
     if (channel === "whatsapp" && "error" in delivery && delivery.error) {
       console.error("[YVITY otp:whatsapp-delivery-failed]", delivery.error);
     }
@@ -143,6 +169,8 @@ export async function issueOtp(input: {
           : "Could not send email verification code. Please try again.",
     };
   }
+
+  await persistOtp(purposeKey, identifier, input.purpose, code);
 
   return {
     ok: true,
