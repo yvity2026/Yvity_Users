@@ -5,8 +5,8 @@ import {
   buildOtpWhatsAppMessage,
   getOtpTemplateName,
   getWhatsAppAccessToken,
+  getWhatsAppMessagesUrl,
   isWhatsAppOtpConfigured,
-  resolveWhatsAppMessagesUrl,
   useMetaOtpTemplate,
 } from "@/lib/server/otp/whatsapp-config";
 
@@ -53,15 +53,14 @@ export function buildOtpEmailContent(code: string): { subject: string; text: str
   return { subject, text, html };
 }
 
-function buildMetaOtpPayload(to: string, code: string) {
+function buildMetaOtpPayload(to: string, code: string, includeButton: boolean) {
   const templateName = getOtpTemplateName();
   if (!templateName) {
     throw new Error("WHATSAPP_OTP_TEMPLATE_NAME is not configured");
   }
 
   const language = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE?.trim() || "en";
-  const buttonSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() || "url";
-  const includeButton = process.env.WHATSAPP_OTP_INCLUDE_BUTTON?.trim() !== "false";
+  const buttonSubType = process.env.WHATSAPP_OTP_BUTTON_SUB_TYPE?.trim() || "copy_code";
   const buttonParamType = buttonSubType === "copy_code" ? "coupon_code" : "text";
   const buttonParameter =
     buttonParamType === "coupon_code"
@@ -86,6 +85,7 @@ function buildMetaOtpPayload(to: string, code: string) {
 
   return {
     messaging_product: "whatsapp",
+    recipient_type: "individual",
     to,
     type: "template",
     template: {
@@ -96,13 +96,28 @@ function buildMetaOtpPayload(to: string, code: string) {
   };
 }
 
+function parseWhatsAppApiError(responseText: string): string {
+  try {
+    const data = JSON.parse(responseText) as {
+      error?: { message?: string; error_data?: { details?: string } };
+    };
+    return (
+      data.error?.error_data?.details ||
+      data.error?.message ||
+      responseText.slice(0, 300)
+    );
+  } catch {
+    return responseText.slice(0, 300);
+  }
+}
+
 async function postWhatsAppRequest(input: {
   url: string;
   token: string;
   body: Record<string, unknown>;
   preview: string;
   to: string;
-}): Promise<{ ok: boolean }> {
+}): Promise<{ ok: boolean; error?: string }> {
   try {
     const res = await fetch(input.url, {
       method: "POST",
@@ -114,54 +129,105 @@ async function postWhatsAppRequest(input: {
     });
 
     const responseText = await res.text();
+    const apiError = res.ok ? undefined : parseWhatsAppApiError(responseText);
+
     await appendOutboundLog({
       channel: "whatsapp",
       to: input.to,
       preview: input.preview.slice(0, 180),
       status: res.ok ? "sent" : "failed",
-      error: res.ok ? undefined : responseText.slice(0, 500),
+      error: apiError,
     });
 
     if (!res.ok) {
-      console.error("[YVITY otp whatsapp]", res.status, responseText.slice(0, 500));
+      console.error("[YVITY otp whatsapp]", res.status, responseText.slice(0, 800));
     }
 
-    return { ok: res.ok };
+    return { ok: res.ok, error: apiError };
   } catch (error) {
+    const message = error instanceof Error ? error.message : "send failed";
     await appendOutboundLog({
       channel: "whatsapp",
       to: input.to,
       preview: input.preview.slice(0, 180),
       status: "failed",
-      error: error instanceof Error ? error.message : "send failed",
+      error: message,
     });
-    return { ok: false };
+    return { ok: false, error: message };
   }
+}
+
+async function sendMetaOtpTemplate(input: {
+  phone: string;
+  code: string;
+  apiUrl: string;
+  apiToken: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const includeButtonEnv = process.env.WHATSAPP_OTP_INCLUDE_BUTTON?.trim();
+  const attempts =
+    includeButtonEnv === "true"
+      ? [true]
+      : includeButtonEnv === "false"
+        ? [false]
+        : [false, true];
+
+  let lastError: string | undefined;
+
+  for (const includeButton of attempts) {
+    const payload = buildMetaOtpPayload(input.phone, input.code, includeButton);
+    const result = await postWhatsAppRequest({
+      url: input.apiUrl,
+      token: input.apiToken,
+      body: payload,
+      preview: `template:${payload.template.name}${includeButton ? "+button" : ""}`,
+      to: input.phone,
+    });
+
+    if (result.ok) return result;
+    lastError = result.error;
+
+    const retryable =
+      !includeButton &&
+      (result.error?.toLowerCase().includes("button") ||
+        result.error?.toLowerCase().includes("component") ||
+        result.error?.includes("132000") ||
+        result.error?.toLowerCase().includes("parameter"));
+
+    if (!retryable || includeButtonEnv !== undefined) {
+      return result;
+    }
+  }
+
+  return { ok: false, error: lastError };
 }
 
 export async function sendOtpWhatsApp(input: {
   phone: string;
   code: string;
-}): Promise<{ ok: boolean; mode: "api" | "logged" | "missing" }> {
+}): Promise<{ ok: boolean; mode: "api" | "logged" | "missing"; error?: string }> {
   const phone = normalizeIndianPhone(input.phone);
-  const apiUrl = resolveWhatsAppMessagesUrl();
+  const apiUrl = getWhatsAppMessagesUrl();
   const apiToken = getWhatsAppAccessToken();
 
   if (!apiUrl || !apiToken) {
     console.info("[YVITY otp whatsapp:missing-config]", phone);
-    return { ok: false, mode: "missing" };
+    return { ok: false, mode: "missing", error: "missing WhatsApp config" };
   }
 
+  console.info("[YVITY otp whatsapp:send]", {
+    mode: useMetaOtpTemplate() ? "meta" : "gateway",
+    url: apiUrl,
+    phone,
+  });
+
   if (useMetaOtpTemplate()) {
-    const payload = buildMetaOtpPayload(phone, input.code);
-    const result = await postWhatsAppRequest({
-      url: apiUrl,
-      token: apiToken,
-      body: payload,
-      preview: `template:${payload.template.name}`,
-      to: phone,
+    const result = await sendMetaOtpTemplate({
+      phone,
+      code: input.code,
+      apiUrl,
+      apiToken,
     });
-    return { ok: result.ok, mode: "api" };
+    return { ok: result.ok, mode: "api", error: result.error };
   }
 
   const message = buildOtpWhatsAppMessage(input.code);
@@ -172,7 +238,7 @@ export async function sendOtpWhatsApp(input: {
     preview: message,
     to: phone,
   });
-  return { ok: result.ok, mode: "api" };
+  return { ok: result.ok, mode: "api", error: result.error };
 }
 
 async function sendEmailViaResend(input: {
@@ -298,7 +364,7 @@ export async function sendWhatsAppMessage(input: {
 }): Promise<{ ok: boolean; waUrl: string; mode: "api" | "logged" }> {
   const phone = normalizeIndianPhone(input.phone);
   const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(input.message)}`;
-  const apiUrl = resolveWhatsAppMessagesUrl();
+  const apiUrl = getWhatsAppMessagesUrl();
   const apiToken = getWhatsAppAccessToken();
 
   if (apiUrl && apiToken) {

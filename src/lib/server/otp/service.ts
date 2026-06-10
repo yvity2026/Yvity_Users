@@ -127,6 +127,9 @@ export async function issueOtp(input: {
 
   if (!delivery.ok) {
     await deleteOtp(purposeKey);
+    if (channel === "whatsapp" && "error" in delivery && delivery.error) {
+      console.error("[YVITY otp:whatsapp-delivery-failed]", delivery.error);
+    }
     return {
       ok: false,
       error:

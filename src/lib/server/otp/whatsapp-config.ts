@@ -1,10 +1,5 @@
 import "server-only";
 
-export function getWhatsAppApiUrl(): string | undefined {
-  return process.env.WHATSAPP_API_URL?.trim() || undefined;
-}
-
-/** Vercel uses WHATSAPP_ACCESS_TOKEN; WHATSAPP_API_TOKEN is accepted as an alias. */
 export function getWhatsAppAccessToken(): string | undefined {
   return (
     process.env.WHATSAPP_ACCESS_TOKEN?.trim() ||
@@ -25,45 +20,63 @@ export function getOtpTemplateName(): string | undefined {
   );
 }
 
-export function resolveWhatsAppMessagesUrl(): string | undefined {
-  const apiUrl = getWhatsAppApiUrl();
-  if (!apiUrl) return undefined;
+/**
+ * Resolved WhatsApp send endpoint.
+ * - Custom gateway: WHATSAPP_API_URL as-is (no phone-id suffix).
+ * - Meta Graph: build from base + WHATSAPP_PHONE_NUMBER_ID, or phone id alone.
+ */
+export function getWhatsAppMessagesUrl(): string | undefined {
+  const explicit = process.env.WHATSAPP_API_URL?.trim();
 
-  if (apiUrl.includes("/messages")) return apiUrl;
+  if (explicit) {
+    if (explicit.includes("/messages")) return explicit;
+
+    if (explicit.includes("graph.facebook.com")) {
+      const phoneNumberId = getWhatsAppPhoneNumberId();
+      let base = explicit.replace(/\/$/, "");
+      if (phoneNumberId && !base.includes(phoneNumberId)) {
+        base = `${base}/${phoneNumberId}`;
+      }
+      return `${base}/messages`;
+    }
+
+    return explicit;
+  }
 
   const phoneNumberId = getWhatsAppPhoneNumberId();
-  let base = apiUrl.replace(/\/$/, "");
+  if (!phoneNumberId) return undefined;
 
-  if (phoneNumberId && !base.includes(phoneNumberId)) {
-    base = `${base}/${phoneNumberId}`;
-  }
+  const version = process.env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v21.0";
+  return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
+}
 
-  if (base.includes("graph.facebook.com") || phoneNumberId) {
-    return `${base}/messages`;
-  }
+/** @deprecated use getWhatsAppMessagesUrl */
+export function resolveWhatsAppMessagesUrl(): string | undefined {
+  return getWhatsAppMessagesUrl();
+}
 
-  return apiUrl;
+export function getWhatsAppApiUrl(): string | undefined {
+  return process.env.WHATSAPP_API_URL?.trim() || getWhatsAppMessagesUrl();
+}
+
+function isMetaGraphEndpoint(): boolean {
+  return (getWhatsAppMessagesUrl() || "").includes("graph.facebook.com");
 }
 
 /**
- * Meta Graph template send — for graph.facebook.com URLs with a template name.
- * Custom gateways always use plain `{ to, message }` even if a template name env exists.
+ * Meta Graph template send when a template name is configured and we're not in gateway mode.
  */
 export function useMetaOtpTemplate(): boolean {
   const mode = (process.env.WHATSAPP_OTP_DELIVERY_MODE || "").trim().toLowerCase();
   if (mode === "gateway") return false;
-  if (mode === "meta") return Boolean(getOtpTemplateName());
+  if (!getOtpTemplateName()) return false;
+  if (mode === "meta") return true;
 
-  const apiUrl = (getWhatsAppApiUrl() || "").toLowerCase();
-  if (!apiUrl.includes("graph.facebook.com")) {
-    return false;
-  }
-
-  return Boolean(getOtpTemplateName());
+  return isMetaGraphEndpoint();
 }
 
 export function isWhatsAppOtpConfigured(): boolean {
-  return Boolean(getWhatsAppAccessToken() && resolveWhatsAppMessagesUrl());
+  return Boolean(getWhatsAppAccessToken() && getWhatsAppMessagesUrl());
 }
 
 export function buildOtpWhatsAppMessage(code: string): string {
