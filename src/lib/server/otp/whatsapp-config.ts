@@ -8,8 +8,13 @@ export function getWhatsAppAccessToken(): string | undefined {
   );
 }
 
+/** Meta phone number IDs are numeric — strip accidental `/messages` suffixes from env. */
 export function getWhatsAppPhoneNumberId(): string | undefined {
-  return process.env.WHATSAPP_PHONE_NUMBER_ID?.trim() || undefined;
+  const raw = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  if (!raw) return undefined;
+
+  const digits = raw.replace(/\D/g, "");
+  return digits || undefined;
 }
 
 export function getOtpTemplateName(): string | undefined {
@@ -24,30 +29,33 @@ function getGraphApiVersion(): string {
   return process.env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v21.0";
 }
 
-/** Meta Cloud API messages endpoint — ignores legacy gateway WHATSAPP_API_URL. */
+function normalizeGraphMessagesUrl(url: string): string {
+  return url.replace(/\/+$/, "").replace(/\/messages\/messages$/i, "/messages");
+}
+
+/**
+ * Meta Cloud API messages endpoint.
+ * When WHATSAPP_PHONE_NUMBER_ID is set, always build the canonical Graph URL
+ * and ignore WHATSAPP_API_URL to avoid double `/messages` path segments.
+ */
 export function getMetaOtpMessagesUrl(): string | undefined {
-  const explicit = process.env.WHATSAPP_API_URL?.trim();
   const phoneNumberId = getWhatsAppPhoneNumberId();
+  const version = getGraphApiVersion();
 
-  if (explicit?.includes("/messages") && explicit.includes("graph.facebook.com")) {
-    return explicit;
+  if (phoneNumberId) {
+    return `https://graph.facebook.com/${version}/${phoneNumberId}/messages`;
   }
 
-  if (explicit?.includes("graph.facebook.com")) {
-    let base = explicit.replace(/\/$/, "");
-    if (phoneNumberId && !base.includes(phoneNumberId)) {
-      base = `${base}/${phoneNumberId}`;
-    }
-    return `${base}/messages`;
-  }
+  const explicit = process.env.WHATSAPP_API_URL?.trim();
+  if (!explicit?.includes("graph.facebook.com")) return undefined;
 
-  if (!phoneNumberId) return undefined;
-  return `https://graph.facebook.com/${getGraphApiVersion()}/${phoneNumberId}/messages`;
+  const normalized = normalizeGraphMessagesUrl(explicit);
+  return normalized.endsWith("/messages") ? normalized : `${normalized}/messages`;
 }
 
 /**
  * Resolved WhatsApp send endpoint.
- * - Meta OTP: always Graph API when template + phone id (or mode=meta).
+ * - Meta OTP: canonical Graph URL from phone number id.
  * - Gateway: WHATSAPP_API_URL as-is.
  */
 export function getWhatsAppMessagesUrl(): string | undefined {
@@ -71,9 +79,9 @@ export function getWhatsAppApiUrl(): string | undefined {
 }
 
 function isMetaGraphEndpoint(): boolean {
+  if (getWhatsAppPhoneNumberId()) return true;
   const explicit = process.env.WHATSAPP_API_URL?.trim();
-  if (explicit?.includes("graph.facebook.com")) return true;
-  return Boolean(getWhatsAppPhoneNumberId());
+  return Boolean(explicit?.includes("graph.facebook.com"));
 }
 
 export function useMetaOtpTemplate(): boolean {
@@ -108,5 +116,8 @@ export function describeWhatsAppOtpConfig(): Record<string, unknown> {
     templateName: getOtpTemplateName() ?? null,
     templateLanguage: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE?.trim() || "en",
     graphApiVersion: getGraphApiVersion(),
+    note: getWhatsAppPhoneNumberId()
+      ? "Meta OTP ignores WHATSAPP_API_URL and builds Graph URL from WHATSAPP_PHONE_NUMBER_ID."
+      : null,
   };
 }
