@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { DUMMY_OTP } from "@/lib/constants";
 import {
   ADVISOR_SELF_TESTIMONIAL_MESSAGE,
   rejectAdvisorSelfSubmissionForCurrentProfile,
 } from "@/lib/server/advisor-self-submission-guard";
+import { issueOtp } from "@/lib/server/otp/service";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 
 function isValidMobile(mobile: string): boolean {
   const digits = mobile.replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 15;
 }
 
-/** Demo OTP — always use code from DUMMY_OTP (see lib/constants). */
 export async function POST(request: Request) {
   let body: { mobile?: string };
   try {
@@ -30,9 +30,21 @@ export async function POST(request: Request) {
   );
   if (selfBlocked) return selfBlocked;
 
-  // Demo: no SMS provider; client uses DUMMY_OTP for verification.
+  const result = await issueOtp({
+    identifier: mobile,
+    purpose: OTP_PURPOSE.TESTIMONIAL,
+    channel: "whatsapp",
+  });
+
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: result.error ?? "Could not send verification code." },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({
     ok: true,
-    message: `Demo OTP sent. Use ${DUMMY_OTP} to verify.`,
+    message: result.message ?? "Verification code sent on WhatsApp.",
   });
 }

@@ -5,6 +5,7 @@ import {
   normalizeEmail,
   storeOtp,
 } from "@/lib/server/registration";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 
 export async function POST(request: Request) {
   try {
@@ -23,12 +24,15 @@ export async function POST(request: Request) {
       );
     }
 
-    storeOtp(email, "email_signup");
-    return NextResponse.json({ success: true });
+    const result = await storeOtp(email, OTP_PURPOSE.EMAIL_SIGNUP);
+    return NextResponse.json({
+      success: true,
+      message: result.message ?? "Verification code sent to your email.",
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to send email OTP" },
-      { status: 500 },
+      { status: 502 },
     );
   }
 }

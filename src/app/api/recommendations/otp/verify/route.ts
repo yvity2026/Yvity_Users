@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
-import { verifyOtpCode } from "@/lib/server/auth";
+import { verifyIssuedOtp } from "@/lib/server/otp/service";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 
-/**
- * Verifies the OTP code submitted by the visitor in the Recommend
- * Advisor flow. This is an inline UX endpoint — the final POST to
- * `/api/recommendations` re-verifies the OTP server-side, so this
- * endpoint is purely a fast "is the code correct?" check so the modal
- * can enable the Submit button as soon as 6 digits are entered.
- */
 export async function POST(request: Request) {
-  let body: { otp?: string };
+  let body: { otp?: string; mobile?: string };
   try {
-    body = (await request.json()) as { otp?: string };
+    body = (await request.json()) as { otp?: string; mobile?: string };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   const otp = body.otp?.trim() ?? "";
-  if (!verifyOtpCode(otp)) {
+  const mobile = body.mobile?.trim() ?? "";
+
+  if (!mobile) {
+    return NextResponse.json({ error: "Mobile number is required." }, { status: 400 });
+  }
+
+  const valid = await verifyIssuedOtp(mobile, OTP_PURPOSE.RECOMMENDATION, otp, "whatsapp");
+  if (!valid) {
     return NextResponse.json({ error: "Invalid OTP. Please try again." }, { status: 401 });
   }
 

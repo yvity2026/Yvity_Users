@@ -58,6 +58,16 @@ async function handleRegistrationPhoneOtp(body: Record<string, unknown>) {
     );
   }
 
-  storeOtp(mobile, flow === "register" ? "signup" : "login");
-  return NextResponse.json({ success: true });
+  try {
+    const result = await storeOtp(mobile, flow === "register" ? "signup" : "login");
+    return NextResponse.json({
+      success: true,
+      message: result.message ?? "Verification code sent on WhatsApp.",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to send OTP" },
+      { status: 502 },
+    );
+  }
 }

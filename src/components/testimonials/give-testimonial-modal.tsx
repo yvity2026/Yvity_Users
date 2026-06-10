@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Headphones, Loader2, MessageSquare, Shield, Upload, Video, X } from "lucide-react";
 import { useAuth } from "@/context/AuthUserContext";
-import { DUMMY_OTP } from "@/lib/constants";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import { testimonialTypeFilters } from "@/lib/sections/testimonials-config";
 import type { TestimonialService, TestimonialType } from "@/lib/sections/types";
@@ -507,10 +506,6 @@ export function GiveTestimonialModal() {
                         autoComplete="one-time-code"
                       />
                     </div>
-
-                    <p className="text-[10px] text-muted-foreground">
-                      Demo OTP: <span className="font-mono text-foreground">{DUMMY_OTP}</span>
-                    </p>
 
                     <Button
                       type="button"

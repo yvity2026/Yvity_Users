@@ -42,13 +42,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "No contact on file for OTP" }, { status: 400 });
     }
 
-    storeOtp(identifier, otpPurpose(action));
-
-    return NextResponse.json({
-      success: true,
-      message: "OTP sent to your registered email",
-      email: registeredEmail(session),
-    });
+    try {
+      const result = await storeOtp(identifier, otpPurpose(action));
+      return NextResponse.json({
+        success: true,
+        message: result.message ?? "Verification code sent.",
+        email: registeredEmail(session),
+      });
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error instanceof Error ? error.message : "Unable to send OTP",
+        },
+        { status: 502 },
+      );
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to send OTP";
     return NextResponse.json({ success: false, message }, { status: 500 });
@@ -74,7 +83,7 @@ export async function PATCH(request: Request) {
     }
 
     const identifier = contactIdentifier(session);
-    if (!consumeOtp(identifier, otpPurpose(action), otp)) {
+    if (!(await consumeOtp(identifier, otpPurpose(action), otp))) {
       return NextResponse.json({ success: false, message: "Invalid or expired OTP" }, { status: 400 });
     }
 

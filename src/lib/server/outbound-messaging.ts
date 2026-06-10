@@ -1,4 +1,5 @@
 import { loadJsonFile, saveJsonFile } from "@/lib/server/json-store";
+import { sendWhatsAppMessage } from "@/lib/server/otp/delivery";
 
 type OutboundLogEntry = {
   id: string;
@@ -21,13 +22,6 @@ async function appendOutboundLog(entry: Omit<OutboundLogEntry, "id" | "createdAt
     createdAt: new Date().toISOString(),
   });
   await saveJsonFile(FILE, db);
-}
-
-function normalizeIndianPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 10) return `91${digits}`;
-  if (digits.startsWith("91") && digits.length === 12) return digits;
-  return digits;
 }
 
 export async function sendApprovalEmail(input: {
@@ -103,47 +97,5 @@ export async function sendApprovalWhatsApp(input: {
   phone: string;
   message: string;
 }): Promise<{ ok: boolean; waUrl: string; mode: "api" | "logged" }> {
-  const phone = normalizeIndianPhone(input.phone);
-  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(input.message)}`;
-  const apiUrl = process.env.WHATSAPP_API_URL?.trim();
-  const apiToken = process.env.WHATSAPP_API_TOKEN?.trim();
-
-  if (apiUrl && apiToken) {
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to: phone, message: input.message }),
-      });
-      await appendOutboundLog({
-        channel: "whatsapp",
-        to: phone,
-        preview: input.message.slice(0, 180),
-        status: res.ok ? "sent" : "failed",
-        error: res.ok ? undefined : (await res.text()).slice(0, 500),
-      });
-      return { ok: res.ok, waUrl, mode: "api" };
-    } catch (error) {
-      await appendOutboundLog({
-        channel: "whatsapp",
-        to: phone,
-        preview: input.message.slice(0, 180),
-        status: "failed",
-        error: error instanceof Error ? error.message : "send failed",
-      });
-      return { ok: false, waUrl, mode: "api" };
-    }
-  }
-
-  console.info("[YVITY outbound whatsapp]", phone, waUrl);
-  await appendOutboundLog({
-    channel: "whatsapp",
-    to: phone,
-    preview: input.message.slice(0, 180),
-    status: "logged",
-  });
-  return { ok: true, waUrl, mode: "logged" };
+  return sendWhatsAppMessage(input);
 }

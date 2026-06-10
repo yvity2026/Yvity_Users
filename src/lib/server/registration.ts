@@ -1,10 +1,13 @@
 import { randomUUID } from "crypto";
-import { DUMMY_OTP } from "@/lib/constants";
 import type { AuthUser } from "@/lib/auth-store";
+import { issueOtp, verifyIssuedOtp } from "@/lib/server/otp/service";
+import { inferOtpChannel } from "@/lib/server/otp/purposes";
+import { normalizeEmail, normalizeIndianMobile } from "@/lib/server/normalize-identifier";
 import { loadRegistrationDb, mutateRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
 import { recordReferralOnRegistration } from "@/lib/server/referrals-store";
 
 export type { RegisteredUser } from "@/lib/server/registration-store";
+export { normalizeEmail, normalizeIndianMobile } from "@/lib/server/normalize-identifier";
 
 export const PHONE_VERIFIED_COOKIE = "yvity_phone_verified";
 export const EMAIL_VERIFIED_COOKIE = "yvity_email_verified";
@@ -14,31 +17,9 @@ export const EXISTING_PHONE_MESSAGE =
 export const EXISTING_EMAIL_MESSAGE =
   "This email is already linked to an account. Log in or use a different email address.";
 
-type OtpRecord = { code: string; expiresAt: number };
-
-/** Ephemeral OTPs — not persisted (short-lived). */
-const otpByKey = new Map<string, OtpRecord>();
-
 const VERIFIED_TTL_MS = 30 * 60 * 1000;
-const OTP_TTL_MS = 10 * 60 * 1000;
 
 type VerifiedPayload = { identifier: string; expiresAt: number };
-
-export function normalizeIndianMobile(phone: string): string {
-  const digits = String(phone || "").replace(/\D/g, "");
-  if (digits.length >= 10) return digits.slice(-10);
-  return digits;
-}
-
-export function normalizeEmail(email: string): string {
-  return String(email || "")
-    .trim()
-    .toLowerCase();
-}
-
-function otpKey(identifier: string, purpose: string) {
-  return `${purpose}:${identifier}`;
-}
 
 export function packVerifiedPayload(payload: VerifiedPayload): string {
   return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
@@ -65,24 +46,18 @@ export function readVerifiedCookie(
   return true;
 }
 
-export function storeOtp(identifier: string, purpose: string) {
-  otpByKey.set(otpKey(identifier, purpose), {
-    code: DUMMY_OTP,
-    expiresAt: Date.now() + OTP_TTL_MS,
-  });
+/** Generate, persist, and deliver an OTP for the given identifier + purpose. */
+export async function storeOtp(identifier: string, purpose: string) {
+  const channel = inferOtpChannel(identifier);
+  const result = await issueOtp({ identifier, purpose, channel });
+  if (!result.ok) {
+    throw new Error(result.error || "Unable to send verification code");
+  }
+  return result;
 }
 
-export function consumeOtp(identifier: string, purpose: string, token: string): boolean {
-  const key = otpKey(identifier, purpose);
-  const record = otpByKey.get(key);
-  if (!record) return false;
-  if (Date.now() > record.expiresAt) {
-    otpByKey.delete(key);
-    return false;
-  }
-  if (String(token).trim() !== record.code) return false;
-  otpByKey.delete(key);
-  return true;
+export async function consumeOtp(identifier: string, purpose: string, token: string): Promise<boolean> {
+  return verifyIssuedOtp(identifier, purpose, token);
 }
 
 export function findUserByPhone(phone: string): RegisteredUser | null {

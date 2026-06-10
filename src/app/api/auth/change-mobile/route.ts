@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { DUMMY_OTP } from "@/lib/constants";
 import {
   mergeSessionProfile,
   toProfileUser,
@@ -11,6 +10,7 @@ import {
   normalizeIndianMobile,
   storeOtp,
 } from "@/lib/server/registration";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { getSessionUser, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
 
 export const runtime = "nodejs";
@@ -35,15 +35,22 @@ export async function POST(request: Request) {
   }
 
   if (action === "send") {
-    storeOtp(newMobile, "change-mobile");
-    return NextResponse.json({
-      success: true,
-      message: `OTP sent. Demo code: ${DUMMY_OTP}`,
-    });
+    try {
+      const result = await storeOtp(newMobile, OTP_PURPOSE.CHANGE_MOBILE);
+      return NextResponse.json({
+        success: true,
+        message: result.message ?? "Verification code sent on WhatsApp.",
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Unable to send OTP" },
+        { status: 502 },
+      );
+    }
   }
 
   const otp = String(body.otp || "").trim();
-  if (!consumeOtp(newMobile, "change-mobile", otp)) {
+  if (!(await consumeOtp(newMobile, OTP_PURPOSE.CHANGE_MOBILE, otp))) {
     return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
   }
 

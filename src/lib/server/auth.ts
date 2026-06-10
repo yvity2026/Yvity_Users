@@ -1,6 +1,5 @@
-import { DUMMY_OTP } from "@/lib/constants";
-
-export { DUMMY_OTP };
+import { verifyIssuedOtp } from "@/lib/server/otp/service";
+import { inferOtpChannel } from "@/lib/server/otp/purposes";
 
 export type AuthMethod = "phone" | "email";
 
@@ -12,6 +11,10 @@ export function isValidIdentifier(method: AuthMethod, identifier: string): boole
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 }
 
-export function verifyOtpCode(otp: string): boolean {
-  return otp.trim() === DUMMY_OTP;
+export async function verifyOtpCode(
+  identifier: string,
+  purpose: string,
+  otp: string,
+): Promise<boolean> {
+  return verifyIssuedOtp(identifier, purpose, otp, inferOtpChannel(identifier));
 }

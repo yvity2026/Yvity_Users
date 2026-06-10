@@ -5,6 +5,7 @@ import { uid } from "@/lib/id";
 import { isRegisteredTestimonialService } from "@/lib/sections/testimonial-service-options";
 import type { TestimonialItem, TestimonialService, TestimonialType } from "@/lib/sections/types";
 import { verifyOtpCode } from "@/lib/server/auth";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { getSessionUser } from "@/lib/server/session";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { saveTestimonialMedia } from "@/lib/server/testimonial-uploads";
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
 
     const session = await getSessionUser();
     const skipOtp = Boolean(session?.id);
-    if (!skipOtp && !verifyOtpCode(otp)) {
+    if (!skipOtp && !(await verifyOtpCode(mobile, OTP_PURPOSE.TESTIMONIAL, otp))) {
       return NextResponse.json({ error: "Invalid OTP. Please try again." }, { status: 401 });
     }
 

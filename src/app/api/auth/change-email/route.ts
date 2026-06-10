@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { DUMMY_OTP } from "@/lib/constants";
 import {
   mergeSessionProfile,
   toProfileUser,
@@ -11,6 +10,7 @@ import {
   normalizeEmail,
   storeOtp,
 } from "@/lib/server/registration";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { getSessionUser, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
 
 export const runtime = "nodejs";
@@ -35,16 +35,23 @@ export async function POST(request: Request) {
   }
 
   if (action === "send") {
-    storeOtp(newEmail, "change-email");
-    return NextResponse.json({
-      success: true,
-      message: `Verification code sent. Demo code: ${DUMMY_OTP}`,
-    });
+    try {
+      const result = await storeOtp(newEmail, OTP_PURPOSE.CHANGE_EMAIL);
+      return NextResponse.json({
+        success: true,
+        message: result.message ?? "Verification code sent to your email.",
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Unable to send verification code" },
+        { status: 502 },
+      );
+    }
   }
 
   const otp = String(body.otp || "").trim();
-  if (!consumeOtp(newEmail, "change-email", otp)) {
-    return NextResponse.json({ error: "Invalid or expired code" }, { status: 400 });
+  if (!(await consumeOtp(newEmail, OTP_PURPOSE.CHANGE_EMAIL, otp))) {
+    return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
   }
 
   const { user: registered, error } = updateRegisteredEmail(session, newEmail);

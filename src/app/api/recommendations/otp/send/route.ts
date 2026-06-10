@@ -1,28 +1,19 @@
 import { NextResponse } from "next/server";
-import { DUMMY_OTP } from "@/lib/constants";
-import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
 import {
   ADVISOR_SELF_RECOMMENDATION_MESSAGE,
   rejectAdvisorSelfSubmissionForCurrentProfile,
 } from "@/lib/server/advisor-self-submission-guard";
 import { hasVerifiedRecommendationFromMobile } from "@/lib/server/recommendations-persistence";
 import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
+import { issueOtp } from "@/lib/server/otp/service";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
+import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
 
 function isValidMobile(mobile: string): boolean {
   const digits = mobile.replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 15;
 }
 
-/**
- * Sends an OTP to the supplied mobile number for the Recommend Advisor
- * flow. In demo mode there is no SMS provider — the client simply
- * displays the well-known `DUMMY_OTP` value as a hint.
- *
- * Returns 403 when the advisor has disabled recommendation requests
- * (Settings → Leads), and 409 when the mobile number has already been
- * used to submit a verified recommendation. Surfacing this *before*
- * sending the OTP avoids wasting the visitor's time.
- */
 export async function POST(request: Request) {
   const advisorSettings = await loadAdvisorSettings();
   if (!advisorSettings.leads.recommendationRequests) {
@@ -65,8 +56,21 @@ export async function POST(request: Request) {
     );
   }
 
+  const result = await issueOtp({
+    identifier: mobile,
+    purpose: OTP_PURPOSE.RECOMMENDATION,
+    channel: "whatsapp",
+  });
+
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: result.error ?? "Could not send verification code." },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({
     ok: true,
-    message: `Demo OTP sent. Use ${DUMMY_OTP} to verify.`,
+    message: result.message ?? "Verification code sent on WhatsApp.",
   });
 }

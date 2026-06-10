@@ -16,11 +16,11 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Demo login
+### Login OTP
 
-1. Go to **Login** and enter a phone or email.
-2. Use OTP **`123456`** to sign in.
-3. Open **Dashboard** to edit the public career profile.
+1. Go to **Login** and enter your mobile number.
+2. Enter the **6-digit code sent on WhatsApp** (requires `WHATSAPP_API_URL` + `WHATSAPP_API_TOKEN` in production).
+3. Local dev without WhatsApp keys: set `YVITY_ALLOW_DEMO_OTP=true` and use `123456`.
 
 Changes save to the server and appear on **My Career**.
 

@@ -7,6 +7,7 @@ import {
   normalizeEmail,
   packVerifiedPayload,
 } from "@/lib/server/registration";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { sessionCookieOptions } from "@/lib/server/session";
 
 export async function POST(request: Request) {
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!consumeOtp(email, "email_signup", token)) {
+    if (!(await consumeOtp(email, OTP_PURPOSE.EMAIL_SIGNUP, token))) {
       return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
     }
 

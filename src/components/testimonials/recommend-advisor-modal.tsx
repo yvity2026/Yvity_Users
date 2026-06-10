@@ -172,7 +172,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
       const res = await fetch("/api/recommendations/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp: code }),
+        body: JSON.stringify({ otp: code, mobile: mobile.trim() }),
       });
       if (!res.ok) {
         const json = (await res.json()) as { error?: string };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { AuthUser } from "@/lib/auth-store";
 import { isValidIdentifier, verifyOtpCode, type AuthMethod } from "@/lib/server/auth";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
 
 export async function POST(request: Request) {
@@ -21,7 +22,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid identifier" }, { status: 400 });
   }
 
-  if (!verifyOtpCode(otp)) {
+  const purpose = method === "phone" ? OTP_PURPOSE.LOGIN : OTP_PURPOSE.EMAIL_SIGNUP;
+  if (!(await verifyOtpCode(identifier, purpose, otp))) {
     return NextResponse.json({ error: "Invalid OTP" }, { status: 401 });
   }
 

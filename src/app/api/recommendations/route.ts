@@ -18,6 +18,7 @@ import {
   type RecommendationTag,
 } from "@/lib/recommendations/types";
 import { verifyOtpCode } from "@/lib/server/auth";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 import { getSessionUser } from "@/lib/server/session";
 import {
   ADVISOR_SELF_RECOMMENDATION_MESSAGE,
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
   // OTP for anonymous visitors; signed-in YVITY users skip OTP.
   const session = await getSessionUser();
   const skipOtp = Boolean(session?.id);
-  if (!skipOtp && !verifyOtpCode(otp)) {
+  if (!skipOtp && !(await verifyOtpCode(mobile, OTP_PURPOSE.RECOMMENDATION, otp))) {
     return NextResponse.json(
       { error: "Mobile number not verified. Please verify with OTP first." },
       { status: 401 },

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     const purpose = flow === "register" ? "signup" : "login";
-    if (!consumeOtp(mobile, purpose, token)) {
+    if (!(await consumeOtp(mobile, purpose, token))) {
       return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 });
     }
 
