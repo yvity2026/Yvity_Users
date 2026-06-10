@@ -103,8 +103,8 @@ export async function issueOtp(input: {
         ok: false,
         error:
           channel === "whatsapp"
-            ? "WhatsApp OTP is not configured. Set WHATSAPP_API_URL and WHATSAPP_ACCESS_TOKEN."
-            : "Email OTP is not configured. Set RESEND_API_KEY.",
+            ? "WhatsApp OTP is not configured. Set WHATSAPP_API_URL, WHATSAPP_ACCESS_TOKEN, and WHATSAPP_PHONE_NUMBER_ID."
+            : "Email OTP is not configured. Set EMAIL_USER and EMAIL_PASS.",
       };
     }
   }
