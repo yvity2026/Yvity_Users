@@ -32,10 +32,21 @@ export function normalizeIndianPhone(phone: string): string {
   return digits;
 }
 
-export function isWhatsAppOtpConfigured(): boolean {
-  return Boolean(
-    process.env.WHATSAPP_API_URL?.trim() && process.env.WHATSAPP_API_TOKEN?.trim(),
+function getWhatsAppApiUrl(): string | undefined {
+  return process.env.WHATSAPP_API_URL?.trim() || undefined;
+}
+
+/** Vercel uses WHATSAPP_ACCESS_TOKEN; WHATSAPP_API_TOKEN is accepted as an alias. */
+function getWhatsAppAccessToken(): string | undefined {
+  return (
+    process.env.WHATSAPP_ACCESS_TOKEN?.trim() ||
+    process.env.WHATSAPP_API_TOKEN?.trim() ||
+    undefined
   );
+}
+
+export function isWhatsAppOtpConfigured(): boolean {
+  return Boolean(getWhatsAppApiUrl() && getWhatsAppAccessToken());
 }
 
 export function isEmailOtpConfigured(): boolean {
@@ -71,8 +82,8 @@ export async function sendOtpWhatsApp(input: {
 }): Promise<{ ok: boolean; mode: "api" | "logged" | "missing" }> {
   const phone = normalizeIndianPhone(input.phone);
   const message = buildOtpWhatsAppMessage(input.code);
-  const apiUrl = process.env.WHATSAPP_API_URL?.trim();
-  const apiToken = process.env.WHATSAPP_API_TOKEN?.trim();
+  const apiUrl = getWhatsAppApiUrl();
+  const apiToken = getWhatsAppAccessToken();
 
   if (!apiUrl || !apiToken) {
     console.info("[YVITY otp whatsapp:missing-config]", phone);
@@ -165,8 +176,8 @@ export async function sendWhatsAppMessage(input: {
 }): Promise<{ ok: boolean; waUrl: string; mode: "api" | "logged" }> {
   const phone = normalizeIndianPhone(input.phone);
   const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(input.message)}`;
-  const apiUrl = process.env.WHATSAPP_API_URL?.trim();
-  const apiToken = process.env.WHATSAPP_API_TOKEN?.trim();
+  const apiUrl = getWhatsAppApiUrl();
+  const apiToken = getWhatsAppAccessToken();
 
   if (apiUrl && apiToken) {
     try {
