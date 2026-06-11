@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, SlidersHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const FALLBACK_SERVICE_CHIPS = [
   "Life Insurance",
@@ -66,12 +67,20 @@ export default function DashboardHomeDiscovery({
         }}
         className="space-y-5"
       >
-        <div className="flex items-stretch gap-3">
-          <div className="home-discovery-search-pill flex min-w-0 flex-1 items-center gap-3 px-4 sm:px-5">
+        <div className="flex items-stretch gap-2.5 sm:gap-3">
+          <div
+            className={cn(
+              "flex min-h-[48px] min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-[#E4E2DB]",
+              "bg-white px-3.5 shadow-[0_2px_14px_rgba(10,74,74,0.07)]",
+              "transition-[border-color,box-shadow] duration-200",
+              "focus-within:border-[#0A4A4A]/35 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,0.16)]",
+              "sm:gap-3 sm:px-4",
+            )}
+          >
             <Search
-              size={22}
+              size={20}
               strokeWidth={2}
-              className="relative z-[1] shrink-0 text-[#0A4A4A]/75"
+              className="shrink-0 text-[#0A4A4A]/70"
               aria-hidden
             />
             <input
@@ -81,14 +90,14 @@ export default function DashboardHomeDiscovery({
               value={searchQuery}
               onChange={(event) => onSearchQueryChange(event.target.value)}
               placeholder="Search professionals, services or city"
-              className="relative z-[1] min-w-0 flex-1 bg-transparent font-poppins text-sm text-[#0A4A4A] outline-none placeholder:text-[#9CA3AF] sm:text-[15px]"
+              className="min-w-0 flex-1 bg-transparent font-poppins text-sm text-[#0A4A4A] outline-none placeholder:text-[#9CA3AF] sm:text-[15px]"
               aria-label="Search professionals, services or city"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98] sm:px-5"
+            className="inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-4 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98] sm:rounded-full sm:px-5"
           >
             Search
           </button>
@@ -98,9 +107,14 @@ export default function DashboardHomeDiscovery({
             onClick={onToggleFilters}
             aria-label="Open advanced filters"
             aria-expanded={showFilters}
-            className="home-discovery-filter-btn inline-flex items-center justify-center"
+            className={cn(
+              "inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-2xl border border-[#E4E2DB] bg-white",
+              "text-[#0A4A4A] shadow-[0_2px_10px_rgba(10,74,74,0.06)] transition",
+              "hover:border-[#0A4A4A]/20 active:scale-[0.98]",
+              showFilters && "border-[#0A4A4A]/30 bg-[#F8F6F1] ring-2 ring-[#F59E0B]/20",
+            )}
           >
-            <SlidersHorizontal size={22} strokeWidth={2} aria-hidden />
+            <SlidersHorizontal size={20} strokeWidth={2} aria-hidden />
           </button>
         </div>
 
@@ -180,7 +194,7 @@ export default function DashboardHomeDiscovery({
         <p className="mb-3 font-poppins text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">
           Popular services
         </p>
-        <div className="home-discovery-chips-track no-scrollbar -mx-3 flex gap-2.5 overflow-x-auto px-3 pb-1 sm:-mx-0 sm:px-0">
+        <div className="no-scrollbar -mx-3 flex flex-wrap gap-2 overflow-x-auto px-3 pb-0.5 sm:-mx-0 sm:gap-2.5 sm:px-0">
           {chips.map((service) => {
             const active = activeQuickFilter === service;
 
@@ -189,12 +203,16 @@ export default function DashboardHomeDiscovery({
                 key={service}
                 type="button"
                 onClick={() => onQuickFilter(service)}
-                className={`home-discovery-chip touch-manipulation ${
-                  active ? "home-discovery-chip--active" : ""
-                }`}
+                className={cn(
+                  "touch-manipulation shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2",
+                  "font-poppins text-xs font-medium transition active:scale-[0.98] sm:text-[13px] sm:px-4 sm:py-2.5",
+                  active
+                    ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_14px_rgba(10,74,74,0.22)]"
+                    : "border-[#E4E2DB] bg-white text-[#0A4A4A] shadow-[0_1px_6px_rgba(10,74,74,0.05)] hover:border-[#0A4A4A]/25 hover:bg-[#F8F6F1]",
+                )}
                 aria-pressed={active}
               >
-                <span className="relative z-[1]">{service}</span>
+                {service}
               </button>
             );
           })}

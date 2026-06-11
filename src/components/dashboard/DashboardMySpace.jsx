@@ -177,7 +177,7 @@ export default function DashboardMySpace() {
         </p>
       </div>
 
-      <section className="rounded-[28px] bg-[#124B48] p-5 text-white sm:p-6">
+      <section className="yvity-on-dark rounded-[28px] bg-[#124B48] p-5 text-white sm:p-6">
         <div className="flex items-center gap-4">
           <UserProfileAvatar
             src={user?.selfie_url}

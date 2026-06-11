@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
   Clock,
-  Gauge,
   MapPin,
   Phone,
   PhoneIncoming,
@@ -16,10 +14,10 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import { AdvisorIdentityAvatar } from "@/components/advisor/advisor-identity-avatar";
 import { ContactTrigger } from "@/components/contact/contact-trigger";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
-import { usePublicYvityScore } from "@/hooks/use-public-yvity-score";
 import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
@@ -30,8 +28,6 @@ import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useAchievementsData, useServicesData } from "@/lib/sections/stores";
 import { formatMdrtMemberLabel } from "@/lib/sections/achievement-tiers";
 import { useAuth } from "@/context/AuthUserContext";
-import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
-import { YvityVerificationSeal } from "@/components/brand/yvity-verification-seal";
 import { CommunityTrustSection } from "@/components/home/community-trust-section";
 import { HomeCareerTeaserSection } from "@/components/home/home-career-teaser-section";
 import { HomeQuickActionsSection } from "@/components/home/home-quick-actions-section";
@@ -54,91 +50,6 @@ function splitDisplayName(fullName: string): { leading: string; accent: string }
   return { leading: parts.join(" "), accent };
 }
 
-function HomeAdvisorPhoto({
-  className,
-  showVerifiedSeal = false,
-}: {
-  className?: string;
-  showVerifiedSeal?: boolean;
-}) {
-  const { user } = useAuth();
-  const advisorProfile = useAdvisorDisplayProfile();
-  const initials = advisorProfile.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  const photoUrl =
-    resolveProfilePhotoUrl(advisorProfile.photoUrl) ||
-    resolveProfilePhotoUrl(user?.selfie_url) ||
-    "";
-  const photoSize = "size-28 sm:size-32 md:size-36 lg:size-[8.5rem]";
-
-  return (
-    <div className={cn("relative shrink-0 mx-auto lg:mx-0", className)}>
-      <div
-        className="pointer-events-none absolute inset-0 -m-3 sm:-m-3.5 rounded-full opacity-90"
-        style={{
-          background:
-            "radial-gradient(circle at 42% 38%, oklch(0.82 0.13 205 / 0.28) 0%, oklch(0.85 0.16 78 / 0.18) 38%, transparent 68%)",
-        }}
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 -m-1.5 rounded-full bg-[oklch(0.85_0.16_78/0.12)] blur-2xl"
-        aria-hidden
-      />
-
-      <div
-        className={cn(
-          "relative inline-flex rounded-full p-[3px]",
-          "bg-gradient-to-br from-[oklch(0.88_0.16_78)] via-[oklch(0.86_0.15_78)] to-[oklch(0.82_0.13_205/0.65)]",
-          "shadow-[0_0_36px_-8px_oklch(0.85_0.16_78/0.55),0_14px_32px_-14px_oklch(0_0_0/0.55)]",
-        )}
-      >
-        <div
-          className={cn(
-            "rounded-full p-[2.5px]",
-            "bg-gradient-to-br from-[oklch(0.82_0.13_205)] via-[oklch(0.78_0.12_200)] to-[oklch(0.72_0.11_198)]",
-          )}
-        >
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-full",
-              photoSize,
-              "shadow-[inset_0_1px_2px_oklch(0_0_0/0.35)]",
-              "ring-1 ring-black/15",
-              !photoUrl && "bg-gradient-to-br from-primary to-accent",
-            )}
-          >
-            {photoUrl ? (
-              <Image
-                src={photoUrl}
-                alt={advisorProfile.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 144px, 136px"
-                priority
-                unoptimized={photoUrl.startsWith("/api/")}
-              />
-            ) : (
-              <span className="flex size-full items-center justify-center text-3xl sm:text-4xl font-bold text-primary-foreground">
-                {initials}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {showVerifiedSeal ? (
-        <YvityVerificationSeal className="absolute bottom-0 right-0 z-10 translate-x-0.5 translate-y-0.5 sm:translate-x-1 sm:translate-y-1" />
-      ) : null}
-    </div>
-  );
-}
-
 function ProfileHeaderBanner() {
   const advisorProfile = useAdvisorDisplayProfile();
   const publicView = usePublicProfileView();
@@ -146,13 +57,12 @@ function ProfileHeaderBanner() {
   const { settings } = useAdvisorSettings();
   const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const [achievements] = useAchievementsData();
-  const { advisor } = useAuth();
+  const { user, advisor } = useAuth();
   const { share, copied: shareDone, canShare } = useShareProfileLink({
     advisorUserId: publicView?.userId,
     profileSlug: advisorProfile.slug,
     livePublicProfile: Boolean(publicView?.userId),
   });
-  const { score: yvityScore, loading: scoreLoading } = usePublicYvityScore();
   const { leading, accent } = splitDisplayName(advisorProfile.name);
   const mdrtLabel = formatMdrtMemberLabel(achievements);
   const showIrdaiBadge = publicView
@@ -186,9 +96,16 @@ function ProfileHeaderBanner() {
 
       <div className="relative p-4 sm:p-5 md:p-6 lg:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-5 xl:gap-6">
-          <HomeAdvisorPhoto
-            className="lg:shrink-0"
-            showVerifiedSeal={showIrdaiBadge}
+          <AdvisorIdentityAvatar
+            className="mx-auto lg:mx-0"
+            name={advisorProfile.name}
+            photoUrl={
+              advisorProfile.photoUrl ||
+              (publicView?.userId === user?.id || !publicView ? user?.selfie_url : undefined)
+            }
+            showVerifiedBadge={showIrdaiBadge}
+            variant="hero"
+            priority
           />
 
           <div className="min-w-0 flex-1 text-center lg:text-left">
@@ -223,7 +140,7 @@ function ProfileHeaderBanner() {
               {accent && <span className="text-gradient-brand">{accent}</span>}
             </h1>
 
-            <p className="mt-1 text-sm sm:text-base font-medium text-[oklch(0.85_0.16_78)]">
+            <p className="mt-1 text-sm sm:text-base font-medium text-[var(--yvity-accent-gold-strong)]">
               {advisorProfile.title}
             </p>
 
@@ -248,14 +165,6 @@ function ProfileHeaderBanner() {
                 <FactPill
                   icon={Users}
                   label={`${advisorProfile.profileHeroStat.value} ${advisorProfile.profileHeroStat.label}`}
-                />
-              ) : null}
-              {showIrdaiBadge ? (
-                <FactPill
-                  icon={Gauge}
-                  label={
-                    scoreLoading ? "YVITY Score …" : `YVITY Score ${yvityScore}/100`
-                  }
                 />
               ) : null}
             </ul>

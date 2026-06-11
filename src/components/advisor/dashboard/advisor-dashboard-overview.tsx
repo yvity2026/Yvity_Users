@@ -180,7 +180,7 @@ export function AdvisorDashboardOverview({
                 {model.displayName}
               </h2>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[oklch(0.85_0.16_78/0.4)] bg-[oklch(0.85_0.16_78/0.12)] px-2.5 py-0.5 text-[10px] font-semibold text-[oklch(0.9_0.14_78)]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[oklch(0.85_0.16_78/0.4)] bg-[oklch(0.85_0.16_78/0.12)] px-2.5 py-0.5 text-[10px] font-semibold text-[var(--yvity-accent-gold-strong)]">
                   <Crown className="size-3" />
                   {model.membershipPlan}
                 </span>

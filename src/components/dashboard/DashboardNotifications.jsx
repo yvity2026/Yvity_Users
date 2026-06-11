@@ -165,11 +165,11 @@ export function DashboardApprovalBanner() {
     <section className="rounded-3xl border border-[oklch(0.85_0.16_78/0.35)] bg-gradient-to-r from-[oklch(0.85_0.16_78/0.14)] via-white/5 to-[oklch(0.82_0.13_205/0.12)] p-5 md:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[oklch(0.85_0.16_78/0.2)] text-[oklch(0.9_0.14_78)]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[oklch(0.85_0.16_78/0.2)] text-[var(--yvity-accent-gold-strong)]">
             <Sparkles className="size-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[oklch(0.9_0.14_78)]">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--yvity-accent-gold-strong)]">
               Profile approved
             </p>
             <h3 className="mt-1 text-lg font-bold text-foreground">{approval.title}</h3>
@@ -191,7 +191,7 @@ export function DashboardApprovalBanner() {
           <button
             type="button"
             onClick={() => void markRead(approval.id)}
-            className="shrink-0 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-white/10"
+            className="shrink-0 rounded-full border border-border bg-muted/60 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted"
           >
             Got it
           </button>

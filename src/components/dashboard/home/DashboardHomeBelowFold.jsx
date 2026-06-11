@@ -412,7 +412,7 @@ export function DashboardHomeTrustFooter() {
   ];
 
   return (
-    <section className="rounded-[24px] border border-[#E4E2DB]/90 bg-gradient-to-br from-[#0A4A4A] via-[#0D4D4D] to-[#083838] px-5 py-6 text-white sm:px-7 sm:py-7">
+    <section className="yvity-on-dark rounded-[24px] border border-[#E4E2DB]/90 bg-gradient-to-br from-[#0A4A4A] via-[#0D4D4D] to-[#083838] px-5 py-6 text-white sm:px-7 sm:py-7">
       <h2 className="font-cormorant text-xl font-bold text-white sm:text-2xl">
         Why Trust YVITY
       </h2>

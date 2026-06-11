@@ -226,7 +226,7 @@ function PreviewPane({
       )}
     >
       {showChrome && (
-        <header className="flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-white/8 bg-[oklch(0.16_0.02_245)] text-white">
+        <header className="yvity-on-dark flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-white/8 bg-[oklch(0.16_0.02_245)] text-white">
           <div className="flex items-center gap-1.5" aria-hidden>
             <span className="size-2.5 rounded-full bg-[oklch(0.72_0.18_15)]" />
             <span className="size-2.5 rounded-full bg-[oklch(0.85_0.16_78)]" />

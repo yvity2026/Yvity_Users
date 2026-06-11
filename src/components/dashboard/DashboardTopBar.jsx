@@ -110,46 +110,54 @@ export default function DashboardTopBar() {
   const useFlatNav =
     isMySpace || pathname === DASHBOARD_TOP_ROUTES.profile;
 
+  const mobileBarInner = (
+    <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
+      <Link
+        href={DASHBOARD_TOP_ROUTES.home}
+        className="flex min-w-0 items-center justify-start"
+        aria-label="YVITY home"
+      >
+        <BrandBlock layout={useFlatNav ? "row" : "column"} />
+      </Link>
+
+      <div className="flex items-center gap-3">
+        <Link
+          href={DASHBOARD_TOP_ROUTES.notifications}
+          className="yvity-dash-nav-action relative flex h-9 w-9 items-center justify-center rounded-full border"
+          aria-label="Notifications"
+        >
+          <IoNotificationsOutline size={20} />
+          {unreadCount > 0 ? (
+            <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-[#F59E0B] px-1 text-[9px] font-bold text-[#0A4A4A]">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          ) : null}
+        </Link>
+
+        <Link href={DASHBOARD_TOP_ROUTES.profile} aria-label="Profile and account">
+          <UserProfileAvatar
+            src={user?.selfie_url}
+            name={user?.name}
+            size={36}
+            className="yvity-dash-nav-avatar-ring ring-2"
+          />
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 m-0 p-0">
-      {/* Mobile */}
-      <div className="mob-nav-top-frame yvity-dash-nav-top-frame lg:hidden">
-        <div className="glass-nav-mobile mob-nav-top-inner yvity-dash-nav-top-inner">
-          <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
-            <Link
-              href={DASHBOARD_TOP_ROUTES.home}
-              className="flex min-w-0 items-center justify-start"
-              aria-label="YVITY home"
-            >
-              <BrandBlock />
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <Link
-                href={DASHBOARD_TOP_ROUTES.notifications}
-                className="yvity-dash-nav-action relative flex h-9 w-9 items-center justify-center rounded-full border"
-                aria-label="Notifications"
-              >
-                <IoNotificationsOutline size={20} />
-                {unreadCount > 0 ? (
-                  <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-background bg-[#F59E0B] px-1 text-[9px] font-bold text-[#0A4A4A]">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                ) : null}
-              </Link>
-
-              <Link href={DASHBOARD_TOP_ROUTES.profile} aria-label="Profile and account">
-                <UserProfileAvatar
-                  src={user?.selfie_url}
-                  name={user?.name}
-                  size={36}
-                  className="yvity-dash-nav-avatar-ring ring-2"
-                />
-              </Link>
-            </div>
+      {/* Mobile — flat bar on My Space / profile (matches public profile nav) */}
+      {useFlatNav ? (
+        <div className="yvity-dash-nav-flat border-b lg:hidden">{mobileBarInner}</div>
+      ) : (
+        <div className="mob-nav-top-frame yvity-dash-nav-top-frame lg:hidden">
+          <div className="glass-nav-mobile mob-nav-top-inner yvity-dash-nav-top-inner">
+            {mobileBarInner}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Desktop — flat bar on My Space */}
       {useFlatNav ? (

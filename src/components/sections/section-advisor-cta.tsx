@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Calendar, Phone, Shield } from "lucide-react";
+import { AdvisorIdentityAvatar } from "@/components/advisor/advisor-identity-avatar";
 import { AdvisorCtaButtons } from "@/components/contact/advisor-cta-buttons";
 import { StarRating } from "@/components/ui/star-rating";
 import { useAuth } from "@/context/AuthUserContext";
@@ -12,44 +13,10 @@ import { cn } from "@/lib/utils";
 
 const HIGHLIGHT_ICONS = [Shield, Calendar, Phone] as const;
 
-function AdvisorAvatar({ name }: { name: string }) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  return (
-    <div className="relative shrink-0">
-      <div
-        className={cn(
-          "flex size-20 sm:size-24 md:size-28 items-center justify-center rounded-full",
-          "bg-gradient-to-br from-primary to-accent text-xl sm:text-2xl font-bold text-primary-foreground",
-          "ring-[3px] ring-[oklch(0.82_0.16_78/0.55)] shadow-lg shadow-primary/40",
-        )}
-      >
-        {initials}
-      </div>
-      <span
-        className={cn(
-          "absolute bottom-0 right-0 translate-x-[15%] translate-y-[15%]",
-          "inline-flex size-7 sm:size-8 items-center justify-center rounded-full",
-          "bg-[oklch(0.82_0.16_78)] text-[oklch(0.18_0.035_235)] shadow-md",
-          "ring-[3px] ring-[oklch(0.18_0.035_235)]",
-        )}
-        aria-hidden
-      >
-        <BadgeCheck className="size-4 sm:size-[1.125rem]" />
-      </span>
-    </div>
-  );
-}
-
 export function SectionAdvisorCta({ className }: { className?: string }) {
   const advisorProfile = useAdvisorDisplayProfile();
   const publicView = usePublicProfileView();
-  const { advisor } = useAuth();
+  const { user, advisor } = useAuth();
   const showVerifiedBadge = publicView
     ? isAdvisorProfileApproved(publicView.profile)
     : isAdvisorProfileApproved(advisor);
@@ -77,7 +44,15 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
 
       <div className="relative flex flex-col lg:flex-row lg:min-h-[280px]">
         <div className="flex items-center justify-center px-5 pt-6 pb-2 sm:px-6 lg:px-8 lg:py-8 lg:border-r lg:border-white/10 lg:shrink-0">
-          <AdvisorAvatar name={advisorProfile.name} />
+          <AdvisorIdentityAvatar
+            name={advisorProfile.name}
+            photoUrl={
+              advisorProfile.photoUrl ||
+              (publicView?.userId === user?.id || !publicView ? user?.selfie_url : undefined)
+            }
+            showVerifiedBadge={showVerifiedBadge}
+            variant="cta"
+          />
         </div>
 
         <div className="flex flex-1 flex-col justify-center px-5 pb-4 sm:px-6 md:px-8 lg:py-8">
