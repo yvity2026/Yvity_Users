@@ -3,10 +3,10 @@
 import { Sparkles } from "lucide-react";
 import { IntroVideoPublicPlayer } from "@/components/intro-video/intro-video-public-player";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useAdvisorProfilePhoto } from "@/hooks/use-advisor-profile-photo";
 import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { getPlanGatedIntroVideo } from "@/lib/intro-video";
-import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { cn } from "@/lib/utils";
 
 /** Gold-only prominent intro video block in the profile hero. */
@@ -14,7 +14,7 @@ export function IntroVideoHeroBlock({ className }: { className?: string }) {
   const { settings } = useAdvisorSettings();
   const { limits } = useResolvedPlanLimits();
   const advisorProfile = useAdvisorDisplayProfile();
-  const profilePhoto = resolveProfilePhotoUrl(advisorProfile.photoUrl) || "";
+  const profilePhoto = useAdvisorProfilePhoto();
 
   if (!limits.introVideoHeroPlacement) return null;
   if (!settings.visibility.introductionVideo) return null;

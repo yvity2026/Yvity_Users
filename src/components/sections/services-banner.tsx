@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionBannerAdvisorIdentity } from "@/components/sections/section-banner-advisor-identity";
 import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
 import { categoryHeadingFor, serviceAccents, servicesPageCopy } from "@/lib/sections/services-config";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,8 @@ export function ServicesBanner({ items, className }: { items: ServiceItem[]; cla
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_0%_100%,oklch(0.82_0.13_205/0.15),transparent_50%)]" />
 
       <div className="relative flex flex-col gap-6 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-stretch lg:gap-8">
-        <div className="min-w-0 flex-1 lg:flex lg:flex-col lg:justify-center">
+        <SectionBannerAdvisorIdentity className="lg:shrink-0 lg:self-center" />
+        <div className="min-w-0 flex-1 text-center lg:text-left lg:flex lg:flex-col lg:justify-center">
           <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[oklch(0.82_0.13_205)]">
             {servicesPageCopy.label}
           </p>

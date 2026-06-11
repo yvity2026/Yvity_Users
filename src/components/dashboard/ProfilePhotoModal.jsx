@@ -90,6 +90,7 @@ export default function ProfilePhotoModal({
 
       toast.success(json.message || "Profile photo updated");
       onPhotoUpdated?.(json.data?.selfie_url);
+      window.dispatchEvent(new CustomEvent("profile-data-updated"));
       handleClose();
     } catch (error) {
       toast.error(error.message || "Could not update photo");

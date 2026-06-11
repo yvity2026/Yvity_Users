@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionBannerAdvisorIdentity } from "@/components/sections/section-banner-advisor-identity";
 import { computeGalleryBannerStats, galleryPageCopy } from "@/lib/gallery-config";
 import type { GalleryItem } from "@/lib/gallery-types";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,8 @@ export function GalleryBanner({ items, className }: { items: GalleryItem[]; clas
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_0%_100%,oklch(0.82_0.13_205/0.15),transparent_50%)]" />
 
       <div className="relative flex flex-col gap-6 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-        <div className="min-w-0 flex-1">
+        <SectionBannerAdvisorIdentity className="lg:shrink-0" />
+        <div className="min-w-0 flex-1 text-center lg:text-left">
           <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[oklch(0.82_0.13_205)]">
             {galleryPageCopy.label}
           </p>

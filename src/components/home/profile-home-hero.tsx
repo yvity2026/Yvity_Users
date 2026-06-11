@@ -17,8 +17,12 @@ import {
 import { AdvisorIdentityAvatar } from "@/components/advisor/advisor-identity-avatar";
 import { ContactTrigger } from "@/components/contact/contact-trigger";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import {
+  useAdvisorProfilePhoto,
+  useShowAdvisorVerifiedBadge,
+} from "@/hooks/use-advisor-profile-photo";
 import { useShareProfileLink } from "@/hooks/use-share-profile-link";
+import { useShowProfileCallback } from "@/hooks/use-show-profile-callback";
 import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { buildHomeServiceChips } from "@/lib/home/home-service-chips";
@@ -55,9 +59,9 @@ function ProfileHeaderBanner() {
   const publicView = usePublicProfileView();
   const { home } = advisorProfile;
   const { settings } = useAdvisorSettings();
-  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const [achievements] = useAchievementsData();
-  const { user, advisor } = useAuth();
+  const profilePhoto = useAdvisorProfilePhoto();
+  const showVerifiedBadge = useShowAdvisorVerifiedBadge();
   const { share, copied: shareDone, canShare } = useShareProfileLink({
     advisorUserId: publicView?.userId,
     profileSlug: advisorProfile.slug,
@@ -65,17 +69,11 @@ function ProfileHeaderBanner() {
   });
   const { leading, accent } = splitDisplayName(advisorProfile.name);
   const mdrtLabel = formatMdrtMemberLabel(achievements);
-  const showIrdaiBadge = publicView
-    ? isAdvisorProfileApproved(publicView.profile)
-    : isAdvisorProfileApproved(advisor);
+  const showIrdaiBadge = showVerifiedBadge;
   const telHref = `tel:${advisorProfile.phone.replace(/\s/g, "")}`;
 
   const showCall = settings.contact.callButton;
-  const showCallback =
-    !isWorkspacePreview &&
-    settings.contact.contactForm &&
-    settings.leads.acceptNewLeads &&
-    settings.leads.publicProfileEnquiries;
+  const showCallback = useShowProfileCallback();
   const showShare = canShare && settings.publicProfile.shareProfile;
 
   const headerBtn =
@@ -99,13 +97,9 @@ function ProfileHeaderBanner() {
           <AdvisorIdentityAvatar
             className="mx-auto lg:mx-0"
             name={advisorProfile.name}
-            photoUrl={
-              advisorProfile.photoUrl ||
-              (publicView?.userId === user?.id || !publicView ? user?.selfie_url : undefined)
-            }
+            photoUrl={profilePhoto}
             showVerifiedBadge={showIrdaiBadge}
             variant="hero"
-            priority
           />
 
           <div className="min-w-0 flex-1 text-center lg:text-left">
@@ -168,6 +162,7 @@ function ProfileHeaderBanner() {
                 />
               ) : null}
             </ul>
+
           </div>
 
           {(showCall || showCallback || showShare) && (

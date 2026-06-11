@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
@@ -9,13 +9,19 @@ type AdvisorIdentityAvatarProps = {
   name: string;
   photoUrl?: string | null;
   showVerifiedBadge?: boolean;
-  /** `hero` — profile header; `cta` — bottom advisor CTA card */
-  variant?: "hero" | "cta";
+  /** `hero` — profile header; `cta` — bottom advisor CTA card; `banner` — section banners */
+  variant?: "hero" | "cta" | "banner";
   className?: string;
-  priority?: boolean;
 };
 
 const VARIANT_CLASS = {
+  banner: {
+    avatar: "size-16 sm:size-20",
+    text: "text-lg sm:text-xl",
+    badge: "size-6 sm:size-7",
+    badgeIcon: "size-3.5 sm:size-4",
+    ring: "ring-2 sm:ring-[3px]",
+  },
   cta: {
     avatar: "size-20 sm:size-24 md:size-28",
     text: "text-xl sm:text-2xl",
@@ -39,10 +45,16 @@ export function AdvisorIdentityAvatar({
   showVerifiedBadge = false,
   variant = "cta",
   className,
-  priority = false,
 }: AdvisorIdentityAvatarProps) {
   const styles = VARIANT_CLASS[variant];
   const resolvedPhoto = resolveProfilePhotoUrl(photoUrl) || "";
+  const [imageError, setImageError] = useState(false);
+  const showPhoto = Boolean(resolvedPhoto) && !imageError;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [resolvedPhoto]);
+
   const initials = name
     .split(" ")
     .map((part) => part[0])
@@ -63,15 +75,13 @@ export function AdvisorIdentityAvatar({
           "ring-[oklch(0.82_0.16_78/0.55)]",
         )}
       >
-        {resolvedPhoto ? (
-          <Image
+        {showPhoto ? (
+          <img
             src={resolvedPhoto}
             alt={name}
-            fill
-            className="object-cover"
-            sizes={variant === "hero" ? "(max-width: 768px) 144px, 144px" : "(max-width: 768px) 112px, 112px"}
-            priority={priority}
-            unoptimized={resolvedPhoto.startsWith("/api/")}
+            className="absolute inset-0 h-full w-full object-cover"
+            referrerPolicy="no-referrer"
+            onError={() => setImageError(true)}
           />
         ) : (
           initials

@@ -4,10 +4,11 @@ import { BadgeCheck, Calendar, Phone, Shield } from "lucide-react";
 import { AdvisorIdentityAvatar } from "@/components/advisor/advisor-identity-avatar";
 import { AdvisorCtaButtons } from "@/components/contact/advisor-cta-buttons";
 import { StarRating } from "@/components/ui/star-rating";
-import { useAuth } from "@/context/AuthUserContext";
-import { usePublicProfileView } from "@/context/public-profile-view-context";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import {
+  useAdvisorProfilePhoto,
+  useShowAdvisorVerifiedBadge,
+} from "@/hooks/use-advisor-profile-photo";
 import { VERIFIED_BY_YVITY_LABEL } from "@/lib/verification/copy";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +16,8 @@ const HIGHLIGHT_ICONS = [Shield, Calendar, Phone] as const;
 
 export function SectionAdvisorCta({ className }: { className?: string }) {
   const advisorProfile = useAdvisorDisplayProfile();
-  const publicView = usePublicProfileView();
-  const { user, advisor } = useAuth();
-  const showVerifiedBadge = publicView
-    ? isAdvisorProfileApproved(publicView.profile)
-    : isAdvisorProfileApproved(advisor);
+  const profilePhoto = useAdvisorProfilePhoto();
+  const showVerifiedBadge = useShowAdvisorVerifiedBadge();
   const highlightItems = HIGHLIGHT_ICONS.map((icon, index) => ({
     icon,
     label: advisorProfile.highlights[index]?.label ?? "",
@@ -46,10 +44,7 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
         <div className="flex items-center justify-center px-5 pt-6 pb-2 sm:px-6 lg:px-8 lg:py-8 lg:border-r lg:border-white/10 lg:shrink-0">
           <AdvisorIdentityAvatar
             name={advisorProfile.name}
-            photoUrl={
-              advisorProfile.photoUrl ||
-              (publicView?.userId === user?.id || !publicView ? user?.selfie_url : undefined)
-            }
+            photoUrl={profilePhoto}
             showVerifiedBadge={showVerifiedBadge}
             variant="cta"
           />

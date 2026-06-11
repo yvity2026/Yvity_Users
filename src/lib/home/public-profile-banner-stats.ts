@@ -54,17 +54,16 @@ export function isIrdaiVerified(profileApproved: boolean): boolean {
 }
 
 export function buildSectionProfileBannerStats(input: {
-  /** Full professional timeline (My Career / journey banner). */
-  journeyExperienceDisplay: string;
+  /** Service tenure — matches profile header pills. */
+  experienceDisplay: string;
   avgRating: number | null;
   companyName: string;
   profileApproved: boolean;
 }): { value: string; label: string }[] {
-  const experienceValue = input.journeyExperienceDisplay
-    ? input.journeyExperienceDisplay.includes("year") ||
-      input.journeyExperienceDisplay.endsWith("+")
-      ? input.journeyExperienceDisplay
-      : `${input.journeyExperienceDisplay} yrs`
+  const experienceValue = input.experienceDisplay
+    ? input.experienceDisplay.includes("year") || input.experienceDisplay.endsWith("+")
+      ? input.experienceDisplay
+      : `${input.experienceDisplay} yrs`
     : "—";
 
   return [
@@ -205,7 +204,7 @@ export function buildPublicProfileBannerStats(input: {
     irdaiVerified: isIrdaiVerified(input.profileApproved),
     profileApproved: input.profileApproved,
     sectionBannerStats: buildSectionProfileBannerStats({
-      journeyExperienceDisplay: input.journeyExperienceDisplay,
+      experienceDisplay: input.experienceDisplay,
       avgRating,
       companyName,
       profileApproved: input.profileApproved,

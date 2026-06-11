@@ -3,7 +3,7 @@
 import { Phone, PhoneIncoming } from "lucide-react";
 import { ContactTrigger } from "@/components/contact/contact-trigger";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { useShowProfileCallback } from "@/hooks/use-show-profile-callback";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,15 +21,10 @@ export function AdvisorCtaButtons({
 }) {
   const { settings } = useAdvisorSettings();
   const advisorProfile = useAdvisorDisplayProfile();
-  const isWorkspacePreview = useIsAdvisorWorkspacePreview();
   const telHref = `tel:${advisorProfile.phone.replace(/\s/g, "")}`;
   const isRow = layout === "row";
   const showCall = settings.contact.callButton;
-  const showCallback =
-    !isWorkspacePreview &&
-    settings.contact.contactForm &&
-    settings.leads.acceptNewLeads &&
-    settings.leads.publicProfileEnquiries;
+  const showCallback = useShowProfileCallback();
 
   if (!showCall && !showCallback) return null;
 
