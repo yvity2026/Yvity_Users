@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-profile-theme="signature-dark" className={brandFontClassName}>
+    <html lang="en" data-profile-theme="warm-ivory" className={brandFontClassName}>
       <body>
         <Providers>
           <SiteChrome />

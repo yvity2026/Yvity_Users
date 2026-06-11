@@ -4,12 +4,15 @@ export type ProfileThemeId =
   | "clean-white"
   | "midnight-amber";
 
-export const DEFAULT_PROFILE_THEME_ID: ProfileThemeId = "signature-dark";
+/** Official YVITY brand theme — default for all advisors; only theme on Free. */
+export const YVITY_BRAND_THEME_ID: ProfileThemeId = "warm-ivory";
+
+export const DEFAULT_PROFILE_THEME_ID: ProfileThemeId = YVITY_BRAND_THEME_ID;
 
 export const PROFILE_THEME_IDS: ProfileThemeId[] = [
-  "signature-dark",
   "warm-ivory",
   "clean-white",
+  "signature-dark",
   "midnight-amber",
 ];
 
@@ -23,6 +26,7 @@ export type ProfileThemeMeta = {
   name: string;
   tagline: string;
   isDefault?: boolean;
+  goldOnly?: boolean;
   preview: {
     background: string;
     card: string;
@@ -34,22 +38,10 @@ export type ProfileThemeMeta = {
 
 export const PROFILE_THEMES: ProfileThemeMeta[] = [
   {
-    id: "signature-dark",
-    name: "Signature Dark",
-    tagline: "Dark premium · Teal & gold · Soft glow",
-    isDefault: true,
-    preview: {
-      background: "oklch(0.18 0.035 235)",
-      card: "oklch(0.235 0.04 232)",
-      accent: "oklch(0.78 0.13 200)",
-      gold: "oklch(0.82 0.16 78)",
-      text: "oklch(0.97 0.01 230)",
-    },
-  },
-  {
     id: "warm-ivory",
-    name: "Warm Ivory",
-    tagline: "Official YVITY brand · Pearl ivory · Teal & saffron · Cormorant + Poppins",
+    name: "YVITY Brand",
+    tagline: "Official YVITY brand · Pearl ivory · Teal & saffron",
+    isDefault: true,
     preview: {
       background: "#F8F6F1",
       card: "#FCFAF6",
@@ -71,9 +63,23 @@ export const PROFILE_THEMES: ProfileThemeMeta[] = [
     },
   },
   {
+    id: "signature-dark",
+    name: "Signature Dark",
+    tagline: "Gold plan · Dark premium · Teal & gold glow",
+    goldOnly: true,
+    preview: {
+      background: "oklch(0.18 0.035 235)",
+      card: "oklch(0.235 0.04 232)",
+      accent: "oklch(0.78 0.13 200)",
+      gold: "oklch(0.82 0.16 78)",
+      text: "oklch(0.97 0.01 230)",
+    },
+  },
+  {
     id: "midnight-amber",
     name: "Midnight Amber",
-    tagline: "Option D preview · Navy depth · Amber glow",
+    tagline: "Gold plan · Navy depth · Amber glow",
+    goldOnly: true,
     preview: {
       background: "#1A1F36",
       card: "#2A3055",

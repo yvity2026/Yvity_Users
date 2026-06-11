@@ -18,7 +18,7 @@ function buildLimitHelpers(planId: MembershipPlanId, limits: PlanLimits) {
   return {
     planId,
     limits,
-    themes: allowedThemeIds(limits),
+    themes: allowedThemeIds(planId),
     canAccessAnalytics: limits.profileAnalytics,
     canAppearInSearch: limits.searchAppearance,
     canVerifyServices: limits.serviceVerification,

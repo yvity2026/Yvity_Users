@@ -41,6 +41,8 @@ export {
   filterGalleryForPublicDisplay,
   filterTestimonialsForPublicDisplay,
   isThemeAllowed,
+  resolveThemeForPlan,
+  PLAN_ALLOWED_THEMES,
   validateIntroVideoSettings,
   validateTestimonialCounts,
   visibleLeads,

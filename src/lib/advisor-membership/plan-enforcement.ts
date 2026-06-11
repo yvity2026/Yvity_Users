@@ -1,4 +1,4 @@
-import { PROFILE_THEME_IDS, type ProfileThemeId } from "@/lib/profile-themes";
+import { PROFILE_THEME_IDS, YVITY_BRAND_THEME_ID, type ProfileThemeId } from "@/lib/profile-themes";
 import type { Lead } from "@/lib/leads/types";
 import type { TestimonialItem, TestimonialType } from "@/lib/sections/types";
 import { isServiceVerifiedByYvity } from "@/lib/verification/defaults";
@@ -7,6 +7,13 @@ import type { PlanLimits } from "./plan-limits";
 import { nextUpgradePlan } from "./plan-limits";
 import type { MembershipPlanId } from "./types";
 import { isHostedIntroVideoUrl } from "@/lib/media-urls";
+
+/** Themes unlocked per membership tier. */
+export const PLAN_ALLOWED_THEMES: Record<MembershipPlanId, ProfileThemeId[]> = {
+  free: [YVITY_BRAND_THEME_ID],
+  silver: [YVITY_BRAND_THEME_ID, "clean-white"],
+  gold: [...PROFILE_THEME_IDS],
+};
 
 export type PlanLimitCheck = {
   ok: boolean;
@@ -116,14 +123,19 @@ export function visibleLeads<T extends Lead>(
   return { visible, total, lockedCount: Math.max(0, total - visible.length), limit };
 }
 
-export function allowedThemeIds(limits: PlanLimits): ProfileThemeId[] {
-  const cap = limits.profileThemes;
-  if (cap === null) return [...PROFILE_THEME_IDS];
-  return PROFILE_THEME_IDS.slice(0, Math.max(1, cap));
+export function allowedThemeIds(planId: MembershipPlanId): ProfileThemeId[] {
+  return PLAN_ALLOWED_THEMES[planId] ?? PLAN_ALLOWED_THEMES.free;
 }
 
-export function isThemeAllowed(limits: PlanLimits, themeId: ProfileThemeId): boolean {
-  return allowedThemeIds(limits).includes(themeId);
+export function isThemeAllowed(planId: MembershipPlanId, themeId: ProfileThemeId): boolean {
+  return allowedThemeIds(planId).includes(themeId);
+}
+
+export function resolveThemeForPlan(
+  planId: MembershipPlanId,
+  themeId: ProfileThemeId,
+): ProfileThemeId {
+  return isThemeAllowed(planId, themeId) ? themeId : YVITY_BRAND_THEME_ID;
 }
 
 export function canUseIntroVideo(

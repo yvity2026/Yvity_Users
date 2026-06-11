@@ -35,7 +35,7 @@ export async function PUT(request: Request) {
 
   const normalized = normalizeAdvisorSettings(body.data);
   const planCtx = await getAdvisorPlanContext(session.id);
-  if (planCtx && !isThemeAllowed(planCtx.limits, normalized.appearance.theme)) {
+  if (planCtx && !isThemeAllowed(planCtx.planId, normalized.appearance.theme)) {
     return NextResponse.json(
       { error: "This profile theme is not available on your current plan." },
       { status: 403 },

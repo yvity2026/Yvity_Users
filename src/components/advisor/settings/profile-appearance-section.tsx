@@ -4,7 +4,7 @@ import { Check, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { SettingsGroup } from "@/components/advisor/settings/settings-ui";
 import { usePlanLimits } from "@/hooks/use-plan-limits";
-import { PROFILE_THEMES, type ProfileThemeId } from "@/lib/profile-themes";
+import { PROFILE_THEMES, isDarkProfileTheme, type ProfileThemeId } from "@/lib/profile-themes";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ function ThemePreviewThumbnail({
   themeId: ProfileThemeId;
   preview: (typeof PROFILE_THEMES)[number]["preview"];
 }) {
-  const isDark = themeId === "signature-dark";
+  const isDark = isDarkProfileTheme(themeId);
 
   return (
     <div
@@ -138,6 +138,11 @@ export function ProfileAppearanceSection() {
                     {theme.isDefault && (
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
                         Default
+                      </p>
+                    )}
+                    {theme.goldOnly && locked && (
+                      <p className="text-[10px] uppercase tracking-wider text-[#F59E0B] mt-0.5">
+                        Gold plan
                       </p>
                     )}
                     <p className="text-[11px] text-muted-foreground mt-1 leading-snug">

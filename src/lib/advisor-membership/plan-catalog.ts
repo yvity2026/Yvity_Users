@@ -29,7 +29,7 @@ export const MEMBERSHIP_PLAN_MARKETING: PlanMarketingCard[] = [
       "5 Gallery Photos",
       "1 Recommendation",
       "View First 5 Leads",
-      "1 Profile Theme",
+      "YVITY Brand Profile Theme",
     ],
     excluded: [
       "Service Verification",
