@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>YVITY Users — Technical Onboarding Guide</title>
+<style>
+  @page { margin: 18mm 16mm; size: A4; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    max-width: 100%;
+  }
+  h1 { font-size: 22pt; color: #0A4A4A; border-bottom: 2px solid #F59E0B; padding-bottom: 6px; margin-top: 0; }
+  h2 { font-size: 14pt; color: #0A4A4A; margin-top: 22px; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; color: #0D6060; margin-top: 16px; page-break-after: avoid; }
+  h4 { font-size: 10.5pt; color: #374151; margin-top: 12px; }
+  p { margin: 6px 0 10px; }
+  li { margin: 4px 0 4px 18px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 9.5pt; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f0f9f8; color: #0A4A4A; font-weight: 600; }
+  tr:nth-child(even) td { background: #fafafa; }
+  code, pre { font-family: Consolas, "Courier New", monospace; font-size: 9pt; }
+  pre { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; overflow-x: auto; white-space: pre-wrap; }
+  code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+  strong { color: #0A4A4A; }
+</style>
+</head>
+<body>
+<h1>YVITY Users — Technical Onboarding Guide</h1>
+<p><strong>Product:</strong> YVITY Users (Advisor &amp; Customer Platform)  </p>
+<p><strong>Repository:</strong> Yvity_Users  </p>
+<p><strong>Audience:</strong> New engineers, QA, and technical stakeholders  </p>
+<p><strong>Last updated:</strong> June 2026</p>
+<hr/>
+<h2>Table of Contents</h2>
+<p>1. [What is YVITY Users?](#1-what-is-yvity-users)</p>
+<p>2. [Who Are the Users?](#2-who-are-the-users)</p>
+<p>3. [Registration — Step by Step](#3-registration--step-by-step)</p>
+<p>4. [After Registration — Dashboard](#4-after-registration--dashboard)</p>
+<p>5. [My Space — Advisor Workspace](#5-my-space--advisor-workspace)</p>
+<p>6. [Public Profile — What Visitors See](#6-public-profile--what-visitors-see)</p>
+<p>7. [YVITY Score — How It Is Calculated](#7-yvity-score--how-it-is-calculated)</p>
+<p>8. [Contact, Leads &amp; Request Call Back](#8-contact-leads--request-call-back)</p>
+<p>9. [Profile Approval (IRDAI) Workflow](#9-profile-approval-irdai-workflow)</p>
+<p>10. [Membership Plans &amp; Limits](#10-membership-plans--limits)</p>
+<p>11. [Data Storage &amp; Key APIs](#11-data-storage--key-apis)</p>
+<p>12. [Developer Quick Reference](#12-developer-quick-reference)</p>
+<hr/>
+<h2>1. What is YVITY Users?</h2>
+<p>YVITY Users is a Next.js web application where:</p>
+<li><strong>Insurance advisors</strong> build a verified, shareable public profile (services, career, achievements, testimonials, gallery, intro video).</li>
+<li><strong>Customers</strong> discover advisors, compare YVITY Scores, and contact advisors.</li>
+<li><strong>YVITY</strong> verifies identity (selfie + OTP), IRDAI credentials, and content to build trust.</li>
+<p>The app has three major surfaces:</p>
+<table>
+<tr><th>Surface</th><th>URL pattern</th><th>Purpose</th></tr>
+<tr><td>Marketing / landing</td><td><code>/</code></td><td>Brand site, find advisors, register</td></tr>
+<tr><td>Logged-in dashboard</td><td><code>/dashboard/*</code></td><td>Home, My Space, profile, saved advisors</td></tr>
+<tr><td>Public advisor profile</td><td><code>/{slug}</code></td><td>Live profile visitors see and share</td></tr>
+</table>
+<hr/>
+<h2>2. Who Are the Users?</h2>
+<h3>2.1 Customer (default role)</h3>
+<p>Every person who completes registration starts as a <strong>customer</strong>.</p>
+<li>Can browse advisors on Dashboard Home and Explore.</li>
+<li>Can save advisor profiles.</li>
+<li>Can submit contact forms on public profiles.</li>
+<li>Does <strong>not</strong> have an advisor workspace until they opt in.</li>
+<p><strong>Role in session:</strong> <code>roles: ["customer"]</code></p>
+<h3>2.2 Advisor (opt-in role)</h3>
+<p>A customer becomes an advisor when they start <strong>My Space setup</strong>.</p>
+<li>Adds <code>advisor</code> to roles: <code>["customer", "advisor"]</code>.</li>
+<li>Gets a workspace to manage career, services, testimonials, etc.</li>
+<li>Gets a public profile slug (e.g. <code>/krishna-mohan-noti-167ec15f</code>).</li>
+<li>Must complete setup and (for paid plans) pass IRDAI admin approval before the profile goes fully live.</li>
+<p><strong>Advisor account statuses:</strong></p>
+<table>
+<tr><th>Status</th><th>Meaning</th></tr>
+<tr><td>*(none)*</td><td>Customer only — no advisor profile submitted</td></tr>
+<tr><td><code>under_review</code></td><td>Silver/Gold submitted; waiting for admin IRDAI approval</td></tr>
+<tr><td><code>active</code></td><td>Approved — public profile live, full score unlocked</td></tr>
+<tr><td><code>action_required</code></td><td>Admin rejected; advisor must fix and resubmit</td></tr>
+</table>
+<h3>2.3 Admin (operational)</h3>
+<p>Admin pages exist for IRDAI approvals and content verification:</p>
+<li><code>/admin/irdaiapprovals</code> — approve/reject advisor profiles</li>
+<li><code>/admin/verifications</code> — review career, achievements, etc.</li>
+<p>*Note: Admin APIs currently gate on signed-in session; dedicated admin RBAC is planned.*</p>
+<hr/>
+<h2>3. Registration — Step by Step</h2>
+<p><strong>Entry:</strong> <code>/register</code> or the global registration modal from the landing page.</p>
+<h3>Step 1 — Verify mobile</h3>
+<p>1. User enters <strong>name</strong> and <strong>Indian mobile number</strong>.</p>
+<p>2. App sends OTP via WhatsApp → <code>POST /api/auth/send-otp</code>.</p>
+<p>3. User enters OTP → <code>POST /api/auth/verify-otp</code>.</p>
+<p>4. Server sets <code>yvity_phone_verified</code> cookie.</p>
+<h3>Step 2 — About you &amp; email</h3>
+<p>1. User enters <strong>date of birth</strong>, <strong>gender</strong>, <strong>email</strong>.</p>
+<p>2. Email OTP sent → verified via email OTP APIs.</p>
+<p>3. Server sets <code>yvity_email_verified</code> cookie.</p>
+<h3>Step 3 — Your profile</h3>
+<p>1. User enters <strong>city</strong>, <strong>state</strong>, <strong>profession</strong> (e.g. "Life Insurance Advisor").</p>
+<p>2. Validated client-side only.</p>
+<h3>Step 4 — Identity check (selfie)</h3>
+<p>1. User captures or uploads a <strong>selfie</strong>.</p>
+<p>2. Uploaded via <code>POST /api/auth/upload-selfie</code>.</p>
+<p>3. This selfie becomes the <strong>default profile photo</strong> everywhere (public profile, cards, dashboard) until changed via Profile &amp; account (requires mobile + email OTP).</p>
+<h3>Final submit</h3>
+<p>1. <code>POST /api/auth/register</code> checks both OTP cookies, creates user record, sets session cookie.</p>
+<p>2. Response: <code>{ redirectUrl: "/dashboard" }</code>.</p>
+<p>3. User lands on <strong>Dashboard Home</strong>.</p>
+<p><strong>Key files:</strong> <code>src/app/api/auth/register/route.ts</code>, <code>src/components/auth/RegistrationModal.jsx</code></p>
+<hr/>
+<h2>4. After Registration — Dashboard</h2>
+<p><strong>Route:</strong> <code>/dashboard</code>  </p>
+<p><strong>Gate:</strong> Must be logged in (<code>src/app/dashboard/layout.tsx</code> redirects otherwise).</p>
+<h3>Layout</h3>
+<li><strong>Top bar</strong> — logo, navigation, profile avatar.</li>
+<li><strong>Bottom nav (mobile)</strong> — Home, My Network, My Space.</li>
+<h3>Main sections</h3>
+<table>
+<tr><th>Route</th><th>Name</th><th>What the user sees</th></tr>
+<tr><td><code>/dashboard</code></td><td><strong>Home</strong></td><td>Greeting, advisor search, featured/recommended advisors, service chips</td></tr>
+<tr><td><code>/dashboard/my-space</code></td><td><strong>My Space</strong></td><td>Advisor workspace hub (see Section 5)</td></tr>
+<tr><td><code>/dashboard/profile</code></td><td><strong>Profile &amp; account</strong></td><td>Name, contact, selfie, identity refresh</td></tr>
+<tr><td><code>/dashboard/activity</code></td><td><strong>Notifications</strong></td><td>Approval alerts, leads, testimonials</td></tr>
+<tr><td><code>/dashboard/saved</code></td><td><strong>Saved</strong></td><td>Bookmarked advisor profiles</td></tr>
+<tr><td><code>/dashboard/explore</code></td><td><strong>Explore</strong></td><td>Full advisor search results</td></tr>
+<tr><td><code>/dashboard/identity-refresh</code></td><td><strong>Identity refresh</strong></td><td>Annual selfie re-verification</td></tr>
+</table>
+<h3>Customer vs advisor on Home</h3>
+<li><strong>Customer:</strong> Sees "Find verified advisors", search, advisor cards.</li>
+<li><strong>Advisor (with active workspace):</strong> Same discovery UI plus onboarding prompts if setup is incomplete.</li>
+<p><strong>Key files:</strong> <code>src/components/dashboard/DashboardShell.jsx</code>, <code>src/components/dashboard/DashboardHome.jsx</code></p>
+<hr/>
+<h2>5. My Space — Advisor Workspace</h2>
+<p><strong>Route:</strong> <code>/dashboard/my-space</code></p>
+<p>This is the advisor's <strong>control centre</strong> for building and managing their YVITY presence.</p>
+<h3>5.1 State machine (what you see first)</h3>
+<pre><code>Not an advisor yet
+    → "Setup My Space" card
+    → POST /api/auth/advisor-intent (adds advisor role)
+    → Opens Setup My Profile wizard
+
+Setup incomplete
+    → Same setup wizard / banner
+
+Under review (Silver/Gold)
+    → IRDAI pending banner
+    → Workspace visible in "review mode" (limited sharing/score)
+
+Active advisor
+    → Full YVITY Gold workspace</code></pre>
+<p><strong>Key file:</strong> <code>src/lib/advisor/workspaceSetupStatus.js</code></p>
+<h3>5.2 Setup wizard (5 steps)</h3>
+<table>
+<tr><th>Step</th><th>Title</th><th>What happens</th></tr>
+<tr><td>1</td><td>Industry &amp; Services</td><td>Select insurance categories (Life, Health, General, Mutual Funds)</td></tr>
+<tr><td>2</td><td>Service Details</td><td>Per-service provider, experience, clients, documents</td></tr>
+<tr><td>3</td><td>Verification Documents</td><td>Upload IRDAI / license documents</td></tr>
+<tr><td>4</td><td>Choose Plan</td><td>Free, Silver, or Gold</td></tr>
+<tr><td>5</td><td>Review &amp; Submit</td><td>Submit → <code>POST /api/customer/setprofile</code></td></tr>
+</table>
+<p><strong>After submit:</strong></p>
+<li><strong>Free plan</strong> → <code>account_status: active</code> immediately (profile can go live).</li>
+<li><strong>Silver/Gold</strong> → Razorpay payment → <code>account_status: under_review</code> until admin approves.</li>
+<p><strong>Key files:</strong> <code>src/components/advisor/setup-profile/SetupMyProfileFlow.jsx</code>, <code>src/app/api/customer/setprofile/route.ts</code></p>
+<h3>5.3 Full workspace sections</h3>
+<p>Once setup is done, My Space opens <strong>YvityGoldMySpaceDashboard</strong> with a card grid and drill-in sections:</p>
+<table>
+<tr><th>Section</th><th>Purpose</th></tr>
+<tr><td><strong>Dashboard</strong></td><td>YVITY Score snapshot, profile health, quick actions, leads summary</td></tr>
+<tr><td><strong>Public Profile</strong></td><td>Mobile/desktop preview of live profile + share tools</td></tr>
+<tr><td><strong>Leads</strong></td><td>Inbound enquiries from contact form and manual entries</td></tr>
+<tr><td><strong>My Career</strong></td><td>Professional journey timeline</td></tr>
+<tr><td><strong>Services</strong></td><td>Insurance products offered (Life, Health, etc.)</td></tr>
+<tr><td><strong>Achievements</strong></td><td>MDRT, COT, awards</td></tr>
+<tr><td><strong>Testimonials</strong></td><td>Text, audio, video client reviews</td></tr>
+<tr><td><strong>Gallery</strong></td><td>Photo gallery</td></tr>
+<tr><td><strong>YVITY Score</strong></td><td>Detailed score breakdown and improvement tips</td></tr>
+<tr><td><strong>Settings</strong></td><td>Visibility toggles, contact buttons, leads, theme</td></tr>
+</table>
+<p><strong>Key files:</strong> <code>src/components/advisor/advisor-my-space-workspace.tsx</code>, <code>src/lib/my-space-sections.ts</code>, <code>src/lib/advisor-nav.ts</code></p>
+<h3>5.4 Typical advisor journey (summary)</h3>
+<pre><code>Register → Dashboard Home → My Space → Setup wizard (5 steps)
+    → Edit sections (Career, Services, Testimonials…)
+    → Preview public profile
+    → (If paid) Wait for IRDAI approval
+    → Share live URL /{slug}
+    → Receive leads &amp; grow YVITY Score</code></pre>
+<hr/>
+<h2>6. Public Profile — What Visitors See</h2>
+<h3>6.1 URL</h3>
+<p>Each approved advisor gets a unique slug:</p>
+<pre><code>https://yvity-users.vercel.app/krishna-mohan-noti-167ec15f</code></pre>
+<p>Legacy routes like <code>/services</code>, <code>/my-career</code> still work when browsing inside an advisor's profile context (cookie sets which advisor's data to load).</p>
+<h3>6.2 Page structure (home tab)</h3>
+<p>1. <strong>Profile header</strong> — photo, name, designation, MDRT badge, rating, experience, Call / Request Call Back / Share.</p>
+<p>2. <strong>Trust section</strong> — YVITY Score, intro video.</p>
+<p>3. <strong>Community trust stats</strong> — profile views, recommendations, testimonials, shares.</p>
+<p>4. <strong>Quick actions</strong> — links to services, career, testimonials.</p>
+<p>5. <strong>Why choose me</strong> — strengths derived from profile data.</p>
+<p>6. <strong>Latest highlights</strong> — recent achievements/testimonials.</p>
+<p>7. <strong>Career teaser</strong> — journey preview.</p>
+<p>8. <strong>Bottom CTA card</strong> — advisor photo, highlights, contact buttons.</p>
+<h3>6.3 Section pages</h3>
+<table>
+<tr><th>Page</th><th>Banner shows</th></tr>
+<tr><td>My Career</td><td>Journey headline + stats (experience, rating, company, verified)</td></tr>
+<tr><td>Services</td><td>Service categories grid</td></tr>
+<tr><td>Achievements</td><td>Awards count, MDRT status, experience</td></tr>
+<tr><td>Testimonials</td><td>Review counts by type + average rating</td></tr>
+<tr><td>Gallery</td><td>Photo stats</td></tr>
+</table>
+<p>Each section page ends with the same <strong>advisor CTA card</strong> (contact actions).</p>
+<h3>6.4 Visibility controls</h3>
+<p>Advisors can hide sections via <strong>Settings → Visibility</strong> (career, gallery, intro video, etc.). Plan limits may also cap testimonials/gallery counts on the public view.</p>
+<h3>6.5 Who can see what</h3>
+<table>
+<tr><th>Viewer</th><th>Access</th></tr>
+<tr><td>Anonymous visitor</td><td>Live approved profile only</td></tr>
+<tr><td>Profile owner</td><td>Own profile even if under review; preview mode <code>?preview=public</code></td></tr>
+<tr><td>Owner in workspace</td><td>iframe preview before approval</td></tr>
+</table>
+<p><strong>Key files:</strong> <code>src/app/[slug]/page.tsx</code>, <code>src/components/home/profile-home-hero.tsx</code>, <code>src/lib/server/public-view-context.ts</code></p>
+<hr/>
+<h2>7. YVITY Score — How It Is Calculated</h2>
+<p><strong>Maximum score:</strong> 100 points across three categories.</p>
+<h3>7.1 Identity (30 points)</h3>
+<table>
+<tr><th>Signal</th><th>Points</th></tr>
+<tr><td>Profile photo (selfie) uploaded</td><td>10</td></tr>
+<tr><td>Mobile + email verified</td><td>5</td></tr>
+<tr><td>IRDAI license approved by admin</td><td>5</td></tr>
+<tr><td>Intro video uploaded (plan-gated)</td><td>10</td></tr>
+</table>
+<p>*If IRDAI is uploaded but pending approval, identity shows "awaiting admin" — points unlock on approval.*</p>
+<h3>7.2 Visibility (30 points)</h3>
+<table>
+<tr><th>Signal</th><th>Points</th></tr>
+<tr><td>Public profile active (approved)</td><td>10</td></tr>
+<tr><td>Advisor self-shares (1 pt per 5 shares, max 5)</td><td>5</td></tr>
+<tr><td>Client shares (1 pt per unique sharer, max 5)</td><td>5</td></tr>
+<tr><td>Profile strength (completeness)</td><td>5</td></tr>
+<tr><td>Monthly login days</td><td>5</td></tr>
+</table>
+<p><strong>Important:</strong> Visibility points (especially shares) only accrue <strong>after IRDAI approval</strong>.</p>
+<h3>7.3 Trust (40 points)</h3>
+<table>
+<tr><th>Signal</th><th>Points</th></tr>
+<tr><td>Testimonials (text / audio / video)</td><td>up to 15</td></tr>
+<tr><td>Verified OTP recommendations</td><td>up to 15</td></tr>
+<tr><td>Achievements (MDRT, COT, TOT tiers)</td><td>up to 10</td></tr>
+</table>
+<h3>7.4 Score decay (post-approval)</h3>
+<p>After a <strong>30-day grace period</strong> from account creation, inactive months reduce score:</p>
+<table>
+<tr><th>Inactivity</th><th>Penalty per month</th></tr>
+<tr><td>0 profile views</td><td>−1 (cap −10)</td></tr>
+<tr><td>Fewer than 5 self-shares</td><td>−1 (cap −5)</td></tr>
+<tr><td>0 client shares</td><td>−1 (cap −5)</td></tr>
+<tr><td>0 login days</td><td>−1 (cap −5)</td></tr>
+</table>
+<p>Maximum total decay penalty: <strong>−25 points</strong>.</p>
+<h3>7.5 Where score appears</h3>
+<li>Public profile trust card</li>
+<li>Advisor card on Find Advisors / Dashboard Home</li>
+<li>My Space → Dashboard overview</li>
+<li>My Space → YVITY Score module (detailed breakdown)</li>
+<p><strong>Key files:</strong> <code>src/lib/advisor-score/build.ts</code>, <code>src/lib/advisor-score/decay.ts</code>, <code>src/lib/advisor-score/share-points.ts</code></p>
+<hr/>
+<h2>8. Contact, Leads &amp; Request Call Back</h2>
+<h3>8.1 Visitor flow</h3>
+<p>1. Visitor clicks <strong>Request Call Back</strong> on public profile (header, CTA card, or mobile bar).</p>
+<p>2. <strong>Get in Touch</strong> modal opens with:</p>
+<p>   - Quick actions: <strong>Call</strong>, <strong>WhatsApp</strong>, <strong>Email</strong> (each toggled in advisor settings).</p>
+<p>   - <strong>Contact form:</strong> name, mobile, interests, message → <strong>Send Message</strong>.</p>
+<p>3. Form submits to <code>POST /api/contact</code>.</p>
+<p>4. Inquiry is stored and <strong>synced to Leads</strong> in My Space.</p>
+<h3>8.2 When the form shows</h3>
+<p>The callback form appears when:</p>
+<li>Contact form is enabled in advisor settings, <strong>and</strong></li>
+<li>Profile is <strong>IRDAI-approved (live)</strong>, <strong>or</strong> lead settings allow public enquiries.</li>
+<h3>8.3 Leads in My Space</h3>
+<p>Advisors see leads in <strong>My Space → Leads</strong>:</p>
+<li>Origin: YVITY public profile, referral, or manual entry.</li>
+<li>Status tracking and follow-up.</li>
+<p><strong>Key files:</strong> <code>src/components/contact/contact-sheet.tsx</code>, <code>src/app/api/contact/route.ts</code>, <code>src/lib/server/leads-persistence.ts</code></p>
+<hr/>
+<h2>9. Profile Approval (IRDAI) Workflow</h2>
+<pre><code>Advisor submits setup (Silver/Gold)
+        ↓
+account_status = under_review
+        ↓
+Admin opens /admin/irdaiapprovals
+        ↓
+    ┌───────────┴───────────┐
+    ↓                       ↓
+ APPROVE                 REJECT
+    ↓                       ↓
+active + approved_at    action_required
+    ↓                       ↓
+Public slug live        Advisor fixes &amp; resubmits
+Full YVITY Score
+Notifications sent</code></pre>
+<p><strong>On approval:</strong></p>
+<li>Public URL goes live at <code>/{slug}</code>.</li>
+<li>Service verification badges sync.</li>
+<li>Advisor receives in-app, email, and WhatsApp notification.</li>
+<p><strong>Key files:</strong> <code>src/app/api/admin/approvals/route.ts</code>, <code>src/lib/server/admin-irdai-approvals.ts</code>, <code>src/lib/advisor/profile-approval.ts</code></p>
+<hr/>
+<h2>10. Membership Plans &amp; Limits</h2>
+<table>
+<tr><th>Feature</th><th>Free</th><th>Silver</th><th>Gold</th></tr>
+<tr><td>Public profile</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>IRDAI approval required</td><td>No (instant active)</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Testimonials (audio/video)</td><td>2 audio, 1 video</td><td>Unlimited audio, 5 video</td><td>Unlimited</td></tr>
+<tr><td>Gallery photos</td><td>5</td><td>25</td><td>Unlimited</td></tr>
+<tr><td>Intro video</td><td>✗</td><td>30s (trust strip)</td><td>120s (hero)</td></tr>
+<tr><td>Recommendations</td><td>1</td><td>15</td><td>Unlimited</td></tr>
+<tr><td>Leads visible</td><td>5</td><td>25</td><td>Unlimited</td></tr>
+<tr><td>Profile themes</td><td>YVITY Brand only</td><td>+1 theme</td><td>All themes</td></tr>
+<tr><td>YVITY verified service badge</td><td>✗</td><td>✓</td><td>✓</td></tr>
+<tr><td>Appear in search</td><td>✗</td><td>✗</td><td>✓</td></tr>
+<tr><td>Profile analytics</td><td>✗</td><td>✗</td><td>✓</td></tr>
+<tr><td>Featured advisor eligibility</td><td>✗</td><td>✗</td><td>✓</td></tr>
+</table>
+<p><strong>Note:</strong> If <code>account_status</code> is not <code>active</code>, effective plan limits downgrade to <strong>Free</strong> regardless of payment.</p>
+<p><strong>Key files:</strong> <code>src/lib/advisor-membership/plan-limits.ts</code>, <code>src/lib/advisor/planFeatures.ts</code></p>
+<hr/>
+<h2>11. Data Storage &amp; Key APIs</h2>
+<h3>11.1 Persistence modes</h3>
+<table>
+<tr><th>Mode</th><th>When</th></tr>
+<tr><td><strong>Local JSON</strong> (<code>.data/</code> folder)</td><td>Default for local dev</td></tr>
+<tr><td><strong>Supabase</strong></td><td>When Supabase env vars are configured</td></tr>
+</table>
+<p>Override: <code>YVITY_FORCE_LOCAL_DATA=true</code>  </p>
+<p>Local writes are disabled on Vercel production.</p>
+<h3>11.2 Main data domains</h3>
+<table>
+<tr><th>Domain</th><th>Local file</th><th>Notes</th></tr>
+<tr><td>Users</td><td><code>.data/registration.json</code></td><td>Name, phone, email, selfie URL</td></tr>
+<tr><td>Advisor profiles</td><td><code>.data/advisor-profiles.json</code></td><td>Slug, status, plan</td></tr>
+<tr><td>Services, career, etc.</td><td><code>.data/{type}-{userId}.json</code></td><td>Per-advisor sections</td></tr>
+<tr><td>Settings</td><td><code>.data/advisor-settings-{userId}.json</code></td><td>Visibility, contact toggles</td></tr>
+<tr><td>Leads</td><td><code>.data/leads.json</code></td><td>Synced from contact inquiries</td></tr>
+<tr><td>Score activity</td><td>score activity store</td><td>Views, shares, logins for decay</td></tr>
+</table>
+<h3>11.3 Essential API routes</h3>
+<table>
+<tr><th>Area</th><th>Routes</th></tr>
+<tr><td>Auth</td><td><code>/api/auth/register</code>, <code>me</code>, <code>send-otp</code>, <code>verify-otp</code>, <code>profile-photo</code></td></tr>
+<tr><td>Advisor</td><td><code>/api/advisor/auth/me</code>, <code>score-activity</code>, <code>plan-limits</code></td></tr>
+<tr><td>Sections</td><td><code>/api/career</code>, <code>services</code>, <code>achievements</code>, <code>gallery</code>, <code>testimonials</code>, <code>settings</code></td></tr>
+<tr><td>Public</td><td><code>/api/public-view</code>, <code>public/advisor-display</code>, <code>public/profile-stats</code></td></tr>
+<tr><td>Contact</td><td><code>/api/contact</code></td></tr>
+<tr><td>Leads</td><td><code>/api/leads</code></td></tr>
+<tr><td>Admin</td><td><code>/api/admin/approvals</code></td></tr>
+<tr><td>Payments</td><td><code>/api/payments/razorpay/order</code>, <code>verify</code></td></tr>
+</table>
+<h3>11.4 Public view cookie</h3>
+<p>When a visitor opens <code>/{slug}</code>, the app sets <code>yvity-view-advisor</code> cookie so section APIs know <strong>which advisor's data</strong> to load on <code>/services</code>, <code>/my-career</code>, etc.</p>
+<p><strong>Key file:</strong> <code>src/lib/server/public-view-context.ts</code></p>
+<hr/>
+<h2>12. Developer Quick Reference</h2>
+<h3>Run locally</h3>
+<pre><code>npm install
+npm run dev
+# Open http://localhost:3000</code></pre>
+<h3>Important env vars</h3>
+<li>Supabase URL + keys → enables cloud persistence</li>
+<li>Razorpay keys → Silver/Gold payments</li>
+<li>WhatsApp / email OTP providers → registration OTP</li>
+<h3>Key directories</h3>
+<pre><code>src/app/              Next.js routes (pages + API)
+src/components/       React UI (dashboard, advisor, sections, home)
+src/lib/                Business logic (score, approval, sections, server)
+src/context/            React context (auth, public profile view)
+src/hooks/              Client hooks
+.data/                  Local JSON persistence (dev)
+docs/                   Documentation (this guide)</code></pre>
+<h3>Architecture flow (one page)</h3>
+<pre><code>Landing → Register (4 steps) → Dashboard Home
+                                    ↓
+                              My Space setup (5 steps)
+                                    ↓
+                         Free: active  |  Paid: under_review
+                                    ↓
+                              Admin IRDAI approve
+                                    ↓
+                         Public profile /{slug} + YVITY Score
+                                    ↓
+                         Visitors → Contact → Leads</code></pre>
+<hr/>
+<h2>Appendix — Glossary</h2>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td><strong>YVITY Score</strong></td><td>0–100 credibility score based on identity, visibility, trust</td></tr>
+<tr><td><strong>Slug</strong></td><td>URL-safe advisor identifier (e.g. <code>krishna-mohan-noti-167ec15f</code>)</td></tr>
+<tr><td><strong>IRDAI</strong></td><td>Insurance regulator; license verification gate for paid plans</td></tr>
+<tr><td><strong>MDRT</strong></td><td>Million Dollar Round Table — achievement tier</td></tr>
+<tr><td><strong>Selfie</strong></td><td>Identity verification photo; default public profile picture</td></tr>
+<tr><td><strong>My Space</strong></td><td>Advisor workspace inside <code>/dashboard/my-space</code></td></tr>
+<tr><td><strong>Public profile</strong></td><td>Visitor-facing page at <code>/{slug}</code></td></tr>
+<tr><td><strong>Lead</strong></td><td>Inbound enquiry from contact form or referral</td></tr>
+</table>
+<hr/>
+<p>*For questions about this codebase, start with <code>src/components/providers.tsx</code> (app shell), <code>src/context/AuthUserContext.tsx</code> (auth), and <code>src/lib/server/public-view-context.ts</code> (public profile data routing).*</p>
+<p><strong>© YVITY — Internal technical documentation</strong></p>
+</body>
+</html>
