@@ -9,7 +9,7 @@ import {
   type ContactInterestId,
 } from "@/lib/contact-config";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
+import { useShowProfileCallback } from "@/hooks/use-show-profile-callback";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useContact } from "@/lib/contact-store";
 import { Button } from "@/components/ui/button";
@@ -92,11 +92,6 @@ export function ContactSheet() {
     if (action.id === "whatsapp") return settings.contact.whatsAppButton;
     return true;
   });
-  const showContactForm =
-    !isWorkspacePreview &&
-    settings.contact.contactForm &&
-    settings.leads.acceptNewLeads &&
-    settings.leads.publicProfileEnquiries;
   const headerMobile = settings.contact.showMobileNumber ? advisor.phone : null;
 
   const toggleInterest = (id: ContactInterestId) => {

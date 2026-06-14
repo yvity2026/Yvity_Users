@@ -10,7 +10,9 @@ import { hasRecentContactInquiryFromMobile } from "@/lib/server/contact-inquiry-
 import {
   rejectAdvisorSelfSubmission,
 } from "@/lib/server/advisor-self-submission-guard";
+import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 const validIds = new Set(contactInterestOptions.map((o) => o.id));
@@ -27,23 +29,27 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const advisorSettings = await loadAdvisorSettings();
-  if (!advisorSettings.leads.acceptNewLeads) {
-    return NextResponse.json(
-      { error: "This advisor is not accepting new enquiries at the moment." },
-      { status: 403 },
-    );
+  const advisorUserId = await resolveAdvisorDataUserId();
+  if (!advisorUserId) {
+    return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
   }
-  if (!advisorSettings.leads.publicProfileEnquiries || !advisorSettings.contact.contactForm) {
+
+  const [advisorSettings, profile] = await Promise.all([
+    loadAdvisorSettings(advisorUserId),
+    getAdvisorProfileForUser(advisorUserId),
+  ]);
+  const profileApproved = isAdvisorProfileApproved(profile);
+  const allowSubmission =
+    advisorSettings.contact.contactForm &&
+    (profileApproved ||
+      (advisorSettings.leads.acceptNewLeads &&
+        advisorSettings.leads.publicProfileEnquiries));
+
+  if (!allowSubmission) {
     return NextResponse.json(
       { error: "Contact form submissions are currently disabled." },
       { status: 403 },
     );
-  }
-
-  const advisorUserId = await resolveAdvisorDataUserId();
-  if (!advisorUserId) {
-    return NextResponse.json({ error: "Advisor profile not found." }, { status: 404 });
   }
 
   let body: {
