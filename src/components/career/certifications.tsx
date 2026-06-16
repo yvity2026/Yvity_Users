@@ -1,4 +1,4 @@
-import { BadgeCheck, Award, Calendar, Building2, Clock, Eye, Upload } from "lucide-react";
+import { BadgeCheck, Award, Calendar, Building2, Clock, Upload } from "lucide-react";
 import { SectionEmptyCard } from "@/components/ui/section-empty-card";
 import type { Certification } from "@/lib/career-types";
 import {
@@ -168,21 +168,6 @@ export function CertificationsSection({
                 </div>
               )}
 
-              {verified && c.certificateUrl && (
-                <a
-                  href={c.certificateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold border",
-                    tone.border,
-                    tone.text,
-                    "hover:bg-white/5 transition",
-                  )}
-                >
-                  <Eye className="size-4" /> View Certificate
-                </a>
-              )}
             </div>
           </article>
         );
