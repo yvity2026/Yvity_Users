@@ -6,6 +6,7 @@ import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
 import { loadCareerForUser } from "@/lib/server/career-persistence";
 import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
 import { countVerifiedRecommendations } from "@/lib/server/recommendations-persistence";
+import { countSelfProfileShares } from "@/lib/server/profile-shares-persistence";
 import {
   loadAchievementsForUser,
   loadGalleryForUser,
@@ -29,7 +30,7 @@ export async function POST() {
 
     const userId = session.id;
 
-    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs] =
+    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs, selfShareCount] =
       await Promise.all([
         getAdvisorProfileForUser(userId),
         loadServicesForUser(userId),
@@ -39,6 +40,7 @@ export async function POST() {
         loadAdvisorSettings(userId),
         loadCareerForUser(userId),
         countVerifiedRecommendations(userId),
+        countSelfProfileShares(userId),
       ]);
 
     const profileApproved = isAdvisorProfileApproved(profile);
@@ -61,6 +63,7 @@ export async function POST() {
       gallery,
       underReview,
       verifiedRecommendationCount: underReview ? 0 : verifiedRecs,
+      selfShareCount,
     });
 
     const finalScore = Math.max(0, Math.min(100, score));

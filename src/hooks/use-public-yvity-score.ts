@@ -14,6 +14,7 @@ import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib
 import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
+import { useProfileShareCounts } from "@/hooks/use-profile-share-counts";
 
 /** Public-facing YVITY Score — same activity model as dashboard and Score tab. */
 export function usePublicYvityScore(): { score: number; loading: boolean } {
@@ -28,6 +29,7 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
   const { limits } = useResolvedPlanLimits();
   const { recommendationCount, decayPenalty, decayActive, graceDaysRemaining, monthlyActivity, loading: recsLoading } =
     usePublicProfileStats();
+  const { selfShareCount, loading: sharesLoading } = useProfileShareCounts();
 
   const photoUrl =
     resolveProfilePhotoUrl(publicView?.selfie_url) ||
@@ -53,7 +55,8 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
     testimonialsLoading ||
     galleryLoading ||
     settingsLoading ||
-    recsLoading;
+    recsLoading ||
+    sharesLoading;
 
   const introVideoUrl = getPlanGatedIntroVideoUrl(settings, limits);
 
@@ -72,6 +75,7 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
       profileApproved,
       irdaiCertificateUploaded,
       verifiedRecommendationCount: profileApproved ? recommendationCount : 0,
+      selfShareCount,
       decayPenalty,
       decayActive,
       decayGraceDaysRemaining: graceDaysRemaining,
@@ -91,6 +95,7 @@ export function usePublicYvityScore(): { score: number; loading: boolean } {
     profileApproved,
     irdaiCertificateUploaded,
     recommendationCount,
+    selfShareCount,
     decayPenalty,
     decayActive,
     graceDaysRemaining,
