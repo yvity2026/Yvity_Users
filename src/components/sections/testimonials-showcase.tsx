@@ -129,7 +129,7 @@ export function TestimonialsShowcase({
     try {
       await fetch(`/api/testimonials/${item.id}`, { method: "DELETE" });
     } catch {
-      setItems((prev) => [item, ...prev]);
+      setItems([item, ...items]);
     }
   };
 
