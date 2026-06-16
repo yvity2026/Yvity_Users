@@ -12,31 +12,27 @@ export function emptyVerification(): VerificationRecord {
   };
 }
 
-/** Record that should be considered pre-verified (e.g. for seeded demo data). */
-export function seededVerifiedRecord(): VerificationRecord {
-  const ts = nowIso();
-  return {
-    status: "verified",
-    documents: [],
-    submittedAt: ts,
-    reviewedAt: ts,
-    updatedAt: ts,
-  };
-}
 
 /**
- * Module-scope frozen record for pre-verified demo data baked into source.
- *
- * Uses a fixed timestamp so the value is stable across SSR/CSR renders and
- * doesn't change every import. Real verifications still use {@link nowIso}.
+ * Critical field changed on an already-verified service — reset to pending
+ * for re-approval. Keeps `reviewedAt` so the dashboard can distinguish
+ * "never reviewed" from "was approved, now needs re-approval".
  */
-export const SEEDED_VERIFIED_RECORD: VerificationRecord = Object.freeze({
-  status: "verified",
-  documents: [],
-  submittedAt: "2024-01-01T00:00:00.000Z",
-  reviewedAt: "2024-01-01T00:00:00.000Z",
-  updatedAt: "2024-01-01T00:00:00.000Z",
-}) as VerificationRecord;
+export function markPendingReapproval(
+  current: VerificationRecord,
+  documents: VerificationDocument[],
+): VerificationRecord {
+  const ts = nowIso();
+  return {
+    ...current,
+    status: "pending",
+    documents,
+    submittedAt: ts,
+    rejectionReason: undefined,
+    updatedAt: ts,
+    // reviewedAt is intentionally preserved — signals "was previously reviewed"
+  };
+}
 
 /** Advisor (re)submitted documents — moves status to pending. */
 export function markSubmitted(

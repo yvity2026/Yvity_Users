@@ -756,7 +756,7 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                             startPhoneOtpCountdown();
                           }}
                           disabled={isSendingPhoneOtp}
-                          className="text-[11px] font-semibold text-[#F59E0B] underline-offset-2 transition hover:text-[#D97706] hover:underline disabled:opacity-50"
+                          className="rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-3 py-1.5 text-[11px] font-semibold text-[#0A4A4A] transition hover:bg-[#FEF3C7] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {isSendingPhoneOtp ? "Sending…" : "Send OTP"}
                         </button>
@@ -1087,60 +1087,21 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                         >
                           {!isEmailVerified && (
                             <>
-                              <div className="mb-2 flex flex-col items-center gap-1 sm:mb-4">
-                                <p
-                                  id="email-otp-hint"
-                                  className="text-center text-[11px] font-semibold text-[#0f4f4f] sm:text-sm"
-                                >
-                                  Enter the 6-digit code sent to your email
+                              {emailOtpSecondsLeft > 0 ? (
+                                <p className="mb-2 text-center tabular-nums text-[10px] font-medium text-[#F59E0B]">
+                                  Resend in {formatOtpResendTimer(emailOtpSecondsLeft)}
                                 </p>
-                                {emailOtpSecondsLeft > 0 ? (
-                                  <span className="tabular-nums text-[10px] font-medium text-[#F59E0B] sm:text-[11px]">
-                                    Resend in{" "}
-                                    {formatOtpResendTimer(emailOtpSecondsLeft)}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <div
-                                className="flex justify-center gap-1 sm:gap-2.5"
-                                role="group"
-                                aria-labelledby="email-otp-hint"
-                              >
-                                {otp.map((digit, idx) => (
-                                  <input
-                                    key={`email-otp-${idx}`}
-                                    ref={(element) => {
-                                      otpRefs.current[idx] = element;
-                                    }}
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    autoComplete="one-time-code"
-                                    maxLength={1}
-                                    aria-label={`Email code digit ${idx + 1} of 6`}
-                                    className="h-9 w-8 rounded-lg border-2 border-stone-200 bg-white text-center text-sm font-bold text-stone-800 shadow-sm outline-none transition focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B]/25 sm:h-14 sm:w-11 sm:rounded-xl sm:text-xl sm:focus:ring-2"
-                                    value={digit}
-                                    onChange={(e) =>
-                                      handleOtpChange(idx, e.target.value)
-                                    }
-                                    onKeyDown={(e) =>
-                                      handleOtpKeyDown(idx, e)
-                                    }
-                                    onPaste={handleEmailPaste}
-                                    style={{
-                                      borderColor: digit
-                                        ? "#F59E0B"
-                                        : undefined,
-                                      background: digit ? "#FFFBF5" : undefined,
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                              {errors.emailOtp && (
-                                <p className="mt-1.5 text-center text-[11px] text-red-600 sm:mt-2 sm:text-sm">
-                                  {errors.emailOtp.message}
-                                </p>
-                              )}
+                              ) : null}
+                              <OtpInputs
+                                digits={otp}
+                                inputRefs={otpRefs}
+                                idPrefix="email-otp"
+                                hint="Enter the 6-digit code sent to your email"
+                                onChange={handleOtpChange}
+                                onKeyDown={handleOtpKeyDown}
+                                onPaste={handleEmailPaste}
+                              />
+                              <FieldError message={errors.emailOtp?.message} />
 
                               <button
                                 type="button"

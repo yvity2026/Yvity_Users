@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthUserContext";
-import { AdvisorCardGold } from "@/yvity-landing/app/components/home-features/advisor-card-gold";
 import { recordSearchImpressionsClient } from "@/lib/advisors/record-search-impressions";
 import { toAdvisorCardGoldProps } from "@/lib/advisor/cardGoldProps";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";

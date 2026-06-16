@@ -17,7 +17,7 @@ import {
 
 /** Top-level advisor dashboard sections (navigation only — modules built later). */
 export type AdvisorTopSection =
-  | "dashboard"
+  | "overview"
   | "public-profile"
   | "leads"
   | "profile"
@@ -44,8 +44,8 @@ export type AdvisorNavItem<T extends string> = {
 
 export const ADVISOR_TOP_NAV: AdvisorNavItem<AdvisorTopSection>[] = [
   {
-    id: "dashboard",
-    label: "Dashboard",
+    id: "overview",
+    label: "Overview",
     icon: LayoutDashboard,
     description: "Your growth snapshot, priorities and quick actions.",
   },
@@ -129,5 +129,5 @@ export const ADVISOR_PROFILE_NAV: AdvisorNavItem<AdvisorProfileSection>[] = [
   },
 ];
 
-export const DEFAULT_TOP_SECTION: AdvisorTopSection = "dashboard";
+export const DEFAULT_TOP_SECTION: AdvisorTopSection = "overview";
 export const DEFAULT_PROFILE_SECTION: AdvisorProfileSection = "profile";

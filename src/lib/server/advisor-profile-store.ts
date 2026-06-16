@@ -136,6 +136,7 @@ export function advisorProfileToApi(record: AdvisorProfileRecord) {
     approved_at: record.approved_at ?? null,
     subscription_started_at: record.subscription_started_at ?? null,
     subscription_expires_at: record.subscription_expires_at ?? null,
+    designation: record.designation ?? null,
   };
 }
 
@@ -192,6 +193,7 @@ export type SubmitAdvisorProfileInput = {
   document_urls?: string[];
   subscription_plan: MembershipPlanId;
   razorpay_payment_id?: string;
+  profile_slug?: string;
 };
 
 function normalizeSubscriptionPlan(value: unknown): MembershipPlanId {
@@ -245,13 +247,18 @@ export async function submitAdvisorProfile(
   }
 
   const taken = await collectTakenSlugs(session.id);
+  const chosenSlug = input.profile_slug?.trim().toLowerCase();
+  const resolvedSlug =
+    chosenSlug && !taken.has(chosenSlug)
+      ? chosenSlug
+      : slugifyName(displayName, session.id, taken);
   const record: AdvisorProfileRecord = {
     id: profileId,
     advisor_id: profileId,
     user_id: session.id,
     account_status: requiresAdminReview ? "under_review" : "active",
     profile_status: !requiresAdminReview,
-    profile_slug: slugifyName(displayName, session.id, taken),
+    profile_slug: resolvedSlug,
     subscription_plan: plan,
     iridai_certificate_url: input.certificate_url?.trim() || "pending",
     advisor_role_id: input.advisor_role_id,

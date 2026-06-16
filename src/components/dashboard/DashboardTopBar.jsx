@@ -86,16 +86,13 @@ function TopBarActions({ user, setupState, unreadCount }) {
 function BrandBlock({ layout = "column" }) {
   return (
     <BrandMark
-      logoSize={layout === "row" ? 40 : 40}
+      logoSize={40}
       showName
       showTagline
       layout={layout}
-      logoClassName={layout === "row" ? "h-9 w-9 object-contain" : "h-10 w-10 object-contain"}
-      nameClassName={cn(
-        "yvity-dash-nav-brand-name font-cormorant font-bold leading-none",
-        layout === "row" ? "text-base" : "text-base",
-      )}
-      taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
+      logoClassName="h-9 w-9 object-contain"
+      nameClassName="font-cormorant text-base font-bold leading-none text-[#0A4A4A]"
+      taglineClassName="font-poppins text-[10px] font-semibold leading-tight text-[#F59E0B]"
     />
   );
 }
@@ -117,7 +114,7 @@ export default function DashboardTopBar() {
         className="flex min-w-0 items-center justify-start"
         aria-label="YVITY home"
       >
-        <BrandBlock layout={useFlatNav ? "row" : "column"} />
+        <BrandBlock layout="row" />
       </Link>
 
       <div className="flex items-center gap-3">
@@ -148,16 +145,12 @@ export default function DashboardTopBar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 m-0 p-0">
-      {/* Mobile — flat bar on My Space / profile (matches public profile nav) */}
-      {useFlatNav ? (
-        <div className="yvity-dash-nav-flat border-b lg:hidden">{mobileBarInner}</div>
-      ) : (
-        <div className="mob-nav-top-frame yvity-dash-nav-top-frame lg:hidden">
-          <div className="glass-nav-mobile mob-nav-top-inner yvity-dash-nav-top-inner">
-            {mobileBarInner}
-          </div>
+      {/* Mobile — glass rounded frame on all pages */}
+      <div className="mob-nav-top-frame yvity-dash-nav-top-frame lg:hidden">
+        <div className="glass-nav-mobile mob-nav-top-inner yvity-dash-nav-top-inner">
+          {mobileBarInner}
         </div>
-      )}
+      </div>
 
       {/* Desktop — flat bar on My Space */}
       {useFlatNav ? (

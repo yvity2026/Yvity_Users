@@ -19,17 +19,19 @@ export function mapDbToAdvisorSettings(
     ...stored,
     visibility: {
       ...defaultAdvisorSettings.visibility,
+      // Legacy column fallbacks — only used when the advisor has never explicitly toggled
+      // the setting (i.e. gold_settings.visibility doesn't have the key yet).
+      careerJourney: stored.visibility?.careerJourney ?? (profile?.ispublic_professional !== false),
+      achievements: stored.visibility?.achievements ?? (profile?.ispublic_achievements !== false),
+      gallery: stored.visibility?.gallery ?? (profile?.ispublic_gallery !== false),
+      individualServices: stored.visibility?.individualServices ?? (profile?.ispublic_services !== false),
+      introductionVideo: stored.visibility?.introductionVideo ?? Boolean(String(profile?.intro_url || "").trim()),
       ...(stored.visibility ?? {}),
-      careerJourney: profile?.ispublic_professional !== false,
-      achievements: profile?.ispublic_achievements !== false,
-      gallery: profile?.ispublic_gallery !== false,
-      individualServices: profile?.ispublic_services !== false,
-      introductionVideo: Boolean(String(profile?.intro_url || "").trim()),
     },
     publicProfile: {
       ...defaultAdvisorSettings.publicProfile,
+      profileActive: stored.publicProfile?.profileActive ?? (profile?.ispublic_profile !== false),
       ...(stored.publicProfile ?? {}),
-      profileActive: profile?.ispublic_profile !== false,
     },
     introVideo: {
       ...defaultAdvisorSettings.introVideo,
@@ -69,6 +71,7 @@ export function mapAdvisorSettingsToDbPatch(settings: AdvisorSettings) {
         posterUrl: normalized.introVideo.posterUrl,
         durationLabel: normalized.introVideo.durationLabel,
       },
+      location: normalized.location,
     },
   };
 }

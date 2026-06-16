@@ -91,6 +91,7 @@ export function SettingsGroup({
 export function SettingsToggleRow({
   label,
   description,
+  disabledHint,
   checked,
   disabled,
   onCheckedChange,
@@ -98,6 +99,8 @@ export function SettingsToggleRow({
 }: {
   label: string;
   description?: string;
+  /** Short note shown below description when the row is disabled, explaining why. */
+  disabledHint?: string;
   checked: boolean;
   disabled?: boolean;
   onCheckedChange: (checked: boolean) => void;
@@ -123,6 +126,11 @@ export function SettingsToggleRow({
         <p className="text-sm font-medium leading-snug">{label}</p>
         {description && (
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
+        )}
+        {disabled && disabledHint && (
+          <p className="mt-1 text-[11px] text-[oklch(0.85_0.16_78/0.8)] leading-snug">
+            {disabledHint}
+          </p>
         )}
       </div>
       <Switch

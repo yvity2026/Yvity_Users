@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       success: true,
       url: `/api/advisor/verification-documents/${saved.filename}`,
       name: file.name,
+      mimeType: mime,
       storage: saved.storagePath ? "supabase" : "local",
     });
   } catch (error) {

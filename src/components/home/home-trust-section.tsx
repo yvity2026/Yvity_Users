@@ -75,7 +75,7 @@ function ScoreInfoButton() {
   );
 }
 
-function IntroVideoTrustCard() {
+export function IntroVideoTrustCard() {
   const { settings } = useAdvisorSettings();
   const { limits } = useResolvedPlanLimits();
   const advisorProfile = useAdvisorDisplayProfile();
@@ -173,7 +173,7 @@ function YvityScoreProgressBar({ percent, loading }: { percent: number; loading:
   );
 }
 
-function YvityScoreTrustCard({ score, loading }: { score: number; loading: boolean }) {
+export function YvityScoreTrustCard({ score, loading }: { score: number; loading: boolean }) {
   const displayScore = loading ? "—" : String(score);
 
   return (

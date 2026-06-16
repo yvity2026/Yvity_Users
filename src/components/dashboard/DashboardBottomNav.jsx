@@ -29,7 +29,7 @@ export default function DashboardBottomNav() {
     >
       <div className="mob-nav-bottom-frame yvity-dash-nav-top-frame">
         <div className="mob-nav-bottom-inner yvity-dash-nav-bottom-inner">
-          <div className="mx-auto flex h-[4.25rem] max-w-lg items-stretch justify-around px-1">
+          <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-around px-1 sm:h-16">
             {DASHBOARD_PRIMARY_NAV.map((item) => {
               const Icon = NAV_ICONS[item.id];
               const href = loading

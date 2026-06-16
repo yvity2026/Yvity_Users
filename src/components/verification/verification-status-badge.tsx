@@ -27,10 +27,13 @@ const STYLES: Record<VerificationStatus, { label: string; icon: typeof Clock; cl
 /** Dashboard-side badge that surfaces the current verification status. */
 export function VerificationStatusBadge({
   status,
+  label,
   className,
   size = "sm",
 }: {
   status: VerificationStatus;
+  /** Override the default label — e.g. "Changes Under Review" for re-approval pending. */
+  label?: string;
   className?: string;
   size?: "sm" | "xs";
 }) {
@@ -46,7 +49,7 @@ export function VerificationStatusBadge({
       )}
     >
       <Icon className={size === "xs" ? "size-3" : "size-3.5"} aria-hidden />
-      {style.label}
+      {label ?? style.label}
     </span>
   );
 }

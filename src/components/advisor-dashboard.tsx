@@ -130,7 +130,7 @@ export function AdvisorDashboard({
    * (no more vertically stacked accordion).
    */
   const renderSectionBody = (): ReactNode => {
-    if (topSection === "dashboard") {
+    if (topSection === "overview") {
       if (reviewMode) {
         return (
           <AdvisorReviewDashboard

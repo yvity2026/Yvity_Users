@@ -3,13 +3,21 @@
 import { BadgeCheck, FileText, Globe, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const trustSignals = [
-  { icon: BadgeCheck, label: "100% Verified" },
+const verifiedTrustSignals = [
+  { icon: BadgeCheck, label: "YVITY Verified" },
   { icon: FileText, label: "Authentic Records" },
   { icon: Globe, label: "Recognised Globally" },
 ] as const;
 
-export function AchievementsVerificationFooter({ className }: { className?: string }) {
+export function AchievementsVerificationFooter({
+  verifiedCount = 0,
+  className,
+}: {
+  verifiedCount?: number;
+  className?: string;
+}) {
+  const hasVerified = verifiedCount > 0;
+
   return (
     <section
       className={cn(
@@ -24,26 +32,31 @@ export function AchievementsVerificationFooter({ className }: { className?: stri
         </span>
         <div className="min-w-0">
           <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-            All achievements are 100% Verified
+            {hasVerified
+              ? `${verifiedCount} ${verifiedCount === 1 ? "achievement" : "achievements"} verified by YVITY`
+              : "Submit your achievements for YVITY verification"}
           </h3>
           <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
-            Every award listed is verified through official records and recognised sources to ensure
-            authenticity.
+            {hasVerified
+              ? "Each verified award is confirmed through official records and recognised sources, stamped with a YVITY badge on your public profile."
+              : "Upload supporting documents on any achievement card to request a YVITY verification badge — it adds credibility and trust for prospective clients."}
           </p>
         </div>
       </div>
 
-      <ul className="flex flex-wrap gap-4 sm:gap-6 lg:shrink-0">
-        {trustSignals.map(({ icon: Icon, label }) => (
-          <li
-            key={label}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm text-muted-foreground"
-          >
-            <Icon className="size-4 text-[oklch(0.82_0.13_205)]" />
-            <span className="font-medium text-foreground/90">{label}</span>
-          </li>
-        ))}
-      </ul>
+      {hasVerified && (
+        <ul className="flex flex-wrap gap-4 sm:gap-6 lg:shrink-0">
+          {verifiedTrustSignals.map(({ icon: Icon, label }) => (
+            <li
+              key={label}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm text-muted-foreground"
+            >
+              <Icon className="size-4 text-[oklch(0.82_0.13_205)]" />
+              <span className="font-medium text-foreground/90">{label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

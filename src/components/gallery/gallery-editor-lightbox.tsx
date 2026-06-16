@@ -8,6 +8,7 @@ import { GalleryImageUpload } from "@/components/gallery/gallery-image-upload";
 import { formatGalleryCategory } from "@/components/gallery/gallery-item-meta";
 import type { GalleryItem, GalleryLayout } from "@/lib/gallery-types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +35,7 @@ export function GalleryEditorLightbox(props: Props) {
   const { items, index, onClose, onPrev, onNext, onSave, onDelete } = props;
   const source = items[index];
   const [draft, setDraft] = useState<GalleryItem | null>(source ?? null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     setDraft(source ?? null);
@@ -162,15 +164,20 @@ export function GalleryEditorLightbox(props: Props) {
                   />
                 </Field>
 
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={!!draft.featured}
-                    onChange={(e) => patch({ featured: e.target.checked })}
-                  />
-                  Featured spotlight (public gallery)
-                </label>
+                <div className="space-y-1">
+                  <label className="inline-flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={!!draft.featured}
+                      onChange={(e) => patch({ featured: e.target.checked })}
+                    />
+                    Featured spotlight
+                  </label>
+                  <p className="text-[10px] text-muted-foreground pl-6">
+                    Pins this photo as the hero image at the top of your public gallery. Only one photo can be featured at a time.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -182,9 +189,7 @@ export function GalleryEditorLightbox(props: Props) {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (confirm("Delete this photo?")) onDelete(draft.id);
-              }}
+              onClick={() => setConfirmDelete(true)}
               className="gap-2"
             >
               <Trash2 className="size-4" /> Delete
@@ -213,6 +218,16 @@ export function GalleryEditorLightbox(props: Props) {
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this photo?"
+        description="This will permanently remove the photo from your gallery. This cannot be undone."
+        confirmLabel="Delete photo"
+        tone="destructive"
+        onConfirm={() => onDelete(draft.id)}
+      />
     </div>
   );
 }

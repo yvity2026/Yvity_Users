@@ -2,13 +2,27 @@
 
 import { ArrowRight, MapPin } from "lucide-react";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { googleMapsDirectionsUrl, hasOfficeLocation } from "@/lib/advisor-office-location";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function ReachOutToAdvisorSection() {
   const advisorProfile = useAdvisorDisplayProfile();
-  const office = advisorProfile.officeLocation;
+  const { settings } = useAdvisorSettings();
+
+  // Prefer explicit office address from settings; fall back to city/state from profile
+  const officeLabel =
+    settings.location.officeAddress.trim() || advisorProfile.officeLocation?.label || "";
+
+  const office = officeLabel
+    ? {
+        label: officeLabel,
+        mapsLink: settings.location.mapsLink.trim() || undefined,
+      }
+    : advisorProfile.officeLocation
+      ? { ...advisorProfile.officeLocation, mapsLink: settings.location.mapsLink.trim() || undefined }
+      : null;
 
   if (!hasOfficeLocation(office)) return null;
 

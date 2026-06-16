@@ -9,7 +9,7 @@ export { emptyCareerData as defaultCareerData } from "./empty-data";
 const EVT = "career-data-updated";
 
 async function fetchCareerData(): Promise<CareerData> {
-  const res = await fetch("/api/career", { cache: "no-store" });
+  const res = await fetch("/api/career", { cache: "no-store", credentials: "same-origin" });
   if (!res.ok) return emptyCareerData;
   const json = (await res.json()) as { data?: CareerData };
   return json.data ?? emptyCareerData;
@@ -41,6 +41,7 @@ export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] 
     void fetch("/api/career", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(d),
     }).then(() => {
       window.dispatchEvent(new CustomEvent(EVT));

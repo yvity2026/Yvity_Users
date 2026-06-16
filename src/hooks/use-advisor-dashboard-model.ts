@@ -144,5 +144,13 @@ export function useAdvisorDashboardModel(): {
     ],
   );
 
+  // Keep advisor_scores in sync so Find Advisors card matches dashboard score.
+  useEffect(() => {
+    if (loading) return;
+    fetch("/api/advisor/score/sync", { method: "POST", credentials: "same-origin" }).catch(
+      () => {},
+    );
+  }, [loading]);
+
   return { model, loading, refreshLeads: loadLeads };
 }

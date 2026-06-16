@@ -1,28 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { IDENTITY_COPY } from "@/lib/identity/messages";
 
 function OtpBoxes({ digits, onChange, idPrefix }) {
+  const refs = useRef([]);
+
+  const focusAt = (idx) => {
+    refs.current[idx]?.focus();
+    refs.current[idx]?.select();
+  };
+
+  const handleChange = (idx, raw) => {
+    const val = raw.replace(/\D/g, "").slice(-1);
+    const next = [...digits];
+    next[idx] = val;
+    onChange(next);
+    if (val && idx < digits.length - 1) focusAt(idx + 1);
+  };
+
+  const handleKeyDown = (idx, e) => {
+    if (e.key === "Backspace") {
+      if (digits[idx]) {
+        // clear current
+        const next = [...digits];
+        next[idx] = "";
+        onChange(next);
+      } else if (idx > 0) {
+        // move back
+        const next = [...digits];
+        next[idx - 1] = "";
+        onChange(next);
+        focusAt(idx - 1);
+      }
+      e.preventDefault();
+    } else if (e.key === "ArrowLeft" && idx > 0) {
+      focusAt(idx - 1);
+    } else if (e.key === "ArrowRight" && idx < digits.length - 1) {
+      focusAt(idx + 1);
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, digits.length);
+    if (!pasted) return;
+    const next = [...digits];
+    for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
+    onChange(next);
+    const nextFocus = Math.min(pasted.length, digits.length - 1);
+    focusAt(nextFocus);
+  };
+
   return (
     <div className="flex justify-center gap-1.5">
       {digits.map((digit, idx) => (
         <input
           key={`${idPrefix}-${idx}`}
+          ref={(el) => { refs.current[idx] = el; }}
           type="text"
           inputMode="numeric"
           maxLength={1}
           value={digit}
           aria-label={`${idPrefix} digit ${idx + 1}`}
           className="h-10 w-9 rounded-lg border border-[#E6E6E6] bg-[#F8F6F1] text-center text-sm font-bold focus:border-[#F59E0B] focus:outline-none focus:ring-1 focus:ring-[#F59E0B]"
-          onChange={(e) => {
-            const val = e.target.value.replace(/\D/g, "").slice(-1);
-            const next = [...digits];
-            next[idx] = val;
-            onChange(next);
-          }}
+          onChange={(e) => handleChange(idx, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(idx, e)}
+          onPaste={handlePaste}
+          onFocus={(e) => e.target.select()}
         />
       ))}
     </div>

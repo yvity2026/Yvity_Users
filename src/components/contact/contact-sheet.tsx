@@ -9,6 +9,7 @@ import {
   type ContactInterestId,
 } from "@/lib/contact-config";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { useIsAdvisorWorkspacePreview } from "@/hooks/use-is-viewing-own-advisor-profile";
 import { useShowProfileCallback } from "@/hooks/use-show-profile-callback";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useContact } from "@/lib/contact-store";
@@ -92,6 +93,7 @@ export function ContactSheet() {
     if (action.id === "whatsapp") return settings.contact.whatsAppButton;
     return true;
   });
+  const showContactForm = settings.contact.contactForm;
   const headerMobile = settings.contact.showMobileNumber ? advisor.phone : null;
 
   const toggleInterest = (id: ContactInterestId) => {
@@ -196,13 +198,19 @@ export function ContactSheet() {
                         target={action.external ? "_blank" : undefined}
                         rel={action.external ? "noopener noreferrer" : undefined}
                         className={cn(
-                          "flex flex-col items-center justify-center gap-2.5 rounded-2xl py-4 shadow-md transition active:scale-[0.98]",
+                          "group relative flex flex-col items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-4 shadow-md",
+                          "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]",
                           action.tile,
                         )}
                       >
+                        {/* Shimmer sweep */}
+                        <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                        </div>
                         <span
                           className={cn(
                             "inline-flex size-11 items-center justify-center rounded-xl",
+                            "transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none",
                             action.iconWrap,
                           )}
                         >

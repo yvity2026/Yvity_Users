@@ -40,7 +40,12 @@ import { PublicProfileMobileCtaBar } from "@/components/home/public-profile-mobi
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { WhyChooseMeSection } from "@/components/home/why-choose-me-section";
 import { IntroVideoHeroBlock } from "@/components/intro-video/intro-video-hero-block";
-import { HomeTrustSection } from "@/components/home/home-trust-section";
+import {
+  IntroVideoTrustCard,
+  YvityScoreTrustCard,
+} from "@/components/home/home-trust-section";
+import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
+import { usePublicYvityScore } from "@/hooks/use-public-yvity-score";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/star-rating";
 import { cn } from "@/lib/utils";
@@ -59,6 +64,8 @@ function ProfileHeaderBanner() {
   const publicView = usePublicProfileView();
   const { home } = advisorProfile;
   const { settings } = useAdvisorSettings();
+  const { limits } = useResolvedPlanLimits();
+  const { score, loading: scoreLoading } = usePublicYvityScore();
   const [achievements] = useAchievementsData();
   const profilePhoto = useAdvisorProfilePhoto();
   const showVerifiedBadge = useShowAdvisorVerifiedBadge();
@@ -75,9 +82,79 @@ function ProfileHeaderBanner() {
   const showCall = settings.contact.callButton;
   const showCallback = useShowProfileCallback();
   const showShare = canShare && settings.publicProfile.shareProfile;
+  const hasCtas = showCall || showCallback || showShare;
 
-  const headerBtn =
+  // Silver/Free: video appears in trust card (not hero placement)
+  const showTrustStripVideo =
+    settings.visibility.introductionVideo &&
+    limits.introVideoEnabled &&
+    !limits.introVideoHeroPlacement;
+
+  const btnBase =
     "h-11 sm:h-12 w-full rounded-full text-sm font-semibold gap-2 shadow-md transition active:scale-[0.98]";
+
+  const ctaButtons = (
+    <div className="flex flex-col gap-2.5">
+      {/* Primary contact pair — side by side on desktop */}
+      {(showCall || showCallback) && (
+        <div className="flex gap-2.5">
+          {showCall && (
+            <Button
+              asChild
+              className={cn(
+                btnBase,
+                "bg-gradient-to-r from-[oklch(0.88_0.16_78)] to-[oklch(0.82_0.15_72)]",
+                "text-[oklch(0.18_0.035_235)] hover:opacity-95",
+                "shadow-[0_10px_24px_-12px_oklch(0.85_0.16_78/0.55)]",
+              )}
+            >
+              <a href={telHref}>
+                <Phone className="size-4 shrink-0" />
+                Call Now
+              </a>
+            </Button>
+          )}
+          {showCallback && (
+            <ContactTrigger
+              variant="outline"
+              className={cn(
+                btnBase,
+                "border-white/20 bg-white/[0.04] text-foreground hover:bg-white/10",
+              )}
+            >
+              <PhoneIncoming className="size-4 shrink-0 text-[oklch(0.82_0.13_205)]" />
+              Request Call Back
+            </ContactTrigger>
+          )}
+        </div>
+      )}
+      {/* Share — secondary, full width, visually lighter */}
+      {showShare && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void share()}
+          className={cn(
+            btnBase,
+            "h-9 sm:h-10 border-white/15 bg-transparent text-sm text-muted-foreground hover:bg-white/[0.06] hover:text-foreground shadow-none",
+          )}
+        >
+          <Share2 className="size-4 shrink-0" />
+          {shareDone ? "Link Copied!" : "Share Profile"}
+        </Button>
+      )}
+    </div>
+  );
+
+  const trustColumn = (
+    <>
+      <YvityScoreTrustCard score={score} loading={scoreLoading} />
+      {/* Gold plan: prominent hero-placement video */}
+      <IntroVideoHeroBlock />
+      {/* Silver/Free: compact trust-card video */}
+      {showTrustStripVideo && <IntroVideoTrustCard />}
+    </>
+  );
 
   return (
     <div
@@ -93,7 +170,9 @@ function ProfileHeaderBanner() {
       />
 
       <div className="relative p-4 sm:p-5 md:p-6 lg:p-7">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-5 xl:gap-6">
+        {/* ── Main row ── */}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-6 xl:gap-7">
+
           <AdvisorIdentityAvatar
             className="mx-auto lg:mx-0"
             name={advisorProfile.name}
@@ -102,6 +181,7 @@ function ProfileHeaderBanner() {
             variant="hero"
           />
 
+          {/* Left column: identity + bio + pills + CTAs (desktop) */}
           <div className="min-w-0 flex-1 text-center lg:text-left">
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
               {showIrdaiBadge ? (
@@ -124,11 +204,6 @@ function ProfileHeaderBanner() {
               ) : null}
             </div>
 
-            {/* Hero name. Uses the same sans-serif stack as every other
-                heading on the site (no `font-serif`) and the canonical
-                `text-gradient-brand` treatment for the accent word —
-                matching "How Can I Help?", "Latest Highlights",
-                "Professional Journey", etc. */}
             <h1 className="mt-3 sm:mt-4 text-2xl sm:text-3xl md:text-[2.15rem] lg:text-[2.35rem] font-bold tracking-tight leading-[1.12]">
               {leading && <span className="text-foreground">{leading} </span>}
               {accent && <span className="text-gradient-brand">{accent}</span>}
@@ -139,10 +214,9 @@ function ProfileHeaderBanner() {
             </p>
 
             <p className="mt-3 text-sm sm:text-[0.9375rem] text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              {home.heroBio}
+              {home.heroBio ||
+                `Trusted insurance advisor${advisorProfile.location ? ` based in ${advisorProfile.location}` : ""} — here to help you find the right cover for your life, health and future.`}
             </p>
-
-            <IntroVideoHeroBlock className="max-w-xl mx-auto lg:mx-0" />
 
             <ul className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <FactPill icon={MapPin} label={advisorProfile.location} />
@@ -163,60 +237,31 @@ function ProfileHeaderBanner() {
               ) : null}
             </ul>
 
+            {/* CTAs — desktop only (mobile CTAs rendered below trust block) */}
+            {hasCtas && (
+              <div className="mt-5 hidden lg:block max-w-sm">
+                {ctaButtons}
+              </div>
+            )}
           </div>
 
-          {(showCall || showCallback || showShare) && (
-            <div className="flex flex-col gap-2.5 w-full lg:w-[min(100%,13.5rem)] shrink-0">
-              {showCall && (
-                <Button
-                  asChild
-                  className={cn(
-                    headerBtn,
-                    "bg-gradient-to-r from-[oklch(0.88_0.16_78)] to-[oklch(0.82_0.15_72)]",
-                    // Dark teal text guarantees a 7:1+ contrast on gold;
-                    // shadow uses the proper `<offset>` / `<blur>` syntax
-                    // so the previously dropped shadow actually renders.
-                    "text-[oklch(0.18_0.035_235)] hover:opacity-95",
-                    "shadow-[0_10px_24px_-12px_oklch(0.85_0.16_78/0.55)]",
-                  )}
-                >
-                  <a href={telHref}>
-                    <Phone className="size-4 shrink-0" />
-                    Call Now
-                  </a>
-                </Button>
-              )}
-              {showCallback && (
-                <ContactTrigger
-                  variant="outline"
-                  className={cn(
-                    headerBtn,
-                    "border-white/20 bg-white/[0.04] text-foreground hover:bg-white/10",
-                  )}
-                >
-                  <PhoneIncoming className="size-4 shrink-0 text-[oklch(0.82_0.13_205)]" />
-                  Request Call Back
-                </ContactTrigger>
-              )}
-              {showShare && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void share()}
-                  className={cn(
-                    headerBtn,
-                    "border-white/20 bg-transparent text-foreground hover:bg-white/[0.06]",
-                  )}
-                >
-                  <Share2 className="size-4 shrink-0" />
-                  {shareDone ? "Link Copied!" : "Share Profile"}
-                </Button>
-              )}
-            </div>
-          )}
+          {/* Right trust column — desktop only */}
+          <div className="hidden lg:flex flex-col gap-3 w-60 xl:w-64 shrink-0">
+            {trustColumn}
+          </div>
         </div>
 
-        <HomeTrustSection />
+        {/* Mobile: trust block between pills and CTAs */}
+        <div className="mt-4 flex flex-col gap-2.5 lg:hidden">
+          {trustColumn}
+        </div>
+
+        {/* CTAs — mobile only */}
+        {hasCtas && (
+          <div className="mt-4 lg:hidden">
+            {ctaButtons}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -255,7 +300,7 @@ function HeroServicesSection() {
   return (
     <div className="w-full">
       <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        Your advisor
+        Services offered
       </p>
       <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-[1.08]">
         <span className="text-gradient-brand">{home.headline}</span>

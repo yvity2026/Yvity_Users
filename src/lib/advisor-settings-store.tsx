@@ -31,7 +31,7 @@ export function AdvisorSettingsProvider({ children }: { children: ReactNode }) {
 
   const reload = useCallback(async () => {
     try {
-      const res = await fetch("/api/settings", { cache: "no-store" });
+      const res = await fetch("/api/settings", { cache: "no-store", credentials: "same-origin" });
       if (!res.ok) return;
       const json = (await res.json()) as { data?: AdvisorSettings };
       if (json.data) setSettingsState(json.data);

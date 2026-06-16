@@ -324,7 +324,7 @@ export function LandingItemAccordion({
 
           {meta ? (
 
-            <span className="mt-0.5 shrink-0 font-nunito text-[11px] font-bold text-[#0a4d46]">
+            <span className="mt-0.5 shrink-0 font-poppins text-[11px] font-bold text-[#0a4d46]">
 
               {meta}
 
@@ -332,7 +332,7 @@ export function LandingItemAccordion({
 
           ) : null}
 
-          <span className="font-nunito text-[14px] font-semibold leading-snug text-[#0A4A4A]">
+          <span className="font-poppins text-[14px] font-semibold leading-snug text-[#0A4A4A]">
 
             {title}
 

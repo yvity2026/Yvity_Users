@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { FaArrowRight } from "react-icons/fa";
-import { AdvisorCardGold } from "./home-features/advisor-card-gold";
+import { AdvisorProfileCard } from "./home-features/advisor-profile-card";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationModal";
 import AnimatedCounter from "@/yvity-landing/components/ui/AnimatedCounter";
@@ -16,18 +16,19 @@ import { usePathname, useRouter } from "next/navigation";
 const HERO_PREVIEW_ADVISOR = {
   name: "Krishna Mohan Noti",
   title: "Chief Life Planner",
-  location: "Guntur, Telangana",
-  score: 40,
-  exp: "15",
+  location: "Guntur, Andhra Pradesh",
+  score: 41,
+  exp: "7",
   reviews: "2",
   avgRating: "4.5",
   recs: "0",
   clients: "127",
   clientsLabel: "Clients",
   serviceTypes: ["Life Insurance", "Health Insurance", "General Insurance"],
-  achievementTags: ["MDRT"],
+  achievementTags: ["MDRT x 2"],
   profileUrl: "/krishna-mohan-noti-167ec15f",
   profileSlug: "krishna-mohan-noti-167ec15f",
+  avatarUrl: "/api/auth/selfie/9705159705-5d7f1012.jpg",
   showVerifiedBadge: true,
   showIdentityVerified: true,
 };
@@ -222,10 +223,10 @@ const Hero = ({ advisor = [] }) => {
           </div>
 
           <span className="flex w-full min-w-0 flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[40px] sm:leading-[1.12] md:text-[52px] md:gap-2 lg:text-[56px] lg:leading-[1.1] xl:text-[64px]">
-            <p className="landing-hero-headline-accent w-full text-balance">
+            <p className="landing-hero-headline-accent font-cormorant w-full text-balance">
               {heroCopy.line1}
             </p>
-            <p className="landing-hero-headline-primary w-full text-balance">
+            <p className="landing-hero-headline-primary font-cormorant w-full text-balance">
               {heroCopy.line2}
             </p>
           </span>
@@ -289,13 +290,7 @@ const Hero = ({ advisor = [] }) => {
             )}
           </div>
         </motion.div>
-        {/* Right side pannel */}
-        {/* <div className="xl:pr-25 md:mx-auto h-full lg:col-span-5"> */}
-        {/* <div className="h-full z-0 relative">   Dup*/}
-        {/* <AdvisorCard {...advisors[0]} /> */}
-        {/* </div>  Dup */}
-        {/* </div> */}
-        {/* Right side pannel */}
+        {/* Right side panel */}
 <motion.div
     className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
     {...(reducedMotion
@@ -309,7 +304,7 @@ const Hero = ({ advisor = [] }) => {
   >
     <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
       <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
-        <AdvisorCardGold {...displayAdvisor} key={displayAdvisor.name} />
+        <AdvisorProfileCard {...displayAdvisor} key={displayAdvisor.name} />
       </div>
     </div>
   </motion.div>

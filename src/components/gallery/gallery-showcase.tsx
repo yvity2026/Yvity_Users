@@ -303,6 +303,7 @@ function CategoryFilterBar({
   onAdd,
   addDisabled,
   embedded,
+  items,
 }: {
   active: GalleryCategory | "all";
   onChange: (c: GalleryCategory | "all") => void;
@@ -310,10 +311,8 @@ function CategoryFilterBar({
   editable?: boolean;
   onAdd?: () => void;
   addDisabled?: boolean;
-  /** When `true` the bar does NOT pin — the workspace already has a
-   *  sticky workspace header at top-0 and a second sticky strip would
-   *  cover the breadcrumb. */
   embedded?: boolean;
+  items: GalleryItem[];
 }) {
   return (
     <div
@@ -324,7 +323,9 @@ function CategoryFilterBar({
     >
       <div className="glass-strong rounded-2xl border border-white/10 p-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 flex-1 min-w-0">
-          {galleryCategories.map((cat) => {
+          {galleryCategories
+            .filter((cat) => cat.id === "all" || active === cat.id || items.some((i) => i.category === cat.id))
+            .map((cat) => {
             const isActive = active === cat.id;
             return (
               <button
@@ -542,6 +543,7 @@ export function GalleryShowcase({
           onAdd={editable ? addPhoto : undefined}
           addDisabled={galleryAtLimit}
           embedded={embedded}
+          items={items}
         />
 
         {items.length === 0 && editable ? (

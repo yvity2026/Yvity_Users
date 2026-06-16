@@ -1,14 +1,15 @@
 import { appendOutboundLog } from "@/lib/server/outbound-log";
 import { sendWhatsAppMessage } from "@/lib/server/otp/delivery";
+import { resolveEmailFrom, type EmailSenderType } from "@/lib/server/email-from";
 
-async function sendApprovalEmailViaResend(input: {
+async function sendEmailViaResend(input: {
+  from: string;
   to: string;
   subject: string;
   text: string;
   html: string;
 }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.YVITY_EMAIL_FROM?.trim() || "YVITY <onboarding@yvity.in>";
   if (!apiKey) return false;
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -18,7 +19,7 @@ async function sendApprovalEmailViaResend(input: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from,
+      from: input.from,
       to: [input.to],
       subject: input.subject,
       html: input.html,
@@ -38,7 +39,8 @@ async function sendApprovalEmailViaResend(input: {
   return res.ok;
 }
 
-async function sendApprovalEmailViaSmtp(input: {
+async function sendEmailViaSmtp(input: {
+  from: string;
   to: string;
   subject: string;
   text: string;
@@ -51,7 +53,6 @@ async function sendApprovalEmailViaSmtp(input: {
   const host = process.env.SMTP_HOST?.trim() || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT?.trim() || "465");
   const secure = process.env.SMTP_SECURE?.trim() !== "false";
-  const from = process.env.YVITY_EMAIL_FROM?.trim() || `YVITY <${user}>`;
 
   try {
     const nodemailer = await import("nodemailer");
@@ -63,7 +64,7 @@ async function sendApprovalEmailViaSmtp(input: {
     });
 
     await transport.sendMail({
-      from,
+      from: input.from,
       to: input.to,
       subject: input.subject,
       text: input.text,
@@ -91,23 +92,23 @@ async function sendApprovalEmailViaSmtp(input: {
   }
 }
 
-export async function sendApprovalEmail(input: {
-  to: string;
-  subject: string;
-  text: string;
-  html: string;
-}): Promise<{ ok: boolean; mode: "resend" | "smtp" | "logged" }> {
+export async function sendApprovalEmail(
+  input: { to: string; subject: string; text: string; html: string },
+  fromType: EmailSenderType = "hello",
+): Promise<{ ok: boolean; mode: "resend" | "smtp" | "logged" }> {
+  const from = resolveEmailFrom(fromType);
+
   if (process.env.EMAIL_USER?.trim() && process.env.EMAIL_PASS?.trim()) {
-    const ok = await sendApprovalEmailViaSmtp(input);
+    const ok = await sendEmailViaSmtp({ from, ...input });
     if (ok) return { ok: true, mode: "smtp" };
   }
 
   if (process.env.RESEND_API_KEY?.trim()) {
-    const ok = await sendApprovalEmailViaResend(input);
+    const ok = await sendEmailViaResend({ from, ...input });
     return { ok, mode: "resend" };
   }
 
-  console.info("[YVITY outbound email]", input.to, input.subject);
+  console.info("[YVITY outbound email]", fromType, input.to, input.subject);
   await appendOutboundLog({
     channel: "email",
     to: input.to,

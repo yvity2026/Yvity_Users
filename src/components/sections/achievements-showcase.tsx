@@ -20,12 +20,13 @@ import { useAchievementsData } from "@/lib/sections/stores";
 import type { AchievementItem } from "@/lib/sections/types";
 import { uid } from "@/lib/section-store";
 import { formatMdrtStatusLabel } from "@/lib/sections/achievement-tiers";
+import { isYvityVerified } from "@/lib/verification/defaults";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { cn } from "@/lib/utils";
 
 function newAchievement(): AchievementItem {
   return {
-    id: uid("ach"),
+    id: crypto.randomUUID(),
     title: "New Achievement",
     subtitle: "",
     description: "",
@@ -46,6 +47,9 @@ export function AchievementsShowcase({
   const [items, setItems, loading] = useAchievementsData();
   const advisorProfile = useAdvisorDisplayProfile();
   const [filter, setFilter] = useState<AchievementFilter>("all");
+  const verifiedCount = items.filter((i) => isYvityVerified(i.verification)).length;
+  const mdrtLabel = formatMdrtStatusLabel(items);
+  const hasMdrt = !!mdrtLabel && mdrtLabel !== "—";
   const [editId, setEditId] = useState<string | null>(null);
   // Inline confirm-dialog (replaces window.confirm so the dismissal
   // is keyboard-accessible and styled with the rest of the modals).
@@ -131,7 +135,7 @@ export function AchievementsShowcase({
 
         <AchievementsBanner
           totalAwards={items.length}
-          mdrtLabel={formatMdrtStatusLabel(items)}
+          mdrtLabel={hasMdrt ? mdrtLabel : undefined}
           experienceDisplay={advisorProfile.experienceDisplay}
           className="mb-8 sm:mb-10"
         />
@@ -195,7 +199,9 @@ export function AchievementsShowcase({
           </div>
         )}
 
-        <AchievementsVerificationFooter className="mb-8 sm:mb-10" />
+        {(editable || verifiedCount > 0) && (
+          <AchievementsVerificationFooter verifiedCount={verifiedCount} className="mb-8 sm:mb-10" />
+        )}
 
         {!embedded && <SectionAdvisorCta />}
       </div>

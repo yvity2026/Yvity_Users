@@ -6,6 +6,10 @@ import {
   type AdvisorProfileRecord,
 } from "@/lib/server/advisor-profile-store";
 import { loadRegistrationDb } from "@/lib/server/registration-store";
+import {
+  notifyProfileApproved,
+  notifyProfileRejected,
+} from "@/lib/server/profile-approval-notify";
 
 export type IrdaiApprovalStatus = "pending" | "approved" | "rejected";
 
@@ -112,9 +116,18 @@ export async function listIrdaiApprovals(baseUrl = ""): Promise<{
 export async function approveIrdaiSubmission(advisorId: string) {
   const existing = await findAdvisorProfileById(advisorId);
   if (!existing) return null;
-  return approveAdvisorProfile(existing.user_id);
+  const profile = await approveAdvisorProfile(existing.user_id);
+  if (profile) {
+    // Fire immediately — don't wait for advisor to open notifications
+    void notifyProfileApproved(profile, { sendOutbound: true });
+  }
+  return profile;
 }
 
 export async function rejectIrdaiSubmission(advisorId: string, reason?: string) {
-  return rejectAdvisorProfile(advisorId, reason);
+  const profile = await rejectAdvisorProfile(advisorId, reason);
+  if (profile) {
+    void notifyProfileRejected(profile, reason?.trim() || "Profile requires changes");
+  }
+  return profile;
 }

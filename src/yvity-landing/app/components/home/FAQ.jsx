@@ -166,7 +166,7 @@ function FaqQuestionAccordion({
         onClick={onToggle}
         className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:text-[#0a4d46]"
       >
-        <span className="pr-2 font-nunito text-[14px] font-semibold leading-snug text-[#0A4A4A]">
+        <span className="pr-2 font-poppins text-[14px] font-semibold leading-snug text-[#0A4A4A]">
           {faq.question}
         </span>
         <AccordionChevron open={isOpen} />
@@ -181,7 +181,7 @@ function FaqQuestionAccordion({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="border-t border-gray-100 px-4 pb-4 pt-1 font-nunito text-[13px] leading-relaxed text-[#374151]">
+            <div className="border-t border-gray-100 px-4 pb-4 pt-1 font-poppins text-[13px] leading-relaxed text-[#374151]">
               {faq.answer}
             </div>
           </motion.div>
@@ -323,7 +323,7 @@ function DesktopFaq() {
                 }
                 className="group flex w-full cursor-pointer items-center justify-between py-5 text-left transition-colors hover:text-[#0a4d46]"
               >
-                <span className="font-nunito text-[16px] font-semibold leading-[26px] text-[#0A4A4A]">
+                <span className="font-poppins text-[16px] font-semibold leading-[26px] text-[#0A4A4A]">
                   {faq.question}
                 </span>
                 <AccordionChevron open={openIndex === index} />
@@ -337,7 +337,7 @@ function DesktopFaq() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <div className="pb-2 pr-10 font-nunito text-[12px] font-normal leading-[26px] text-[#374151]">
+                    <div className="pb-2 pr-10 font-poppins text-[12px] font-normal leading-[26px] text-[#374151]">
                       {faq.answer}
                     </div>
                   </motion.div>

@@ -49,7 +49,7 @@ export function getMySpaceNavHref(user, advisor) {
 
 export async function persistOnboardingCtaComplete() {
   try {
-    const response = await fetch("/api/auth/onboarding-cta", { method: "POST" });
+    const response = await fetch("/api/auth/onboarding-cta", { method: "POST", credentials: "same-origin" });
     const result = await response.json();
     return Boolean(response.ok && result?.success);
   } catch {

@@ -6,9 +6,9 @@ import type { DashboardAdvisor, DashboardUser } from "@/context/AuthUserContext"
 /** Static copy labels — not advisor-specific demo data. */
 export const ADVISOR_PROFILE_LABELS = {
   journeyHeadline: "My Journey",
-  journeyLabel: "Professional Profile",
+  journeyLabel: "Career Profile",
   journeyDescription:
-    "Add your career story, certifications, and education so clients understand your background.",
+    "A record of roles, certifications and education — the professional background behind every recommendation.",
   ctaDescription:
     "Share how you help clients — your services and contact details appear here once you fill your profile.",
   consultationHref: "/login",

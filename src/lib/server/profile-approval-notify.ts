@@ -1,6 +1,8 @@
 import {
   buildProfileApprovedEmail,
   buildProfileApprovedWhatsAppMessage,
+  buildProfileRejectedEmail,
+  buildProfileRejectedWhatsAppMessage,
 } from "@/lib/notifications/approval-message";
 import {
   appendNotification,
@@ -59,10 +61,7 @@ export async function notifyProfileApproved(
   });
 
   if (user?.email?.trim()) {
-    await sendApprovalEmail({
-      to: user.email.trim(),
-      ...emailPayload,
-    });
+    await sendApprovalEmail({ to: user.email.trim(), ...emailPayload }, "hello");
   }
 
   if (user?.phone?.trim()) {
@@ -70,6 +69,40 @@ export async function notifyProfileApproved(
       phone: user.phone.trim(),
       message: whatsappMessage,
     });
+  }
+}
+
+/** In-app notification + email/WhatsApp when admin rejects a profile. */
+export async function notifyProfileRejected(
+  profile: AdvisorProfileRecord,
+  reason: string,
+): Promise<void> {
+  const user = loadRegistrationDb().users.find((item) => item.id === profile.user_id);
+  const advisorName = user?.fullName?.trim() || "Advisor";
+  const baseUrl = resolveBaseUrl();
+  const resubmitUrl = `${baseUrl}/dashboard/my-space?setup=profile`;
+
+  await appendNotification({
+    userId: profile.user_id,
+    kind: "profile_rejected",
+    title: "Profile update required — action needed",
+    message: `Hi ${advisorName}, your profile needs an update before it can go live. Reason: ${reason}`,
+    href: "/dashboard/my-space?setup=profile",
+    meta: {
+      reason,
+      rejectedAt: new Date().toISOString(),
+    },
+  });
+
+  const emailPayload = buildProfileRejectedEmail({ advisorName, reason, resubmitUrl });
+  const whatsappMessage = buildProfileRejectedWhatsAppMessage({ advisorName, reason, resubmitUrl });
+
+  if (user?.email?.trim()) {
+    await sendApprovalEmail({ to: user.email.trim(), ...emailPayload }, "support");
+  }
+
+  if (user?.phone?.trim()) {
+    await sendApprovalWhatsApp({ phone: user.phone.trim(), message: whatsappMessage });
   }
 }
 

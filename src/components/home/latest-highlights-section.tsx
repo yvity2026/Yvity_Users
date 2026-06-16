@@ -41,10 +41,13 @@ export function LatestHighlightsSection() {
     [achievements],
   );
 
-  const latestTestimonial = useMemo(
-    () => (testimonials.length > 0 ? testimonials[0] : null),
-    [testimonials],
-  );
+  // Prefer 2 testimonials when achievements are absent or hidden — more persuasive for new advisors
+  const topTestimonials = useMemo(() => testimonials.slice(0, 2), [testimonials]);
+  const latestTestimonial = topTestimonials[0] ?? null;
+  const secondTestimonial = topTestimonials[1] ?? null;
+
+  // Show second testimonial slot when: achievements are hidden OR no achievement exists
+  const showSecondTestimonial = !latestAchievement || !showAchievements;
 
   const loading = achievementsLoading || testimonialsLoading;
 
@@ -73,28 +76,26 @@ export function LatestHighlightsSection() {
       <div
         className={cn(
           "mt-5 sm:mt-6 grid gap-5 sm:gap-6",
-          showAchievements && showTestimonials && latestAchievement && latestTestimonial
+          (showAchievements && latestAchievement) ||
+          (showSecondTestimonial && secondTestimonial)
             ? "md:grid-cols-2"
             : "max-w-xl",
         )}
       >
-        {showAchievements ? (
+        {/* Left column: achievement when available, otherwise second testimonial */}
+        {showAchievements && latestAchievement ? (
           <div className="flex min-w-0 flex-col gap-4">
-            {latestAchievement ? (
-              <AchievementDetailCard item={latestAchievement} />
-            ) : (
-              <EmptyState
-                icon={Award}
-                title="No achievements yet"
-                description="As soon as the advisor adds awards or milestones, they will surface here."
-                size="sm"
-                className="min-h-[280px] flex flex-col items-center justify-center"
-              />
-            )}
+            <AchievementDetailCard item={latestAchievement} />
             <ViewAllLink href="/achievements" label="View All Achievements" />
+          </div>
+        ) : showSecondTestimonial && secondTestimonial ? (
+          <div className="flex min-w-0 flex-col gap-4">
+            <TestimonialDetailCard item={secondTestimonial} index={1} />
+            <ViewAllLink href="/testimonials" label="View All Testimonials" />
           </div>
         ) : null}
 
+        {/* Right column: always the primary testimonial */}
         {showTestimonials ? (
           <div className="flex min-w-0 flex-col gap-4">
             {latestTestimonial ? (

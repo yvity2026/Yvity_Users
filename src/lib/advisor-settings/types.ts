@@ -54,6 +54,13 @@ export type IntroVideoSettings = {
   durationLabel: string;
 };
 
+export type LocationSettings = {
+  /** Full office address shown on the public profile (e.g. "Plot 12, MG Road, Guntur, AP 522001") */
+  officeAddress: string;
+  /** Google Maps share link — used as the "Get Directions" href when set */
+  mapsLink: string;
+};
+
 export type AdvisorSettings = {
   visibility: ProfileVisibilitySettings;
   contact: ContactSettings;
@@ -62,6 +69,7 @@ export type AdvisorSettings = {
   publicProfile: PublicProfileSettings;
   appearance: ProfileAppearanceSettings;
   introVideo: IntroVideoSettings;
+  location: LocationSettings;
 };
 
 export type AdvisorSettingsPatch = {
@@ -72,4 +80,5 @@ export type AdvisorSettingsPatch = {
   publicProfile?: Partial<PublicProfileSettings>;
   appearance?: Partial<ProfileAppearanceSettings>;
   introVideo?: Partial<IntroVideoSettings>;
+  location?: Partial<LocationSettings>;
 };

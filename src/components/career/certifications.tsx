@@ -48,6 +48,7 @@ export function CertificationsSection({
 }: {
   items: Certification[];
   embedded?: boolean;
+  /** When undefined, component is in read-only / public-profile mode. */
   editable?: CareerSectionEditable;
 }) {
   const body = (
@@ -150,23 +151,28 @@ export function CertificationsSection({
                 </div>
               ) : null}
 
-              <div>
-                <div className={cn("text-xs font-semibold uppercase tracking-wider", tone.text)}>
-                  Certificate ID
-                </div>
-                {c.certificateId ? (
-                  <div className="mt-1 font-mono text-sm">{c.certificateId}</div>
-                ) : (
-                  <div className="mt-2 rounded-xl border border-dashed border-white/15 p-5 text-center text-xs text-muted-foreground">
-                    <Upload className="size-5 mx-auto mb-2 opacity-60" />
-                    <div className="font-semibold text-foreground/80">Upload Certificate</div>
-                    <div>JPG, PNG, PDF (Max 2MB)</div>
+              {(c.certificateId || editable) && (
+                <div>
+                  <div className={cn("text-xs font-semibold uppercase tracking-wider", tone.text)}>
+                    Certificate ID
                   </div>
-                )}
-              </div>
+                  {c.certificateId ? (
+                    <div className="mt-1 font-mono text-sm">{c.certificateId}</div>
+                  ) : editable ? (
+                    <div className="mt-2 rounded-xl border border-dashed border-white/15 p-5 text-center text-xs text-muted-foreground">
+                      <Upload className="size-5 mx-auto mb-2 opacity-60" />
+                      <div className="font-semibold text-foreground/80">Upload Certificate</div>
+                      <div>JPG, PNG, PDF (Max 2MB)</div>
+                    </div>
+                  ) : null}
+                </div>
+              )}
 
-              {verified && (
-                <button
+              {verified && c.certificateUrl && (
+                <a
+                  href={c.certificateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold border",
                     tone.border,
@@ -175,7 +181,7 @@ export function CertificationsSection({
                   )}
                 >
                   <Eye className="size-4" /> View Certificate
-                </button>
+                </a>
               )}
             </div>
           </article>

@@ -30,6 +30,15 @@ export function hasMdrtAchievement(
   return hasAchievementTier(achievements, "mdrt");
 }
 
+/** Total number of times MDRT was achieved (sum of years across all MDRT items). */
+export function getMdrtCount(
+  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
+): number {
+  return achievements
+    .filter((item) => achievementHasTier(item, "mdrt"))
+    .reduce((sum, item) => sum + Math.max(1, (item.years ?? []).length), 0);
+}
+
 export function getMdrtLatestYear(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): number | null {
@@ -45,20 +54,24 @@ export function getMdrtLatestYear(
   return years.length ? Math.max(...years) : null;
 }
 
-/** Banner tile on the achievements page — e.g. "MDRT 2024" or "—". */
+/** Banner tile on the achievements page — e.g. "MDRT 2024", "MDRT x 2", or "—". */
 export function formatMdrtStatusLabel(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): string {
   if (!hasMdrtAchievement(achievements)) return "—";
+  const count = getMdrtCount(achievements);
+  if (count > 1) return `MDRT x ${count}`;
   const year = getMdrtLatestYear(achievements);
   return year ? `MDRT ${year}` : "MDRT";
 }
 
-/** Profile hero badge — "MDRT Member" when an MDRT achievement exists. */
+/** Profile hero badge — "MDRT Member", "MDRT x 2", or "Trusted Advisor". */
 export function formatMdrtMemberLabel(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): string {
-  return hasMdrtAchievement(achievements) ? "MDRT Member" : "Trusted Advisor";
+  if (!hasMdrtAchievement(achievements)) return "Trusted Advisor";
+  const count = getMdrtCount(achievements);
+  return count > 1 ? `MDRT x ${count}` : "MDRT Member";
 }
 
 const TIER_TAG_LABELS: Record<AchievementTier, string> = {
@@ -79,8 +92,13 @@ export function extractAchievementTags(
   for (const tier of ["mdrt", "cot", "tot"] as AchievementTier[]) {
     if (!hasAchievementTier(achievements, tier)) continue;
     if (tier === "mdrt") {
-      const year = getMdrtLatestYear(achievements);
-      tags.push(year ? `MDRT ${year}` : "MDRT");
+      const count = getMdrtCount(achievements);
+      if (count > 1) {
+        tags.push(`MDRT x ${count}`);
+      } else {
+        const year = getMdrtLatestYear(achievements);
+        tags.push(year ? `MDRT ${year}` : "MDRT");
+      }
     } else {
       tags.push(TIER_TAG_LABELS[tier]);
     }

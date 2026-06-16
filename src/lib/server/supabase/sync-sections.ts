@@ -204,12 +204,21 @@ export async function syncAchievements(advisorId: string, items: AchievementItem
   }
 
   for (const item of items) {
+    const extraMeta: Record<string, unknown> = {};
+    if (item.verification) extraMeta.verification = item.verification;
+    const allYears = Array.isArray(item.years) ? item.years.filter(Boolean) : [];
+    if (allYears.length > 1) extraMeta.years = allYears;
+    if ((item.achievedCount ?? 1) > 1) extraMeta.achievedCount = item.achievedCount;
+    const descriptionWithMeta =
+      Object.keys(extraMeta).length > 0
+        ? embedGoldMeta(item.description, extraMeta)
+        : item.description;
     const row = {
       advisor_id: advisorId,
       title: item.title,
       organisation: item.subtitle || "—",
-      description: item.description,
-      achievement_year: item.years[0] || String(new Date().getFullYear()),
+      description: descriptionWithMeta,
+      achievement_year: allYears[0] || String(new Date().getFullYear()),
       type: ACHIEVEMENT_TYPE[item.category] ?? "other",
       icon: item.iconStyle,
     };
@@ -246,13 +255,23 @@ export async function syncGallery(advisorId: string, items: GalleryItem[]) {
 
   for (let index = 0; index < items.length; index++) {
     const item = items[index];
-    const caption = [item.title, item.caption].filter(Boolean).join("\n").trim() || item.title;
+    // Store title separately in the caption field prefixed so we can recover
+    // it losslessly. Format: title\n\ncaption (double newline separator).
+    // Legacy rows without this separator are handled in mapDbGallery.
+    const captionPayload = item.title
+      ? `${item.title}\n\n${item.caption ?? ""}`.trim()
+      : (item.caption ?? "").trim();
     const row = {
       advisor_id: advisorId,
       image_url: item.imageUrl,
-      caption,
+      caption: captionPayload,
       category: item.category,
       sort_order: index,
+      is_featured: Boolean(item.featured),
+      // Store layout and location as JSON in the caption suffix if the DB
+      // columns don't exist yet; fall back to extra fields when available.
+      location: item.location ?? null,
+      layout: item.layout ?? "default",
     };
 
     if (isUuid(item.id)) {

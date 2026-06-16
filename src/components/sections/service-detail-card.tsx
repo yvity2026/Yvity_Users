@@ -13,9 +13,6 @@ import {
 import { serviceAccents } from "@/lib/sections/services-config";
 import {
   displayCategoryHeading,
-  displayCompanyName,
-  displayDesignation,
-  displayExperience,
   displayLicenseHolder,
   formatMetricValue,
   normalizeCompanyName,
@@ -140,7 +137,9 @@ export function ServiceDetailCard({
 }: ServiceDetailCardProps) {
   void _editable;
   void _onEdit;
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(
+    () => defaultOpen || (typeof window !== "undefined" && window.innerWidth >= 768),
+  );
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : uncontrolledOpen;
   const toggleOpen = () => {
@@ -155,12 +154,13 @@ export function ServiceDetailCard({
   const accent = serviceAccents[item.category];
   const showVerified = isServiceVerifiedForPlan(limits, item, profileApproved);
   const companyName = normalizeCompanyName(item.provider);
-  const companyDisplay = displayCompanyName(item.provider);
   const categoryHeading = displayCategoryHeading(item);
-  const designationDisplay = displayDesignation(item);
-  const experienceDisplay = displayExperience(item);
   const licenseHolderLine = displayLicenseHolder(item, profileOwnerName);
-  const subtitleLine = `${designationDisplay} • ${experienceDisplay}`;
+  // Use raw values — never show placeholder strings ("Enter your…") on the public card
+  const designation = item.roleLabel?.trim() ?? "";
+  const experience = resolveServiceExperience(item).trim();
+  const subtitleParts = [designation, experience].filter(Boolean);
+  const subtitleLine = subtitleParts.join(" • ");
   const capacityId = item.capacityId ?? "individual_agent";
   const cardDisplay = useMemo(
     () => mergeCardDisplay(capacityId, item.cardDisplay),
@@ -189,8 +189,8 @@ export function ServiceDetailCard({
     showBranches;
   const logoUrl = item.companyLogoUrl?.trim() ?? "";
   const hasLogo = logoUrl.length > 0;
-  const initials = deriveCompanyInitials(companyName || item.provider);
-  const longInitials = initials.length >= 3;
+  const initials = companyName ? deriveCompanyInitials(companyName) : null;
+  const longInitials = (initials?.length ?? 0) >= 3;
   const badge =
     statusBadge !== undefined ? (
       statusBadge
@@ -233,12 +233,7 @@ export function ServiceDetailCard({
             "relative flex items-center justify-between gap-3",
             "px-5 sm:px-6 py-3.5 sm:py-4",
             "border-b border-white/10",
-            // Theme-independent dark band. A fixed near-charcoal background
-            // gives the header a clear "title bar" feel on dark, ivory and
-            // clean-white themes alike. A faint gradient sheen keeps the
-            // surface from looking flat.
-            "bg-[oklch(0.18_0.02_245)]",
-            "bg-gradient-to-br from-[oklch(0.21_0.025_245)] to-[oklch(0.14_0.015_245)]",
+            accent.headerGradient,
           )}
         >
           <span
@@ -280,35 +275,35 @@ export function ServiceDetailCard({
                 className="size-full object-contain p-1"
                 unoptimized={logoUrl.startsWith("/api/")}
               />
-            ) : (
+            ) : initials ? (
               <span
                 className={cn(
                   "font-bold leading-none tracking-wide",
                   longInitials ? "text-[11px] sm:text-[12px]" : "text-sm sm:text-base",
                   accent.text,
                 )}
-                aria-label={item.provider ? `${item.provider} initials` : undefined}
+                aria-label={`${item.provider} initials`}
               >
                 {initials}
               </span>
-            )}
+            ) : (() => { const CatIcon = accent.icon; return <CatIcon className={cn("size-5", accent.text)} aria-hidden />; })()
+            }
           </span>
 
           <div className="min-w-0 flex-1">
-            <p
-              className={cn(
-                "text-sm sm:text-base font-semibold truncate",
-                companyName ? "text-foreground" : "text-muted-foreground italic",
-              )}
-            >
-              {companyDisplay}
-            </p>
+            {companyName ? (
+              <p className="text-sm sm:text-base font-semibold truncate text-foreground">
+                {companyName}
+              </p>
+            ) : null}
             {licenseHolderLine ? (
               <p className="mt-0.5 text-[11px] sm:text-xs text-muted-foreground truncate">
                 {licenseHolderLine}
               </p>
             ) : null}
-            <p className={cn("mt-0.5 text-xs sm:text-sm truncate", accent.text)}>{subtitleLine}</p>
+            {subtitleLine ? (
+              <p className={cn("mt-0.5 text-xs sm:text-sm truncate", accent.text)}>{subtitleLine}</p>
+            ) : null}
             {showCapacityChip ? (
               <p className="mt-1 inline-flex max-w-full truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {metricLabels.capacityChip}
@@ -352,7 +347,7 @@ export function ServiceDetailCard({
             <div className="mb-4 border-t border-white/10" aria-hidden />
 
             {hasMetricGrid ? (
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {showClients ? (
                   <MetricChip
                     icon={Users}
@@ -396,9 +391,9 @@ export function ServiceDetailCard({
                 {showSumInsured ? (
                   <div
                     className={cn(
-                      "rounded-xl border border-white/10 p-3 col-span-1 text-center",
+                      "rounded-xl border border-white/10 p-3 text-center",
                       accent.soft,
-                      !showClaimSettled && "col-span-2",
+                      !showClaimSettled ? "sm:col-span-2" : "sm:col-span-1",
                     )}
                   >
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -412,9 +407,9 @@ export function ServiceDetailCard({
                 {showClaimSettled ? (
                   <div
                     className={cn(
-                      "rounded-xl border border-white/10 p-3 col-span-1 text-center",
+                      "rounded-xl border border-white/10 p-3 text-center",
                       accent.soft,
-                      !showSumInsured && "col-span-2",
+                      !showSumInsured ? "sm:col-span-2" : "sm:col-span-1",
                     )}
                   >
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">

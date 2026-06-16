@@ -35,8 +35,11 @@ export function TestimonialsShowcase({
 }) {
   const { settings } = useAdvisorSettings();
   const isWorkspacePreview = useIsAdvisorWorkspacePreview();
-  const canAcceptPublicTestimonials =
-    !isWorkspacePreview && !embedded && settings.leads.testimonialRequests;
+  // On the public profile page (editable=false, embedded=false), always show Give
+  // Testimonial. `editable` is the reliable signal — isWorkspacePreview can return
+  // true for logged-in advisors visiting their own public URL when publicView context
+  // is not set on that route.
+  const canAcceptPublicTestimonials = !embedded && (!editable || (settings.leads.testimonialRequests && !isWorkspacePreview));
   const [items, setItems, loading] = useTestimonialsData();
   const [optimisticItems, setOptimisticItems] = useState<TestimonialItem[]>([]);
   const [typeFilter, setTypeFilter] = useState<TestimonialTypeFilter>("all");
@@ -44,8 +47,8 @@ export function TestimonialsShowcase({
   const [replyTarget, setReplyTarget] = useState<TestimonialItem | null>(null);
   const [replyMode, setReplyMode] = useState<"create" | "edit">("create");
   const [replyBusyId, setReplyBusyId] = useState<string | null>(null);
-  // Inline confirm-dialog state for "Delete your reply".
   const [pendingDeleteReply, setPendingDeleteReply] = useState<TestimonialItem | null>(null);
+  const [pendingDeleteTestimonial, setPendingDeleteTestimonial] = useState<TestimonialItem | null>(null);
   const { openGiveTestimonial, openRequestTestimonial, registerOnPublished } =
     useTestimonialSubmit();
   const { filterOptions: serviceFilterOptions } = useRegisteredTestimonialServices();
@@ -102,6 +105,32 @@ export function TestimonialsShowcase({
   const openReply = (item: TestimonialItem, mode: "create" | "edit") => {
     setReplyTarget(item);
     setReplyMode(mode);
+  };
+
+  const performServiceChange = async (item: TestimonialItem, service: TestimonialItem["service"]) => {
+    patchItem({ ...item, service });
+    try {
+      const res = await fetch(`/api/testimonials/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service }),
+      });
+      const data = (await res.json()) as { data?: TestimonialItem };
+      if (res.ok && data.data) patchItem(data.data);
+      else patchItem(item); // revert on error
+    } catch {
+      patchItem(item);
+    }
+  };
+
+  const performDeleteTestimonial = async (item: TestimonialItem) => {
+    setItems(items.filter((i) => i.id !== item.id));
+    setOptimisticItems((prev) => prev.filter((i) => i.id !== item.id));
+    try {
+      await fetch(`/api/testimonials/${item.id}`, { method: "DELETE" });
+    } catch {
+      setItems((prev) => [item, ...prev]);
+    }
   };
 
   const performDeleteReply = async (item: TestimonialItem) => {
@@ -233,6 +262,9 @@ export function TestimonialsShowcase({
                   onReply={() => openReply(item, "create")}
                   onEditReply={() => openReply(item, "edit")}
                   onDeleteReply={() => setPendingDeleteReply(item)}
+                  onDelete={() => setPendingDeleteTestimonial(item)}
+                  onUpgrade={upgradePlan ? () => { window.location.href = "/pricing"; } : undefined}
+                  onServiceChange={(service) => void performServiceChange(item, service)}
                   replyBusy={replyBusyId === item.id}
                 />
               ))
@@ -275,6 +307,22 @@ export function TestimonialsShowcase({
           if (!pendingDeleteReply) return;
           await performDeleteReply(pendingDeleteReply);
           setPendingDeleteReply(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingDeleteTestimonial)}
+        onOpenChange={(next) => {
+          if (!next) setPendingDeleteTestimonial(null);
+        }}
+        title="Delete this testimonial?"
+        description="This will permanently remove the testimonial from your profile. This cannot be undone."
+        confirmLabel="Delete testimonial"
+        tone="destructive"
+        onConfirm={async () => {
+          if (!pendingDeleteTestimonial) return;
+          await performDeleteTestimonial(pendingDeleteTestimonial);
+          setPendingDeleteTestimonial(null);
         }}
       />
     </div>

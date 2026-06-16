@@ -1,4 +1,5 @@
 import { normalizeAdvisorProfileSlug, slugifyAdvisorName } from "@/lib/advisor/profileSlug";
+import { buildHandleUrl } from "@/lib/advisor/handle";
 
 /** App routes that must not be treated as advisor profile slugs. */
 export const RESERVED_PUBLIC_PROFILE_SLUGS = new Set([
@@ -60,6 +61,17 @@ export function toPublicProfileSlugSegment(slug: string): string {
 export function buildPublicProfilePath(slug: string): string {
   const segment = toPublicProfileSlugSegment(slug);
   return segment ? `/${segment}` : "/profile";
+}
+
+/**
+ * Full URL for an advisor's public profile.
+ * Production: https://handle.yvity.com
+ * Dev: baseUrl/handle (subdomains don't work on localhost)
+ */
+export function buildPublicProfileUrl(slug: string, baseUrl: string): string {
+  const segment = toPublicProfileSlugSegment(slug);
+  if (!segment) return baseUrl;
+  return buildHandleUrl(segment, baseUrl);
 }
 
 /**

@@ -106,7 +106,7 @@ export function buildProfileHealth(input: {
     {
       id: "gallery",
       label: "Gallery",
-      complete: input.gallery.length >= 3,
+      complete: input.gallery.length >= 5,
       weight: 10,
       profileSection: "gallery",
     },
@@ -333,7 +333,8 @@ export function buildDashboardOverviewModel(input: {
       renewalDate: membershipModel.renewal.renewalDate,
       daysUntilRenewal: renewalDays,
       benefits: membershipModel.benefits.map((b) => b.label),
-      upgradePlanName: upgradePlan?.name ?? "GOLD",
+      canUpgrade: !!upgradePlan,
+      upgradePlanName: upgradePlan?.name ?? "",
       upgradeHighlight: upgradePlan?.tagline ?? "",
     },
     pendingTestimonialReplies,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +27,7 @@ const categories: { value: AchievementCategory; label: string }[] = [
 ];
 
 const iconStyles: { value: AchievementIconStyle; label: string }[] = [
+  { value: "mdrt", label: "MDRT / COT / TOT" },
   { value: "trophy", label: "Trophy" },
   { value: "ribbon", label: "Ribbon / Award" },
   { value: "star", label: "Star" },
@@ -53,20 +55,32 @@ export function AchievementsEditorModal({
     item.verification?.documents ?? [],
   );
   const [docsDirty, setDocsDirty] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   useEffect(() => {
     setDraft(item);
     setYearsText(item.years.join(", "));
     setPendingDocs(item.verification?.documents ?? []);
     setDocsDirty(false);
+    setDirty(false);
   }, [item]);
 
   const patch = useCallback(
     <K extends keyof AchievementItem>(key: K, value: AchievementItem[K]) => {
       setDraft((d) => ({ ...d, [key]: value }));
+      setDirty(true);
     },
     [],
   );
+
+  const handleClose = () => {
+    if (dirty || docsDirty) {
+      setConfirmClose(true);
+    } else {
+      onClose();
+    }
+  };
 
   const save = () => {
     const years = yearsText
@@ -88,9 +102,10 @@ export function AchievementsEditorModal({
   };
 
   return (
+    <>
     <AnimatedModalShell
       className="z-[100]"
-      onClose={onClose}
+      onClose={handleClose}
       backdropTone="heavy"
       panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl p-5 sm:p-6 md:p-8 space-y-4 max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto"
     >
@@ -103,7 +118,7 @@ export function AchievementsEditorModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="inline-flex size-9 items-center justify-center rounded-full glass border border-white/10"
           >
             <X className="size-4" />
@@ -156,7 +171,7 @@ export function AchievementsEditorModal({
           <Input
             placeholder="2021, 2022, 2023"
             value={yearsText}
-            onChange={(e) => setYearsText(e.target.value)}
+            onChange={(e) => { setYearsText(e.target.value); setDirty(true); }}
           />
         </Field>
         <Field label="Description">
@@ -181,11 +196,21 @@ export function AchievementsEditorModal({
           <Button onClick={save} className="gap-2">
             <Save className="size-4" /> Save
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(draft.id)} className="gap-2">
+          <Button variant="destructive" onClick={() => { onDelete(draft.id); onClose(); }} className="gap-2">
             <Trash2 className="size-4" /> Delete
           </Button>
         </div>
     </AnimatedModalShell>
+    <ConfirmDialog
+      open={confirmClose}
+      onOpenChange={setConfirmClose}
+      title="Discard changes?"
+      description="You have unsaved changes. Are you sure you want to close?"
+      confirmLabel="Discard"
+      tone="destructive"
+      onConfirm={onClose}
+    />
+    </>
   );
 }
 

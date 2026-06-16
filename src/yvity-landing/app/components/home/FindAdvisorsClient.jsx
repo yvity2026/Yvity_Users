@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { AdvisorCardGold } from "../home-features/advisor-card-gold";
+import { AdvisorProfileCard } from "../home-features/advisor-profile-card";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import LandingSectionHeader from "./LandingSectionHeader";
 import LandingSnapScroll, {
@@ -10,8 +10,6 @@ import LandingSnapScroll, {
 } from "./LandingSnapScroll";
 import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
 import { LANDING_INNER, LANDING_SECTION_ANCHOR, LANDING_SECTION_PY } from "./landingLayout";
-
-const SERVICE_FILTER_OPTIONS = ["Life Insurance", "Health Insurance"];
 
 const fieldClass =
   "w-full rounded-lg border border-gray-200/90 bg-[#F8F6F1] px-2.5 py-2 text-[13px] font-medium text-[#0A4A4A] outline-none transition-colors placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] lg:py-2.5 lg:text-[14px]";
@@ -58,12 +56,8 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
   );
 
   const serviceOptions = useMemo(() => {
-    const fromAdvisors = advisors.flatMap(
-      (advisor) => advisor.serviceTypes ?? [],
-    );
-    return [
-      ...new Set([...SERVICE_FILTER_OPTIONS, ...fromAdvisors].filter(Boolean)),
-    ].sort();
+    const fromAdvisors = advisors.flatMap((advisor) => advisor.serviceTypes ?? []);
+    return [...new Set(fromAdvisors.filter(Boolean))].sort();
   }, [advisors]);
 
   const runSearch = useCallback(
@@ -191,10 +185,10 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
         >
           <LandingSectionHeader
             eyebrow="Find Advisors"
-            accent="Discover Verified"
+            accent="Discover"
             title={
               <>
-                Advisors
+                Verified Advisors
                 <br className="lg:hidden" /> Near You
               </>
             }
@@ -231,17 +225,14 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
             ) : null}
           </div>
 
-          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-2 lg:grid-cols-5 lg:gap-3">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
             <FilterField label="State">
               <input
                 type="text"
                 list="advisor-state-options"
                 placeholder="e.g. Telangana"
                 value={searchState}
-                onChange={(e) => {
-                  setSearchState(e.target.value);
-                  resetField();
-                }}
+                onChange={(e) => { setSearchState(e.target.value); resetField(); }}
                 className={fieldClass}
               />
               <datalist id="advisor-state-options">
@@ -256,30 +247,9 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 type="text"
                 placeholder="e.g. Hyderabad"
                 value={searchCity}
-                onChange={(e) => {
-                  setSearchCity(e.target.value);
-                  resetField();
-                }}
+                onChange={(e) => { setSearchCity(e.target.value); resetField(); }}
                 className={fieldClass}
               />
-            </FilterField>
-
-            <FilterField label="Service">
-              <select
-                value={searchService}
-                onChange={(e) => {
-                  setSearchService(e.target.value);
-                  resetField();
-                }}
-                className={`${fieldClass} cursor-pointer appearance-none`}
-              >
-                <option value="">All services</option>
-                {serviceOptions.map((service) => (
-                  <option key={service} value={service}>
-                    {service}
-                  </option>
-                ))}
-              </select>
             </FilterField>
 
             <FilterField label="Company">
@@ -288,10 +258,7 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 list="advisor-company-options"
                 placeholder="e.g. LIC"
                 value={searchCompany}
-                onChange={(e) => {
-                  setSearchCompany(e.target.value);
-                  resetField();
-                }}
+                onChange={(e) => { setSearchCompany(e.target.value); resetField(); }}
                 className={fieldClass}
               />
               <datalist id="advisor-company-options">
@@ -301,22 +268,43 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
               </datalist>
             </FilterField>
 
-            <FilterField
-              label="Name"
-              className="min-[400px]:col-span-2 lg:col-span-1"
-            >
+            <FilterField label="Name">
               <input
                 type="text"
                 placeholder="Advisor name"
                 value={searchName}
-                onChange={(e) => {
-                  setSearchName(e.target.value);
-                  resetField();
-                }}
+                onChange={(e) => { setSearchName(e.target.value); resetField(); }}
                 className={fieldClass}
               />
             </FilterField>
           </div>
+
+          {serviceOptions.length > 0 && (
+            <FilterField label="Service" className="mt-2.5">
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                {serviceOptions.map((service) => {
+                  const active = searchService === service;
+                  return (
+                    <button
+                      key={service}
+                      type="button"
+                      onClick={() => {
+                        setSearchService(active ? "" : service);
+                        resetField();
+                      }}
+                      className={`rounded-full border px-3 py-1 font-poppins text-[12px] font-semibold transition-all duration-150 ${
+                        active
+                          ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B]"
+                          : "border-[#D1D5DB] bg-white text-[#374151] hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                      }`}
+                    >
+                      {service}
+                    </button>
+                  );
+                })}
+              </div>
+            </FilterField>
+          )}
 
           <button
             type="button"
@@ -334,9 +322,9 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
               });
             }}
             disabled={!hasSearchInputs || isSearching}
-            className="mt-3 flex w-full items-center justify-center rounded-full bg-[#0A4A4A] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:hidden"
+            className="mt-3 flex w-full items-center justify-center rounded-full bg-[#0A4A4A] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_14px_rgba(10,74,74,0.25)] transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:mt-4"
           >
-            {isSearching ? "Searching…" : isLoggedIn ? "Search advisors" : "Log in to search"}
+            {isSearching ? "Searching…" : isLoggedIn ? "Search Advisors" : "Log in to Search"}
           </button>
 
           {hasSearchInputs && searchError ? (
@@ -360,7 +348,7 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                     className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
                   >
                     <div className="landing-hero-card-glow w-full overflow-visible py-1">
-                      <AdvisorCardGold {...toAdvisorCardGoldProps(advisor)} />
+                      <AdvisorProfileCard {...toAdvisorCardGoldProps(advisor)} />
                     </div>
                   </LandingSnapItem>
                 ))}
@@ -374,7 +362,7 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                     key={`advisor-grid-${advisor.id ?? index}`}
                     className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
                   >
-                    <AdvisorCardGold {...toAdvisorCardGoldProps(advisor)} />
+                    <AdvisorProfileCard {...toAdvisorCardGoldProps(advisor)} />
                   </div>
                 ))}
               </div>

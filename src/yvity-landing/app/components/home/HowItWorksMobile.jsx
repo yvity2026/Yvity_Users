@@ -14,7 +14,7 @@ function StepTimeline({ title, subtitle, steps }) {
       <ol className="relative ml-2 space-y-5 border-l-2 border-[#0a4d46]/15 pl-5">
         {steps.map((step, index) => (
           <li key={`${title}-${index}`} className="relative text-left">
-            <span className="absolute -left-[1.65rem] top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#e8f6f3] font-nunito text-[11px] font-bold text-[#0a4d46]">
+            <span className="absolute -left-[1.65rem] top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#e8f6f3] font-poppins text-[11px] font-bold text-[#0a4d46]">
               {step.number}
             </span>
             <div className="flex flex-col gap-2 pt-0.5">
@@ -26,7 +26,7 @@ function StepTimeline({ title, subtitle, steps }) {
               <h4 className="font-poppins text-[14px] font-semibold text-[#0A4A4A]">
                 {step.title}
               </h4>
-              <p className="font-nunito text-[13px] leading-relaxed text-[#374151]">
+              <p className="font-poppins text-[13px] leading-relaxed text-[#374151]">
                 {step.description}
               </p>
             </div>

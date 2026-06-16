@@ -2,7 +2,11 @@ export type NotificationKind =
   | "profile_approved"
   | "profile_rejected"
   | "new_recommendation"
-  | "new_testimonial";
+  | "new_testimonial"
+  | "achievement_verified"
+  | "achievement_rejected"
+  | "payment_success"
+  | "payment_failed";
 
 export type AdvisorNotification = {
   id: string;

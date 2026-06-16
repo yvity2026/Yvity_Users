@@ -41,4 +41,8 @@ export const defaultAdvisorSettings: AdvisorSettings = {
     posterUrl: "",
     durationLabel: "",
   },
+  location: {
+    officeAddress: "",
+    mapsLink: "",
+  },
 };

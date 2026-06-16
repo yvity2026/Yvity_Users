@@ -1,9 +1,7 @@
 import "server-only";
 
 import { resolveProfileHeroStat } from "@/lib/advisor/profile-hero-stat";
-import {
-  calculateHighestExperienceYears,
-} from "@/lib/advisor/publicMetrics";
+import { computeHighestExperienceYears } from "@/lib/advisor/profession-experience";
 import { mapDbServices } from "@/lib/server/supabase/mappers";
 import { extractAchievementTags } from "@/lib/sections/achievement-tiers";
 import {
@@ -14,6 +12,7 @@ import {
 import type { PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
 import { compareAdvisors } from "@/lib/advisors/publicAdvisorFilters";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
+import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
 
 const DEFAULT_CARD_METRICS = {
   exp: "0",
@@ -96,8 +95,8 @@ function mapAdvisorToCard(
     profile.subscription_plan,
     profile.account_status,
   );
-  const exp = calculateHighestExperienceYears(services);
   const serviceItems = mapDbServices(services);
+  const exp = String(computeHighestExperienceYears(serviceItems) ?? 0);
   const heroStat = resolveProfileHeroStat(serviceItems, true);
   const recs = recommendationsCountByAdvisorId.get(profile.advisor_id) ?? 0;
   const reviews = testimonialsCountByAdvisorId.get(profile.advisor_id) ?? 0;
@@ -105,11 +104,19 @@ function mapAdvisorToCard(
   const city = String(user.city || "Location not available");
   const achievementRecords = achievementsByAdvisorId.get(profile.advisor_id) ?? [];
   const achievementTags = extractAchievementTags(
-    achievementRecords.map((row) => ({
-      title: String(row.title ?? ""),
-      subtitle: String(row.organisation ?? ""),
-      years: row.achievement_year ? [String(row.achievement_year)] : [],
-    })),
+    achievementRecords.map((row) => {
+      const { meta } = parseGoldMeta(String(row.description ?? ""));
+      const metaYears = Array.isArray(meta.years)
+        ? (meta.years as unknown[]).map(String).filter(Boolean)
+        : null;
+      const baseYear = row.achievement_year ? [String(row.achievement_year)] : [];
+      const years = metaYears ?? baseYear;
+      return {
+        title: String(row.title ?? ""),
+        subtitle: String(row.organisation ?? ""),
+        years,
+      };
+    }),
   );
 
   return {
@@ -197,7 +204,7 @@ export async function fetchSupabasePublicAdvisors(
       .in("advisor_id", advisorIds),
     supabase
       .from("advisor_achievements")
-      .select("advisor_id, title, organisation, achievement_year")
+      .select("advisor_id, title, organisation, achievement_year, description")
       .in("advisor_id", advisorIds),
     supabase.from("advisor_recommendations").select("advisor_id").in("advisor_id", advisorIds),
     supabase

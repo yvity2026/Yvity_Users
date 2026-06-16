@@ -72,7 +72,6 @@ export default function DashboardHome({ advisors = [] }) {
   const [searchCity, setSearchCity] = useState("");
   const [searchService, setSearchService] = useState("");
   const [searchCompany, setSearchCompany] = useState("");
-  const [searchName, setSearchName] = useState("");
   const [activeQuickFilter, setActiveQuickFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [inlineVisible, setInlineVisible] = useState(false);
@@ -121,19 +120,12 @@ export default function DashboardHome({ advisors = [] }) {
 
   const currentFilters = useMemo(
     () => ({
-      query: searchQuery || searchName,
+      query: searchQuery,
       city: effectiveCity,
       service: searchService || activeQuickFilter,
       company: searchCompany,
     }),
-    [
-      searchQuery,
-      searchName,
-      effectiveCity,
-      searchService,
-      activeQuickFilter,
-      searchCompany,
-    ],
+    [searchQuery, effectiveCity, searchService, activeQuickFilter, searchCompany],
   );
 
   const inlineResults = useMemo(() => {
@@ -164,22 +156,14 @@ export default function DashboardHome({ advisors = [] }) {
     (overrides = {}) => {
       router.push(
         buildExploreUrl({
-          name: overrides.name ?? searchName ?? searchQuery,
+          name: overrides.name ?? searchQuery,
           city: overrides.city ?? effectiveCity,
           service: overrides.service ?? searchService ?? activeQuickFilter,
           company: overrides.company ?? searchCompany,
         }),
       );
     },
-    [
-      router,
-      searchName,
-      searchQuery,
-      effectiveCity,
-      searchService,
-      activeQuickFilter,
-      searchCompany,
-    ],
+    [router, searchQuery, effectiveCity, searchService, activeQuickFilter, searchCompany],
   );
 
   const runInlineSearch = useCallback(() => {
@@ -207,7 +191,6 @@ export default function DashboardHome({ advisors = [] }) {
     setSearchCity("");
     setSearchService("");
     setSearchCompany("");
-    setSearchName("");
     setSearchQuery("");
     setActiveQuickFilter("");
     setInlineVisible(false);
@@ -258,7 +241,7 @@ export default function DashboardHome({ advisors = [] }) {
     const href = getMySpaceNavHref(user, advisor);
     dismissOnboarding();
     try {
-      const res = await fetch("/api/auth/advisor-intent", { method: "POST" });
+      const res = await fetch("/api/auth/advisor-intent", { method: "POST", credentials: "same-origin" });
       if (res.ok) {
         const result = await res.json();
         const nextRoles = result?.data?.roles;
@@ -275,7 +258,7 @@ export default function DashboardHome({ advisors = [] }) {
   useEffect(() => {
     let ignore = false;
 
-    fetch("/api/dashboard/home-reviews")
+    fetch("/api/dashboard/home-reviews", { credentials: "same-origin" })
       .then((res) => res.json())
       .then((result) => {
         if (ignore || !result?.success) return;
@@ -326,6 +309,7 @@ export default function DashboardHome({ advisors = [] }) {
 
       {showOnboarding ? (
         <DashboardOnboardingGuidance
+          user={user}
           onStartSearching={handleStartSearching}
           onGoToMySpace={handleGoToMySpace}
         />
@@ -350,8 +334,6 @@ export default function DashboardHome({ advisors = [] }) {
           onSearchServiceChange={setSearchService}
           searchCompany={searchCompany}
           onSearchCompanyChange={setSearchCompany}
-          searchName={searchName}
-          onSearchNameChange={setSearchName}
           activeQuickFilter={activeQuickFilter}
           showFilters={showFilters}
           onToggleFilters={() => setShowFilters((open) => !open)}
@@ -365,6 +347,7 @@ export default function DashboardHome({ advisors = [] }) {
           }}
           onClearFilters={handleClearFilters}
           onQuickFilter={handleQuickFilter}
+          hasSearched={inlineVisible}
         />
       </div>
 
