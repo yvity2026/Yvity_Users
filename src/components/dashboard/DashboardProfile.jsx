@@ -573,163 +573,169 @@ export default function DashboardProfile() {
                 </SectionBlock>
               </div>
 
-              <div className="border-t border-[#E5E0D6] pt-4">
-                <SectionBlock
-                  eyebrow="Public Profile"
-                  title="Office Location"
-                  description="Shown on your public profile with a Get Directions button. Add a Google Maps link for a precise pin."
-                >
-                  <div className="space-y-2.5">
-                    <div>
-                      <label className={labelClass}>Office address</label>
-                      <textarea
-                        rows={2}
-                        value={locationForm.officeAddress}
-                        onChange={(e) => setLocationForm((f) => ({ ...f, officeAddress: e.target.value }))}
-                        className={`${inputClass} min-h-[64px] resize-none py-2`}
-                        placeholder="e.g. Plot 12, MG Road, Guntur, AP 522001"
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Google Maps link <span className="normal-case text-[#9CA3AF]">(optional)</span></label>
-                      <input
-                        type="url"
-                        value={locationForm.mapsLink}
-                        onChange={(e) => setLocationForm((f) => ({ ...f, mapsLink: e.target.value }))}
-                        className={inputClass}
-                        placeholder="https://maps.app.goo.gl/..."
-                      />
-                      <p className="mt-1 font-poppins text-[10px] leading-relaxed text-[#6B7280]">
-                        Open Google Maps → share your office pin → paste the link here. If provided, the Get Directions button uses this link directly.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleSaveLocation}
-                      disabled={locationSaving}
-                      className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
-                    >
-                      {locationSaving ? "Saving…" : "Save Location"}
-                    </button>
-                  </div>
-                </SectionBlock>
-              </div>
-
-              {/* Profile URL / Handle */}
-              <div className="border-t border-[#E5E0D6] pt-4">
-                <SectionBlock
-                  eyebrow="Public Profile"
-                  title="Your Profile URL"
-                  description="Your personal YVITY link. Share it on WhatsApp, business cards, or social media."
-                >
-                  {handleEditing ? (
-                    <div className="space-y-3">
-                      <HandlePicker
-                        defaultHandle={currentSegment || undefined}
-                        onChange={setPendingHandle}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleSaveHandle}
-                          disabled={!pendingHandle || handleSaving}
-                          className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
-                        >
-                          {handleSaving ? "Saving…" : "Save URL"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setHandleEditing(false); setPendingHandle(null); }}
-                          disabled={handleSaving}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#E4E2DB] px-4 py-2 font-poppins text-sm font-medium text-[#6B7280] hover:bg-[#F8F6F1]"
-                        >
-                          <X className="size-3.5" /> Cancel
-                        </button>
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="Public Profile"
+                    title="Office Location"
+                    description="Shown on your public profile with a Get Directions button. Add a Google Maps link for a precise pin."
+                  >
+                    <div className="space-y-2.5">
+                      <div>
+                        <label className={labelClass}>Office address</label>
+                        <textarea
+                          rows={2}
+                          value={locationForm.officeAddress}
+                          onChange={(e) => setLocationForm((f) => ({ ...f, officeAddress: e.target.value }))}
+                          className={`${inputClass} min-h-[64px] resize-none py-2`}
+                          placeholder="e.g. Plot 12, MG Road, Guntur, AP 522001"
+                        />
                       </div>
-                    </div>
-                  ) : currentSegment && profileUrl ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 rounded-lg border border-[#E4E2DB] bg-[#F8F6F1] px-3 py-2.5">
-                        <Link2 className="size-4 shrink-0 text-[#0A4A4A]" />
-                        <span className="flex-1 truncate font-poppins text-sm font-semibold text-[#0A4A4A]">
-                          {displayUrl}
-                        </span>
-                        <button
-                          type="button"
-                          aria-label="Copy URL"
-                          onClick={() => { navigator.clipboard.writeText(profileUrl); toast.success("Profile URL copied!"); }}
-                          className="rounded p-1 hover:bg-[#E4E2DB] transition"
-                        >
-                          <Copy className="size-3.5 text-[#6B7280]" />
-                        </button>
-                        <a
-                          href={profileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Open profile"
-                          className="rounded p-1 hover:bg-[#E4E2DB] transition"
-                        >
-                          <ExternalLink className="size-3.5 text-[#6B7280]" />
-                        </a>
-                        <button
-                          type="button"
-                          aria-label="Edit URL"
-                          onClick={() => setHandleEditing(true)}
-                          className="rounded p-1 hover:bg-[#E4E2DB] transition"
-                        >
-                          <Pencil className="size-3.5 text-[#6B7280]" />
-                        </button>
+                      <div>
+                        <label className={labelClass}>Google Maps link <span className="normal-case text-[#9CA3AF]">(optional)</span></label>
+                        <input
+                          type="url"
+                          value={locationForm.mapsLink}
+                          onChange={(e) => setLocationForm((f) => ({ ...f, mapsLink: e.target.value }))}
+                          className={inputClass}
+                          placeholder="https://maps.app.goo.gl/..."
+                        />
+                        <p className="mt-1 font-poppins text-[10px] leading-relaxed text-[#6B7280]">
+                          Open Google Maps → share your office pin → paste the link here. If provided, the Get Directions button uses this link directly.
+                        </p>
                       </div>
-                      <p className="font-poppins text-[10px] text-[#6B7280]">
-                        Handle: <strong className="text-[#0A4A4A]">{currentSegment}</strong>. Click the pencil to change it.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="font-poppins text-sm text-[#6B7280]">
-                        You haven&apos;t claimed a personal URL yet.
-                      </p>
                       <button
                         type="button"
-                        onClick={() => setHandleEditing(true)}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c]"
+                        onClick={handleSaveLocation}
+                        disabled={locationSaving}
+                        className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
                       >
-                        <Link2 className="size-4" /> Claim your URL
+                        {locationSaving ? "Saving…" : "Save Location"}
                       </button>
                     </div>
-                  )}
-                </SectionBlock>
-              </div>
+                  </SectionBlock>
+                </div>
+              ) : null}
 
-              <div className="border-t border-[#E5E0D6] pt-4">
-                <SectionBlock
-                  eyebrow="About"
-                  title="You"
-                  description={isEditing ? "Optional, max 500 chars." : undefined}
-                >
-                  {isEditing ? (
-                    <>
-                      <textarea
-                        rows={3}
-                        maxLength={500}
-                        value={form.about}
-                        onChange={(e) => updateField("about", e.target.value)}
-                        className={`${inputClass} min-h-[72px] resize-none py-2`}
-                        placeholder="A few lines about you."
-                      />
-                      <p className="mt-1 text-right font-poppins text-[10px] text-[#9CA3AF]">
-                        {form.about.length}/500
+              {/* Profile URL / Handle — advisor only */}
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="Public Profile"
+                    title="Your Profile URL"
+                    description="Your personal YVITY link. Share it on WhatsApp, business cards, or social media."
+                  >
+                    {handleEditing ? (
+                      <div className="space-y-3">
+                        <HandlePicker
+                          defaultHandle={currentSegment || undefined}
+                          onChange={setPendingHandle}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSaveHandle}
+                            disabled={!pendingHandle || handleSaving}
+                            className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
+                          >
+                            {handleSaving ? "Saving…" : "Save URL"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setHandleEditing(false); setPendingHandle(null); }}
+                            disabled={handleSaving}
+                            className="inline-flex items-center gap-1 rounded-full border border-[#E4E2DB] px-4 py-2 font-poppins text-sm font-medium text-[#6B7280] hover:bg-[#F8F6F1]"
+                          >
+                            <X className="size-3.5" /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : currentSegment && profileUrl ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 rounded-lg border border-[#E4E2DB] bg-[#F8F6F1] px-3 py-2.5">
+                          <Link2 className="size-4 shrink-0 text-[#0A4A4A]" />
+                          <span className="flex-1 truncate font-poppins text-sm font-semibold text-[#0A4A4A]">
+                            {displayUrl}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="Copy URL"
+                            onClick={() => { navigator.clipboard.writeText(profileUrl); toast.success("Profile URL copied!"); }}
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <Copy className="size-3.5 text-[#6B7280]" />
+                          </button>
+                          <a
+                            href={profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Open profile"
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <ExternalLink className="size-3.5 text-[#6B7280]" />
+                          </a>
+                          <button
+                            type="button"
+                            aria-label="Edit URL"
+                            onClick={() => setHandleEditing(true)}
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <Pencil className="size-3.5 text-[#6B7280]" />
+                          </button>
+                        </div>
+                        <p className="font-poppins text-[10px] text-[#6B7280]">
+                          Handle: <strong className="text-[#0A4A4A]">{currentSegment}</strong>. Click the pencil to change it.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="font-poppins text-sm text-[#6B7280]">
+                          You haven&apos;t claimed a personal URL yet.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setHandleEditing(true)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c]"
+                        >
+                          <Link2 className="size-4" /> Claim your URL
+                        </button>
+                      </div>
+                    )}
+                  </SectionBlock>
+                </div>
+              ) : null}
+
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="About"
+                    title="You"
+                    description={isEditing ? "Optional, max 500 chars." : undefined}
+                  >
+                    {isEditing ? (
+                      <>
+                        <textarea
+                          rows={3}
+                          maxLength={500}
+                          value={form.about}
+                          onChange={(e) => updateField("about", e.target.value)}
+                          className={`${inputClass} min-h-[72px] resize-none py-2`}
+                          placeholder="A few lines about you."
+                        />
+                        <p className="mt-1 text-right font-poppins text-[10px] text-[#9CA3AF]">
+                          {form.about.length}/500
+                        </p>
+                      </>
+                    ) : (
+                      <p
+                        className={`${inputDisabledClass} min-h-[40px] whitespace-pre-wrap break-words py-2`}
+                      >
+                        {form.about || "—"}
                       </p>
-                    </>
-                  ) : (
-                    <p
-                      className={`${inputDisabledClass} min-h-[40px] whitespace-pre-wrap break-words py-2`}
-                    >
-                      {form.about || "—"}
-                    </p>
-                  )}
-                </SectionBlock>
-              </div>
+                    )}
+                  </SectionBlock>
+                </div>
+              ) : null}
             </div>
           </div>
 
