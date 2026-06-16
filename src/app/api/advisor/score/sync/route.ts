@@ -70,12 +70,21 @@ export async function POST() {
 
     const supabase = getAdminClientOrNull();
     if (supabase) {
-      const { error } = await supabase
-        .from("advisor_scores")
-        .upsert({ advisor_id: userId, total_score: finalScore }, { onConflict: "advisor_id" });
+      const [scoreResult] = await Promise.all([
+        supabase
+          .from("advisor_scores")
+          .upsert({ advisor_id: userId, total_score: finalScore }, { onConflict: "advisor_id" }),
+        // Sync selfie_url to users table so Find Advisors cards show the correct photo
+        session.selfie_url
+          ? supabase
+              .from("users")
+              .update({ selfie_url: session.selfie_url })
+              .eq("id", userId)
+          : Promise.resolve(null),
+      ]);
 
-      if (error) {
-        console.warn("[score/sync] upsert failed:", error.message);
+      if (scoreResult.error) {
+        console.warn("[score/sync] upsert failed:", scoreResult.error.message);
       }
     }
 

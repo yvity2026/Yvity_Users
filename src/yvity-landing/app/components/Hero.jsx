@@ -17,7 +17,7 @@ const HERO_PREVIEW_ADVISOR = {
   name: "Krishna Mohan Noti",
   title: "Chief Life Planner",
   location: "Guntur, Andhra Pradesh",
-  score: 41,
+  score: 45,
   exp: "7",
   reviews: "2",
   avgRating: "4.5",
