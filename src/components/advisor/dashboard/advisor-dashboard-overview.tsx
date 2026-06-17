@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import {
   Award,
@@ -159,15 +158,9 @@ export function AdvisorDashboardOverview({
         <div className="h-1 bg-gradient-to-r from-primary via-[oklch(0.82_0.13_205)] to-[oklch(0.82_0.16_162)]" />
         <div className="p-5 md:p-7 flex flex-col sm:flex-row gap-5 sm:items-center">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            {model.photoUrl?.trim() ? (
-              <div className="relative size-16 md:size-20 shrink-0 rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-lg">
-                <Image src={model.photoUrl} alt="" fill className="object-cover" sizes="80px" />
-              </div>
-            ) : (
-              <div className="size-16 md:size-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xl font-bold text-primary-foreground ring-2 ring-white/20 shadow-lg">
-                {initials}
-              </div>
-            )}
+            <div className="size-16 md:size-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xl font-bold text-primary-foreground ring-2 ring-white/20 shadow-lg">
+              {initials}
+            </div>
             <div className="min-w-0">
               <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 Welcome back
