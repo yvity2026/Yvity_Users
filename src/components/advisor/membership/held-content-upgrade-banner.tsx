@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Lock, Sparkles } from "lucide-react";
 import { upgradePlanLabel } from "@/lib/advisor-membership/plan-limit-usage";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 import { cn } from "@/lib/utils";
 
 type HeldContentUpgradeBannerProps = {
@@ -52,6 +53,7 @@ export function HeldContentUpgradeBanner({
   upgradePlan,
   className,
 }: HeldContentUpgradeBannerProps) {
+  const profileHome = usePublicProfileNavHome();
   const parts = formatHeldParts({
     heldTestimonialCount,
     heldRecommendationCount,
@@ -83,7 +85,7 @@ export function HeldContentUpgradeBanner({
           </p>
           {upgradePlan ? (
             <Link
-              href="/profile?tab=membership"
+              href={`${profileHome}?tab=membership`}
               className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
             >
               <Lock className="size-3.5" />
