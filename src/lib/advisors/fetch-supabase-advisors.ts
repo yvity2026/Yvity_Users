@@ -169,11 +169,10 @@ export async function fetchSupabasePublicAdvisors(
   const { data: profiles, error: profilesError } = await supabase
     .from("advisor_profiles")
     .select(
-      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing, approved_at",
+      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing",
     )
     .eq("account_status", "active")
-    .not("profile_slug", "is", null)
-    .not("approved_at", "is", null);
+    .not("profile_slug", "is", null);
 
   if (profilesError) {
     throw new Error(`Failed to load advisor profiles: ${profilesError.message}`);
