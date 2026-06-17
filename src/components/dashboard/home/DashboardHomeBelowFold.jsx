@@ -164,6 +164,7 @@ function ReviewStars({ rating = 5 }) {
 
 export function DashboardHomeFeatured({ advisors, loading = false }) {
   const featured = getFeaturedAdvisors(advisors);
+  const isTopRated = Boolean(featured._isTopRatedFallback);
 
   if (loading && !advisors.length) {
     return <DashboardHomeSectionSkeleton rows={2} />;
@@ -172,8 +173,8 @@ export function DashboardHomeFeatured({ advisors, loading = false }) {
   return (
     <section className="mb-10" aria-labelledby="home-featured-heading">
       <SectionHeader
-        title="Featured Advisors"
-        subtitle="Hand-picked professionals on YVITY"
+        title={isTopRated ? "Top Rated Advisors" : "Featured Advisors"}
+        subtitle={isTopRated ? "Highest-rated professionals on YVITY" : "Hand-picked professionals on YVITY"}
         seeAllHref="/dashboard/explore"
       />
       <AdvisorScrollRow

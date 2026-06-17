@@ -21,12 +21,37 @@ export function sortAdvisorsByRating(advisors) {
 import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 
 export function getFeaturedAdvisors(advisors, limit = 8) {
-  const eligible = advisors.filter(
+  // Prefer Gold members; fall back to Silver; fall back to all active advisors
+  const goldEligible = advisors.filter(
     (a) => resolvePlanLimits(a.subscription_plan, a.account_status).featuredAdvisorEligibility,
   );
-  const flagged = eligible.filter((a) => a.isHero || a.isLanding);
-  const pool = flagged.length >= 3 ? flagged : eligible;
-  return [...pool].sort(compareAdvisors).slice(0, limit);
+
+  let pool;
+  let isTopRatedFallback = false;
+
+  if (goldEligible.length > 0) {
+    const flagged = goldEligible.filter((a) => a.isHero || a.isLanding);
+    pool = flagged.length >= 3 ? flagged : goldEligible;
+  } else {
+    const silverEligible = advisors.filter(
+      (a) => String(a.subscription_plan || "").toLowerCase() === "silver" &&
+             String(a.account_status || "").toLowerCase() === "active",
+    );
+    if (silverEligible.length > 0) {
+      pool = silverEligible;
+      isTopRatedFallback = true;
+    } else {
+      pool = advisors.filter(
+        (a) => String(a.account_status || "").toLowerCase() === "active",
+      );
+      isTopRatedFallback = true;
+    }
+  }
+
+  const results = [...pool].sort(compareAdvisors).slice(0, limit);
+  // Attach fallback flag so UI can show "Top Rated" label instead of "Featured"
+  results._isTopRatedFallback = isTopRatedFallback;
+  return results;
 }
 
 export function getRecommendedAdvisors(
