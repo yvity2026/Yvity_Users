@@ -179,6 +179,7 @@ function ProfileHeaderBanner() {
             photoUrl={profilePhoto}
             showVerifiedBadge={showIrdaiBadge}
             variant="hero"
+            goldGlow
           />
 
           {/* Left column: identity + bio + pills + CTAs (desktop) */}

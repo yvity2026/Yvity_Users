@@ -11,6 +11,8 @@ type AdvisorIdentityAvatarProps = {
   showVerifiedBadge?: boolean;
   /** `hero` — profile header; `cta` — bottom advisor CTA card; `banner` — section banners */
   variant?: "hero" | "cta" | "banner";
+  /** Adds teal brand ring + saffron gold glow — used on public profile page */
+  goldGlow?: boolean;
   className?: string;
 };
 
@@ -44,6 +46,7 @@ export function AdvisorIdentityAvatar({
   photoUrl,
   showVerifiedBadge = false,
   variant = "cta",
+  goldGlow = false,
   className,
 }: AdvisorIdentityAvatarProps) {
   const styles = VARIANT_CLASS[variant];
@@ -63,16 +66,20 @@ export function AdvisorIdentityAvatar({
     .toUpperCase();
 
   return (
-    <div className={cn("relative shrink-0", className)}>
+    <div
+      className={cn("relative shrink-0", className)}
+      style={goldGlow ? { filter: "drop-shadow(0 0 18px rgba(245,158,11,0.55)) drop-shadow(0 0 6px rgba(245,158,11,0.35))" } : undefined}
+    >
       <div
         className={cn(
           "relative flex items-center justify-center overflow-hidden rounded-full",
           "bg-gradient-to-br from-primary to-accent font-bold text-primary-foreground",
-          "shadow-lg shadow-primary/40",
           styles.avatar,
           styles.text,
           styles.ring,
-          "ring-[oklch(0.82_0.16_78/0.55)]",
+          goldGlow
+            ? "ring-[var(--color-primary)] shadow-[0_0_0_4px_rgba(245,158,11,0.35),0_4px_24px_rgba(10,74,74,0.45)]"
+            : "ring-[oklch(0.82_0.16_78/0.55)] shadow-lg shadow-primary/40",
         )}
       >
         {showPhoto ? (
