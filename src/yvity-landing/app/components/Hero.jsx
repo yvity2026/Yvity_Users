@@ -28,7 +28,7 @@ const HERO_PREVIEW_ADVISOR = {
   achievementTags: ["MDRT x 2"],
   profileUrl: "/krishnamohannoti",
   profileSlug: "krishnamohannoti",
-  avatarUrl: "/api/auth/selfie/9705159705-5d7f1012.jpg",
+  avatarUrl: "https://akwvvhntxbhjyixaxhpv.supabase.co/storage/v1/object/public/selfies/9705159705/9705159705-5d7f1012.jpg",
   showVerifiedBadge: true,
   showIdentityVerified: true,
 };
