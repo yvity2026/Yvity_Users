@@ -41,10 +41,13 @@ export function PublicProfileViewProvider({
     if (!value?.userId) return;
     try {
       sessionStorage.setItem(PUBLIC_VIEW_USER_STORAGE_KEY, value.userId);
+      if (value.profile.profile_slug) {
+        sessionStorage.setItem("yvity-public-view-slug", value.profile.profile_slug);
+      }
     } catch {
       // ignored — private mode / storage blocked
     }
-  }, [value?.userId]);
+  }, [value?.userId, value?.profile.profile_slug]);
 
   useEffect(() => {
     if (!value || !isAdvisorProfileApproved(value.profile)) {

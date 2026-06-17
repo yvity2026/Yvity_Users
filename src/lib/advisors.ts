@@ -1,6 +1,5 @@
 import "server-only";
 
-import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { fetchSupabasePublicAdvisors } from "@/lib/advisors/fetch-supabase-advisors";
 import { loadLocalPublicAdvisors } from "@/lib/advisors/load-local-public-advisors";
 import { getMockPublicAdvisors, type PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
@@ -84,7 +83,8 @@ export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
   return mocks;
 }
 
-/** Filter and rank public advisors for landing + dashboard search. */
+/** Filter and rank public advisors for landing + dashboard search.
+ *  All active advisors (Free, Silver, Gold) appear in search results. */
 export async function searchPublicAdvisors(filters: AdvisorSearchFilters = {}) {
   const advisors = await getPublicAdvisors();
 
@@ -94,9 +94,5 @@ export async function searchPublicAdvisors(filters: AdvisorSearchFilters = {}) {
     service: filters.service ?? "",
     company: filters.company ?? "",
     name: filters.name ?? "",
-  })
-    .filter((advisor: PublicAdvisorCard) =>
-      resolvePlanLimits(advisor.subscription_plan, advisor.account_status).searchAppearance,
-    )
-    .sort(compareAdvisors);
+  }).sort(compareAdvisors);
 }

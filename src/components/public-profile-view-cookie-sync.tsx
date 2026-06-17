@@ -71,6 +71,7 @@ export function PublicProfileViewCookieSync() {
       bootstrappedUserRef.current = null;
       try {
         sessionStorage.removeItem(PUBLIC_VIEW_USER_STORAGE_KEY);
+        sessionStorage.removeItem("yvity-public-view-slug");
       } catch {
         // ignored
       }
