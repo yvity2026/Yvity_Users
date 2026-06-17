@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { ProfileHomeHero } from "@/components/home/profile-home-hero";
 import { PublicProfileViewProvider } from "@/context/public-profile-view-context";
 import { isReservedPublicProfileSlug } from "@/lib/advisor/public-profile-slug";

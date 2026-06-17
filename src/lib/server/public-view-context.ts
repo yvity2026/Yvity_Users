@@ -7,6 +7,7 @@ import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
 import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
 import { slugMatches, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
 import { getSessionUser } from "@/lib/server/session";
+import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 
 export const PUBLIC_VIEW_COOKIE = "yvity-view-advisor";
 
@@ -100,6 +101,8 @@ export type PublicViewAdvisorPayload = {
   profession: string;
   about?: string;
   selfie_url?: string;
+  /** Score from advisor_scores.total_score — single source of truth */
+  dbScore?: number | null;
 };
 
 async function resolveRegisteredUserForPublicView(
@@ -124,7 +127,10 @@ export async function loadPublicViewAdvisorByUserId(
   const profile = await getAdvisorProfileForUser(userId);
   if (!profile) return null;
 
-  const user = await resolveRegisteredUserForPublicView(userId);
+  const [user, dbScore] = await Promise.all([
+    resolveRegisteredUserForPublicView(userId),
+    loadAdvisorDbScore(userId),
+  ]);
   if (!user) return null;
 
   return {
@@ -138,7 +144,23 @@ export async function loadPublicViewAdvisorByUserId(
     profession: user.profession?.trim() || profile.designation?.trim() || "",
     about: user.about?.trim() || "",
     selfie_url: user.selfieUrl?.trim() || undefined,
+    dbScore,
   };
+}
+
+async function loadAdvisorDbScore(advisorId: string): Promise<number | null> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return null;
+  try {
+    const { data } = await supabase
+      .from("advisor_scores")
+      .select("total_score")
+      .eq("advisor_id", advisorId)
+      .maybeSingle();
+    return data?.total_score != null ? Math.max(0, Math.min(100, Number(data.total_score))) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function loadPublicViewAdvisorBySlug(

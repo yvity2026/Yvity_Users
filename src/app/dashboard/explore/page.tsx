@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import DashboardExploreView from "@/components/dashboard/DashboardExploreView";
 import IdentityDashboardShell from "@/components/identity/IdentityDashboardShell";
 import { getPublicAdvisors } from "@/lib/advisors";

@@ -13,10 +13,6 @@ import type { PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
 import { compareAdvisors } from "@/lib/advisors/publicAdvisorFilters";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
-import { getYvityScoreTotal } from "@/lib/advisor-score/build";
-import { mapJourneyToCareer } from "@/lib/server/supabase/career-mapper";
-import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
-import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
 import { getPublicProfileLivePath } from "@/lib/public-profile-url";
 
 const DEFAULT_CARD_METRICS = {
@@ -81,9 +77,6 @@ type AdvisorProfileRow = {
   account_status: string | null;
   is_hero: boolean | null;
   is_landing: boolean | null;
-  ispublic_profile: boolean | null;
-  iridai_certificate_url: string | null;
-  intro_url: string | null;
 };
 
 function mapAdvisorToCard(
@@ -95,8 +88,7 @@ function mapAdvisorToCard(
   verifiedRecsCountByAdvisorId: Map<string, number>,
   testimonialsCountByAdvisorId: Map<string, number>,
   averageRatingByAdvisorIdMap: Map<string, number>,
-  journeyByAdvisorId: Map<string, Array<Record<string, unknown>>>,
-  galleryCountByAdvisorId: Map<string, number>,
+  dbScoreByAdvisorId: Map<string, number>,
 ): PublicAdvisorCard | null {
   const user = usersById.get(profile.advisor_id);
   if (!user) return null;
@@ -105,52 +97,11 @@ function mapAdvisorToCard(
   const serviceItems = mapDbServices(services);
   const achievementRecords = achievementsByAdvisorId.get(profile.advisor_id) ?? [];
   const testimonialsRaw = testimonialsFullByAdvisorId.get(profile.advisor_id) ?? [];
-  const testimonials = mapDbTestimonials(testimonialsRaw);
-  const journeyRows = journeyByAdvisorId.get(profile.advisor_id) ?? [];
-  const career = mapJourneyToCareer(journeyRows as Parameters<typeof mapJourneyToCareer>[0]);
-  const galleryCount = galleryCountByAdvisorId.get(profile.advisor_id) ?? 0;
-  // Minimal gallery array — score only needs count, not content
-  const gallery = Array.from({ length: galleryCount }, (_, i) => ({ id: String(i) }) as never);
-
-  const profileApproved = isAdvisorProfileApproved({ account_status: profile.account_status ?? undefined });
-  const underReview = profile.account_status === "under_review";
-  const photoUrl = (user.selfie_url as string) || undefined;
-  const introVideoUrl = profile.intro_url?.trim() || undefined;
-  const publicProfileActive = profile.ispublic_profile !== false;
   const verifiedRecs = verifiedRecsCountByAdvisorId.get(profile.advisor_id) ?? 0;
+  const photoUrl = (user.selfie_url as string) || undefined;
 
-  // Compute score using the same function as My Space / dashboard — single source of truth
-  const liveScore = getYvityScoreTotal({
-    photoUrl,
-    introVideoUrl,
-    publicProfileActive,
-    profileApproved,
-    irdaiCertificateUploaded: hasIrdaiCertificateUploaded({ iridai_certificate_url: profile.iridai_certificate_url ?? undefined }),
-    career,
-    services: serviceItems,
-    achievements: achievementRecords.map((row) => {
-      const { meta } = parseGoldMeta(String(row.description ?? ""));
-      const metaYears = Array.isArray(meta.years)
-        ? (meta.years as unknown[]).map(String).filter(Boolean)
-        : null;
-      const baseYear = row.achievement_year ? [String(row.achievement_year)] : [];
-      return {
-        id: String(row.id ?? ""),
-        category: "other" as const,
-        title: String(row.title ?? ""),
-        organisation: String(row.organisation ?? ""),
-        achievement_year: row.achievement_year ? Number(row.achievement_year) : undefined,
-        years: metaYears ?? baseYear,
-        description: String(row.description ?? ""),
-        subtitle: String(row.organisation ?? ""),
-      } as never;
-    }),
-    testimonials,
-    gallery,
-    underReview,
-    verifiedRecommendationCount: underReview ? 0 : verifiedRecs,
-    selfShareCount: 0, // Not bulk-loaded; negligible contribution (5 shares = 1 pt)
-  });
+  // Single source of truth: read score from advisor_scores (written by /api/advisor/score/sync)
+  const dbScore = dbScoreByAdvisorId.get(profile.advisor_id) ?? 0;
 
   const exp = String(computeHighestExperienceYears(serviceItems) ?? 0);
   const heroStat = resolveProfileHeroStat(serviceItems, true);
@@ -196,7 +147,7 @@ function mapAdvisorToCard(
     avatarUrl: photoUrl || null,
     showIdentityVerified: hasIdentityVerified(user),
     showVerifiedBadge: hasVerifiedServices(profile.subscription_plan, profile.account_status),
-    score: Math.max(0, Math.min(100, liveScore)),
+    score: dbScore,
     profileUrl: getPublicProfileLivePath(profile.profile_slug ?? ""),
     profileSlug: profile.profile_slug ?? "",
     serviceTypes,
@@ -228,7 +179,7 @@ export async function fetchSupabasePublicAdvisors(
   const { data: profiles, error: profilesError } = await supabase
     .from("advisor_profiles")
     .select(
-      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing, ispublic_profile, iridai_certificate_url, intro_url",
+      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing",
     )
     .eq("account_status", "active")
     .not("profile_slug", "is", null);
@@ -249,8 +200,7 @@ export async function fetchSupabasePublicAdvisors(
     achievementsResult,
     testimonialsResult,
     recommendationsResult,
-    journeyResult,
-    galleryResult,
+    scoresResult,
   ] = await Promise.all([
     supabase
       .from("users")
@@ -272,13 +222,10 @@ export async function fetchSupabasePublicAdvisors(
       .from("advisor_recommendations")
       .select("advisor_id, is_mobile_verified, is_verified")
       .in("advisor_id", advisorIds),
+    // Single source of truth: scores written by /api/advisor/score/sync
     supabase
-      .from("advisor_journey")
-      .select("*")
-      .in("user_id", advisorIds),
-    supabase
-      .from("advisor_gallery")
-      .select("advisor_id")
+      .from("advisor_scores")
+      .select("advisor_id, total_score")
       .in("advisor_id", advisorIds),
   ]);
 
@@ -287,9 +234,6 @@ export async function fetchSupabasePublicAdvisors(
   if (achievementsResult.error) throw new Error(`Failed to load achievements: ${achievementsResult.error.message}`);
   if (testimonialsResult.error) throw new Error(`Failed to load testimonials: ${testimonialsResult.error.message}`);
   if (recommendationsResult.error) throw new Error(`Failed to load recommendations: ${recommendationsResult.error.message}`);
-  // Journey and gallery failures are non-fatal — score degrades gracefully
-  const journeyRows = journeyResult.error ? [] : (journeyResult.data ?? []);
-  const galleryRows = galleryResult.error ? [] : (galleryResult.data ?? []);
 
   const usersById = new Map(
     (usersResult.data ?? []).map((user) => [user.id, user as Record<string, unknown>]),
@@ -297,12 +241,10 @@ export async function fetchSupabasePublicAdvisors(
   const servicesByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
   const achievementsByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
   const testimonialsFullByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
-  const journeyByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
 
   const testimonialsCountByAdvisorId = countRowsByAdvisorId(testimonialsResult.data ?? []);
   const averageRatingByAdvisorIdMap = averageRatingByAdvisorId(testimonialsResult.data ?? []);
 
-  // Verified recs: is_mobile_verified or is_verified
   const verifiedRecsCountByAdvisorId = new Map<string, number>();
   for (const row of recommendationsResult.data ?? []) {
     if (!row.advisor_id) continue;
@@ -314,7 +256,12 @@ export async function fetchSupabasePublicAdvisors(
     }
   }
 
-  const galleryCountByAdvisorId = countRowsByAdvisorId(galleryRows as Array<{ advisor_id?: string }>);
+  // DB score map — single source of truth
+  const dbScoreByAdvisorId = new Map<string, number>(
+    (scoresResult.data ?? [])
+      .filter((row) => row.advisor_id && row.total_score != null)
+      .map((row) => [row.advisor_id, Math.max(0, Math.min(100, Number(row.total_score)))]),
+  );
 
   for (const service of servicesResult.data ?? []) {
     const list = servicesByAdvisorId.get(service.advisor_id) ?? [];
@@ -331,13 +278,6 @@ export async function fetchSupabasePublicAdvisors(
     list.push(testimonial as Record<string, unknown>);
     testimonialsFullByAdvisorId.set(testimonial.advisor_id, list);
   }
-  for (const row of journeyRows) {
-    const uid = String((row as Record<string, unknown>).user_id ?? "");
-    if (!uid) continue;
-    const list = journeyByAdvisorId.get(uid) ?? [];
-    list.push(row as Record<string, unknown>);
-    journeyByAdvisorId.set(uid, list);
-  }
 
   const advisors = (profiles as AdvisorProfileRow[])
     .map((profile) =>
@@ -350,8 +290,7 @@ export async function fetchSupabasePublicAdvisors(
         verifiedRecsCountByAdvisorId,
         testimonialsCountByAdvisorId,
         averageRatingByAdvisorIdMap,
-        journeyByAdvisorId,
-        galleryCountByAdvisorId,
+        dbScoreByAdvisorId,
       ),
     )
     .filter(Boolean) as PublicAdvisorCard[];
