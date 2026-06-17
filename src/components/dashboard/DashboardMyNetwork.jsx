@@ -193,7 +193,7 @@ export default function DashboardMyNetwork() {
         ) : hasSaved ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {profiles.map((advisor) => (
-              <AdvisorCardWithSave key={advisor.id} advisor={advisor} />
+              <AdvisorCardWithSave key={advisor.id} advisor={advisor} variant="compact" />
             ))}
           </div>
         ) : (

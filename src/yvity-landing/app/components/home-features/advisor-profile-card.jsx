@@ -188,18 +188,39 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
   );
 }
 
-/* ─────────────── Compact variant (hero card) ─────────────── */
+function StatCellCompact({ icon: Icon, value, label }) {
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#0D6060] ring-1 ring-[#0A4A4A]/10">
+        <Icon className="h-3 w-3" />
+      </span>
+      <p className="font-poppins text-[11px] font-bold leading-none tabular-nums text-[#0A4A4A]">{value}</p>
+      <p className="font-poppins text-[9px] font-medium leading-none text-[#6B7280]">{label}</p>
+    </div>
+  );
+}
+
+/* ─────────────── Compact variant — in-app use ─────────────── */
 function AdvisorProfileCardCompact({
-  name, title, location, score, avgRating, profileUrl,
-  avatarUrl, showIdentityVerified = false, serviceTypes = [], achievementTags = [],
+  name, title, location, score, exp, avgRating,
+  clients, clientsLabel = "Clients", recs,
+  profileUrl, avatarUrl, showIdentityVerified = false,
+  serviceTypes = [], achievementTags = [],
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const numericScore = Math.min(100, Math.max(0, Number(score) || 0));
   const servicePills = resolveServicePills(serviceTypes);
 
+  const statItems = [
+    { icon: Briefcase, value: formatExperienceDisplay(exp), label: "Exp." },
+    { icon: Star,      value: formatAverageRating(avgRating), label: "Rating" },
+    { icon: Users,     value: clients,                        label: clientsLabel },
+    { icon: ThumbsUp,  value: recs,                           label: "Recs" },
+  ];
+
   return (
     <motion.article
-      className="mx-auto h-full w-full max-w-[290px]"
+      className="mx-auto h-full w-full max-w-[340px]"
       {...(reducedMotion ? {} : {
         whileHover: {
           y: -4,
@@ -208,13 +229,13 @@ function AdvisorProfileCardCompact({
         },
       })}
     >
-      <div className="advisor-card-gold-shell advisor-card-gold-shell--compact">
+      <div className="advisor-card-gold-shell">
         <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
 
-          {/* Header */}
+          {/* Header — row layout, smaller padding */}
           <div className="advisor-card-gold-profile-header px-3 pb-3 pt-3">
             {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
-            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+            <div className="relative z-10 flex items-start gap-2.5">
               <AvatarBlock
                 avatarUrl={avatarUrl}
                 name={name}
@@ -222,19 +243,19 @@ function AdvisorProfileCardCompact({
                 showIdentityVerified={showIdentityVerified}
                 size="sm"
               />
-              <div>
-                <h3 className="font-cormorant text-[17px] font-bold leading-tight tracking-[0.02em] text-white">
+              <div className="min-w-0 flex-1 pt-0.5">
+                <h3 className="font-cormorant text-[16px] font-bold leading-tight tracking-[0.02em] text-white">
                   {name}
                 </h3>
-                <p className="mt-0.5 font-poppins text-[11px] font-semibold text-[#F59E0B]">
+                <p className="mt-0.5 font-poppins text-[10px] font-semibold tracking-wide text-[#F59E0B]">
                   {title}
                 </p>
-                <p className="mt-0.5 flex items-center justify-center gap-1 font-poppins text-[11px] font-medium text-white/80">
+                <p className="mt-0.5 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/80">
                   <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]" />
                   <span className="line-clamp-1">{location}</span>
                 </p>
                 {achievementTags.length > 0 ? (
-                  <div className="mt-1.5 flex flex-wrap justify-center gap-1">
+                  <div className="mt-1 flex flex-wrap gap-1">
                     {achievementTags.slice(0, 2).map((tag) => (
                       <AchievementBadge key={tag} label={tag} compact />
                     ))}
@@ -245,26 +266,44 @@ function AdvisorProfileCardCompact({
           </div>
 
           {/* Body */}
-          <div className="relative z-10 flex flex-col gap-2 px-3 pb-3">
-            <div className="advisor-card-gold-glass-panel flex items-center justify-between gap-2 px-2.5 py-1.5">
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 shrink-0 fill-[#F59E0B] text-[#F59E0B]" aria-hidden />
-                <span className="font-poppins text-[11px] font-bold text-[#0A4A4A]">
-                  {formatAverageRating(avgRating)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/70">YVITY</span>
-                <span className="font-poppins text-sm font-bold tabular-nums text-[#0A4A4A]">{Math.round(numericScore)}</span>
-                <YvityScoreInfoTip />
-              </div>
-            </div>
+          <div className="relative z-10 flex flex-col gap-2 p-3">
 
             {servicePills.length > 0 ? (
-              <div className="flex flex-wrap justify-start gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 {servicePills.map((tag) => <ServicePill key={tag} label={tag} compact />)}
               </div>
             ) : null}
+
+            {/* YVITY Score — compact bar */}
+            <div className="advisor-card-gold-glass-panel px-2.5 py-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#0A4A4A]">YVITY Score</p>
+                  <YvityScoreInfoTip />
+                </div>
+                <p className="font-poppins text-[15px] font-bold leading-none tabular-nums text-[#0A4A4A]">
+                  {Math.round(numericScore)}
+                  <span className="font-poppins text-[9px] font-medium text-[#9CA3AF]"> /100</span>
+                </p>
+              </div>
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/45 ring-1 ring-[#0A4A4A]/8">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 45%, #F59E0B 100%)" }}
+                  initial={reducedMotion ? { width: `${numericScore}%` } : { width: 0 }}
+                  whileInView={{ width: `${numericScore}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+
+            {/* Stats — 4 in a row */}
+            <div className="advisor-card-gold-glass-panel grid grid-cols-4 gap-1 px-2 py-2">
+              {statItems.map(({ icon, value, label }) => (
+                <StatCellCompact key={label} icon={icon} value={value} label={label} />
+              ))}
+            </div>
 
             <ViewProfileCta profileUrl={profileUrl} compact reducedMotion={reducedMotion} />
           </div>

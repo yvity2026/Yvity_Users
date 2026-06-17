@@ -433,7 +433,7 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [], mode = "explore" }
               key={advisor.id || index}
               className="w-full max-w-[520px] mx-auto"
             >
-              <AdvisorCardWithSave advisor={advisor} showSave={Boolean(user?.id)} />
+              <AdvisorCardWithSave advisor={advisor} showSave={Boolean(user?.id)} variant="compact" />
             </div>
           ))}
         </div>
