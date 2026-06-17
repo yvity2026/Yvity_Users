@@ -30,6 +30,7 @@ export default function DashboardHomeDiscovery({
   searchQuery,
   onSearchQueryChange,
   searchCity,
+  searchCityPlaceholder = "e.g. Hyderabad",
   onSearchCityChange,
   searchService,
   onSearchServiceChange,
@@ -134,7 +135,7 @@ export default function DashboardHomeDiscovery({
                   type="text"
                   value={searchCity}
                   onChange={(event) => onSearchCityChange(event.target.value)}
-                  placeholder="e.g. Hyderabad"
+                  placeholder={searchCityPlaceholder}
                   className={fieldClass}
                 />
               </FilterField>
