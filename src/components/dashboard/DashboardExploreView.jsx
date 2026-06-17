@@ -51,16 +51,14 @@ export default function DashboardExploreView({ advisors = [] }) {
     [serviceOptions],
   );
 
-  const effectiveCity = searchCity || user?.city || "";
-
   const currentFilters = useMemo(
     () => ({
       query: searchQuery,
-      city: effectiveCity,
+      city: searchCity,  // only use what user typed, never auto-inject user's city
       service: searchService || activeQuickFilter,
       company: searchCompany,
     }),
-    [searchQuery, effectiveCity, searchService, activeQuickFilter, searchCompany],
+    [searchQuery, searchCity, searchService, activeQuickFilter, searchCompany],
   );
 
   const results = useMemo(
@@ -88,7 +86,11 @@ export default function DashboardExploreView({ advisors = [] }) {
     Boolean(searchCompany.trim()) ||
     Boolean(activeQuickFilter);
 
-  const displayedAdvisors = hasActiveFilters ? results : advisors;
+  // When platform has few advisors (<10), always show all — don't leave users with empty results
+  const FEW_ADVISORS_THRESHOLD = 10;
+  const tooFewToFilter = advisors.length < FEW_ADVISORS_THRESHOLD;
+  const displayedAdvisors =
+    !hasActiveFilters || (tooFewToFilter && results.length === 0) ? advisors : results;
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-3 py-5 sm:px-4 sm:py-8">
@@ -150,7 +152,7 @@ export default function DashboardExploreView({ advisors = [] }) {
         <div className="rounded-[24px] border border-dashed border-[#E4E2DB] bg-gradient-to-br from-white via-[#F8F6F1] to-[#E8F4F4]/60 px-6 py-16 text-center">
           <p className="font-poppins text-sm text-[#6B7280]">
             {hasActiveFilters
-              ? "No advisors matched your search. Try adjusting your filters."
+              ? "No advisors matched your search. Try a different city or service."
               : "No advisors are listed yet. Check back soon."}
           </p>
           {hasActiveFilters ? (

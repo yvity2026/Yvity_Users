@@ -279,35 +279,55 @@ export function DashboardHomeRecentReviews({ reviews, reviewsLoaded }) {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 animate-pulse rounded-2xl bg-[#E4E2DB]/80"
+              className="h-52 animate-pulse rounded-2xl bg-[#E4E2DB]/80"
               aria-hidden
             />
           ))}
         </div>
       ) : reviews.length ? (
         <div className="no-scrollbar -mx-3 flex gap-4 overflow-x-auto px-3 pb-1 snap-x snap-mandatory sm:-mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-3">
-          {reviews.map((review) => {
+          {reviews.map((review, index) => {
+            const reviewerInitials = (review.reviewerName || "C")
+              .split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+            const avatarColors = [
+              "from-[#0A4A4A] to-[#0D6060]",
+              "from-[#1a5c5c] to-[#0f7a7a]",
+              "from-[#083838] to-[#0a5050]",
+            ];
+            const avatarColor = avatarColors[index % avatarColors.length];
+
             const card = (
-              <article className="flex h-full flex-col rounded-2xl border border-[#E4E2DB] bg-white p-5 shadow-[0_2px_16px_rgba(10,74,74,0.06)] transition hover:border-[#0A4A4A]/15 hover:shadow-[0_6px_24px_rgba(10,74,74,0.1)]">
-                <ReviewStars
-                  rating={Math.max(1, Math.round(Number(review.rating || 5)))}
-                />
-                <p className="mt-3 line-clamp-4 flex-1 font-poppins text-sm leading-relaxed text-[#374151]">
-                  &ldquo;{review.text}&rdquo;
+              <article className="flex h-full flex-col rounded-2xl border border-[#E4E2DB]/70 bg-white p-5 shadow-[0_2px_16px_rgba(10,74,74,0.06)] transition-all duration-300 hover:border-[#0A4A4A]/20 hover:shadow-[0_8px_28px_rgba(10,74,74,0.12)] hover:-translate-y-0.5">
+                {/* Header: avatar + stars */}
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${avatarColor} font-poppins text-xs font-bold text-[#F59E0B] shadow-sm`}>
+                    {reviewerInitials}
+                  </div>
+                  <ReviewStars rating={Math.max(1, Math.round(Number(review.rating || 5)))} />
+                </div>
+
+                {/* Review text */}
+                <p className="mb-4 line-clamp-4 flex-1 font-poppins text-sm leading-relaxed text-[#374151]">
+                  <span className="mr-0.5 font-cormorant text-xl font-bold text-[#F59E0B] leading-none">&ldquo;</span>
+                  {review.text}
+                  <span className="ml-0.5 font-cormorant text-xl font-bold text-[#F59E0B] leading-none">&rdquo;</span>
                 </p>
-                <div className="mt-4 border-t border-[#E4E2DB]/80 pt-4">
-                  <p className="font-poppins text-xs font-semibold text-[#0A4A4A]">
-                    {review.reviewerName || review.name || "YVITY member"}
-                  </p>
-                  <p className="mt-1 font-poppins text-xs font-semibold text-[#0A4A4A]">
+
+                {/* Reviewer name */}
+                <p className="font-poppins text-xs font-semibold text-[#374151]">
+                  {review.reviewerName || "YVITY member"}
+                </p>
+
+                {/* Divider + advisor info */}
+                <div className="mt-3 border-t border-[#E4E2DB]/80 pt-3">
+                  <p className="font-poppins text-[11px] text-[#6B7280]">Reviewed</p>
+                  <p className="mt-0.5 font-poppins text-xs font-semibold text-[#0A4A4A]">
                     {review.advisorName}
                   </p>
-                  <p className="font-poppins text-[11px] text-[#6B7280]">
-                    {review.advisorTitle}
-                  </p>
+                  <p className="font-poppins text-[11px] text-[#6B7280]">{review.advisorTitle}</p>
                   {review.advisorCity ? (
-                    <p className="mt-1 inline-flex items-center gap-1 font-poppins text-[11px] text-[#6B7280]">
-                      <MapPin size={11} aria-hidden />
+                    <p className="mt-1 inline-flex items-center gap-1 font-poppins text-[10px] text-[#9CA3AF]">
+                      <MapPin size={10} aria-hidden />
                       {review.advisorCity}
                     </p>
                   ) : null}

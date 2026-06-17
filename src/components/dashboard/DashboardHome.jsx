@@ -111,7 +111,10 @@ export default function DashboardHome({ advisors = [] }) {
     [serviceOptions],
   );
 
+  // effectiveCity is only for UI hints/placeholders; filterCity is what's actually applied
   const effectiveCity = searchCity || user?.city || "";
+  // Only filter by city if the user explicitly typed one — never auto-inject user's city
+  const filterCity = searchCity;
 
   const recentService = useMemo(() => {
     if (recentServiceChip) return recentServiceChip;
@@ -121,11 +124,11 @@ export default function DashboardHome({ advisors = [] }) {
   const currentFilters = useMemo(
     () => ({
       query: searchQuery,
-      city: effectiveCity,
+      city: filterCity,
       service: searchService || activeQuickFilter,
       company: searchCompany,
     }),
-    [searchQuery, effectiveCity, searchService, activeQuickFilter, searchCompany],
+    [searchQuery, filterCity, searchService, activeQuickFilter, searchCompany],
   );
 
   const inlineResults = useMemo(() => {
@@ -157,13 +160,13 @@ export default function DashboardHome({ advisors = [] }) {
       router.push(
         buildExploreUrl({
           name: overrides.name ?? searchQuery,
-          city: overrides.city ?? effectiveCity,
+          city: overrides.city ?? filterCity,
           service: overrides.service ?? searchService ?? activeQuickFilter,
           company: overrides.company ?? searchCompany,
         }),
       );
     },
-    [router, searchQuery, effectiveCity, searchService, activeQuickFilter, searchCompany],
+    [router, searchQuery, filterCity, searchService, activeQuickFilter, searchCompany],
   );
 
   const runInlineSearch = useCallback(() => {
