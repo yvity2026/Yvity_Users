@@ -74,7 +74,8 @@ export default function DashboardHome({ advisors = [] }) {
   const [searchCompany, setSearchCompany] = useState("");
   const [activeQuickFilter, setActiveQuickFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [inlineVisible, setInlineVisible] = useState(false);
+  // Auto-show results when there are very few advisors — no need to click Search
+  const [inlineVisible, setInlineVisible] = useState(() => advisors.length > 0 && advisors.length < 10);
   const [showStickySearch, setShowStickySearch] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoaded, setReviewsLoaded] = useState(false);
@@ -348,7 +349,7 @@ export default function DashboardHome({ advisors = [] }) {
           }}
           onClearFilters={handleClearFilters}
           onQuickFilter={handleQuickFilter}
-          hasSearched={inlineVisible}
+          hasSearched={inlineVisible && (!!searchQuery || !!searchCity || !!searchService || !!searchCompany)}
         />
       </div>
 

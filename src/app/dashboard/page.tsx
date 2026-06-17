@@ -5,6 +5,9 @@ import { getPublicAdvisors } from "@/lib/advisors";
 import type { PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Home | YVITY Dashboard",
   description: "Discover trusted professionals on YVITY",
