@@ -62,6 +62,7 @@ type MembershipPaymentRow = {
 
 export function AdvisorMembershipModule() {
   const { advisor, setAdvisor } = useAuth();
+  const accountStatus = advisor?.account_status;
   const [payments, setPayments] = useState<MembershipPaymentRow[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(true);
   const model = useMemo(
@@ -167,7 +168,44 @@ export function AdvisorMembershipModule() {
         </div>
       </section>
 
-      {renewal.showReminder && (
+      {/* Expired plan banner */}
+      {current.status === "expired" && (
+        <div className="rounded-2xl border border-[oklch(0.72_0.18_15/0.45)] bg-[oklch(0.72_0.18_15/0.1)] p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[oklch(0.88_0.12_15)]">Your membership has expired</p>
+            <p className="mt-1 text-xs text-[oklch(0.88_0.12_15/0.75)] leading-relaxed">
+              Your {current.planName} plan expired on {formatDate(current.expiryDate)}. Renew now to restore your verified badge, profile visibility, and plan features.
+            </p>
+          </div>
+          <Button
+            onClick={openRenew}
+            className="shrink-0 rounded-xl bg-[oklch(0.72_0.18_15)] hover:bg-[oklch(0.68_0.18_15)] text-white gap-2"
+          >
+            <RefreshCw className="size-4" />
+            Renew now
+          </Button>
+        </div>
+      )}
+
+      {/* Account status banners */}
+      {accountStatus === "under_review" && (
+        <div className="rounded-2xl border border-[oklch(0.82_0.13_205/0.4)] bg-[oklch(0.82_0.13_205/0.08)] p-4 md:p-5">
+          <p className="text-sm font-bold text-[oklch(0.88_0.12_205)]">Profile under review</p>
+          <p className="mt-1 text-xs text-[oklch(0.88_0.12_205/0.75)] leading-relaxed">
+            Your profile and documents are being verified by YVITY. This typically takes 1–2 business days. Plan features will be fully active once approved.
+          </p>
+        </div>
+      )}
+      {accountStatus === "action_required" && (
+        <div className="rounded-2xl border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.1)] p-4 md:p-5">
+          <p className="text-sm font-bold text-[oklch(0.92_0.14_78)]">Action required on your profile</p>
+          <p className="mt-1 text-xs text-[oklch(0.92_0.14_78/0.75)] leading-relaxed">
+            YVITY needs additional information to verify your profile. Check your notifications or contact support@yvity.com to resolve this quickly.
+          </p>
+        </div>
+      )}
+
+      {renewal.showReminder && current.status !== "expired" && (
         <RenewalReminder
           daysRemaining={renewal.daysRemaining}
           level={renewal.reminderLevel}
@@ -186,7 +224,7 @@ export function AdvisorMembershipModule() {
                 {current.planName}
               </p>
             </div>
-            <StatusBadge status={current.status} />
+            <StatusBadge status={current.status} accountStatus={accountStatus} />
           </div>
 
           <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -449,7 +487,27 @@ export function AdvisorMembershipModule() {
   );
 }
 
-function StatusBadge({ status }: { status: "active" | "expired" }) {
+function StatusBadge({
+  status,
+  accountStatus,
+}: {
+  status: "active" | "expired";
+  accountStatus?: string | null;
+}) {
+  if (accountStatus === "under_review") {
+    return (
+      <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider border-[oklch(0.82_0.13_205/0.4)] bg-[oklch(0.82_0.13_205/0.12)] text-[oklch(0.88_0.12_205)]">
+        Under review
+      </span>
+    );
+  }
+  if (accountStatus === "action_required") {
+    return (
+      <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.12)] text-[oklch(0.92_0.14_78)]">
+        Action required
+      </span>
+    );
+  }
   const active = status === "active";
   return (
     <span

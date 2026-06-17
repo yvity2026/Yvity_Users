@@ -5,6 +5,7 @@ import { resolveRegisteredUser } from "@/lib/server/profile";
 import { verifyRazorpayPaymentSignature, isRazorpayConfigured } from "@/lib/server/razorpay";
 import { qualifyReferralOnPayment } from "@/lib/server/referrals-store";
 import { getSessionUser } from "@/lib/server/session";
+import { notifyPaymentSuccess } from "@/lib/server/payment-notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,6 +74,10 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error("[razorpay/verify] referral qualification failed:", error);
     }
+
+    notifyPaymentSuccess(record).catch((err) =>
+      console.error("[razorpay/verify] payment notification failed:", err),
+    );
 
     return NextResponse.json({
       success: true,

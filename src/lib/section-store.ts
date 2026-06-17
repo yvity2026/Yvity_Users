@@ -6,7 +6,7 @@ export { uid } from "@/lib/id";
 
 export function createSectionStore<T>(endpoint: string, fallback: T, evt: string) {
   async function fetchData(): Promise<T> {
-    const res = await fetch(endpoint, { cache: "no-store" });
+    const res = await fetch(endpoint, { cache: "no-store", credentials: "same-origin" });
     if (!res.ok) return fallback;
     const json = (await res.json()) as { data?: T };
     return json.data ?? fallback;
@@ -38,6 +38,7 @@ export function createSectionStore<T>(endpoint: string, fallback: T, evt: string
       void fetch(endpoint, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ data: next }),
       }).then(() => {
         window.dispatchEvent(new CustomEvent(evt));

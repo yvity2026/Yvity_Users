@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { FaArrowRight } from "react-icons/fa";
-import { AdvisorCardGold } from "./home-features/advisor-card-gold";
+import { AdvisorProfileCard } from "./home-features/advisor-profile-card";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationModal";
 import AnimatedCounter from "@/yvity-landing/components/ui/AnimatedCounter";
@@ -16,18 +16,19 @@ import { usePathname, useRouter } from "next/navigation";
 const HERO_PREVIEW_ADVISOR = {
   name: "Krishna Mohan Noti",
   title: "Chief Life Planner",
-  location: "Guntur, Telangana",
-  score: 40,
-  exp: "15",
+  location: "Guntur, Andhra Pradesh",
+  score: 45,
+  exp: "7",
   reviews: "2",
   avgRating: "4.5",
   recs: "0",
   clients: "127",
   clientsLabel: "Clients",
   serviceTypes: ["Life Insurance", "Health Insurance", "General Insurance"],
-  achievementTags: ["MDRT"],
-  profileUrl: "/krishna-mohan-noti-167ec15f",
-  profileSlug: "krishna-mohan-noti-167ec15f",
+  achievementTags: ["MDRT x 2"],
+  profileUrl: "/krishnamohannoti",
+  profileSlug: "krishnamohannoti",
+  avatarUrl: "https://akwvvhntxbhjyixaxhpv.supabase.co/storage/v1/object/public/selfies/9705159705/9705159705-5d7f1012.jpg",
   showVerifiedBadge: true,
   showIdentityVerified: true,
 };
@@ -97,18 +98,10 @@ const Hero = ({ advisor = [] }) => {
   }, [mobileNav, pathname, router]);
 
   const [countData, setCountData] = useState([
-    {
-      count: 0,
-      title: "Verified Advisors",
-    },
-    {
-      count: 0,
-      title: "Cities Covered",
-    },
-    {
-      count: 0,
-      title: "Verified Reviews",
-    },
+    { count: 0, title: "Total Users", isRating: false },
+    { count: 0, title: "Verified Advisors", isRating: false },
+    { count: 0, title: "Cities Covered", isRating: false },
+    { count: 0, title: "Platform Rating", isRating: true },
   ]);
   useEffect(() => {
     let ignore = false;
@@ -125,18 +118,10 @@ const Hero = ({ advisor = [] }) => {
         }
 
         setCountData([
-          {
-            count: Number(result.data?.verifiedAdvisors || 0),
-            title: "Verified Advisors",
-          },
-          {
-            count: Number(result.data?.citiesCovered || 0),
-            title: "Cities Covered",
-          },
-          {
-            count: Number(result.data?.verifiedReviews || 0),
-            title: "Verified Reviews",
-          },
+          { count: Number(result.data?.totalUsers || 0), title: "Total Users", isRating: false },
+          { count: Number(result.data?.verifiedAdvisors || 0), title: "Verified Advisors", isRating: false },
+          { count: Number(result.data?.citiesCovered || 0), title: "Cities Covered", isRating: false },
+          { count: Number(result.data?.platformRating || 0), title: "Platform Rating", isRating: true },
         ]);
       } catch (error) {
         console.error("Failed to load landing stats:", error);
@@ -222,10 +207,10 @@ const Hero = ({ advisor = [] }) => {
           </div>
 
           <span className="flex w-full min-w-0 flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[40px] sm:leading-[1.12] md:text-[52px] md:gap-2 lg:text-[56px] lg:leading-[1.1] xl:text-[64px]">
-            <p className="landing-hero-headline-accent w-full text-balance">
+            <p className="landing-hero-headline-accent font-cormorant w-full text-balance">
               {heroCopy.line1}
             </p>
-            <p className="landing-hero-headline-primary w-full text-balance">
+            <p className="landing-hero-headline-primary font-cormorant w-full text-balance">
               {heroCopy.line2}
             </p>
           </span>
@@ -289,13 +274,7 @@ const Hero = ({ advisor = [] }) => {
             )}
           </div>
         </motion.div>
-        {/* Right side pannel */}
-        {/* <div className="xl:pr-25 md:mx-auto h-full lg:col-span-5"> */}
-        {/* <div className="h-full z-0 relative">   Dup*/}
-        {/* <AdvisorCard {...advisors[0]} /> */}
-        {/* </div>  Dup */}
-        {/* </div> */}
-        {/* Right side pannel */}
+        {/* Right side panel */}
 <motion.div
     className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
     {...(reducedMotion
@@ -309,7 +288,7 @@ const Hero = ({ advisor = [] }) => {
   >
     <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
       <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
-        <AdvisorCardGold {...displayAdvisor} key={displayAdvisor.name} />
+        <AdvisorProfileCard {...displayAdvisor} key={displayAdvisor.name} />
       </div>
     </div>
   </motion.div>
@@ -318,20 +297,28 @@ const Hero = ({ advisor = [] }) => {
       {/* Count Bar — hidden when all stats are zero (e.g. empty local DB) */}
       {countData.some((item) => item.count > 0) ? (
       <div className="landing-hero-stats mt-16 w-full sm:mt-14 md:mt-20">
-        <div className={`${LANDING_INNER} grid grid-cols-3 py-4 md:py-5`}>
+        <div className={`${LANDING_INNER} grid grid-cols-2 py-4 sm:grid-cols-4 md:py-5`}>
           {countData.map((item, index) => (
             <div
               key={item.title}
-              className={`flex flex-col items-center justify-center gap-1 px-2 text-center sm:flex-row sm:gap-3 sm:px-4 ${
-                index < countData.length - 1
-                  ? "border-r landing-hero-stats-divider"
-                  : ""
+              className={`flex flex-col items-center justify-center gap-1 px-2 py-2 text-center sm:flex-row sm:gap-3 sm:px-4 sm:py-0 ${
+                index % 2 === 0 ? "border-r landing-hero-stats-divider sm:border-r" : ""
+              } ${
+                index < 2 ? "border-b landing-hero-stats-divider sm:border-b-0" : ""
+              } ${
+                index === 3 ? "sm:border-r-0" : index < 3 ? "sm:border-r landing-hero-stats-divider" : ""
               }`}
             >
-              <AnimatedCounter
-                value={item.count}
-                className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
-              />
+              {item.isRating ? (
+                <span className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl">
+                  {item.count > 0 ? item.count.toFixed(1) : "—"} <span className="text-[#F59E0B]">★</span>
+                </span>
+              ) : (
+                <AnimatedCounter
+                  value={item.count}
+                  className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
+                />
+              )}
               <p className="landing-hero-stats-label font-poppins text-[10px] leading-snug sm:max-w-[8rem] sm:text-left md:text-xs lg:text-sm">
                 {item.title}
               </p>

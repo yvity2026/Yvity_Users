@@ -63,7 +63,8 @@ export function Navbar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0">
-        <div className="yvity-dash-nav-flat border-b lg:hidden">
+        <div className="mob-nav-top-frame lg:hidden">
+          <div className="glass-nav-mobile mob-nav-top-inner">
           <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
             <Link
               href={homeHref}
@@ -76,63 +77,70 @@ export function Navbar() {
                 showTagline
                 layout="row"
                 logoClassName="h-9 w-9 object-contain"
-                nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none"
-                taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
+                nameClassName="font-cormorant text-base font-bold leading-none text-[#0A4A4A]"
+                taglineClassName="font-poppins text-[10px] font-semibold leading-tight text-[#F59E0B]"
               />
             </Link>
 
             <button
               type="button"
               onClick={() => router.push(ctaHref)}
-              className="yvity-dash-nav-cta inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+              className="relative flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#0A4A4A] via-[#0D5555] to-[#0A4A4A] px-4 font-poppins shadow-[0_4px_16px_rgba(10,74,74,0.2),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-[#F59E0B]/40 transition-transform duration-200 active:scale-95 sm:h-10 sm:px-5 gap-1.5"
             >
-              <CtaIcon className="size-3.5" /> {ctaLabel}
+              <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
+              <CtaIcon className="relative size-3.5 text-[#F59E0B]" />
+              <span className="relative text-[13px] font-bold leading-none tracking-wide text-[#F59E0B] sm:text-sm">{ctaLabel}</span>
             </button>
+          </div>
           </div>
         </div>
 
-        <div className="yvity-dash-nav-flat hidden border-b lg:block">
-          <nav className="relative mx-auto flex h-16 w-full max-w-[1536px] items-center justify-between px-6">
-            <Link
-              href={homeHref}
-              className="relative z-10 flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
-              aria-label="YVITY home"
-            >
-              <BrandMark
-                logoSize={40}
-                showName
-                showTagline
-                layout="row"
-                logoClassName="h-9 w-9 object-contain"
-                nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none xl:text-lg"
-                taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
-              />
-            </Link>
+        <div className="app-top-nav-desktop-wrap hidden lg:block">
+          <div className="mx-auto w-full max-w-[1536px] px-4 sm:px-6 lg:px-8 xl:px-10">
+            <div className="glass-nav-frame relative flex h-[4.375rem] w-full items-center justify-between rounded-[100px] p-[1px]">
+              <nav className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-6 py-3 lg:px-8 xl:px-10">
+                <Link
+                  href={homeHref}
+                  className="relative z-10 flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
+                  aria-label="YVITY home"
+                >
+                  <BrandMark
+                    logoSize={40}
+                    showName
+                    showTagline
+                    layout="row"
+                    logoClassName="h-9 w-9 object-contain"
+                    nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none xl:text-lg"
+                    taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
+                  />
+                </Link>
 
-            <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 sm:gap-1">
-              {links.map((l) => (
-                <li key={l.href} className="pointer-events-auto">
-                  <Link
-                    href={l.href === "/profile" ? homeHref : l.href}
-                    className={navLinkClass(
-                      isActivePath(pathname, l.href, homeHref),
-                      "yvity-dash-nav-link relative rounded-full px-3.5 py-1.5 text-sm font-medium font-poppins transition-colors",
-                    )}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 sm:gap-1">
+                  {links.map((l) => (
+                    <li key={l.href} className="pointer-events-auto">
+                      <Link
+                        href={l.href === "/profile" ? homeHref : l.href}
+                        className={navLinkClass(
+                          isActivePath(pathname, l.href, homeHref),
+                          "yvity-dash-nav-link relative rounded-full px-3.5 py-1.5 text-sm font-medium font-poppins transition-colors",
+                        )}
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
 
-            <button
-              type="button"
-              onClick={() => router.push(ctaHref)}
-              className="yvity-dash-nav-cta relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
-            >
-              <CtaIcon className="size-3.5" /> {ctaLabel}
-            </button>
-          </nav>
+                <button
+                  type="button"
+                  onClick={() => router.push(ctaHref)}
+                  className="yvity-dash-nav-cta relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold font-poppins shadow-md active:scale-95 transition hover:opacity-90"
+                >
+                  <CtaIcon className="size-3.5" /> {ctaLabel}
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -242,69 +250,60 @@ function MobileBottomBar({
       className="lg:hidden fixed inset-x-0 bottom-0 z-[60]"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="yvity-dash-nav-flat border-t">
-        <div className="mx-auto flex h-[4.25rem] max-w-lg items-stretch justify-around px-1">
-          <Link
-            href={servicesHref}
-            className={navLinkClass(
-              isActivePath(pathname, servicesHref, homeHref),
-              "yvity-dash-nav-bottom-label relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition",
-            )}
-          >
-            <span
-              className={cn(
-                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
-                isActivePath(pathname, servicesHref, homeHref) &&
-                  "yvity-dash-nav-bottom-icon--active",
-              )}
-            >
-              <Sparkles className="size-5" strokeWidth={2} />
-            </span>
-            <span className="mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
-              Services
-            </span>
-          </Link>
-
+      <div className="mob-nav-bottom-frame">
+        <div className="glass-nav-mobile mob-nav-bottom-inner">
+        <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-around px-1 sm:h-16">
           <Link
             href={homeHref}
             aria-current={homeActive ? "page" : undefined}
             className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
           >
-            <span
-              className={cn(
-                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
-                homeActive && "yvity-dash-nav-bottom-icon--active",
-              )}
-            >
+            <span className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                homeActive
+                  ? "bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_12px_rgba(10,74,74,0.45)]"
+                  : "bg-transparent text-[#0A4A4A]/55",
+              )}>
               <Home className="size-5" strokeWidth={homeActive ? 2.25 : 2} />
             </span>
-            <span
-              className={cn(
-                "yvity-dash-nav-bottom-label mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight sm:text-[10px]",
-                homeActive ? "font-semibold" : "font-medium opacity-65",
-              )}
-            >
+            <span className={cn("mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight text-[#0A4A4A] sm:text-[10px]",
+                homeActive ? "font-semibold" : "font-medium opacity-65")}>
               Home
             </span>
           </Link>
 
           <Link
-            href={testimonialsHref}
-            className={navLinkClass(
-              isActivePath(pathname, testimonialsHref, homeHref),
-              "yvity-dash-nav-bottom-label relative flex min-h-[44px] min-w-0 flex-col items-center justify-center px-0.5 active:scale-95 transition",
-            )}
+            href={servicesHref}
+            className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
           >
-            <span
-              className={cn(
-                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
-                isActivePath(pathname, testimonialsHref, homeHref) &&
-                  "yvity-dash-nav-bottom-icon--active",
-              )}
-            >
+            <span className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                isActivePath(pathname, servicesHref, homeHref)
+                  ? "bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_12px_rgba(10,74,74,0.45)]"
+                  : "bg-transparent text-[#0A4A4A]/55",
+              )}>
+              <Sparkles className="size-5" strokeWidth={2} />
+            </span>
+            <span className={cn("mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight text-[#0A4A4A] sm:text-[10px]",
+                isActivePath(pathname, servicesHref, homeHref) ? "font-semibold" : "font-medium opacity-65")}>
+              Services
+            </span>
+          </Link>
+
+          <Link
+            href={testimonialsHref}
+            className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
+          >
+            <span className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                isActivePath(pathname, testimonialsHref, homeHref)
+                  ? "bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_12px_rgba(10,74,74,0.45)]"
+                  : "bg-transparent text-[#0A4A4A]/55",
+              )}>
               <Quote className="size-5" strokeWidth={2} />
             </span>
-            <span className="mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
+            <span className={cn("mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight text-[#0A4A4A] sm:text-[10px]",
+                isActivePath(pathname, testimonialsHref, homeHref) ? "font-semibold" : "font-medium opacity-65")}>
               Testimonials
             </span>
           </Link>
@@ -316,18 +315,20 @@ function MobileBottomBar({
             aria-expanded={expanded}
             className="relative flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center px-0.5 active:scale-95 transition"
           >
-            <span
-              className={cn(
-                "yvity-dash-nav-bottom-icon flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
-                expanded && "yvity-dash-nav-bottom-icon--active",
-              )}
-            >
+            <span className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
+                expanded
+                  ? "bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_12px_rgba(10,74,74,0.45)]"
+                  : "bg-transparent text-[#0A4A4A]/55",
+              )}>
               {expanded ? <X className="size-5" /> : <Briefcase className="size-5" strokeWidth={2} />}
             </span>
-            <span className="yvity-dash-nav-bottom-label mt-0.5 max-w-full truncate text-center font-poppins text-[9px] font-medium leading-tight sm:text-[10px]">
+            <span className={cn("mt-0.5 max-w-full truncate text-center font-poppins text-[9px] leading-tight text-[#0A4A4A] sm:text-[10px]",
+                expanded ? "font-semibold" : "font-medium opacity-65")}>
               More
             </span>
           </button>
+        </div>
         </div>
       </div>
     </nav>

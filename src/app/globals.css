@@ -38,7 +38,7 @@
   --color-accent-emerald: var(--accent-emerald);
   --color-accent-amber: var(--accent-amber);
   --color-accent-rose: var(--accent-rose);
-  --font-cormorant: var(--font-cormorant), Georgia, serif;
+  --font-cormorant: "Cormorant Garamond", Georgia, serif;
   --font-poppins: var(--font-poppins), system-ui, sans-serif;
 }
 

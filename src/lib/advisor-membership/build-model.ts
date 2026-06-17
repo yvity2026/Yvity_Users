@@ -5,7 +5,6 @@ import { featuresForPlan, MEMBERSHIP_PLANS } from "./plans";
 import type { MembershipModel, MembershipStatus } from "./types";
 
 function renewalReminderLevel(days: number): MembershipModel["renewal"]["reminderLevel"] {
-  if (days <= 0) return "urgent";
   if (days <= 14) return "urgent";
   if (days <= 45) return "soon";
   return "none";

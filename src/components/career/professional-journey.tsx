@@ -2,7 +2,6 @@ import {
   BadgeCheck,
   Briefcase,
   Calendar,
-  Clock,
   MapPin,
   GraduationCap,
   TrendingUp,
@@ -68,22 +67,6 @@ function VerifiedBadge({ tone = "emerald" }: { tone?: "emerald" }) {
   );
 }
 
-/**
- * Small dashboard-only "Under review" pill for experiences whose docs have
- * been submitted but not yet approved. Hidden on the public profile.
- */
-function PendingVerificationBadge() {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase",
-        "bg-[oklch(0.85_0.16_78/0.12)] text-[oklch(0.92_0.14_78)] border border-[oklch(0.85_0.16_78/0.4)]",
-      )}
-    >
-      <Clock className="size-3.5" /> Under review
-    </span>
-  );
-}
 
 function JourneyVerifiedBadge() {
   return (
@@ -158,8 +141,10 @@ export function ProfessionalJourneySection({
         />
       ) : null}
       <div className="relative">
-        {/* vertical spine — hidden on mobile (stacked layout) */}
-        <div className="hidden sm:block absolute left-[88px] md:left-[140px] top-2 bottom-2 w-px bg-gradient-to-b from-[oklch(0.82_0.13_205/0.5)] via-[oklch(0.78_0.15_295/0.5)] to-[oklch(0.82_0.16_78/0.5)]" />
+        {/* vertical spine — only when there are entries, hidden on mobile */}
+        {experiences.length > 0 && (
+          <div className="hidden sm:block absolute left-[88px] md:left-[140px] top-2 bottom-2 w-px bg-gradient-to-b from-[oklch(0.82_0.13_205/0.5)] via-[oklch(0.78_0.15_295/0.5)] to-[oklch(0.82_0.16_78/0.5)]" />
+        )}
 
         <div className="space-y-6">
           {experiences.length === 0 ? null : experiences.map((exp, i) => {
@@ -232,13 +217,6 @@ export function ProfessionalJourneySection({
                             "Under review" while documents are pending. */}
                         {isYvityVerified(exp.verification) ? (
                           <VerifiedBadge />
-                        ) : exp.verified && !exp.verification ? (
-                          // Legacy boolean flag for entries created before
-                          // the verification record existed — keeps existing
-                          // demo data visually consistent.
-                          <VerifiedBadge />
-                        ) : editable && exp.verification?.status === "pending" ? (
-                          <PendingVerificationBadge />
                         ) : null}
                       </div>
                       <div className="mt-1 font-medium text-sm sm:text-base break-words">

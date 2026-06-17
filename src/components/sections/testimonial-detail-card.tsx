@@ -61,6 +61,9 @@ export function TestimonialDetailCard({
   onReply,
   onEditReply,
   onDeleteReply,
+  onDelete,
+  onUpgrade,
+  onServiceChange,
   replyBusy = false,
 }: {
   item: TestimonialItem;
@@ -70,6 +73,9 @@ export function TestimonialDetailCard({
   onReply?: () => void;
   onEditReply?: () => void;
   onDeleteReply?: () => void;
+  onDelete?: () => void;
+  onUpgrade?: () => void;
+  onServiceChange?: (service: import("@/lib/sections/types").TestimonialService) => void;
   replyBusy?: boolean;
 }) {
   const [services] = useServicesData();
@@ -94,15 +100,26 @@ export function TestimonialDetailCard({
       )}
       style={{ animationDelay: `${Math.min(index * 70, 420)}ms` }}
     >
+      {/* Shimmer sweep */}
+      <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-[inherit]">
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.05] to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      </div>
       {isHeld ? (
-        <div className="absolute inset-0 z-20 pointer-events-none">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3">
           <div className="absolute inset-0 backdrop-blur-[6px] bg-background/35" />
-          <div className="absolute inset-x-0 top-0 flex items-center justify-center px-4 pt-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.15)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.92_0.14_78)]">
-              <Lock className="size-3.5" />
-              Not on public profile
-            </span>
-          </div>
+          <span className="relative inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.15)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[oklch(0.92_0.14_78)]">
+            <Lock className="size-3.5" />
+            Not on public profile
+          </span>
+          {onUpgrade && (
+            <button
+              type="button"
+              onClick={onUpgrade}
+              className="relative inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:opacity-90 active:scale-[0.98] transition pointer-events-auto"
+            >
+              Upgrade to publish
+            </button>
+          )}
         </div>
       ) : null}
       <header className="flex items-center justify-between gap-2 px-4 sm:px-5 pt-4 sm:pt-5">
@@ -200,6 +217,7 @@ export function TestimonialDetailCard({
           <div
             className={cn(
               "flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-primary-foreground",
+              "transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none",
               avatarTone,
             )}
           >
@@ -245,10 +263,22 @@ export function TestimonialDetailCard({
 
       <footer className="mt-auto border-t border-white/10 px-4 sm:px-5 py-3 flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Shield className="size-3.5 text-[oklch(0.82_0.13_205)]" />
-          <span className="text-xs font-medium text-muted-foreground">
-            {serviceLabel}
-          </span>
+          <Shield className="size-3.5 shrink-0 text-[oklch(0.82_0.13_205)]" />
+          {manageReplies && onServiceChange ? (
+            <select
+              value={item.service}
+              onChange={(e) => onServiceChange(e.target.value as import("@/lib/sections/types").TestimonialService)}
+              className="flex-1 appearance-none rounded-lg border border-white/12 bg-white/[0.04] px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-[oklch(0.82_0.13_205/0.5)]"
+            >
+              <option value="life" className="bg-[oklch(0.18_0.035_235)]">Life Insurance</option>
+              <option value="health" className="bg-[oklch(0.18_0.035_235)]">Health Insurance</option>
+              <option value="general" className="bg-[oklch(0.18_0.035_235)]">General Insurance</option>
+              <option value="mutual" className="bg-[oklch(0.18_0.035_235)]">Mutual Funds</option>
+              <option value="claim" className="bg-[oklch(0.18_0.035_235)]">Claim Support</option>
+            </select>
+          ) : (
+            <span className="text-xs font-medium text-muted-foreground">{serviceLabel}</span>
+          )}
         </div>
 
         {manageReplies && (
@@ -297,6 +327,21 @@ export function TestimonialDetailCard({
               >
                 <MessageSquareReply className="size-3.5" />
                 Reply
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-8 rounded-full border-white/15 text-xs text-destructive hover:text-destructive ml-auto"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Delete
               </Button>
             )}
           </div>

@@ -1,4 +1,3 @@
-import { defaultServices } from "./defaults";
 import type { ServiceItem } from "./types";
 import { categoryHeadingFor } from "./services-config";
 import { normalizeLicenseHolder } from "@/lib/advisor/service-license-holder";
@@ -7,11 +6,7 @@ import {
   mergeCardDisplay,
 } from "@/lib/advisor/service-card-display";
 import { normalizeCapacityId, type ServiceCapacityId } from "@/lib/advisor/serviceCapacity";
-import {
-  emptyVerification,
-  normalizeVerification,
-  seededVerifiedRecord,
-} from "@/lib/verification/defaults";
+import { emptyVerification, normalizeVerification } from "@/lib/verification/defaults";
 
 function isServiceLike(value: unknown): value is Partial<ServiceItem> {
   return (
@@ -27,21 +22,17 @@ function isServiceLike(value: unknown): value is Partial<ServiceItem> {
  * Upgrades legacy flat service records to the insurance card schema and
  * ensures every service has a {@link VerificationRecord}.
  *
- * Legacy `verified: true` records become pre-verified records so existing demo
- * data continues to show on the public profile after the verification system
- * is enabled. New records default to `pending` (and stay hidden publicly until
- * an admin approves).
+ * All records start with emptyVerification (pending) and must go through
+ * real admin approval to appear on the public profile.
  */
 export function normalizeServices(data: unknown): ServiceItem[] {
-  const source: unknown[] = Array.isArray(data) && data.length > 0 ? data : defaultServices;
+  const source: unknown[] = Array.isArray(data) ? data : [];
 
   return source.filter(isServiceLike).map((raw): ServiceItem => {
     const partial = raw as Partial<ServiceItem> & { verified?: boolean };
-    const fallbackVerification = () =>
-      partial.verified === false ? emptyVerification() : seededVerifiedRecord();
     const verification = partial.verification
-      ? normalizeVerification(partial.verification, fallbackVerification)
-      : fallbackVerification();
+      ? normalizeVerification(partial.verification, emptyVerification)
+      : emptyVerification();
 
     const category = (partial.category ?? "life") as ServiceItem["category"];
     const capacityId = (normalizeCapacityId(partial.capacityId ?? "") ||

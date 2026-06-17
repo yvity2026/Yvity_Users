@@ -44,6 +44,7 @@ export type DashboardAdvisor = {
   subscription_expires_at?: string | null;
   iridai_certificate_url?: string | null;
   irdai_rejected_reason?: string | null;
+  designation?: string | null;
 } | null;
 
 export type IdentityRefreshData = ReturnType<typeof getIdentityRefreshStatus>;

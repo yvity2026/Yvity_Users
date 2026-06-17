@@ -1,12 +1,19 @@
 import type { DashboardAdvisor, DashboardUser } from "@/context/AuthUserContext";
+import { getAdvisorWorkspaceSetupState } from "@/lib/advisor/workspaceSetupStatus";
 
 /**
  * Whether My Space should render the full YVITY-Gold advisor workspace.
- * Demo: any signed-in user sees the workspace with hardcoded advisor data.
+ * True for any advisor lifecycle state: role set, profile exists, under review, or active.
  */
 export function shouldShowGoldAdvisorWorkspace(
   user: DashboardUser | null | undefined,
-  _advisor?: DashboardAdvisor,
+  advisor?: DashboardAdvisor | null,
 ): boolean {
-  return true;
+  const setup = getAdvisorWorkspaceSetupState(user, advisor);
+  return (
+    setup.isAdvisorRole ||
+    setup.isUnderReview ||
+    setup.hasAdvisorProfile ||
+    setup.canAccessDashboard
+  );
 }

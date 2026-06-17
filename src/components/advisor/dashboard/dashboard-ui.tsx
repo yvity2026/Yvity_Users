@@ -39,11 +39,11 @@ export function DashboardSection({
 
   if (noMobileCollapse) {
     return (
-      <section className={cn("space-y-3", className)}>
+      <section className={cn("space-y-4", className)}>
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
-            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+            <h2 className="text-base md:text-lg font-semibold tracking-tight">{title}</h2>
+            {subtitle && <p className="text-xs md:text-sm text-muted-foreground mt-1">{subtitle}</p>}
           </div>
           {action}
         </div>
@@ -55,7 +55,7 @@ export function DashboardSection({
   return (
     <section
       className={cn(
-        "space-y-3",
+        "space-y-4",
         "max-md:space-y-0 max-md:glass-strong max-md:rounded-2xl max-md:border max-md:border-white/10 max-md:overflow-hidden",
         className,
       )}
@@ -64,16 +64,16 @@ export function DashboardSection({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "md:hidden flex w-full items-start justify-between gap-3 px-4 py-4 text-left",
+          "md:hidden flex w-full items-start justify-between gap-3 px-4 py-4 md:py-5 text-left",
           "transition-all duration-200 ease-out motion-reduce:transition-none",
           "hover:bg-white/[0.03] active:bg-white/[0.06] active:scale-[0.995]",
         )}
         aria-expanded={open}
       >
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold tracking-tight">{title}</span>
+          <span className="block text-base font-semibold tracking-tight">{title}</span>
           {subtitle && (
-            <span className="mt-0.5 block text-xs text-muted-foreground">{subtitle}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{subtitle}</span>
           )}
         </span>
         <ChevronDown
@@ -86,8 +86,8 @@ export function DashboardSection({
 
       <div className="hidden md:flex md:items-end md:justify-between md:gap-3">
         <div>
-          <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
-          {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+          <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+          {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
         </div>
         {action}
       </div>

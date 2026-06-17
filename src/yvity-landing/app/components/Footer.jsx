@@ -101,9 +101,6 @@ const Footer = () => {
     router.push(subitem.link);
   };
 
-  const platformRowOne = platformLinks.slice(0, 2);
-  const platformRowTwo = platformLinks.slice(2, 5);
-
   return (
     <footer
       className={`${FOOTER_FONT} w-full border-t border-[#0AE0E0]/10 bg-[#003234] py-8 lg:py-12`}
@@ -138,21 +135,11 @@ const Footer = () => {
             </button>
           </div>
 
-          <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 lg:mx-0 lg:max-w-none lg:items-start lg:gap-6">
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+          <div className="mx-auto grid w-full max-w-md grid-cols-3 gap-4 lg:mx-0 lg:max-w-none lg:gap-8">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>Platform</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
-                {platformRowOne.map((item) => (
-                  <li key={item.link}>
-                    <FooterLinkButton
-                      label={item.name}
-                      onClick={() => handlePlatformClick(item)}
-                    />
-                  </li>
-                ))}
-              </ul>
-              <ul className="grid grid-cols-3 gap-x-2 gap-y-2 sm:gap-x-3">
-                {platformRowTwo.map((item) => (
+              <ul className="flex flex-col gap-2">
+                {platformLinks.map((item) => (
                   <li key={item.link}>
                     <FooterLinkButton
                       label={item.name}
@@ -163,9 +150,9 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>For Advisors</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
+              <ul className="flex flex-col gap-2">
                 {advisorLinks.map((item) => (
                   <li key={item.name}>
                     <FooterLinkButton
@@ -177,9 +164,9 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>Company</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2 lg:grid-cols-1 lg:gap-y-2">
+              <ul className="flex flex-col gap-2">
                 {companyLinks.map((item) => (
                   <li key={item.link}>
                     <FooterLinkButton

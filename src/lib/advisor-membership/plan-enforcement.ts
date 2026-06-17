@@ -218,8 +218,17 @@ export function isServiceVerifiedForPlan(
 /** Public profile: cap customer audio/video testimonials while preserving list order. */
 export { filterTestimonialsForPublicDisplay } from "./content-visibility";
 
-export function filterGalleryForPublicDisplay<T>(limits: PlanLimits, items: T[]): T[] {
+export function filterGalleryForPublicDisplay(
+  limits: PlanLimits,
+  items: import("@/lib/gallery-types").GalleryItem[],
+): import("@/lib/gallery-types").GalleryItem[] {
   const cap = limits.galleryPhotos;
   if (cap === null) return items;
-  return items.slice(0, cap);
+  // Show featured items first so the cap never hides them in favour of
+  // later-added non-featured photos.
+  const sorted = [
+    ...items.filter((i) => i.featured),
+    ...items.filter((i) => !i.featured),
+  ];
+  return sorted.slice(0, cap);
 }

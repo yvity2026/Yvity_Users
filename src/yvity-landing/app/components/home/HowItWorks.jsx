@@ -233,7 +233,7 @@ export default function HowItWorks() {
                     whileHover={{ scale: 1.03 }}
                     className="flex flex-col items-center relative group cursor-pointer"
                   >
-                    <div className="font-nunito w-10 h-10 rounded-full bg-[#e8f6f3] text-[#0a4d46] flex items-center justify-center font-bold mb-5 transition-colors duration-300 group-hover:bg-[#0A4A4A] group-hover:text-[#F59E0B] relative z-20">
+                    <div className="font-poppins w-10 h-10 rounded-full bg-[#e8f6f3] text-[#0a4d46] flex items-center justify-center font-bold mb-5 transition-colors duration-300 group-hover:bg-[#0A4A4A] group-hover:text-[#F59E0B] relative z-20">
                       {step.number}
                     </div>
                     <img
@@ -244,7 +244,7 @@ export default function HowItWorks() {
                     <h4 className="font-bold text-[#0A4A4A] mb-2 text-sm font-poppins relative z-10">
                       {step.title}
                     </h4>
-                    <p className="text-[#374151] text-xs max-w-[250px] leading-relaxed font-nunito relative z-10">
+                    <p className="text-[#374151] text-xs max-w-[250px] leading-relaxed font-poppins relative z-10">
                       {step.description}
                     </p>
                   </motion.div>

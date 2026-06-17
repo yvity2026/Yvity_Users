@@ -120,39 +120,55 @@ export async function loadAdvisorRolesFromDb(): Promise<
 }
 
 export async function loadLandingStatsFromDb(): Promise<{
+  totalUsers: number;
   verifiedAdvisors: number;
   citiesCovered: number;
-  verifiedReviews: number;
+  platformRating: number;
 }> {
   const supabase = client();
 
-  const [profilesRes, citiesRes, testimonialsRes] = await Promise.all([
+  const [usersRes, profilesRes, citiesRes, ratingsRes] = await Promise.all([
+    supabase.from("users").select("id", { count: "exact", head: true }),
     supabase
       .from("advisor_profiles")
       .select("id", { count: "exact", head: true })
       .eq("account_status", "active"),
-    supabase.from("users").select("city").not("city", "is", null),
+    supabase
+      .from("advisor_profiles")
+      .select("users(city)")
+      .eq("account_status", "active"),
     supabase
       .from("advisor_testimonials")
-      .select("id", { count: "exact", head: true })
+      .select("testimonial_rating")
       .eq("status", "approved")
-      .eq("is_mobile_verified", true),
+      .eq("is_mobile_verified", true)
+      .not("testimonial_rating", "is", null),
   ]);
 
+  if (usersRes.error) throw new Error(usersRes.error.message);
   if (profilesRes.error) throw new Error(profilesRes.error.message);
   if (citiesRes.error) throw new Error(citiesRes.error.message);
-  if (testimonialsRes.error) throw new Error(testimonialsRes.error.message);
+  if (ratingsRes.error) throw new Error(ratingsRes.error.message);
 
   const cities = new Set(
     (citiesRes.data ?? [])
-      .map((row) => String(row.city || "").trim().toLowerCase())
+      .map((row) => {
+        const u = row.users as { city?: string | null } | null;
+        return String(u?.city || "").trim().toLowerCase();
+      })
       .filter(Boolean),
   );
 
+  const ratings = (ratingsRes.data ?? []).map((r) => Number(r.testimonial_rating)).filter((n) => n > 0);
+  const platformRating = ratings.length > 0
+    ? Math.round((ratings.reduce((s, r) => s + r, 0) / ratings.length) * 10) / 10
+    : 0;
+
   return {
+    totalUsers: usersRes.count ?? 0,
     verifiedAdvisors: profilesRes.count ?? 0,
     citiesCovered: cities.size,
-    verifiedReviews: testimonialsRes.count ?? 0,
+    platformRating,
   };
 }
 
@@ -162,6 +178,8 @@ export async function loadRecentHomeReviewsFromDb(limit = 6): Promise<
     text: string;
     rating: number;
     reviewerName: string;
+    reviewerProfession: string;
+    reviewerCity: string;
     advisorId: string;
     advisorName: string;
     advisorTitle: string;
@@ -199,11 +217,25 @@ export async function loadRecentHomeReviewsFromDb(limit = 6): Promise<
     const user = userById.get(String(row.advisor_id));
     const profile = profileByAdvisor.get(String(row.advisor_id));
     const slug = profile?.profile_slug ? String(profile.profile_slug).trim() : "";
+    const rawContent = String(row.content || "");
+    const metaIdx = rawContent.indexOf("\n---YVITY-META---\n");
+    const text = metaIdx === -1 ? rawContent.trim() : rawContent.slice(0, metaIdx).trim();
+    let reviewerProfession = "";
+    let reviewerCity = "";
+    if (metaIdx !== -1) {
+      try {
+        const meta = JSON.parse(rawContent.slice(metaIdx + "\n---YVITY-META---\n".length)) as Record<string, unknown>;
+        reviewerProfession = String(meta.profession || "");
+        reviewerCity = String(meta.location || "");
+      } catch { /* ignore */ }
+    }
     return {
       id: String(row.id),
-      text: String(row.content || "").split("\n---YVITY-META---\n")[0]?.trim() || "",
+      text,
       rating: Number(row.testimonial_rating ?? 5) || 5,
       reviewerName: String(row.name || "Client"),
+      reviewerProfession,
+      reviewerCity,
       advisorId: String(row.advisor_id),
       advisorName: String(user?.name || "Advisor"),
       advisorTitle: String(profile?.designation || "Insurance Advisor"),

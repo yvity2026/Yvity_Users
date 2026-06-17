@@ -98,7 +98,8 @@ function testimonialsThisMonth(items: TestimonialItem[]): number {
   const month = now.toLocaleString("en-US", { month: "short" }).toLowerCase();
   const year = String(now.getFullYear());
   return items.filter((t) => {
-    const d = t.date.toLowerCase();
+    const d = t.date?.toLowerCase();
+    if (!d) return false;
     return d.includes(month) && d.includes(year);
   }).length;
 }

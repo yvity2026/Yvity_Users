@@ -24,7 +24,7 @@ export default function ValueCard({ title, description, icon, titleColor, index 
         {title}
       </h3>
 
-      <p className="text-[#374151] text-[12px] md:text-[13px] lg:text-[14px] xl:text-[15px] font-nunito text-xs leading-relaxed">
+      <p className="text-[#374151] text-[12px] md:text-[13px] lg:text-[14px] xl:text-[15px] font-poppins text-xs leading-relaxed">
         {description}
       </p>
     </motion.div>

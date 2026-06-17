@@ -207,16 +207,25 @@ export function AdvisorInsightsModule({
         title="Service Performance"
         subtitle="Interest and leads by service area (profile engagement + your pipeline)"
       >
-        <div className="glass-strong rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/10">
-          <div className="hidden sm:grid sm:grid-cols-[1fr_5rem_5rem] gap-3 px-4 md:px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-white/[0.02]">
-            <span>Service</span>
-            <span className="text-right">Views</span>
-            <span className="text-right">Leads</span>
+        {model.servicePerformance.length === 0 || model.servicePerformance.every((r) => r.leads === 0 && r.views === 0) ? (
+          <div className="glass-strong rounded-2xl border border-white/10 px-5 py-8 text-center">
+            <p className="text-sm font-medium text-foreground">No service activity yet</p>
+            <p className="mt-1 text-xs text-muted-foreground max-w-xs mx-auto">
+              Once visitors interact with your services or you add leads, performance will appear here.
+            </p>
           </div>
-          {model.servicePerformance.map((row) => (
-            <ServiceRow key={row.id} row={row} />
-          ))}
-        </div>
+        ) : (
+          <div className="glass-strong rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/10">
+            <div className="hidden sm:grid sm:grid-cols-[1fr_5rem_5rem] gap-3 px-4 md:px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-white/[0.02]">
+              <span>Service</span>
+              <span className="text-right">Views</span>
+              <span className="text-right">Leads</span>
+            </div>
+            {model.servicePerformance.map((row) => (
+              <ServiceRow key={row.id} row={row} />
+            ))}
+          </div>
+        )}
       </DashboardSection>
 
       <DashboardSection
@@ -342,10 +351,12 @@ export function AdvisorInsightsModule({
         )}
       </DashboardSection>
 
-      <p className="text-[10px] text-center text-muted-foreground px-4">
-        Profile views and service-engagement metrics are illustrative estimates while live analytics
-        are being connected. Lead and credibility numbers reflect your actual workspace data.
-      </p>
+      <div className="rounded-xl border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-4 py-3 flex items-start gap-3">
+        <span className="mt-0.5 shrink-0 inline-flex size-4 items-center justify-center rounded-full border border-[oklch(0.85_0.16_78/0.6)] text-[oklch(0.92_0.14_78)] text-[10px] font-bold select-none">i</span>
+        <p className="text-[11px] leading-relaxed text-[oklch(0.92_0.14_78/0.85)]">
+          <strong className="font-semibold text-[oklch(0.92_0.14_78)]">Profile views and service engagement are estimates</strong> — live analytics are not yet connected. Lead counts, testimonials, and credibility data reflect your real workspace.
+        </p>
+      </div>
     </div>
   );
 }
@@ -385,7 +396,7 @@ function ServiceRow({ row }: { row: ServicePerformanceRow }) {
         <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
           <Sparkles className="size-4" />
         </span>
-        <span className="font-medium text-sm truncate">{row.label}</span>
+        <span className="font-medium text-sm truncate" title={row.label}>{row.label}</span>
       </div>
       <div className="flex sm:block items-center justify-between sm:text-right text-sm">
         <span className="sm:hidden text-[10px] uppercase tracking-wider text-muted-foreground">

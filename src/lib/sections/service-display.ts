@@ -38,6 +38,11 @@ export function displayLicenseHolder(
   return displayLicenseHolderLine(item, profileOwnerName);
 }
 
+/** Mutual Funds and services with showDetailCard=false appear in the banner only — no detail card. */
+export function isBannerOnlyService(item: Pick<ServiceItem, "category" | "showDetailCard">): boolean {
+  return item.category === "mutual" || item.showDetailCard === false;
+}
+
 export function formatMetricValue(value: number | string, placeholder: string): string {
   if (typeof value === "number") {
     return value === 0 ? "0" : String(value);

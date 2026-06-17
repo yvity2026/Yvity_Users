@@ -33,7 +33,7 @@ type QuickActionDef = {
   ring: string;
 };
 
-const actions: QuickActionDef[] = [
+const socialActions: QuickActionDef[] = [
   {
     id: "recommend",
     label: "Recommend Advisor",
@@ -52,6 +52,9 @@ const actions: QuickActionDef[] = [
     glow: "bg-[oklch(0.78_0.16_162/0.18)]",
     ring: "ring-[oklch(0.78_0.16_162/0.35)]",
   },
+];
+
+const utilityActions: QuickActionDef[] = [
   {
     id: "pdf",
     label: "Download Profile PDF",
@@ -163,12 +166,14 @@ export function HomeQuickActionsSection() {
     profileSlug: display.slug,
   });
 
-  const visibleActions = actions.filter((action) => {
+  const visibleSocialActions = socialActions.filter((action) => {
     if (isWorkspacePreview && (action.id === "recommend" || action.id === "testimonial")) {
       return false;
     }
     return true;
   });
+
+  const visibleUtilityActions = utilityActions;
 
   const isDisabled = (id: QuickActionId): boolean => {
     if (id === "recommend") return !settings.leads.recommendationRequests;
@@ -234,8 +239,8 @@ export function HomeQuickActionsSection() {
           Recommend, share feedback, or save this profile for offline use.
         </p>
 
-        <ul className="mt-5 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {visibleActions.map((action) => (
+        <ul className="mt-5 sm:mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+          {visibleSocialActions.map((action) => (
             <QuickActionCard
               key={action.id}
               action={action}
@@ -246,6 +251,25 @@ export function HomeQuickActionsSection() {
             />
           ))}
         </ul>
+
+        {/* Utility downloads — separate intent from the social actions above */}
+        <div className="mt-3 border-t border-white/8 pt-3">
+          <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Save for offline
+          </p>
+          <ul className="grid grid-cols-2 gap-2.5 sm:gap-3">
+            {visibleUtilityActions.map((action) => (
+              <QuickActionCard
+                key={action.id}
+                action={action}
+                disabled={isDisabled(action.id)}
+                disabledReason={getDisabledReason(action.id)}
+                busy={busyId === action.id}
+                onClick={() => void handleAction(action.id)}
+              />
+            ))}
+          </ul>
+        </div>
       </section>
 
       <RecommendAdvisorModal open={recommendOpen} onClose={() => setRecommendOpen(false)} />

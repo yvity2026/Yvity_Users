@@ -99,7 +99,7 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
   const isPublicDesktop = topSection === "public-profile" && publicViewMode === "desktop";
 
   const renderSectionBody = (): ReactNode => {
-    if (topSection === "dashboard") {
+    if (topSection === "overview") {
       if (reviewMode) {
         return (
           <AdvisorReviewDashboard

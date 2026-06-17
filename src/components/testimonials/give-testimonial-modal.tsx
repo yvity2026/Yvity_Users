@@ -52,7 +52,10 @@ function formatTimer(seconds: number): string {
 
 export function GiveTestimonialModal() {
   const { giveOpen, closeGiveTestimonial, onPublished } = useTestimonialSubmit();
-  const { serviceOptions, loading: servicesLoading } = useRegisteredTestimonialServices("public");
+  // Use "all" scope so customers see every service the advisor offers,
+  // not just the currently verified/public ones — avoids all testimonials
+  // defaulting to the first verified service category.
+  const { serviceOptions, loading: servicesLoading } = useRegisteredTestimonialServices("all");
   const { user } = useAuth();
   const isLoggedIn = Boolean(user?.id);
   const [draft, setDraft] = useState<GiveTestimonialDraft>(initialGiveTestimonialDraft);
@@ -357,8 +360,8 @@ export function GiveTestimonialModal() {
                       value={draft.rating}
                       onChange={(rating) => patch({ rating })}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      {draft.rating} out of 5 stars — tap to change
+                    <p className={cn("text-xs", draft.rating === 0 ? "text-[oklch(0.85_0.16_78)] font-medium" : "text-muted-foreground")}>
+                      {draft.rating === 0 ? "Please select a star rating" : `${draft.rating} out of 5 stars — tap to change`}
                     </p>
                   </div>
                 </div>
@@ -400,15 +403,26 @@ export function GiveTestimonialModal() {
 
               {draft.type === "text" ? (
                 <div className="space-y-1.5">
-                  <Label htmlFor="gt-quote">
-                    Your testimonial <span className="text-destructive">*</span>
-                  </Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="gt-quote">
+                      Your testimonial <span className="text-destructive">*</span>
+                    </Label>
+                    <span
+                      className={cn(
+                        "text-[10px] tabular-nums",
+                        draft.quote.length > 480 ? "text-destructive" : "text-muted-foreground",
+                      )}
+                    >
+                      {draft.quote.length}/500
+                    </span>
+                  </div>
                   <Textarea
                     id="gt-quote"
                     value={draft.quote}
-                    onChange={(e) => patch({ quote: e.target.value })}
+                    onChange={(e) => patch({ quote: e.target.value.slice(0, 500) })}
                     placeholder="Share your experience with the advisor..."
                     rows={4}
+                    maxLength={500}
                     className="rounded-xl border-white/15 bg-white/[0.04] resize-none"
                   />
                 </div>
@@ -418,24 +432,60 @@ export function GiveTestimonialModal() {
                     Upload {draft.type === "audio" ? "audio" : "video"}{" "}
                     <span className="text-destructive">*</span>
                   </Label>
-                  <label
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15",
-                      "bg-white/[0.03] px-4 py-6 cursor-pointer hover:border-[oklch(0.82_0.13_205/0.4)] transition",
-                    )}
-                  >
-                    <Upload className="size-7 text-[oklch(0.82_0.13_205)]" />
-                    <span className="text-sm font-medium text-center">
-                      {draft.mediaFile ? draft.mediaFile.name : "Tap to upload"}
-                    </span>
-                    <input
-                      type="file"
-                      className="sr-only"
-                      accept={draft.type === "audio" ? "audio/*" : "video/*"}
-                      onChange={(e) => void onMediaPick(e.target.files?.[0] ?? null)}
-                    />
-                  </label>
-                  {mediaDuration && (
+                  {draft.mediaFile && draft.type === "audio" ? (
+                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] px-4 py-4 space-y-2">
+                      <audio
+                        controls
+                        className="w-full h-9 accent-primary"
+                        src={URL.createObjectURL(draft.mediaFile)}
+                        preload="metadata"
+                      >
+                        <track kind="captions" />
+                      </audio>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs text-muted-foreground truncate">{draft.mediaFile.name}</p>
+                        <label className="shrink-0 cursor-pointer text-[11px] text-[oklch(0.82_0.13_205)] hover:underline">
+                          Change
+                          <input type="file" className="sr-only" accept="audio/*" onChange={(e) => void onMediaPick(e.target.files?.[0] ?? null)} />
+                        </label>
+                      </div>
+                    </div>
+                  ) : draft.mediaFile && draft.type === "video" ? (
+                    <div className="rounded-2xl border border-white/15 bg-white/[0.03] overflow-hidden space-y-2">
+                      <video
+                        controls
+                        className="w-full max-h-48 object-cover"
+                        src={URL.createObjectURL(draft.mediaFile)}
+                        preload="metadata"
+                      >
+                        <track kind="captions" />
+                      </video>
+                      <div className="flex items-center justify-between gap-2 px-4 pb-3">
+                        <p className="text-xs text-muted-foreground truncate">{draft.mediaFile.name}</p>
+                        <label className="shrink-0 cursor-pointer text-[11px] text-[oklch(0.82_0.13_205)] hover:underline">
+                          Change
+                          <input type="file" className="sr-only" accept="video/*" onChange={(e) => void onMediaPick(e.target.files?.[0] ?? null)} />
+                        </label>
+                      </div>
+                    </div>
+                  ) : (
+                    <label
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15",
+                        "bg-white/[0.03] px-4 py-6 cursor-pointer hover:border-[oklch(0.82_0.13_205/0.4)] transition",
+                      )}
+                    >
+                      <Upload className="size-7 text-[oklch(0.82_0.13_205)]" />
+                      <span className="text-sm font-medium text-center">Tap to upload</span>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept={draft.type === "audio" ? "audio/*" : "video/*"}
+                        onChange={(e) => void onMediaPick(e.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                  )}
+                  {mediaDuration && !draft.mediaFile && (
                     <p className="text-xs text-muted-foreground">Duration: {mediaDuration}</p>
                   )}
                 </div>

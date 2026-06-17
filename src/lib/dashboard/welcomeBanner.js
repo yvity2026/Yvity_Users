@@ -1,14 +1,4 @@
-export function parseUserRoles(user) {
-  let roles = user?.roles;
-  if (typeof roles === "string") {
-    try {
-      roles = JSON.parse(roles);
-    } catch {
-      roles = [];
-    }
-  }
-  return Array.isArray(roles) ? roles : [];
-}
+import { parseUserRoles } from "@/lib/advisor/workspaceSetupStatus";
 
 export function isAdvisorRole(user) {
   return parseUserRoles(user).includes("advisor");

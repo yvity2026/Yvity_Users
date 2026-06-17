@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useState } from "react";
 import {
   Award,
-  BarChart3,
   Check,
   Crown,
   Eye,
@@ -149,7 +148,7 @@ export function AdvisorDashboardOverview({
   };
 
   return (
-    <div className="space-y-3 md:space-y-10 pb-4 animate-in fade-in duration-500">
+    <div className="space-y-6 md:space-y-10 pb-4 animate-in fade-in duration-500">
       <DashboardApprovalBanner />
 
       {/* 1. Welcome section */}
@@ -158,7 +157,7 @@ export function AdvisorDashboardOverview({
         className="glass-strong rounded-3xl border border-white/12 overflow-hidden"
       >
         <div className="h-1 bg-gradient-to-r from-primary via-[oklch(0.82_0.13_205)] to-[oklch(0.82_0.16_162)]" />
-        <div className="p-5 md:p-6 flex flex-col sm:flex-row gap-5 sm:items-center">
+        <div className="p-5 md:p-7 flex flex-col sm:flex-row gap-5 sm:items-center">
           <div className="flex items-center gap-4 min-w-0 flex-1">
             {model.photoUrl?.trim() ? (
               <div className="relative size-16 md:size-20 shrink-0 rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-lg">
@@ -170,12 +169,12 @@ export function AdvisorDashboardOverview({
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 Welcome back
               </p>
               <h2
                 id="dashboard-welcome-title"
-                className="text-xl md:text-2xl font-bold tracking-tight truncate"
+                className="text-2xl md:text-3xl font-bold tracking-tight truncate"
               >
                 {model.displayName}
               </h2>
@@ -199,18 +198,16 @@ export function AdvisorDashboardOverview({
           <div className="flex items-center gap-4 sm:flex-col sm:items-end shrink-0">
             <div className="relative flex items-center justify-center">
               <ProgressRing percent={model.profileCompletionPercent} size="lg" />
-              <span className="absolute text-sm font-bold tabular-nums">
+              <span className="absolute text-base font-bold tabular-nums">
                 {model.profileCompletionPercent}%
               </span>
             </div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-center sm:text-right">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider text-center sm:text-right">
               Profile complete
             </p>
           </div>
         </div>
       </section>
-
-      <AdvisorAmbassadorReferralCard />
 
       {/* 2. Performance Snapshot */}
       <DashboardSection
@@ -225,7 +222,7 @@ export function AdvisorDashboardOverview({
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <DashboardStatCard
             label="YVITY Score"
-            value={model.performance.yvityScore}
+            value={`${model.performance.yvityScore} / 100`}
             icon={Zap}
             accent="amber"
             large
@@ -248,7 +245,7 @@ export function AdvisorDashboardOverview({
             />
           ) : null}
           <DashboardStatCard
-            label="Profile Shares (Others)"
+            label="Shared by Others"
             value={model.performance.profileSharesByOthers}
             icon={Share2}
             accent="emerald"
@@ -277,140 +274,9 @@ export function AdvisorDashboardOverview({
         ) : null}
       </DashboardSection>
 
-      {/* 3. Lead Summary */}
-      <DashboardSection
-        title="Lead Summary"
-        subtitle="Stay on top of new business"
-        action={
-          <DashboardLinkButton onClick={() => onNavigateTop("leads")}>
-            View all leads
-          </DashboardLinkButton>
-        }
-      >
-        {/* Uses the canonical StatCard so the Lead Summary tiles share
-            the same layout, density and accents as Performance Snapshot,
-            Insights and Community Trust — no more hand-rolled tile
-            variants on this surface. */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <DashboardStatCard
-            label="Total Leads"
-            value={model.leads.totalLeads}
-            icon={Users}
-            accent="emerald"
-            onClick={() => onNavigateTop("leads")}
-          />
-          <DashboardStatCard
-            label="New Leads"
-            value={model.leads.newLeads}
-            icon={UserPlus}
-            accent="cyan"
-            onClick={() => onNavigateTop("leads")}
-          />
-          <DashboardStatCard
-            label="Follow-up Leads"
-            value={model.leads.followUpLeads}
-            icon={Target}
-            accent="amber"
-            onClick={() => onNavigateTop("leads")}
-          />
-          <DashboardStatCard
-            label="Converted Leads"
-            value={model.leads.convertedLeads}
-            icon={Award}
-            accent="violet"
-            onClick={() => onNavigateTop("leads")}
-          />
-        </div>
-      </DashboardSection>
-
-      {/* 4. Action Center */}
-      {model.actions.length > 0 && (
-        <DashboardSection title="Action Center" subtitle="Recommended next steps">
-          <ul className="space-y-2">
-            {model.actions.map((action) => (
-              <li key={action.id}>
-                <button
-                  type="button"
-                  onClick={() => runAction(action)}
-                  className="w-full glass-strong rounded-2xl border border-white/10 p-4 flex items-start gap-3 text-left hover:border-[oklch(0.82_0.13_205/0.35)] active:scale-[0.99] transition"
-                >
-                  <span
-                    className={cn(
-                      "mt-0.5 size-2 shrink-0 rounded-full",
-                      action.priority === "high"
-                        ? "bg-[oklch(0.85_0.16_78)]"
-                        : action.priority === "medium"
-                          ? "bg-[oklch(0.82_0.13_205)]"
-                          : "bg-white/30",
-                    )}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{action.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                      {action.description}
-                    </p>
-                  </div>
-                  <Target className="size-4 text-muted-foreground shrink-0 mt-0.5" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </DashboardSection>
-      )}
-
-      {/* 6. Profile Performance */}
-      <DashboardSection
-        title="Profile Performance"
-        subtitle="Growth signals from your public profile"
-      >
-        <div className="glass-strong rounded-2xl border border-white/10 p-4 md:p-5 space-y-5">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                <TrendingUp className="size-3.5" />
-                Profile views (7 days)
-              </p>
-              <span className="text-[10px] text-[oklch(0.82_0.16_162)] font-semibold">
-                {model.performance.profileViewsDelta}
-              </span>
-            </div>
-            <div className="flex items-end gap-1.5 h-24">
-              {model.viewsTrend.map((v, i) => (
-                <div
-                  key={i}
-                  // Animate ONLY the height of the bar — `transition-all`
-                  // forced every property (background, transform) to repaint
-                  // on every value change, which spiked CPU on long charts.
-                  className="flex-1 rounded-t-md bg-gradient-to-t from-primary/80 to-[oklch(0.82_0.13_205/0.5)] min-h-[4px] transition-[height] duration-500 ease-out motion-reduce:transition-none"
-                  style={{ height: `${Math.max(8, (v / maxTrend) * 100)}%` }}
-                  title={`Day ${i + 1}: ${v} views`}
-                />
-              ))}
-            </div>
-          </div>
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {model.performanceInsights.map((row) => (
-              <li
-                key={row.label}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3"
-              >
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {row.label}
-                </p>
-                <p className="text-sm font-semibold mt-1">{row.value}</p>
-                {row.hint && <p className="text-[10px] text-muted-foreground mt-0.5">{row.hint}</p>}
-              </li>
-            ))}
-          </ul>
-          <DashboardLinkButton onClick={() => onNavigateTop("insights")}>
-            Full insights
-          </DashboardLinkButton>
-        </div>
-      </DashboardSection>
-
-      {/* 7. Quick Actions */}
+      {/* 3. Quick Actions */}
       <DashboardSection title="Quick Actions" subtitle="One tap to grow your profile">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <QuickAction
             icon={Eye}
             label="View Public Profile"
@@ -467,28 +333,156 @@ export function AdvisorDashboardOverview({
             label="Intro Video"
             onClick={() => setIntroVideoModalOpen(true)}
           />
-          <QuickAction
-            icon={BarChart3}
-            label="View Insights"
-            onClick={() => onNavigateTop("insights")}
+        </div>
+      </DashboardSection>
+
+      {/* 4. Lead Summary */}
+      <DashboardSection
+        title="Lead Summary"
+        subtitle="Stay on top of new business"
+        action={
+          <DashboardLinkButton onClick={() => onNavigateTop("leads")}>
+            View all leads
+          </DashboardLinkButton>
+        }
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <DashboardStatCard
+            label="Total Leads"
+            value={model.leads.totalLeads}
+            icon={Users}
+            accent="emerald"
+            onClick={() => onNavigateTop("leads")}
+          />
+          <DashboardStatCard
+            label="New Leads"
+            value={model.leads.newLeads}
+            icon={UserPlus}
+            accent="cyan"
+            onClick={() => onNavigateTop("leads")}
+          />
+          <DashboardStatCard
+            label="Follow-up Leads"
+            value={model.leads.followUpLeads}
+            icon={Target}
+            accent="amber"
+            onClick={() => onNavigateTop("leads")}
+          />
+          <DashboardStatCard
+            label="Converted Leads"
+            value={model.leads.convertedLeads}
+            icon={Award}
+            accent="violet"
+            onClick={() => onNavigateTop("leads")}
           />
         </div>
       </DashboardSection>
 
+      {/* 5. Profile Performance */}
+      <DashboardSection
+        title="Profile Performance"
+        subtitle="Growth signals from your public profile"
+      >
+        <div className="glass-strong rounded-2xl border border-white/10 p-4 md:p-5 space-y-5">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[13px] font-medium text-muted-foreground flex items-center gap-1.5">
+                <TrendingUp className="size-3.5" />
+                Profile views (7 days)
+              </p>
+              <span className="text-[11px] text-[oklch(0.82_0.16_162)] font-semibold">
+                {model.performance.profileViewsDelta}
+              </span>
+            </div>
+            {maxTrend <= 1 && model.viewsTrend.every((v) => v === 0) ? (
+              <div className="flex h-24 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
+                <p className="text-xs text-muted-foreground">No data yet — check back soon</p>
+              </div>
+            ) : (
+              <div className="flex items-end gap-1.5 h-24">
+                {model.viewsTrend.map((v, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-md bg-gradient-to-t from-primary/80 to-[oklch(0.82_0.13_205/0.5)] min-h-[4px] transition-[height] duration-500 ease-out motion-reduce:transition-none"
+                    style={{ height: `${Math.max(8, (v / maxTrend) * 100)}%` }}
+                    title={`Day ${i + 1}: ${v} views`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {model.performanceInsights.map((row) => (
+              <li
+                key={row.label}
+                className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-3.5"
+              >
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {row.label}
+                </p>
+                <p className="text-[15px] font-semibold mt-1.5 leading-snug">{row.value}</p>
+                {row.hint && <p className="text-[11px] text-muted-foreground mt-1">{row.hint}</p>}
+              </li>
+            ))}
+          </ul>
+          <DashboardLinkButton onClick={() => onNavigateTop("insights")}>
+            Full insights
+          </DashboardLinkButton>
+        </div>
+      </DashboardSection>
+
+      {/* 6. Action Center */}
+      {model.actions.length > 0 && (
+        <DashboardSection title="Action Center" subtitle="Recommended next steps">
+          <ul className="space-y-2">
+            {model.actions.map((action) => (
+              <li key={action.id}>
+                <button
+                  type="button"
+                  onClick={() => runAction(action)}
+                  className="w-full glass-strong rounded-2xl border border-white/10 p-4 sm:p-5 flex items-start gap-3.5 text-left hover:border-[oklch(0.82_0.13_205/0.35)] active:scale-[0.99] transition"
+                >
+                  <span
+                    className={cn(
+                      "mt-1 size-2 shrink-0 rounded-full",
+                      action.priority === "high"
+                        ? "bg-[oklch(0.85_0.16_78)]"
+                        : action.priority === "medium"
+                          ? "bg-[oklch(0.82_0.13_205)]"
+                          : "bg-white/30",
+                    )}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-semibold leading-snug">{action.title}</p>
+                    <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed">
+                      {action.description}
+                    </p>
+                  </div>
+                  <Target className="size-4 text-muted-foreground shrink-0 mt-1" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </DashboardSection>
+      )}
+
+      {/* 7. Referral Card */}
+      <AdvisorAmbassadorReferralCard />
+
       {/* 8. Membership Status */}
       <DashboardSection title="Membership Status">
         <div className="glass-strong rounded-3xl border border-white/12 overflow-hidden">
-          <div className="p-5 md:p-6 space-y-4">
+          <div className="p-5 md:p-7 space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   Current plan
                 </p>
-                <p className="text-lg font-bold mt-1 flex items-center gap-2">
+                <p className="text-xl font-bold mt-1 flex items-center gap-2">
                   <Crown className="size-5 text-[oklch(0.85_0.16_78)]" />
                   {model.membership.planName}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[13px] text-muted-foreground mt-1">
                   Renews{" "}
                   {new Date(model.membership.renewalDate).toLocaleDateString("en-IN", {
                     day: "numeric",
@@ -509,24 +503,26 @@ export function AdvisorDashboardOverview({
                 className="rounded-full"
                 onClick={() => onNavigateTop("membership")}
               >
-                Upgrade
+                {model.membership.canUpgrade ? "Upgrade" : "Manage Plan"}
               </Button>
             </div>
             <ul className="grid gap-1.5 sm:grid-cols-2">
               {model.membership.benefits.map((b) => (
-                <li key={b} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <li key={b} className="flex items-center gap-2 text-[13px] text-muted-foreground">
                   <Check className="size-3.5 shrink-0 text-[oklch(0.82_0.16_162)]" />
                   {b}
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground border-t border-white/10 pt-4">
-              <span className="font-semibold text-foreground">
-                {model.membership.upgradePlanName}
-              </span>
-              {" — "}
-              {model.membership.upgradeHighlight}
-            </p>
+            {model.membership.canUpgrade && model.membership.upgradeHighlight ? (
+              <p className="text-[13px] text-muted-foreground border-t border-white/10 pt-4">
+                <span className="font-semibold text-foreground">
+                  {model.membership.upgradePlanName}
+                </span>
+                {" — "}
+                {model.membership.upgradeHighlight}
+              </p>
+            ) : null}
           </div>
         </div>
       </DashboardSection>
@@ -552,12 +548,12 @@ function QuickAction({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-2xl glass border border-white/10 p-3.5 hover:bg-white/[0.05] active:scale-[0.97] transition text-center"
+      className="flex flex-col items-center gap-2.5 rounded-2xl glass border border-white/10 p-4 hover:bg-white/[0.05] hover:border-white/20 active:scale-[0.97] transition text-center"
     >
-      <span className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/40 to-accent/30 ring-1 ring-white/10">
-        <Icon className="size-[1.125rem]" />
+      <span className="inline-flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/40 to-accent/30 ring-1 ring-white/10">
+        <Icon className="size-5" />
       </span>
-      <span className="text-[11px] font-medium leading-tight">{label}</span>
+      <span className="text-[13px] font-semibold leading-tight">{label}</span>
     </button>
   );
 }

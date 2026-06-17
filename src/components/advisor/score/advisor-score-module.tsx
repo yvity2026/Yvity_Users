@@ -1478,7 +1478,7 @@ function AchievementTierCard({ tier }: { tier: ScoreAchievementTier }) {
             <BadgeCheck className="size-3" /> Active
           </>
         ) : (
-          "Not Uploaded"
+          "—"
         )}
       </span>
     </div>

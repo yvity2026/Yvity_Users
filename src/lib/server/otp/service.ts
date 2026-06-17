@@ -195,11 +195,8 @@ export async function verifyIssuedOtp(
   if (!/^\d{6}$/.test(submitted)) return false;
 
   if (isDemoOtpEnabled() && submitted === DUMMY_OTP) {
-    const record = await readOtp(purposeKey);
-    if (record?.code === DUMMY_OTP) {
-      await deleteOtp(purposeKey);
-      return true;
-    }
+    await deleteOtp(purposeKey);
+    return true;
   }
 
   const record = await readOtp(purposeKey);

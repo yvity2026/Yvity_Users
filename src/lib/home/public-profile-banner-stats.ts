@@ -54,11 +54,10 @@ export function isIrdaiVerified(profileApproved: boolean): boolean {
 }
 
 export function buildSectionProfileBannerStats(input: {
-  /** Service tenure — matches profile header pills. */
+  /** Total career experience — from journey entries, not current profession. */
   experienceDisplay: string;
   avgRating: number | null;
-  companyName: string;
-  profileApproved: boolean;
+  organizationCount: number;
 }): { value: string; label: string }[] {
   const experienceValue = input.experienceDisplay
     ? input.experienceDisplay.includes("year") || input.experienceDisplay.endsWith("+")
@@ -66,17 +65,16 @@ export function buildSectionProfileBannerStats(input: {
       : `${input.experienceDisplay} yrs`
     : "—";
 
+  const orgValue = input.organizationCount > 0 ? String(input.organizationCount) : "—";
+  const orgLabel = input.organizationCount === 1 ? "Organisation" : "Organisations";
+
   return [
     { value: experienceValue, label: "Years experience" },
     {
       value: input.avgRating != null ? `${input.avgRating}/5` : "—",
       label: "Rating",
     },
-    { value: input.companyName || "—", label: "Company" },
-    {
-      value: input.profileApproved ? "Verified" : "—",
-      label: "YVITY verified",
-    },
+    { value: orgValue, label: orgLabel },
   ];
 }
 
@@ -162,10 +160,14 @@ export function buildAdvisorHighlightLabels(input: {
     ];
   }
 
-  while (highlights.length < 3) {
-    highlights.push({
-      label: input.profileApproved ? "Verified by YVITY" : "Flexible consultation",
-    });
+  const padLabels = input.profileApproved
+    ? ["Verified by YVITY", "Flexible consultation", "Direct advisor contact"]
+    : ["Flexible consultation", "Verified credentials", "Direct advisor contact"];
+  for (const label of padLabels) {
+    if (highlights.length >= 3) break;
+    if (!highlights.some((h) => h.label === label)) {
+      highlights.push({ label });
+    }
   }
 
   return highlights.slice(0, 3);
@@ -188,6 +190,13 @@ export function buildPublicProfileBannerStats(input: {
   const companyName = resolvePrimaryCompanyName(input.services, input.profileApproved);
   const mdrtLabel = formatMdrtStatusLabel(input.achievements);
   const mdrtMember = hasMdrtAchievement(input.achievements);
+  const visibleServices = input.services.filter((s) =>
+    isServiceVisibleOnPublicProfile(s, input.profileApproved),
+  );
+  const organizationCount = new Set([
+    ...input.career.experiences.map((e) => e.company.trim().toLowerCase()).filter(Boolean),
+    ...visibleServices.map((s) => normalizeCompanyName(s.provider).trim().toLowerCase()).filter(Boolean),
+  ]).size;
 
   return {
     experienceDisplay: input.experienceDisplay,
@@ -204,10 +213,9 @@ export function buildPublicProfileBannerStats(input: {
     irdaiVerified: isIrdaiVerified(input.profileApproved),
     profileApproved: input.profileApproved,
     sectionBannerStats: buildSectionProfileBannerStats({
-      experienceDisplay: input.experienceDisplay,
+      experienceDisplay: input.journeyExperienceDisplay || input.experienceDisplay,
       avgRating,
-      companyName,
-      profileApproved: input.profileApproved,
+      organizationCount,
     }),
     communityTrustStats: buildCommunityTrustStatsFromCounts({
       testimonialCount: input.testimonials.length,

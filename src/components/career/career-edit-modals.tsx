@@ -9,11 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  OptionalVerificationSection,
-  resolveVerificationOnSave,
-} from "@/components/verification/optional-verification-section";
-import type { VerificationDocument } from "@/lib/verification/types";
+
 function ModalShell({
   title,
   onClose,
@@ -67,34 +63,11 @@ export function ExperienceEditModal({
   onSave: (item: Experience) => void;
 }) {
   const [draft, setDraft] = useState(item);
-  const [pendingDocs, setPendingDocs] = useState<VerificationDocument[]>(
-    item.verification?.documents ?? [],
-  );
-  const [docsDirty, setDocsDirty] = useState(false);
-
-  useEffect(() => {
-    setDraft(item);
-    setPendingDocs(item.verification?.documents ?? []);
-    setDocsDirty(false);
-  }, [item]);
-
+  useEffect(() => { setDraft(item); }, [item]);
   const patch = (p: Partial<Experience>) => setDraft((d) => ({ ...d, ...p }));
 
-  const handleSave = () => {
-    const nextVerification = resolveVerificationOnSave({
-      current: draft.verification,
-      pendingDocs,
-      dirty: docsDirty,
-    });
-    onSave({
-      ...draft,
-      verification: nextVerification,
-      verified: nextVerification?.status === "verified",
-    });
-  };
-
   return (
-    <ModalShell title="Edit experience" onClose={onClose} onSave={handleSave}>
+    <ModalShell title="Edit experience" onClose={onClose} onSave={() => onSave(draft)}>
       <p className="text-xs text-muted-foreground">
         Duration:{" "}
         <span className="text-foreground font-medium">
@@ -132,17 +105,6 @@ export function ExperienceEditModal({
           onChange={(e) => patch({ bullets: e.target.value.split("\n") })}
         />
       </Field>
-
-      <OptionalVerificationSection
-        value={draft.verification}
-        onChange={({ documents, dirty }) => {
-          setPendingDocs(documents);
-          setDocsDirty(dirty);
-        }}
-        description="Optional. Upload offer letters, employment certificates or HR letters to earn a “Verified by YVITY” badge on this experience. You can publish without verification."
-        suggestedLabels={["Offer Letter", "Employment Certificate", "Relieving Letter"]}
-      />
-
       <SubRolesEditor
         subRoles={draft.subRoles || []}
         onChange={(subRoles) => patch({ subRoles })}
@@ -223,36 +185,11 @@ export function CertificationEditModal({
   onSave: (item: Certification) => void;
 }) {
   const [draft, setDraft] = useState(item);
-  const [pendingDocs, setPendingDocs] = useState<VerificationDocument[]>(
-    item.verification?.documents ?? [],
-  );
-  const [docsDirty, setDocsDirty] = useState(false);
-
-  useEffect(() => {
-    setDraft(item);
-    setPendingDocs(item.verification?.documents ?? []);
-    setDocsDirty(false);
-  }, [item]);
-
+  useEffect(() => { setDraft(item); }, [item]);
   const patch = (p: Partial<Certification>) => setDraft((d) => ({ ...d, ...p }));
 
-  const handleSave = () => {
-    const nextVerification = resolveVerificationOnSave({
-      current: draft.verification,
-      pendingDocs,
-      dirty: docsDirty,
-    });
-    onSave({
-      ...draft,
-      verification: nextVerification,
-      // Sync the legacy `status` field with the verification record so older
-      // UI that still reads `cert.status` continues to behave.
-      status: nextVerification?.status === "verified" ? "verified" : "pending",
-    });
-  };
-
   return (
-    <ModalShell title="Edit certification" onClose={onClose} onSave={handleSave}>
+    <ModalShell title="Edit certification" onClose={onClose} onSave={() => onSave(draft)}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Field label="Name">
           <Input value={draft.name} onChange={(e) => patch({ name: e.target.value })} />
@@ -277,16 +214,6 @@ export function CertificationEditModal({
           onChange={(e) => patch({ bullets: e.target.value.split("\n") })}
         />
       </Field>
-
-      <OptionalVerificationSection
-        value={draft.verification}
-        onChange={({ documents, dirty }) => {
-          setPendingDocs(documents);
-          setDocsDirty(dirty);
-        }}
-        description="Optional. Upload the certificate PDF or institute-issued document to earn a “Verified by YVITY” badge on this credential. You can publish without verification."
-        suggestedLabels={["Certificate", "Issuer Letter"]}
-      />
     </ModalShell>
   );
 }

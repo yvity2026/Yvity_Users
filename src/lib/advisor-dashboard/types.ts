@@ -71,6 +71,7 @@ export type DashboardOverviewModel = {
     renewalDate: string;
     daysUntilRenewal: number;
     benefits: readonly string[];
+    canUpgrade: boolean;
     upgradePlanName: string;
     upgradeHighlight: string;
   };

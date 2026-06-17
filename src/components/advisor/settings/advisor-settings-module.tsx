@@ -2,6 +2,7 @@
 
 import { Bell, Eye, Globe, Phone, Settings2, Shield, UserRound, Users } from "lucide-react";
 import { ProfileAppearanceSection } from "@/components/advisor/settings/profile-appearance-section";
+import { AdvisorHandleSection } from "@/components/advisor/settings/advisor-handle-section";
 import { AdvisorReferralSettingsSection } from "@/components/advisor/settings/advisor-referral-settings-section";
 import { SettingsGroup, SettingsToggleRow } from "@/components/advisor/settings/settings-ui";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
@@ -87,6 +88,8 @@ export function AdvisorSettingsModule() {
       </section>
 
       <ProfileAppearanceSection />
+
+      <AdvisorHandleSection />
 
       <SettingsGroup
         icon={Eye}
@@ -180,6 +183,7 @@ export function AdvisorSettingsModule() {
           checked={settings.leads.publicProfileEnquiries}
           onCheckedChange={(v) => patchLeads("publicProfileEnquiries", v)}
           disabled={!settings.leads.acceptNewLeads}
+          disabledHint="Enable &ldquo;Accept new leads&rdquo; above to turn this on."
         />
         <SettingsToggleRow
           label="Testimonial requests"
@@ -244,6 +248,7 @@ export function AdvisorSettingsModule() {
           checked={settings.publicProfile.searchVisibility}
           onCheckedChange={(v) => patchPublic("searchVisibility", v)}
           disabled={!settings.publicProfile.profileActive}
+          disabledHint="Enable &ldquo;Public profile active&rdquo; above to turn this on."
         />
         <SettingsToggleRow
           label="Share profile availability"
@@ -251,6 +256,7 @@ export function AdvisorSettingsModule() {
           checked={settings.publicProfile.shareProfile}
           onCheckedChange={(v) => patchPublic("shareProfile", v)}
           disabled={!settings.publicProfile.profileActive}
+          disabledHint="Enable &ldquo;Public profile active&rdquo; above to turn this on."
         />
       </SettingsGroup>
 

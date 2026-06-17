@@ -5,10 +5,13 @@ export const DEFAULT_INDUSTRY_ID = "bfsi";
 export const DEFAULT_CATEGORY_ID = "insurance";
 
 export const SETUP_PROFILE_STEPS = [
-  { id: "scope", label: "Industry & Services" },
+  { id: "industry", label: "Industry" },
+  { id: "category", label: "Category" },
+  { id: "services", label: "Services" },
   { id: "details", label: "Service Details" },
   { id: "documents", label: "Verification Documents" },
   { id: "plan", label: "Choose Plan" },
+  { id: "handle", label: "Your URL" },
   { id: "review", label: "Review & Submit" },
 ] as const;
 
@@ -21,11 +24,7 @@ export const ONBOARDING_CATEGORIES: Record<
   { id: string; label: string; icon: LucideIcon }[]
 > = {
   [DEFAULT_INDUSTRY_ID]: [
-    {
-      id: DEFAULT_CATEGORY_ID,
-      label: "Insurance",
-      icon: Building2,
-    },
+    { id: DEFAULT_CATEGORY_ID, label: "Insurance", icon: Building2 },
   ],
 };
 
@@ -94,31 +93,26 @@ export function getServiceMeta(categoryId: string, serviceId: string) {
 }
 
 export type ServiceDetailForm = {
-  designation: string;
   company: string;
-  startDate: string;
-  endDate: string;
-  isActive: boolean;
   licenseNumber: string;
-  professionalCapacity: string;
   licenseHolderType: "self" | "other";
   licenseHolderName: string;
   licenseHolderRelationship: string;
   consentLetterUrl: string;
   consentLetterName: string;
-  consentLetterFile: null;
+  consentLetterFile: File | null;
   consentUploading: boolean;
+  /** Per-service declaration accepted (only required when licenseHolderType === "other") */
+  declarationAccepted: boolean;
+  designation: string;
+  professionalCapacity: string;
+  startDate: string;
 };
 
 export function createEmptyServiceDetail(): ServiceDetailForm {
   return {
-    designation: "",
     company: "",
-    startDate: "",
-    endDate: "",
-    isActive: true,
     licenseNumber: "",
-    professionalCapacity: "individual_agent",
     licenseHolderType: "self",
     licenseHolderName: "",
     licenseHolderRelationship: "",
@@ -126,6 +120,10 @@ export function createEmptyServiceDetail(): ServiceDetailForm {
     consentLetterName: "",
     consentLetterFile: null,
     consentUploading: false,
+    declarationAccepted: false,
+    designation: "",
+    professionalCapacity: "individual_agent",
+    startDate: "",
   };
 }
 

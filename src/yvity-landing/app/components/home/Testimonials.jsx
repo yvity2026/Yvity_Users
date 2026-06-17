@@ -192,7 +192,7 @@ const Testimonials = () => {
         renderReplySection(testimonial)}
 
       <p
-        className={`mb-5 font-nunito text-[12px] leading-relaxed italic text-gray-600 lg:text-[14px] ${testimonial.hasAudio ? "line-clamp-3" : ""}`}
+        className={`mb-5 font-poppins text-[12px] leading-relaxed italic text-gray-600 lg:text-[14px] ${testimonial.hasAudio ? "line-clamp-3" : ""}`}
       >
         {testimonial.text}
       </p>
@@ -244,12 +244,8 @@ const Testimonials = () => {
         <motion.div {...motionProps} className="mb-8 lg:mb-12">
           <LandingSectionHeader
             eyebrow="Reviews"
-            title={
-              <>
-                Real Stories.{" "}
-                <span className="text-[#F59E0B]">Real Trust.</span>
-              </>
-            }
+            accent="Real Stories."
+            title="Real Trust."
             description="See how YVITY is helping advisors build credibility and customers find trusted professionals."
           />
         </motion.div>

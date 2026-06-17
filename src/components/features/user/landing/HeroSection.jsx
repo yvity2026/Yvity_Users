@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthUserContext";
-import { AdvisorCardGold } from "@/yvity-landing/app/components/home-features/advisor-card-gold";
 import { recordSearchImpressionsClient } from "@/lib/advisors/record-search-impressions";
 import { toAdvisorCardGoldProps } from "@/lib/advisor/cardGoldProps";
 import UserProfileAvatar from "@/components/user/UserProfileAvatar";
@@ -434,7 +433,7 @@ const AdvisorSearchFilter = ({ onSearchChange, advisors = [], mode = "explore" }
               key={advisor.id || index}
               className="w-full max-w-[520px] mx-auto"
             >
-              <AdvisorCardWithSave advisor={advisor} showSave={Boolean(user?.id)} />
+              <AdvisorCardWithSave advisor={advisor} showSave={Boolean(user?.id)} variant="compact" />
             </div>
           ))}
         </div>

@@ -11,6 +11,7 @@ import {
   ExperienceEditModal,
 } from "@/components/career/career-edit-modals";
 import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { uid } from "@/lib/career-store";
 import type { CareerData, Certification, Education, Experience } from "@/lib/career-types";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,11 @@ type EditTarget =
   | { kind: "certification"; item: Certification }
   | { kind: "education"; item: Education };
 
+type DeleteTarget =
+  | { kind: "experience"; id: string; label: string }
+  | { kind: "certification"; id: string; label: string }
+  | { kind: "education"; id: string; label: string };
+
 export function AdvisorCareerProfile({
   data,
   setData,
@@ -34,6 +40,7 @@ export function AdvisorCareerProfile({
   const { advisor } = useAuth();
   const profileApproved = isAdvisorProfileApproved(advisor);
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
   const saveExperience = (item: Experience) => {
     const exists = data.experiences.some((e) => e.id === item.id);
@@ -69,18 +76,30 @@ export function AdvisorCareerProfile({
   };
 
   const deleteExperience = (id: string) => {
-    if (!confirm("Delete this experience?")) return;
-    setData({ ...data, experiences: data.experiences.filter((e) => e.id !== id) });
+    const item = data.experiences.find((e) => e.id === id);
+    setDeleteTarget({ kind: "experience", id, label: item?.role || "this experience" });
   };
 
   const deleteCertification = (id: string) => {
-    if (!confirm("Delete this certification?")) return;
-    setData({ ...data, certifications: data.certifications.filter((c) => c.id !== id) });
+    const item = data.certifications.find((c) => c.id === id);
+    setDeleteTarget({ kind: "certification", id, label: item?.name || "this certification" });
   };
 
   const deleteEducation = (id: string) => {
-    if (!confirm("Delete this education entry?")) return;
-    setData({ ...data, education: data.education.filter((e) => e.id !== id) });
+    const item = data.education.find((e) => e.id === id);
+    setDeleteTarget({ kind: "education", id, label: item?.degree || "this education entry" });
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.kind === "experience") {
+      setData({ ...data, experiences: data.experiences.filter((e) => e.id !== deleteTarget.id) });
+    } else if (deleteTarget.kind === "certification") {
+      setData({ ...data, certifications: data.certifications.filter((c) => c.id !== deleteTarget.id) });
+    } else {
+      setData({ ...data, education: data.education.filter((e) => e.id !== deleteTarget.id) });
+    }
+    setDeleteTarget(null);
   };
 
   const addExperience = () => {
@@ -122,7 +141,7 @@ export function AdvisorCareerProfile({
       <SectionCompletionGuidance healthId="career" icon={Briefcase} />
       <SectionCompletionGuidance healthId="education" icon={GraduationCap} />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <div className="flex flex-wrap gap-2">
           <Button onClick={addExperience} size="sm" className="gap-1.5">
             <Plus className="size-4" /> Add experience
@@ -135,6 +154,9 @@ export function AdvisorCareerProfile({
           </Button>
         </div>
       </div>
+      <p className="text-[11px] text-muted-foreground mb-4 pl-0.5">
+        Verified entries display a <span className="font-semibold text-foreground/70">YVITY Verified</span> badge on your public profile after YVITY review.
+      </p>
 
       <CareerSectionsAccordion
         experiences={data.experiences}
@@ -201,6 +223,16 @@ export function AdvisorCareerProfile({
           onSave={saveEducation}
         />
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(next) => { if (!next) setDeleteTarget(null); }}
+        title="Delete entry?"
+        description={deleteTarget ? `"${deleteTarget.label}" will be removed from your profile.` : ""}
+        confirmLabel="Delete"
+        tone="destructive"
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

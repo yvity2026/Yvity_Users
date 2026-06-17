@@ -73,7 +73,7 @@ export const achievementCategoryAccents: Record<AchievementCategory, Achievement
   },
 };
 
-export const achievementIconMap: Record<AchievementIconStyle, LucideIcon> = {
+export const achievementIconMap: Record<Exclude<AchievementIconStyle, "mdrt">, LucideIcon> = {
   trophy: Trophy,
   ribbon: Award,
   star: Star,

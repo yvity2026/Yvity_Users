@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, MapPin, Pencil } from "lucide-react";
+import { CheckCircle2, Copy, ExternalLink, Link2, MapPin, Pencil, X } from "lucide-react";
 import { FiLogOut } from "react-icons/fi";
 import { toast } from "sonner";
 import LandingSectionHeader from "@/yvity-landing/app/components/home/LandingSectionHeader";
@@ -13,6 +13,10 @@ import {
   MobileModal,
 } from "@/components/features/advisor/settings/settings-modals";
 import { useAuth } from "@/context/AuthUserContext";
+import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { isAdvisorRole } from "@/lib/dashboard/welcomeBanner";
+import { HandlePicker } from "@/components/advisor/handle-picker";
+import { buildPublicProfileUrl, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
 
 const inputClass =
   "min-h-[40px] w-full rounded-lg border border-[#E4E2DB] bg-[#F8F6F1] px-3 py-2 font-poppins text-sm font-medium text-[#0A4A4A] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] focus:bg-white focus:ring-1 focus:ring-[#0A4A4A]";
@@ -106,12 +110,57 @@ function ProfileSkeleton() {
 }
 
 export default function DashboardProfile() {
-  const { user, setUser } = useAuth();
+  const { user, advisor, setUser, setAdvisor } = useAuth();
+  const { settings } = useAdvisorSettings();
+  const isAdvisor = isAdvisorRole(user);
   const [isEditing, setIsEditing] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locationForm, setLocationForm] = useState({
+    officeAddress: settings.location.officeAddress,
+    mapsLink: settings.location.mapsLink,
+  });
+  const [locationSaving, setLocationSaving] = useState(false);
+
+  // Handle / profile URL
+  const [handleEditing, setHandleEditing] = useState(false);
+  const [pendingHandle, setPendingHandle] = useState(null);
+  const [handleSaving, setHandleSaving] = useState(false);
+  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://yvity.com";
+  const currentSegment = toPublicProfileSlugSegment(advisor?.profile_slug?.trim() ?? "");
+  const profileUrl = currentSegment ? buildPublicProfileUrl(currentSegment, siteUrl) : null;
+  const displayUrl = profileUrl ? profileUrl.replace(/^https?:\/\//, "") : null;
+
+  const handleSaveHandle = useCallback(async () => {
+    if (!pendingHandle) return;
+    setHandleSaving(true);
+    try {
+      const res = await fetch("/api/advisor/handle", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handle: pendingHandle }),
+      });
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error ?? "Could not update URL"); return; }
+      setAdvisor(advisor ? { ...advisor, profile_slug: data.handle ?? pendingHandle } : advisor);
+      toast.success("Profile URL updated!");
+      setHandleEditing(false);
+      setPendingHandle(null);
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setHandleSaving(false);
+    }
+  }, [pendingHandle, advisor, setAdvisor]);
+
+  useEffect(() => {
+    setLocationForm({
+      officeAddress: settings.location.officeAddress,
+      mapsLink: settings.location.mapsLink,
+    });
+  }, [settings.location.officeAddress, settings.location.mapsLink]);
 
   const [form, setForm] = useState({
     name: "",
@@ -138,16 +187,15 @@ export default function DashboardProfile() {
 
   const isDirty = useMemo(() => {
     if (!user) return false;
-    return (
-      form.name !== (user.name || "") ||
-      form.profession !== (user.profession || "") ||
+    const baseChanged =
       form.city !== (user.city || "") ||
       form.state !== (user.state || "") ||
       form.address_line !== (user.address_line || "") ||
       form.pincode !== (user.pincode || "") ||
-      form.about !== (user.about || "")
-    );
-  }, [form, user]);
+      form.about !== (user.about || "");
+    if (isAdvisor) return baseChanged;
+    return baseChanged || form.name !== (user.name || "") || form.profession !== (user.profession || "");
+  }, [form, user, isAdvisor]);
 
   const locationDisplay = [form.city, form.state].filter(Boolean).join(", ");
 
@@ -173,6 +221,28 @@ export default function DashboardProfile() {
     setIsEditing(false);
   };
 
+  const handleSaveLocation = async () => {
+    setLocationSaving(true);
+    try {
+      const res = await fetch("/api/advisor/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: {
+            officeAddress: locationForm.officeAddress.trim(),
+            mapsLink: locationForm.mapsLink.trim(),
+          },
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      toast.success("Office location saved");
+    } catch {
+      toast.error("Could not save office location");
+    } finally {
+      setLocationSaving(false);
+    }
+  };
+
   const handleSave = async (event) => {
     event.preventDefault();
     if (!isDirty) {
@@ -182,10 +252,13 @@ export default function DashboardProfile() {
     }
     setSaving(true);
     try {
+      const payload = isAdvisor
+        ? { name: form.name, city: form.city, state: form.state, address_line: form.address_line, pincode: form.pincode, about: form.about }
+        : form;
       const res = await fetch("/api/auth/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to save profile");
@@ -307,7 +380,7 @@ export default function DashboardProfile() {
                 eyebrow="Personal"
                 title="Details"
                 description={
-                  isEditing
+                  isEditing && !isAdvisor
                     ? "Name and profession on your YVITY account."
                     : undefined
                 }
@@ -315,7 +388,16 @@ export default function DashboardProfile() {
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelClass}>Full name</label>
-                    {isEditing ? (
+                    {isAdvisor ? (
+                      <>
+                        <p className={`${inputDisabledClass} break-words`}>
+                          {form.name || "—"}
+                        </p>
+                        <p className="mt-1 font-poppins text-[10px] leading-relaxed text-[#6B7280]">
+                          Name is locked to your IRDAI license. To update, resubmit your license documents.
+                        </p>
+                      </>
+                    ) : isEditing ? (
                       <input
                         type="text"
                         required
@@ -333,8 +415,17 @@ export default function DashboardProfile() {
                     )}
                   </div>
                   <div className="sm:col-span-2">
-                    <label className={labelClass}>Designation / profession</label>
-                    {isEditing ? (
+                    <label className={labelClass}>Designation</label>
+                    {isAdvisor ? (
+                      <>
+                        <p className={`${inputDisabledClass} break-words`}>
+                          {advisor?.designation || form.profession || "—"}
+                        </p>
+                        <p className="mt-1 font-poppins text-[10px] leading-relaxed text-[#6B7280]">
+                          Designation is set from your verified advisor profile.
+                        </p>
+                      </>
+                    ) : isEditing ? (
                       <input
                         type="text"
                         autoComplete="organization-title"
@@ -482,35 +573,169 @@ export default function DashboardProfile() {
                 </SectionBlock>
               </div>
 
-              <div className="border-t border-[#E5E0D6] pt-4">
-                <SectionBlock
-                  eyebrow="About"
-                  title="You"
-                  description={isEditing ? "Optional, max 500 chars." : undefined}
-                >
-                  {isEditing ? (
-                    <>
-                      <textarea
-                        rows={3}
-                        maxLength={500}
-                        value={form.about}
-                        onChange={(e) => updateField("about", e.target.value)}
-                        className={`${inputClass} min-h-[72px] resize-none py-2`}
-                        placeholder="A few lines about you."
-                      />
-                      <p className="mt-1 text-right font-poppins text-[10px] text-[#9CA3AF]">
-                        {form.about.length}/500
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="Public Profile"
+                    title="Office Location"
+                    description="Shown on your public profile with a Get Directions button. Add a Google Maps link for a precise pin."
+                  >
+                    <div className="space-y-2.5">
+                      <div>
+                        <label className={labelClass}>Office address</label>
+                        <textarea
+                          rows={2}
+                          value={locationForm.officeAddress}
+                          onChange={(e) => setLocationForm((f) => ({ ...f, officeAddress: e.target.value }))}
+                          className={`${inputClass} min-h-[64px] resize-none py-2`}
+                          placeholder="e.g. Plot 12, MG Road, Guntur, AP 522001"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Google Maps link <span className="normal-case text-[#9CA3AF]">(optional)</span></label>
+                        <input
+                          type="url"
+                          value={locationForm.mapsLink}
+                          onChange={(e) => setLocationForm((f) => ({ ...f, mapsLink: e.target.value }))}
+                          className={inputClass}
+                          placeholder="https://maps.app.goo.gl/..."
+                        />
+                        <p className="mt-1 font-poppins text-[10px] leading-relaxed text-[#6B7280]">
+                          Open Google Maps → share your office pin → paste the link here. If provided, the Get Directions button uses this link directly.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSaveLocation}
+                        disabled={locationSaving}
+                        className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
+                      >
+                        {locationSaving ? "Saving…" : "Save Location"}
+                      </button>
+                    </div>
+                  </SectionBlock>
+                </div>
+              ) : null}
+
+              {/* Profile URL / Handle — advisor only */}
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="Public Profile"
+                    title="Your Profile URL"
+                    description="Your personal YVITY link. Share it on WhatsApp, business cards, or social media."
+                  >
+                    {handleEditing ? (
+                      <div className="space-y-3">
+                        <HandlePicker
+                          defaultHandle={currentSegment || undefined}
+                          onChange={setPendingHandle}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSaveHandle}
+                            disabled={!pendingHandle || handleSaving}
+                            className="rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c] disabled:opacity-60"
+                          >
+                            {handleSaving ? "Saving…" : "Save URL"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setHandleEditing(false); setPendingHandle(null); }}
+                            disabled={handleSaving}
+                            className="inline-flex items-center gap-1 rounded-full border border-[#E4E2DB] px-4 py-2 font-poppins text-sm font-medium text-[#6B7280] hover:bg-[#F8F6F1]"
+                          >
+                            <X className="size-3.5" /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : currentSegment && profileUrl ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 rounded-lg border border-[#E4E2DB] bg-[#F8F6F1] px-3 py-2.5">
+                          <Link2 className="size-4 shrink-0 text-[#0A4A4A]" />
+                          <span className="flex-1 truncate font-poppins text-sm font-semibold text-[#0A4A4A]">
+                            {displayUrl}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="Copy URL"
+                            onClick={() => { navigator.clipboard.writeText(profileUrl); toast.success("Profile URL copied!"); }}
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <Copy className="size-3.5 text-[#6B7280]" />
+                          </button>
+                          <a
+                            href={profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Open profile"
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <ExternalLink className="size-3.5 text-[#6B7280]" />
+                          </a>
+                          <button
+                            type="button"
+                            aria-label="Edit URL"
+                            onClick={() => setHandleEditing(true)}
+                            className="rounded p-1 hover:bg-[#E4E2DB] transition"
+                          >
+                            <Pencil className="size-3.5 text-[#6B7280]" />
+                          </button>
+                        </div>
+                        <p className="font-poppins text-[10px] text-[#6B7280]">
+                          Handle: <strong className="text-[#0A4A4A]">{currentSegment}</strong>. Click the pencil to change it.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="font-poppins text-sm text-[#6B7280]">
+                          You haven&apos;t claimed a personal URL yet.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setHandleEditing(true)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[#0A4A4A] px-5 py-2 font-poppins text-sm font-semibold text-[#F59E0B] hover:bg-[#083c3c]"
+                        >
+                          <Link2 className="size-4" /> Claim your URL
+                        </button>
+                      </div>
+                    )}
+                  </SectionBlock>
+                </div>
+              ) : null}
+
+              {isAdvisor ? (
+                <div className="border-t border-[#E5E0D6] pt-4">
+                  <SectionBlock
+                    eyebrow="About"
+                    title="You"
+                    description={isEditing ? "Optional, max 500 chars." : undefined}
+                  >
+                    {isEditing ? (
+                      <>
+                        <textarea
+                          rows={3}
+                          maxLength={500}
+                          value={form.about}
+                          onChange={(e) => updateField("about", e.target.value)}
+                          className={`${inputClass} min-h-[72px] resize-none py-2`}
+                          placeholder="A few lines about you."
+                        />
+                        <p className="mt-1 text-right font-poppins text-[10px] text-[#9CA3AF]">
+                          {form.about.length}/500
+                        </p>
+                      </>
+                    ) : (
+                      <p
+                        className={`${inputDisabledClass} min-h-[40px] whitespace-pre-wrap break-words py-2`}
+                      >
+                        {form.about || "—"}
                       </p>
-                    </>
-                  ) : (
-                    <p
-                      className={`${inputDisabledClass} min-h-[40px] whitespace-pre-wrap break-words py-2`}
-                    >
-                      {form.about || "—"}
-                    </p>
-                  )}
-                </SectionBlock>
-              </div>
+                    )}
+                  </SectionBlock>
+                </div>
+              ) : null}
             </div>
           </div>
 

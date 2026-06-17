@@ -53,11 +53,12 @@ export function CareerSectionsAccordion({
   showEducationalJourney?: boolean;
   profileApproved?: boolean;
 }) {
-  const showJourneyVerifiedBadge = profileApproved && experiences.length > 0;
-  const showEducationVerifiedBadge = profileApproved && education.length > 0;
+  // Verification badges re-enabled once admin verification pipeline is live.
+  const showJourneyVerifiedBadge = false;
+  const showEducationVerifiedBadge = false;
 
   return (
-    <Accordion type="multiple" className="space-y-3 sm:space-y-4">
+    <Accordion type="multiple" defaultValue={["professional-journey"]} className="space-y-3 sm:space-y-4">
       {showCareerJourney && (
         <AccordionItem value="professional-journey" className={cardClass}>
           <AccordionTrigger className={triggerClass}>
@@ -65,7 +66,7 @@ export function CareerSectionsAccordion({
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <ProfessionalJourneySection
-              experiences={experiences}
+              experiences={[...experiences].reverse()}
               embedded
               editable={editable?.experiences}
               showVerifiedBadge={showJourneyVerifiedBadge}
@@ -81,7 +82,7 @@ export function CareerSectionsAccordion({
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <CertificationsSection
-              items={certifications}
+              items={[...certifications].reverse()}
               embedded
               editable={editable?.certifications}
             />
@@ -95,7 +96,7 @@ export function CareerSectionsAccordion({
             <EducationHeader compact showVerifiedBadge={showEducationVerifiedBadge} />
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
-            <EducationSection items={education} embedded editable={editable?.education} />
+            <EducationSection items={[...education].reverse()} embedded editable={editable?.education} />
           </AccordionContent>
         </AccordionItem>
       )}
