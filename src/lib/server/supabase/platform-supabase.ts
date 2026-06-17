@@ -178,6 +178,8 @@ export async function loadRecentHomeReviewsFromDb(limit = 6): Promise<
     text: string;
     rating: number;
     reviewerName: string;
+    reviewerProfession: string;
+    reviewerCity: string;
     advisorId: string;
     advisorName: string;
     advisorTitle: string;
@@ -215,11 +217,25 @@ export async function loadRecentHomeReviewsFromDb(limit = 6): Promise<
     const user = userById.get(String(row.advisor_id));
     const profile = profileByAdvisor.get(String(row.advisor_id));
     const slug = profile?.profile_slug ? String(profile.profile_slug).trim() : "";
+    const rawContent = String(row.content || "");
+    const metaIdx = rawContent.indexOf("\n---YVITY-META---\n");
+    const text = metaIdx === -1 ? rawContent.trim() : rawContent.slice(0, metaIdx).trim();
+    let reviewerProfession = "";
+    let reviewerCity = "";
+    if (metaIdx !== -1) {
+      try {
+        const meta = JSON.parse(rawContent.slice(metaIdx + "\n---YVITY-META---\n".length)) as Record<string, unknown>;
+        reviewerProfession = String(meta.profession || "");
+        reviewerCity = String(meta.location || "");
+      } catch { /* ignore */ }
+    }
     return {
       id: String(row.id),
-      text: String(row.content || "").split("\n---YVITY-META---\n")[0]?.trim() || "",
+      text,
       rating: Number(row.testimonial_rating ?? 5) || 5,
       reviewerName: String(row.name || "Client"),
+      reviewerProfession,
+      reviewerCity,
       advisorId: String(row.advisor_id),
       advisorName: String(user?.name || "Advisor"),
       advisorTitle: String(profile?.designation || "Insurance Advisor"),
