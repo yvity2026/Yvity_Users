@@ -17,6 +17,7 @@ import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { getPlanGatedIntroVideoUrl } from "@/lib/intro-video";
 import { getYvityScoreTotal } from "@/lib/advisor-score/build";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
+import { evaluateAdvisorScoreDecay } from "@/lib/server/evaluate-score-decay";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +31,7 @@ export async function POST() {
 
     const userId = session.id;
 
-    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs, selfShareCount] =
+    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs, selfShareCount, decayState] =
       await Promise.all([
         getAdvisorProfileForUser(userId),
         loadServicesForUser(userId),
@@ -41,6 +42,7 @@ export async function POST() {
         loadCareerForUser(userId),
         countVerifiedRecommendations(userId),
         countSelfProfileShares(userId),
+        evaluateAdvisorScoreDecay(userId),
       ]);
 
     const profileApproved = isAdvisorProfileApproved(profile);
@@ -64,6 +66,10 @@ export async function POST() {
       underReview,
       verifiedRecommendationCount: underReview ? 0 : verifiedRecs,
       selfShareCount,
+      decayPenalty: decayState?.penalty ?? 0,
+      decayActive: decayState?.active ?? false,
+      decayGraceDaysRemaining: decayState?.graceDaysRemaining ?? null,
+      monthlyActivity: decayState?.currentMonthActivity ?? undefined,
     });
 
     const finalScore = Math.max(0, Math.min(100, score));
