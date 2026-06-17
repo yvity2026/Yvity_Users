@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AlertTriangle, Sparkles } from "lucide-react";
 import { formatUsageLine, upgradePlanLabel, type PlanLimitUsage } from "@/lib/advisor-membership/plan-limit-usage";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 import { cn } from "@/lib/utils";
 
 type PlanLimitBannerProps = {
@@ -30,6 +31,7 @@ export function PlanLimitBanner({
 
   const usageLine = formatUsageLine(usage, resourceLabel);
   const upgradeName = upgradePlanLabel(upgradePlan);
+  const profileHome = usePublicProfileNavHome();
 
   if (usage.atLimit && visitorMessage) {
     return (
@@ -92,7 +94,7 @@ export function PlanLimitBanner({
           </p>
           {upgradePlan && showUpgradeLink && usage.atLimit ? (
             <Link
-              href="/profile?tab=membership"
+              href={`${profileHome}?tab=membership`}
               className="mt-2 inline-flex text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
             >
               View upgrade options
