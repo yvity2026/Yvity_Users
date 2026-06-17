@@ -24,31 +24,50 @@ export function compareAdvisors(left, right) {
 export function filterAdvisors(advisors, filters = {}) {
   const city = normalizeValue(filters.city);
   const name = normalizeValue(filters.name);
+  // `query` is the main search box — matches name, city, AND service (broad search)
+  const query = normalizeValue(filters.query);
   const state = normalizeValue(filters.state);
   const service = normalizeValue(filters.service);
   const company = normalizeValue(filters.company);
 
   return advisors.filter((advisor) => {
-    const matchesCity =
-      !city || normalizeValue(advisor.location).includes(city);
-    const matchesName = !name || normalizeValue(advisor.name).includes(name);
+    const advisorName = normalizeValue(advisor.name);
+    const advisorCity = normalizeValue(advisor.location);
+    const advisorServices = (advisor.serviceTypes ?? []).map(normalizeValue);
+    const advisorTitle = normalizeValue(advisor.title);
+
+    // Dedicated city filter (from advanced filters panel)
+    const matchesCity = !city || advisorCity.includes(city);
+
+    // Dedicated name filter
+    const matchesName = !name || advisorName.includes(name);
+
     const matchesState =
       !state ||
       normalizeValue(advisor.state).includes(state) ||
-      normalizeValue(advisor.location).includes(state);
+      advisorCity.includes(state);
+
+    // Dedicated service filter (dropdown) — partial match so "life" matches "life insurance"
     const matchesService =
       !service ||
-      (advisor.serviceTypes ?? []).some(
-        (serviceType) => normalizeValue(serviceType) === service,
-      );
+      advisorServices.some((s) => s.includes(service) || service.includes(s));
+
     const matchesCompany =
       !company ||
       (advisor.companies ?? []).some((entry) =>
         normalizeValue(entry).includes(company),
       );
 
+    // Main search box: matches name, city, service type, or title (broad)
+    const matchesQuery =
+      !query ||
+      advisorName.includes(query) ||
+      advisorCity.includes(query) ||
+      advisorServices.some((s) => s.includes(query)) ||
+      advisorTitle.includes(query);
+
     return (
-      matchesCity && matchesName && matchesState && matchesService && matchesCompany
+      matchesQuery && matchesCity && matchesName && matchesState && matchesService && matchesCompany
     );
   });
 }

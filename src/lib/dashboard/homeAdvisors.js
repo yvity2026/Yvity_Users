@@ -5,7 +5,8 @@ import {
 
 export function filterHomeAdvisors(advisors, filters = {}) {
   return filterAdvisors(advisors, {
-    name: filters.query || filters.name,
+    query: filters.query,       // main search box — broad match across name/city/service
+    name: filters.name,        // dedicated name filter
     city: filters.city,
     service: filters.service,
     company: filters.company,
