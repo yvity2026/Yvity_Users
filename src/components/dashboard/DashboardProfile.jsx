@@ -112,7 +112,8 @@ function ProfileSkeleton() {
 export default function DashboardProfile() {
   const { user, advisor, setUser, setAdvisor } = useAuth();
   const { settings } = useAdvisorSettings();
-  const isAdvisor = isAdvisorRole(user);
+  // advisor object from auth context is the reliable signal — user.roles may not be populated
+  const isAdvisor = !!advisor || isAdvisorRole(user);
   const [isEditing, setIsEditing] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

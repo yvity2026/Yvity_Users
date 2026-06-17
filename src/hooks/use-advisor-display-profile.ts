@@ -42,15 +42,15 @@ export function useAdvisorDisplayProfile(
     let base: AdvisorDisplayProfile;
 
     if (publicAdvisor) {
+      // Advisor data loaded from server (SSR context or async API fetch).
       base = buildDisplayProfileFromPublicView(publicAdvisor);
-    } else if (user?.id) {
-      base = buildAdvisorDisplayProfile({
-        user,
-        advisor,
-        designation,
-      });
-    } else {
+    } else if (advisor?.id) {
+      // Logged-in advisor viewing their own section pages — use their own data.
       base = buildAdvisorDisplayProfile({ user, advisor, designation });
+    } else {
+      // No advisor data yet (customer visitor waiting for async fetch).
+      // Use empty profile to avoid showing the customer's own name/photo in the CTA.
+      base = buildAdvisorDisplayProfile({ user: null, advisor: null, designation });
     }
 
     const isOwner = Boolean(user?.id && publicAdvisor?.userId === user.id);

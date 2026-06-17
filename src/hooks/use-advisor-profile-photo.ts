@@ -45,8 +45,11 @@ export function useAdvisorProfilePhoto(): string {
 export function useShowAdvisorVerifiedBadge(): boolean {
   const { advisor } = useAuth();
   const publicView = usePublicProfileView();
+  const publicAdvisor = useResolvedPublicAdvisorPayload();
 
-  return publicView
-    ? isAdvisorProfileApproved(publicView.profile)
-    : isAdvisorProfileApproved(advisor);
+  // On slug page: publicView is set from SSR.
+  // On section pages: publicView is null — use resolved payload (async fetch via cookie).
+  // Fallback to logged-in advisor's own profile (for advisor viewing their own pages).
+  const profile = publicView?.profile ?? publicAdvisor?.profile ?? advisor;
+  return isAdvisorProfileApproved(profile);
 }
