@@ -34,17 +34,15 @@ export function getFeaturedAdvisors(advisors, limit = 8) {
     const flagged = goldEligible.filter((a) => a.isHero || a.isLanding);
     pool = flagged.length >= 3 ? flagged : goldEligible;
   } else {
+    const isVisible = (a) => ["active", "under_review"].includes(String(a.account_status || "").toLowerCase());
     const silverEligible = advisors.filter(
-      (a) => String(a.subscription_plan || "").toLowerCase() === "silver" &&
-             String(a.account_status || "").toLowerCase() === "active",
+      (a) => String(a.subscription_plan || "").toLowerCase() === "silver" && isVisible(a),
     );
     if (silverEligible.length > 0) {
       pool = silverEligible;
       isTopRatedFallback = true;
     } else {
-      pool = advisors.filter(
-        (a) => String(a.account_status || "").toLowerCase() === "active",
-      );
+      pool = advisors.filter(isVisible);
       isTopRatedFallback = true;
     }
   }
