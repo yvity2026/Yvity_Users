@@ -10,39 +10,6 @@ import {
   LANDING_SECTION_PY,
 } from "./landingLayout";
 
-const testimonialsData = [
-  {
-    id: 1,
-    name: "Krishna Mohan",
-    role: "LIC Advisor • Nellore",
-    type: "Advisor",
-    text: '"YVITY transformed how my clients perceive me. My verified profile speaks before I even meet them — 3x more inquiries in 2 months!"',
-    rating: 5,
-    status: "Verified",
-    hasAudio: false,
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    role: "Customer • Hyderabad",
-    type: "Customer",
-    text: '"I could compare advisors by score and reviews in one place. It made choosing someone I trust much easier."',
-    rating: 5,
-    status: "OTP Verified",
-    hasAudio: true,
-    audioDuration: "1:12",
-  },
-  {
-    id: 3,
-    name: "Anitha Reddy",
-    role: "Health Advisor • Bengaluru",
-    type: "Advisor",
-    text: '"Clients now see my achievements and verified reviews upfront. My profile does the talking before the first call."',
-    rating: 5,
-    status: "Verified",
-    hasAudio: false,
-  },
-];
 
 const waveHeights = [40, 70, 30, 90, 50, 100, 60, 40, 80, 30, 70, 50, 90, 40];
 
@@ -82,7 +49,7 @@ const renderAvatar = (testimonial) => {
 };
 
 const Testimonials = () => {
-  const [testimonials, setTestimonials] = useState(testimonialsData);
+  const [testimonials, setTestimonials] = useState([]);
   const visibleTestimonials = getSortedTestimonials(testimonials);
   const reducedMotion = usePrefersReducedMotion();
 
@@ -234,6 +201,8 @@ const Testimonials = () => {
         viewport: { once: true, margin: "-50px" },
         transition: { duration: 0.6, ease: "easeOut" },
       };
+
+  if (visibleTestimonials.length === 0) return null;
 
   return (
     <section

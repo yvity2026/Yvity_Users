@@ -90,11 +90,14 @@ export async function upsertUserToDb(user: RegisteredUser): Promise<void> {
         gender: user.gender || null,
         city: user.city || null,
         profession: user.profession || null,
-        selfie_url: user.selfieUrl,
-        mobile_verified: Boolean(user.phone),
+        selfie_url: user.selfieUrl || null,
+        mobile_verified: true,
+        email_verified: Boolean(user.email),
+        is_active: true,
+        roles: ["customer"],
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "id" },
+      { onConflict: "mobile" },
     );
 
   if (error) throw new Error(error.message);
