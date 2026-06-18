@@ -113,7 +113,11 @@ export default function DashboardProfile() {
   const { user, advisor, setUser, setAdvisor } = useAuth();
   const { settings } = useAdvisorSettings();
   // advisor object from auth context is the reliable signal — user.roles may not be populated
-  const isAdvisor = !!advisor || isAdvisorRole(user);
+  // Only treat as advisor when fully approved (active). Under-review / pending
+  // profiles still show the customer view — advisor fields appear after approval.
+  const isAdvisor =
+    (!!advisor && String(advisor.account_status || "").toLowerCase() === "active") ||
+    isAdvisorRole(user);
   const [isEditing, setIsEditing] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
