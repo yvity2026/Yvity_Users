@@ -65,10 +65,14 @@ export function resolveCheckoutQuote(input: {
   approvedAt?: string | null;
   submittedAt?: string | null;
   now?: Date;
+  /** Dynamic plan prices from admin (platform_configs "plan_pricing"). Overrides hardcoded catalog. */
+  planPrices?: Partial<Record<string, number>>;
 }): CheckoutQuote | { error: string } {
   const currentPlanId = normalizePlanId(input.currentPlanId);
   const targetPlanId = input.targetPlanId;
-  const listPriceInr = getPlanMarketing(targetPlanId).priceAnnualInr;
+  const getPrice = (planId: MembershipPlanId) =>
+    input.planPrices?.[planId] ?? getPlanMarketing(planId).priceAnnualInr;
+  const listPriceInr = getPrice(targetPlanId);
 
   if (input.checkoutKind === "renew") {
     if (currentPlanId !== "silver" && currentPlanId !== "gold") {
@@ -95,7 +99,7 @@ export function resolveCheckoutQuote(input: {
     }
     if (
       currentPlanId !== "free" &&
-      getPlanMarketing(currentPlanId).priceAnnualInr >= listPriceInr
+      getPrice(currentPlanId) >= listPriceInr
     ) {
       return { error: "You can only upgrade to a higher plan" };
     }
@@ -111,6 +115,7 @@ export function resolveCheckoutQuote(input: {
         subscriptionExpiresAt: dates.expiresAt,
         subscriptionStartedAt: dates.startedAt,
         now: input.now,
+        planPrices: input.planPrices,
       });
 
       return {
@@ -155,7 +160,7 @@ export function resolveCheckoutQuote(input: {
 
 export function resolveCheckoutQuoteForProfile(
   profile: AdvisorProfileRecord,
-  input: { checkoutKind: CheckoutKind; targetPlanId: "silver" | "gold" },
+  input: { checkoutKind: CheckoutKind; targetPlanId: "silver" | "gold"; planPrices?: Partial<Record<string, number>> },
   now?: Date,
 ): CheckoutQuote | { error: string } {
   return resolveCheckoutQuote({
@@ -167,5 +172,6 @@ export function resolveCheckoutQuoteForProfile(
     approvedAt: profile.approved_at,
     submittedAt: profile.submitted_at,
     now,
+    planPrices: input.planPrices,
   });
 }

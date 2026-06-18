@@ -4,7 +4,7 @@ import {
   type CheckoutKind,
 } from "@/lib/advisor-membership/checkout-pricing";
 import { previewCouponDiscount } from "@/lib/server/coupons-store";
-import { getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
+import { getAdminPlanPrices, getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { resolveRegisteredUser } from "@/lib/server/profile";
 import { getSessionUser } from "@/lib/server/session";
@@ -61,9 +61,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const planPrices = await getAdminPlanPrices();
     const quote = resolveCheckoutQuoteForProfile(profile, {
       checkoutKind,
       targetPlanId,
+      planPrices,
     });
 
     if ("error" in quote) {
