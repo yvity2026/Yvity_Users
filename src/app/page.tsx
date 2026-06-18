@@ -23,6 +23,8 @@ import {
   pickLandingFeaturedAdvisors,
 } from "@/lib/advisors/landing-featured";
 import { getSessionUser } from "@/lib/server/session";
+import { getSiteOrigin } from "@/lib/social/site-origin";
+import { COMPANY_NAME } from "@/lib/brand";
 
 function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
@@ -34,6 +36,21 @@ type LandingSection = { id: string; content: ReactNode };
 
 /** Marketing landing — ported from YVITY/src/app/page.js */
 export default async function LandingPage() {
+  const origin = getSiteOrigin();
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: COMPANY_NAME,
+    url: origin,
+    logo: `${origin}/brand/yvity-logo.png`,
+    description:
+      "India's first credibility platform for insurance advisors and their clients. Build a verified, IRDAI-ready profile or find trusted advisors near you.",
+    foundingDate: "2024",
+    areaServed: "IN",
+    sameAs: [],
+  };
+
   const [advisors, session] = await Promise.all([getPublicAdvisors(), getSessionUser()]);
   const heroAdvisors = pickHeroAdvisors(advisors);
   const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
@@ -102,6 +119,10 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-full w-full bg-[#F8F6F1]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <Navbar />
       <LandingMobileShell>
         <LandingMobileExperience
