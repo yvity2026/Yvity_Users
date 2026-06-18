@@ -49,6 +49,7 @@ import {
   formatExperienceFromStart,
 } from "@/lib/sections/service-experience";
 import { useRazorpayCheckout } from "@/hooks/use-razorpay-checkout";
+import { useSetupDraft } from "@/hooks/use-setup-draft";
 import {
   AccordionSection,
   fieldClass,
@@ -218,6 +219,10 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
   const [paidPlanId, setPaidPlanId] = useState(null);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
   const [chosenHandle, setChosenHandle] = useState(null);
+  const [draftBanner, setDraftBanner] = useState(null); // "resume" | "saved" | null
+  const [showDraftResumeDialog, setShowDraftResumeDialog] = useState(false);
+
+  const { saveDraft, loadDraft, clearDraft } = useSetupDraft(user?.id);
 
   const { payForPlan } = useRazorpayCheckout();
 
@@ -280,7 +285,56 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
     setInvalidFields({});
   }, [stepIndex]);
 
+  /* ── Draft: collect current state into a saveable snapshot ── */
+  const collectDraftState = useCallback(() => ({
+    stepIndex,
+    industryId,
+    categoryId,
+    selectedServices,
+    serviceDetails,
+    documents,
+    selectedPlan,
+    paymentDone,
+    paidPlanId,
+    razorpayPaymentId,
+    chosenHandle,
+  }), [stepIndex, industryId, categoryId, selectedServices, serviceDetails, documents, selectedPlan, paymentDone, paidPlanId, razorpayPaymentId, chosenHandle]);
+
+  const triggerSaveDraft = useCallback(() => {
+    saveDraft(collectDraftState());
+    setDraftBanner("saved");
+    setTimeout(() => setDraftBanner(null), 2500);
+  }, [saveDraft, collectDraftState]);
+
+  /* ── Draft: check for existing draft on mount, offer resume ── */
+  useEffect(() => {
+    if (!user?.id) return;
+    const draft = loadDraft();
+    if (draft && draft.stepIndex > 0) {
+      setShowDraftResumeDialog(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   /* ─── Service state helpers ─────────────────────────────── */
+
+  /* ── Draft: apply a saved draft to component state ── */
+  const applyDraft = useCallback((draft) => {
+    setStepIndex(draft.stepIndex ?? 0);
+    setIndustryId(draft.industryId ?? DEFAULT_INDUSTRY_ID);
+    setCategoryId(draft.categoryId ?? DEFAULT_CATEGORY_ID);
+    setSelectedServices(draft.selectedServices ?? []);
+    setServiceDetails(draft.serviceDetails ?? {});
+    // Restore only previously-uploaded documents (they have a URL but no File object)
+    setDocuments(
+      (draft.documents ?? []).map((d) => ({ ...d, file: null })),
+    );
+    setSelectedPlan(draft.selectedPlan ?? "free");
+    setPaymentDone(draft.paymentDone ?? false);
+    setPaidPlanId(draft.paidPlanId ?? null);
+    setRazorpayPaymentId(draft.razorpayPaymentId ?? null);
+    setChosenHandle(draft.chosenHandle ?? null);
+  }, []);
 
   const syncServiceDetails = (nextSelected) => {
     setServiceDetails((prev) => {
@@ -529,6 +583,8 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
     }
     setFreePlanConfirm(false);
     clearValidation();
+    // Auto-save draft when advancing a step
+    saveDraft({ ...collectDraftState(), stepIndex: Math.min(stepIndex + 1, totalSteps - 1) });
     setStepIndex((i) => Math.min(i + 1, totalSteps - 1));
   };
 
@@ -717,6 +773,7 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
         }).catch(() => {});
       }
 
+      clearDraft();
       toast.success(
         isPaidPlan ? "Profile submitted for verification" : "Your profile is live on YVITY",
       );
@@ -733,6 +790,58 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
 
   if (!isOpen) return null;
 
+  /* ── Draft resume dialog ── */
+  if (showDraftResumeDialog) {
+    const draft = loadDraft();
+    const savedAt = draft?.savedAt
+      ? new Date(draft.savedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+      : "";
+    const stepLabel = draft
+      ? Object.values(STEP_TITLE)[draft.stepIndex] ?? `Step ${draft.stepIndex + 1}`
+      : "";
+    return (
+      <SetupProfileLuxuryModal
+        isOpen
+        onClose={() => { clearDraft(); setShowDraftResumeDialog(false); }}
+        stepIndex={draft?.stepIndex ?? 0}
+        totalSteps={totalSteps}
+        title="Resume your setup?"
+        subtitle="You have a saved draft from your last session"
+        footer={null}
+      >
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF9EC]">
+            <FileText className="h-8 w-8 text-[#F59E0B]" />
+          </div>
+          <h3 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">Resume where you left off</h3>
+          <p className="mx-auto mt-2 max-w-xs font-poppins text-sm leading-relaxed text-[#6B7280]">
+            You were on <span className="font-semibold text-[#0A4A4A]">{stepLabel}</span>.
+            {savedAt ? ` Last saved ${savedAt}.` : ""}
+          </p>
+          <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (draft) applyDraft(draft);
+                setShowDraftResumeDialog(false);
+              }}
+              className="w-full rounded-xl bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] py-3 font-poppins text-sm font-semibold text-[#F59E0B]"
+            >
+              Resume from {stepLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => { clearDraft(); setShowDraftResumeDialog(false); }}
+              className="w-full rounded-xl border border-[#E4E2DB] py-3 font-poppins text-sm font-semibold text-[#6B7280] hover:border-red-300 hover:text-red-600"
+            >
+              Start fresh
+            </button>
+          </div>
+        </div>
+      </SetupProfileLuxuryModal>
+    );
+  }
+
   /* ─── Step content ───────────────────────────────────────── */
 
   const stepTitle = STEP_TITLE[currentStep.id] ?? currentStep.label;
@@ -743,9 +852,9 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
     const discardContent = (
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <AlertTriangle className="mb-3 h-10 w-10 text-[#F59E0B]" />
-        <h3 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">Discard progress?</h3>
+        <h3 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">Save your progress?</h3>
         <p className="mx-auto mt-2 max-w-xs font-poppins text-sm leading-relaxed text-[#6B7280]">
-          All details you&apos;ve entered will be lost. You&apos;ll need to start the setup again.
+          Save as a draft and continue later, or discard everything and start fresh next time.
         </p>
         <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
           <button
@@ -757,10 +866,21 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
           </button>
           <button
             type="button"
-            onClick={() => { setShowCloseConfirm(false); onClose?.(); }}
+            onClick={() => {
+              triggerSaveDraft();
+              setShowCloseConfirm(false);
+              onClose?.();
+            }}
+            className="w-full rounded-xl border border-[#0A4A4A]/30 bg-[#F0FAFA] py-3 font-poppins text-sm font-semibold text-[#0A4A4A] hover:border-[#0A4A4A]/60"
+          >
+            Save draft &amp; close
+          </button>
+          <button
+            type="button"
+            onClick={() => { clearDraft(); setShowCloseConfirm(false); onClose?.(); }}
             className="w-full rounded-xl border border-[#E4E2DB] py-3 font-poppins text-sm font-semibold text-[#6B7280] hover:border-red-300 hover:text-red-600"
           >
-            Yes, discard & close
+            Discard &amp; close
           </button>
         </div>
       </div>
@@ -1542,6 +1662,16 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
   const footer = (
     <>
       <SetupModalProgress stepIndex={stepIndex} totalSteps={totalSteps} />
+      {/* Save draft link — always visible except on step 0 (nothing entered yet) */}
+      {stepIndex > 0 && !isReview && (
+        <button
+          type="button"
+          onClick={triggerSaveDraft}
+          className="w-full text-center font-poppins text-[11px] font-semibold text-[#0A4A4A]/60 hover:text-[#0A4A4A] transition-colors py-1"
+        >
+          Save draft &amp; close later
+        </button>
+      )}
       {isReview ? (
         <PrimaryContinueButton
           variant="gold"
@@ -1597,6 +1727,13 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
       onBack={stepIndex > 0 ? goBack : undefined}
       footer={footer}
     >
+      {/* Draft saved toast banner */}
+      {draftBanner === "saved" && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 font-poppins text-xs font-semibold text-emerald-700">
+          <CheckCircle2 className="size-4 shrink-0" />
+          Draft saved — you can close and resume anytime
+        </div>
+      )}
       {stepContent}
     </SetupProfileLuxuryModal>
   );
