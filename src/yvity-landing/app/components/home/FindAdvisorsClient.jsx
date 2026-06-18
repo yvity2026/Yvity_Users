@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { AdvisorProfileCard } from "../home-features/advisor-profile-card";
 import { AdvisorProfileGateModal } from "../home-features/advisor-profile-gate-modal";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
@@ -9,14 +10,22 @@ import LandingSectionHeader from "./LandingSectionHeader";
 import LandingSnapScroll, { LandingSnapItem } from "./LandingSnapScroll";
 import { LANDING_INNER, LANDING_SECTION_ANCHOR, LANDING_SECTION_PY } from "./landingLayout";
 import { filterAdvisors } from "@/lib/advisors/publicAdvisorFilters";
+import { cn } from "@/lib/utils";
+
+const QUICK_SERVICES = [
+  "Life Insurance",
+  "Health Insurance",
+  "General Insurance",
+  "Mutual Funds",
+];
 
 const fieldClass =
-  "w-full rounded-lg border border-gray-200/90 bg-[#F8F6F1] px-2.5 py-2 text-[13px] font-medium text-[#0A4A4A] outline-none transition-colors placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] lg:py-2.5 lg:text-[14px]";
+  "w-full rounded-xl border border-[#E4E2DB] bg-[#F8F6F1]/90 px-3 py-2.5 text-sm font-medium text-[#0A4A4A] outline-none transition-[border-color,box-shadow] duration-300 placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.18)]";
 
-function FilterField({ label, className = "", children }) {
+function FilterField({ label, children }) {
   return (
-    <div className={className}>
-      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+    <div>
+      <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
         {label}
       </label>
       {children}
@@ -24,74 +33,75 @@ function FilterField({ label, className = "", children }) {
   );
 }
 
-/**
- * Props:
- *   featuredAdvisors  — 6 admin-selected advisors shown by default
- *   allAdvisors       — full list used for client-side search filtering
- *   featuredIds       — Set<string> of advisor IDs that are featured (no gate)
- *   isLoggedIn        — boolean
- */
 export default function FindAdvisorsClient({
   featuredAdvisors = [],
   allAdvisors = [],
-  featuredIdList = [],   // array — Set can't cross RSC boundary
+  featuredIdList = [],
   isLoggedIn = false,
 }) {
-  // Convert array to Set once for O(1) lookups
   const featuredIds = useMemo(() => new Set(featuredIdList), [featuredIdList]);
-  const [searchState, setSearchState] = useState("");
-  const [searchCity, setSearchCity] = useState("");
-  const [searchService, setSearchService] = useState("");
-  const [searchCompany, setSearchCompany] = useState("");
-  const [searchName, setSearchName] = useState("");
 
-  // Gate modal state
+  // Main search bar
+  const [query, setQuery] = useState("");
+  const [committedQuery, setCommittedQuery] = useState("");
+  const searchRef = useRef(null);
+
+  // Advanced filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCity, setFilterCity] = useState("");
+  const [filterService, setFilterService] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
+  const [activeQuick, setActiveQuick] = useState("");
+
+  // Gate modal
   const [gateModal, setGateModal] = useState({ open: false, profileUrl: "" });
 
+  // Derived: are any search/filter criteria active?
   const hasFilters =
-    Boolean(searchState.trim()) ||
-    Boolean(searchCity.trim()) ||
-    Boolean(searchService) ||
-    Boolean(searchCompany.trim()) ||
-    Boolean(searchName.trim());
-
-  // Client-side filter — no API call, no login required
-  const searchResults = useMemo(() => {
-    if (!hasFilters) return null;
-    return filterAdvisors(allAdvisors, {
-      state: searchState,
-      city: searchCity,
-      service: searchService,
-      company: searchCompany,
-      name: searchName,
-    });
-  }, [hasFilters, allAdvisors, searchState, searchCity, searchService, searchCompany, searchName]);
-
-  const displayedAdvisors = hasFilters
-    ? (searchResults ?? []).slice(0, 15)
-    : featuredAdvisors.slice(0, 6);
-
-  const stateOptions = useMemo(
-    () => [...new Set(allAdvisors.map((a) => a.state).filter(Boolean))].sort(),
-    [allAdvisors],
-  );
-
-  const companyOptions = useMemo(
-    () => [...new Set(allAdvisors.flatMap((a) => a.companies ?? []).filter(Boolean))].sort(),
-    [allAdvisors],
-  );
+    Boolean(committedQuery.trim()) ||
+    Boolean(filterCity.trim()) ||
+    Boolean(filterService) ||
+    Boolean(filterCompany.trim()) ||
+    Boolean(activeQuick);
 
   const serviceOptions = useMemo(
     () => [...new Set(allAdvisors.flatMap((a) => a.serviceTypes ?? []).filter(Boolean))].sort(),
     [allAdvisors],
   );
 
-  const clearAllFilters = () => {
-    setSearchState("");
-    setSearchCity("");
-    setSearchService("");
-    setSearchCompany("");
-    setSearchName("");
+  const searchResults = useMemo(() => {
+    if (!hasFilters) return null;
+    return filterAdvisors(allAdvisors, {
+      query: committedQuery,
+      city: filterCity,
+      service: filterService || activeQuick,
+      company: filterCompany,
+    });
+  }, [hasFilters, allAdvisors, committedQuery, filterCity, filterService, filterCompany, activeQuick]);
+
+  const displayedAdvisors = hasFilters
+    ? (searchResults ?? []).slice(0, 15)
+    : featuredAdvisors.slice(0, 6);
+
+  const handleSearch = () => {
+    setCommittedQuery(query.trim());
+  };
+
+  const handleQuickService = (service) => {
+    const next = activeQuick === service ? "" : service;
+    setActiveQuick(next);
+    setFilterService("");
+  };
+
+  const clearAll = () => {
+    setQuery("");
+    setCommittedQuery("");
+    setFilterCity("");
+    setFilterService("");
+    setFilterCompany("");
+    setActiveQuick("");
+    setShowFilters(false);
+    searchRef.current?.focus();
   };
 
   const openGate = (profileUrl) => setGateModal({ open: true, profileUrl });
@@ -119,103 +129,177 @@ export default function FindAdvisorsClient({
                 <br className="lg:hidden" /> Near You
               </>
             }
-            description="Search from 500+ YVITY verified insurance advisors across India."
+            description="Search from YVITY verified insurance advisors across India."
           />
         </motion.div>
 
         {/* Search panel */}
-        <div className="mb-5 rounded-xl border border-[#D7D7D7]/80 bg-white p-3 font-poppins shadow-[0_2px_12px_rgba(10,74,74,0.06)] lg:mb-6 lg:rounded-2xl lg:p-4">
-          <div className="mb-2.5 flex items-center justify-between gap-2 lg:mb-3">
-            <p className="text-xs font-semibold text-[#0A4A4A] lg:text-sm">
-              Search advisors
-            </p>
-            {hasFilters ? (
+        <div className="mb-5 font-poppins lg:mb-6">
+          {/* Main search bar */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+            className="mb-4"
+          >
+            <div className="flex items-stretch gap-2.5 sm:gap-3">
+              <div
+                className={cn(
+                  "flex min-h-[52px] min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-[#E4E2DB]",
+                  "bg-white px-3.5 shadow-[0_2px_14px_rgba(10,74,74,0.07)]",
+                  "transition-[border-color,box-shadow] duration-200",
+                  "focus-within:border-[#0A4A4A]/35 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,0.16)]",
+                  "sm:gap-3 sm:px-4",
+                )}
+              >
+                <Search size={20} strokeWidth={2} className="shrink-0 text-[#0A4A4A]/70" aria-hidden />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  enterKeyHint="search"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (!e.target.value.trim()) setCommittedQuery("");
+                  }}
+                  placeholder="Search by name, city or service…"
+                  className="min-w-0 flex-1 bg-transparent font-poppins text-sm text-[#0A4A4A] outline-none placeholder:text-[#9CA3AF] sm:text-[15px]"
+                  aria-label="Search advisors by name, city or service"
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => { setQuery(""); setCommittedQuery(""); }}
+                    className="shrink-0 text-[#9CA3AF] hover:text-[#0A4A4A] transition"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                ) : null}
+              </div>
+
+              <button
+                type="submit"
+                className="inline-flex min-h-[52px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98]"
+              >
+                Search
+              </button>
+
               <button
                 type="button"
-                onClick={clearAllFilters}
-                className="text-[11px] font-semibold text-[#F59E0B] lg:text-xs"
+                onClick={() => setShowFilters((v) => !v)}
+                aria-label="Advanced filters"
+                aria-expanded={showFilters}
+                className={cn(
+                  "inline-flex min-h-[52px] min-w-[52px] shrink-0 items-center justify-center rounded-2xl border border-[#E4E2DB] bg-white",
+                  "text-[#0A4A4A] shadow-[0_2px_10px_rgba(10,74,74,0.06)] transition",
+                  "hover:border-[#0A4A4A]/20 active:scale-[0.98]",
+                  showFilters && "border-[#0A4A4A]/30 bg-[#F8F6F1] ring-2 ring-[#F59E0B]/20",
+                )}
               >
-                Clear all
+                <SlidersHorizontal size={20} strokeWidth={2} aria-hidden />
               </button>
-            ) : null}
-          </div>
+            </div>
 
-          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
-            <FilterField label="State">
-              <input
-                type="text"
-                list="advisor-state-options"
-                placeholder="e.g. Telangana"
-                value={searchState}
-                onChange={(e) => setSearchState(e.target.value)}
-                className={fieldClass}
-              />
-              <datalist id="advisor-state-options">
-                {stateOptions.map((s) => <option key={s} value={s} />)}
-              </datalist>
-            </FilterField>
-
-            <FilterField label="City">
-              <input
-                type="text"
-                placeholder="e.g. Hyderabad"
-                value={searchCity}
-                onChange={(e) => setSearchCity(e.target.value)}
-                className={fieldClass}
-              />
-            </FilterField>
-
-            <FilterField label="Company">
-              <input
-                type="text"
-                list="advisor-company-options"
-                placeholder="e.g. LIC"
-                value={searchCompany}
-                onChange={(e) => setSearchCompany(e.target.value)}
-                className={fieldClass}
-              />
-              <datalist id="advisor-company-options">
-                {companyOptions.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </FilterField>
-
-            <FilterField label="Name">
-              <input
-                type="text"
-                placeholder="Advisor name"
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                className={fieldClass}
-              />
-            </FilterField>
-          </div>
-
-          {serviceOptions.length > 0 ? (
-            <FilterField label="Service" className="mt-2.5">
-              <div className="flex flex-wrap gap-2 pt-0.5">
-                {serviceOptions.map((service) => {
-                  const active = searchService === service;
-                  return (
-                    <button
-                      key={service}
-                      type="button"
-                      onClick={() => setSearchService(active ? "" : service)}
-                      className={`rounded-full border px-3 py-1 font-poppins text-[12px] font-semibold transition-all duration-150 ${
-                        active
-                          ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B]"
-                          : "border-[#D1D5DB] bg-white text-[#374151] hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-                      }`}
+            {/* Advanced filters panel */}
+            {showFilters ? (
+              <div className="mt-3 rounded-[20px] border border-[#E4E2DB]/90 bg-white/90 p-4 shadow-[0_8px_32px_rgba(10,74,74,0.08)] backdrop-blur-md sm:p-5">
+                <p className="mb-3.5 font-poppins text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0A4A4A]/60">
+                  Advanced filters
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <FilterField label="City / Location">
+                    <input
+                      type="text"
+                      value={filterCity}
+                      onChange={(e) => setFilterCity(e.target.value)}
+                      placeholder="e.g. Hyderabad"
+                      className={fieldClass}
+                    />
+                  </FilterField>
+                  <FilterField label="Service">
+                    <select
+                      value={filterService}
+                      onChange={(e) => { setFilterService(e.target.value); setActiveQuick(""); }}
+                      className={`${fieldClass} cursor-pointer`}
                     >
-                      {service}
+                      <option value="">All services</option>
+                      {serviceOptions.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </FilterField>
+                  <FilterField label="Company">
+                    <input
+                      type="text"
+                      value={filterCompany}
+                      onChange={(e) => setFilterCompany(e.target.value)}
+                      placeholder="e.g. LIC"
+                      className={fieldClass}
+                    />
+                  </FilterField>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters(false)}
+                    className="rounded-full bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-6 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98]"
+                  >
+                    Apply filters
+                  </button>
+                  {hasFilters ? (
+                    <button
+                      type="button"
+                      onClick={clearAll}
+                      className="rounded-full border border-[#E4E2DB] bg-white/80 px-6 py-2.5 font-poppins text-sm font-semibold text-[#6B7280] transition hover:border-[#0A4A4A]/20 active:scale-[0.98]"
+                    >
+                      Clear all
                     </button>
-                  );
-                })}
+                  ) : null}
+                </div>
               </div>
-            </FilterField>
-          ) : null}
+            ) : null}
+          </form>
 
+          {/* Quick service chips */}
+          <div>
+            <p className="mb-2.5 font-poppins text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">
+              Popular services
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_SERVICES.map((service) => {
+                const active = activeQuick === service;
+                return (
+                  <button
+                    key={service}
+                    type="button"
+                    onClick={() => handleQuickService(service)}
+                    aria-pressed={active}
+                    className={cn(
+                      "touch-manipulation shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5",
+                      "font-poppins text-xs font-medium transition active:scale-[0.98] sm:text-[13px] sm:px-4 sm:py-2",
+                      active
+                        ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_14px_rgba(10,74,74,0.22)]"
+                        : "border-[#E4E2DB] bg-white text-[#0A4A4A] shadow-[0_1px_6px_rgba(10,74,74,0.05)] hover:border-[#0A4A4A]/25 hover:bg-[#F8F6F1]",
+                    )}
+                  >
+                    {service}
+                  </button>
+                );
+              })}
+              {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="shrink-0 whitespace-nowrap rounded-full border border-[#F59E0B]/40 bg-[#FEF3C7] px-3.5 py-1.5 font-poppins text-xs font-semibold text-[#92400E] transition active:scale-[0.98] sm:px-4 sm:py-2 sm:text-[13px]"
+                >
+                  Clear all
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Results count */}
           {hasFilters && searchResults !== null ? (
-            <p className="mt-3 text-center font-poppins text-[11px] text-[#6B7280]">
+            <p className="mt-3 font-poppins text-[11px] text-[#6B7280]">
               {searchResults.length === 0
                 ? "No advisors matched your search."
                 : `${searchResults.length} advisor${searchResults.length !== 1 ? "s" : ""} found`}
@@ -275,19 +359,19 @@ export default function FindAdvisorsClient({
                 })}
               </div>
 
-              {!isLoggedIn && hasFilters && (
+              {!isLoggedIn && hasFilters ? (
                 <p className="mt-4 text-center font-poppins text-[12px] text-[#6B7280]">
                   Featured advisor profiles open directly.{" "}
                   <span className="text-[#0A4A4A] font-semibold">Login</span>{" "}
                   to access all advisor profiles.
                 </p>
-              )}
+              ) : null}
             </>
           ) : (
             <div className="rounded-2xl border border-[#D7D7D7] bg-white px-5 py-10 text-center font-poppins text-sm text-[#374151] shadow-sm lg:rounded-[28px] lg:px-6 lg:py-12">
               {hasFilters
                 ? "No advisors matched your search. Try a different city, service, or name."
-                : "No advisors are featured yet. Check back soon."}
+                : "No featured advisors yet. Check back soon."}
             </div>
           )}
         </div>

@@ -36,7 +36,8 @@ export function filterAdvisors(advisors, filters = {}) {
 
   return advisors.filter((advisor) => {
     const advisorName = normalizeValue(advisor.name);
-    const advisorCity = normalizeValue(advisor.location);
+    // Check both location and city fields — Supabase card uses location, raw DB may use city
+    const advisorCity = normalizeValue(advisor.location || advisor.city);
     const advisorServices = (advisor.serviceTypes ?? []).map(normalizeValue);
     const advisorTitle = normalizeValue(advisor.title);
 
