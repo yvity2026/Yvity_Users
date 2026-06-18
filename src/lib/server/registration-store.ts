@@ -69,8 +69,15 @@ export function loadRegistrationDb(): RegistrationDb {
 
 export function saveRegistrationDb(next: RegistrationDb) {
   cache = next;
-  ensureDataDir();
-  fs.writeFileSync(REGISTRATION_FILE, JSON.stringify(next, null, 2), "utf-8");
+
+  if (canUseLocalDataFiles()) {
+    ensureDataDir();
+    try {
+      fs.writeFileSync(REGISTRATION_FILE, JSON.stringify(next, null, 2), "utf-8");
+    } catch {
+      // Read-only filesystem (Vercel) — skip local write, Supabase handles persistence
+    }
+  }
 
   if (useSupabasePersistence()) {
     void Promise.all(next.users.map((user) => upsertUserToDb(user))).catch((error) => {
