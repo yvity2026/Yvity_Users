@@ -181,7 +181,7 @@ export async function fetchSupabasePublicAdvisors(
     .select(
       "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing",
     )
-    .eq("account_status", "active")
+    .in("account_status", ["active", "under_review"])
     .not("profile_slug", "is", null);
 
   if (profilesError) {

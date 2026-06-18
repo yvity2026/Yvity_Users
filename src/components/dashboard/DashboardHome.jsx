@@ -74,7 +74,8 @@ export default function DashboardHome({ advisors = [] }) {
   const [searchCompany, setSearchCompany] = useState("");
   const [activeQuickFilter, setActiveQuickFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [inlineVisible, setInlineVisible] = useState(false);
+  // Auto-show results when there are very few advisors — no need to click Search
+  const [inlineVisible, setInlineVisible] = useState(() => advisors.length > 0 && advisors.length < 10);
   const [showStickySearch, setShowStickySearch] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoaded, setReviewsLoaded] = useState(false);
@@ -111,9 +112,6 @@ export default function DashboardHome({ advisors = [] }) {
     [serviceOptions],
   );
 
-  // effectiveCity is only for UI hints/placeholders; filterCity is what's actually applied
-  const effectiveCity = searchCity || user?.city || "";
-  // Only filter by city if the user explicitly typed one — never auto-inject user's city
   const filterCity = searchCity;
 
   const recentService = useMemo(() => {
@@ -331,7 +329,8 @@ export default function DashboardHome({ advisors = [] }) {
           searchInputRef={searchInputRef}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
-          searchCity={searchCity || user?.city || ""}
+          searchCity={searchCity}
+          searchCityPlaceholder={user?.city ? `e.g. ${user.city}` : "e.g. Hyderabad"}
           onSearchCityChange={setSearchCity}
           searchService={searchService}
           onSearchServiceChange={setSearchService}
@@ -350,7 +349,7 @@ export default function DashboardHome({ advisors = [] }) {
           }}
           onClearFilters={handleClearFilters}
           onQuickFilter={handleQuickFilter}
-          hasSearched={inlineVisible}
+          hasSearched={inlineVisible && (!!searchQuery || !!searchCity || !!searchService || !!searchCompany)}
         />
       </div>
 

@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
+import { canUseLocalDataFiles } from "@/lib/server/json-store";
 import type { AmbassadorDashboardData } from "@/lib/advisor/ambassador-types";
 import type { PaymentRecord } from "@/lib/server/payment-store";
 import { evaluateAndGrantRewardsForUser } from "@/lib/server/reward-engine";
@@ -81,8 +82,13 @@ function readJsonFile<T>(filename: string, fallback: T): T {
 }
 
 function writeJsonFile<T>(filename: string, data: T) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
+  if (!canUseLocalDataFiles()) return;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
+  } catch {
+    // Read-only filesystem (Vercel)
+  }
 }
 
 function normalizeReferralCode(value: string) {

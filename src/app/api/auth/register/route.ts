@@ -14,6 +14,8 @@ import {
   toAuthUser,
 } from "@/lib/server/registration";
 import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
 export async function POST(request: Request) {
   try {
@@ -81,6 +83,13 @@ export async function POST(request: Request) {
       selfieUrl: body.selfieUrl ?? null,
       referralCode: body.referralCode?.trim() || null,
     });
+
+    // Explicitly await Supabase upsert so it completes before the lambda responds.
+    // saveRegistrationDb fires this as void (fire-and-forget) which can be dropped
+    // when the serverless function terminates — awaiting here guarantees persistence.
+    if (useSupabasePersistence()) {
+      await upsertUserToDb(user);
+    }
 
     const authUser = toAuthUser(user);
     const response = NextResponse.json({

@@ -38,6 +38,8 @@ export default async function LandingPage() {
   const heroAdvisors = pickHeroAdvisors(advisors);
   const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
   const isLoggedIn = Boolean(session);
+  // Array — Set is not serializable across the RSC boundary
+  const featuredIdList: string[] = landingAdvisors.map((a) => a.id).filter(Boolean);
 
   const landingSections: LandingSection[] = [
     {
@@ -52,7 +54,15 @@ export default async function LandingPage() {
       id: "find-advisors",
       content: (
         <Suspense fallback={<SectionFallback />}>
-          <FindAdvisors advisors={landingAdvisors} isLoggedIn={isLoggedIn} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <FindAdvisors
+            {...({
+              featuredAdvisors: landingAdvisors,
+              allAdvisors: advisors,
+              featuredIdList,
+              isLoggedIn,
+            } as any)}
+          />
         </Suspense>
       ),
     },
