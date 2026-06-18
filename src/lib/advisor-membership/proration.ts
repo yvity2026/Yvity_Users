@@ -53,9 +53,10 @@ export function calculateSilverToGoldUpgradeQuote(input: {
   subscriptionExpiresAt: string;
   subscriptionStartedAt?: string | null;
   now?: Date;
+  planPrices?: Partial<Record<string, number>>;
 }): SilverToGoldUpgradeQuote {
-  const silverAnnualInr = getPlanMarketing("silver").priceAnnualInr;
-  const goldAnnualInr = getPlanMarketing("gold").priceAnnualInr;
+  const silverAnnualInr = input.planPrices?.["silver"] ?? getPlanMarketing("silver").priceAnnualInr;
+  const goldAnnualInr = input.planPrices?.["gold"] ?? getPlanMarketing("gold").priceAnnualInr;
   const now = input.now ?? new Date();
   const remainingDays = remainingSubscriptionDays(input.subscriptionExpiresAt, now);
   const silverCreditInr = calculateUnusedSilverCredit({
