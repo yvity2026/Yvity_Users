@@ -20,6 +20,7 @@ export function toAdvisorCardGoldProps(advisor = {}) {
 
   return {
     id: advisor.id ?? null,
+    isFeatured: Boolean(advisor.isFeatured ?? advisor.isLanding ?? advisor.isHero),
     name: advisor.name ?? "Advisor",
     title: advisor.title ?? advisor.designation ?? "Insurance Advisor",
     location: advisor.location ?? "Location not available",

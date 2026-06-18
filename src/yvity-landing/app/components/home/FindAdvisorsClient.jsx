@@ -1,15 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { AdvisorProfileCard } from "../home-features/advisor-profile-card";
+import { AdvisorProfileGateModal } from "../home-features/advisor-profile-gate-modal";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import LandingSectionHeader from "./LandingSectionHeader";
-import LandingSnapScroll, {
-  LandingSnapItem,
-} from "./LandingSnapScroll";
-import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
+import LandingSnapScroll, { LandingSnapItem } from "./LandingSnapScroll";
 import { LANDING_INNER, LANDING_SECTION_ANCHOR, LANDING_SECTION_PY } from "./landingLayout";
+import { filterAdvisors } from "@/lib/advisors/publicAdvisorFilters";
 
 const fieldClass =
   "w-full rounded-lg border border-gray-200/90 bg-[#F8F6F1] px-2.5 py-2 text-[13px] font-medium text-[#0A4A4A] outline-none transition-colors placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] lg:py-2.5 lg:text-[14px]";
@@ -25,125 +24,65 @@ function FilterField({ label, className = "", children }) {
   );
 }
 
-export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
-  const [results, setResults] = useState(null);
+/**
+ * Props:
+ *   featuredAdvisors  — 6 admin-selected advisors shown by default
+ *   allAdvisors       — full list used for client-side search filtering
+ *   featuredIds       — Set<string> of advisor IDs that are featured (no gate)
+ *   isLoggedIn        — boolean
+ */
+export default function FindAdvisorsClient({
+  featuredAdvisors = [],
+  allAdvisors = [],
+  featuredIds = new Set(),
+  isLoggedIn = false,
+}) {
   const [searchState, setSearchState] = useState("");
   const [searchCity, setSearchCity] = useState("");
   const [searchService, setSearchService] = useState("");
   const [searchCompany, setSearchCompany] = useState("");
   const [searchName, setSearchName] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState("");
 
-  const stateOptions = useMemo(
-    () =>
-      [
-        ...new Set(
-          advisors.map((advisor) => advisor.state).filter(Boolean),
-        ),
-      ].sort(),
-    [advisors],
-  );
+  // Gate modal state
+  const [gateModal, setGateModal] = useState({ open: false, profileUrl: "" });
 
-  const companyOptions = useMemo(
-    () =>
-      [
-        ...new Set(
-          advisors.flatMap((advisor) => advisor.companies ?? []).filter(Boolean),
-        ),
-      ].sort(),
-    [advisors],
-  );
-
-  const serviceOptions = useMemo(() => {
-    const fromAdvisors = advisors.flatMap((advisor) => advisor.serviceTypes ?? []);
-    return [...new Set(fromAdvisors.filter(Boolean))].sort();
-  }, [advisors]);
-
-  const runSearch = useCallback(
-    async ({
-      state = "",
-      city = "",
-      service = "",
-      company = "",
-      name = "",
-      signal,
-    } = {}) => {
-      const params = new URLSearchParams();
-
-      if (state.trim()) params.set("state", state.trim());
-      if (city.trim()) params.set("city", city.trim());
-      if (service) params.set("service", service);
-      if (company.trim()) params.set("company", company.trim());
-      if (name.trim()) params.set("name", name.trim());
-
-      setIsSearching(true);
-      setSearchError("");
-
-      try {
-        const response = await fetch(
-          `/api/advisors/search?${params.toString()}`,
-          { signal },
-        );
-        const payload = await response.json();
-
-        if (response.status === 401 || payload.code === "LOGIN_REQUIRED") {
-          openLoginModal();
-          throw new Error("Log in to search all advisors.");
-        }
-
-        if (!response.ok) {
-          throw new Error(payload.error || "Search failed");
-        }
-
-        setResults(payload.advisors ?? []);
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        setSearchError(error.message || "Search failed");
-        setResults([]);
-      } finally {
-        if (!signal?.aborted) setIsSearching(false);
-      }
-    },
-    [],
-  );
-
-  const hasSearchInputs =
+  const hasFilters =
     Boolean(searchState.trim()) ||
     Boolean(searchCity.trim()) ||
     Boolean(searchService) ||
     Boolean(searchCompany.trim()) ||
     Boolean(searchName.trim());
 
-  useEffect(() => {
-    if (!hasSearchInputs || !isLoggedIn) return undefined;
+  // Client-side filter — no API call, no login required
+  const searchResults = useMemo(() => {
+    if (!hasFilters) return null;
+    return filterAdvisors(allAdvisors, {
+      state: searchState,
+      city: searchCity,
+      service: searchService,
+      company: searchCompany,
+      name: searchName,
+    });
+  }, [hasFilters, allAdvisors, searchState, searchCity, searchService, searchCompany, searchName]);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      runSearch({
-        state: searchState,
-        city: searchCity,
-        service: searchService,
-        company: searchCompany,
-        name: searchName,
-        signal: controller.signal,
-      });
-    }, 350);
+  const displayedAdvisors = hasFilters
+    ? (searchResults ?? []).slice(0, 15)
+    : featuredAdvisors.slice(0, 6);
 
-    return () => {
-      controller.abort();
-      clearTimeout(timeoutId);
-    };
-  }, [
-    hasSearchInputs,
-    runSearch,
-    searchState,
-    searchCity,
-    searchService,
-    searchCompany,
-    searchName,
-    isLoggedIn,
-  ]);
+  const stateOptions = useMemo(
+    () => [...new Set(allAdvisors.map((a) => a.state).filter(Boolean))].sort(),
+    [allAdvisors],
+  );
+
+  const companyOptions = useMemo(
+    () => [...new Set(allAdvisors.flatMap((a) => a.companies ?? []).filter(Boolean))].sort(),
+    [allAdvisors],
+  );
+
+  const serviceOptions = useMemo(
+    () => [...new Set(allAdvisors.flatMap((a) => a.serviceTypes ?? []).filter(Boolean))].sort(),
+    [allAdvisors],
+  );
 
   const clearAllFilters = () => {
     setSearchState("");
@@ -151,24 +90,10 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
     setSearchService("");
     setSearchCompany("");
     setSearchName("");
-    setResults(null);
-    setSearchError("");
   };
 
-  const advisorsToDisplay = hasSearchInputs && isLoggedIn ? results ?? [] : advisors;
-  const displayedAdvisors = hasSearchInputs && isLoggedIn
-    ? advisorsToDisplay.slice(0, 15)
-    : advisorsToDisplay.slice(0, 6);
-
-  const promptLoginToSearch = () => {
-    setSearchError("Log in to search all advisors.");
-    openLoginModal();
-  };
-
-  const resetField = () => {
-    setSearchError("");
-    setIsSearching(false);
-  };
+  const openGate = (profileUrl) => setGateModal({ open: true, profileUrl });
+  const closeGate = () => setGateModal({ open: false, profileUrl: "" });
 
   return (
     <section
@@ -196,25 +121,13 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
           />
         </motion.div>
 
+        {/* Search panel */}
         <div className="mb-5 rounded-xl border border-[#D7D7D7]/80 bg-white p-3 font-poppins shadow-[0_2px_12px_rgba(10,74,74,0.06)] lg:mb-6 lg:rounded-2xl lg:p-4">
-          {!isLoggedIn ? (
-            <div className="mb-3 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5 text-[12px] text-[#92400E] lg:text-[13px]">
-              Featured advisors below are visible without login.{" "}
-              <button
-                type="button"
-                onClick={openLoginModal}
-                className="font-semibold text-[#0A4A4A] underline underline-offset-2"
-              >
-                Log in
-              </button>{" "}
-              to search the full directory.
-            </div>
-          ) : null}
           <div className="mb-2.5 flex items-center justify-between gap-2 lg:mb-3">
             <p className="text-xs font-semibold text-[#0A4A4A] lg:text-sm">
               Search advisors
             </p>
-            {hasSearchInputs ? (
+            {hasFilters ? (
               <button
                 type="button"
                 onClick={clearAllFilters}
@@ -232,13 +145,11 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 list="advisor-state-options"
                 placeholder="e.g. Telangana"
                 value={searchState}
-                onChange={(e) => { setSearchState(e.target.value); resetField(); }}
+                onChange={(e) => setSearchState(e.target.value)}
                 className={fieldClass}
               />
               <datalist id="advisor-state-options">
-                {stateOptions.map((state) => (
-                  <option key={state} value={state} />
-                ))}
+                {stateOptions.map((s) => <option key={s} value={s} />)}
               </datalist>
             </FilterField>
 
@@ -247,7 +158,7 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 type="text"
                 placeholder="e.g. Hyderabad"
                 value={searchCity}
-                onChange={(e) => { setSearchCity(e.target.value); resetField(); }}
+                onChange={(e) => setSearchCity(e.target.value)}
                 className={fieldClass}
               />
             </FilterField>
@@ -258,13 +169,11 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 list="advisor-company-options"
                 placeholder="e.g. LIC"
                 value={searchCompany}
-                onChange={(e) => { setSearchCompany(e.target.value); resetField(); }}
+                onChange={(e) => setSearchCompany(e.target.value)}
                 className={fieldClass}
               />
               <datalist id="advisor-company-options">
-                {companyOptions.map((company) => (
-                  <option key={company} value={company} />
-                ))}
+                {companyOptions.map((c) => <option key={c} value={c} />)}
               </datalist>
             </FilterField>
 
@@ -273,13 +182,13 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 type="text"
                 placeholder="Advisor name"
                 value={searchName}
-                onChange={(e) => { setSearchName(e.target.value); resetField(); }}
+                onChange={(e) => setSearchName(e.target.value)}
                 className={fieldClass}
               />
             </FilterField>
           </div>
 
-          {serviceOptions.length > 0 && (
+          {serviceOptions.length > 0 ? (
             <FilterField label="Service" className="mt-2.5">
               <div className="flex flex-wrap gap-2 pt-0.5">
                 {serviceOptions.map((service) => {
@@ -288,10 +197,7 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                     <button
                       key={service}
                       type="button"
-                      onClick={() => {
-                        setSearchService(active ? "" : service);
-                        resetField();
-                      }}
+                      onClick={() => setSearchService(active ? "" : service)}
                       className={`rounded-full border px-3 py-1 font-poppins text-[12px] font-semibold transition-all duration-150 ${
                         active
                           ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B]"
@@ -304,78 +210,93 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
                 })}
               </div>
             </FilterField>
-          )}
-
-          <button
-            type="button"
-            onClick={() => {
-              if (!isLoggedIn) {
-                promptLoginToSearch();
-                return;
-              }
-              runSearch({
-                state: searchState,
-                city: searchCity,
-                service: searchService,
-                company: searchCompany,
-                name: searchName,
-              });
-            }}
-            disabled={!hasSearchInputs || isSearching}
-            className="mt-3 flex w-full items-center justify-center rounded-full bg-[#0A4A4A] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_14px_rgba(10,74,74,0.25)] transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:mt-4"
-          >
-            {isSearching ? "Searching…" : isLoggedIn ? "Search Advisors" : "Log in to Search"}
-          </button>
-
-          {hasSearchInputs && searchError ? (
-            <p className="mt-2.5 text-xs text-[#B91C1C] lg:text-sm">{searchError}</p>
           ) : null}
-          {hasSearchInputs && isSearching ? (
-            <p className="mt-2.5 text-xs text-[#6B7280] lg:text-sm">Searching…</p>
+
+          {hasFilters && searchResults !== null ? (
+            <p className="mt-3 text-center font-poppins text-[11px] text-[#6B7280]">
+              {searchResults.length === 0
+                ? "No advisors matched your search."
+                : `${searchResults.length} advisor${searchResults.length !== 1 ? "s" : ""} found`}
+            </p>
           ) : null}
         </div>
 
+        {/* Advisor cards */}
         <div className="mb-12 w-full lg:mb-12">
           {displayedAdvisors.length ? (
             <>
-              <LandingSnapScroll
-                ariaLabel="Advisor profiles"
-                className="py-2 lg:hidden"
-              >
-                {displayedAdvisors.map((advisor, index) => (
-                  <LandingSnapItem
-                    key={`advisor-${advisor.id ?? index}`}
-                    className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
-                  >
-                    <div className="landing-hero-card-glow w-full overflow-visible py-1">
-                      <AdvisorProfileCard {...toAdvisorCardGoldProps(advisor)} />
-                    </div>
-                  </LandingSnapItem>
-                ))}
+              {/* Mobile horizontal scroll */}
+              <LandingSnapScroll ariaLabel="Advisor profiles" className="py-2 lg:hidden">
+                {displayedAdvisors.map((advisor, index) => {
+                  const cardProps = toAdvisorCardGoldProps(advisor);
+                  const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+                  return (
+                    <LandingSnapItem
+                      key={`advisor-${advisor.id ?? index}`}
+                      className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
+                    >
+                      <div className="landing-hero-card-glow w-full overflow-visible py-1">
+                        <AdvisorProfileCard
+                          {...cardProps}
+                          isFeatured={isFeatured}
+                          isLoggedIn={isLoggedIn}
+                          onGatedClick={() => openGate(cardProps.profileUrl)}
+                        />
+                      </div>
+                    </LandingSnapItem>
+                  );
+                })}
               </LandingSnapScroll>
+
               <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
                 Swipe for more advisors
               </p>
+
+              {/* Desktop grid */}
               <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
-                {displayedAdvisors.map((advisor, index) => (
-                  <div
-                    key={`advisor-grid-${advisor.id ?? index}`}
-                    className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
-                  >
-                    <AdvisorProfileCard {...toAdvisorCardGoldProps(advisor)} />
-                  </div>
-                ))}
+                {displayedAdvisors.map((advisor, index) => {
+                  const cardProps = toAdvisorCardGoldProps(advisor);
+                  const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+                  return (
+                    <div
+                      key={`advisor-grid-${advisor.id ?? index}`}
+                      className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
+                    >
+                      <AdvisorProfileCard
+                        {...cardProps}
+                        isFeatured={isFeatured}
+                        isLoggedIn={isLoggedIn}
+                        onGatedClick={() => openGate(cardProps.profileUrl)}
+                      />
+                    </div>
+                  );
+                })}
               </div>
+
+              {!isLoggedIn && hasFilters && (
+                <p className="mt-4 text-center font-poppins text-[12px] text-[#6B7280]">
+                  Featured advisor profiles open directly.{" "}
+                  <span className="text-[#0A4A4A] font-semibold">Login</span>{" "}
+                  to access all advisor profiles.
+                </p>
+              )}
             </>
           ) : (
             <div className="rounded-2xl border border-[#D7D7D7] bg-white px-5 py-10 text-center font-poppins text-sm text-[#374151] shadow-sm lg:rounded-[28px] lg:px-6 lg:py-12">
-              {hasSearchInputs
-                ? "No public advisors matched your search."
+              {hasFilters
+                ? "No advisors matched your search. Try a different city, service, or name."
                 : "No advisors are featured yet. Check back soon."}
             </div>
           )}
         </div>
       </div>
+
+      {/* Profile gate modal */}
+      <AdvisorProfileGateModal
+        open={gateModal.open}
+        profileUrl={gateModal.profileUrl}
+        onClose={closeGate}
+      />
     </section>
   );
 }

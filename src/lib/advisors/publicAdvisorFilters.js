@@ -9,16 +9,20 @@ function normalizeValue(value) {
 }
 
 export function compareAdvisors(left, right) {
-  const leftPlanPriority =
+  const leftPlan =
     PLAN_PRIORITY[String(left?.subscription_plan || "free").toLowerCase()] ?? 0;
-  const rightPlanPriority =
+  const rightPlan =
     PLAN_PRIORITY[String(right?.subscription_plan || "free").toLowerCase()] ?? 0;
 
-  if (rightPlanPriority !== leftPlanPriority) {
-    return rightPlanPriority - leftPlanPriority;
-  }
+  if (rightPlan !== leftPlan) return rightPlan - leftPlan;
 
-  return Number(right?.score || 0) - Number(left?.score || 0);
+  const scoreDiff = Number(right?.score || 0) - Number(left?.score || 0);
+  if (scoreDiff !== 0) return scoreDiff;
+
+  const ratingDiff = Number(right?.avgRating || 0) - Number(left?.avgRating || 0);
+  if (ratingDiff !== 0) return ratingDiff;
+
+  return Number(right?.recs || 0) - Number(left?.recs || 0);
 }
 
 export function filterAdvisors(advisors, filters = {}) {

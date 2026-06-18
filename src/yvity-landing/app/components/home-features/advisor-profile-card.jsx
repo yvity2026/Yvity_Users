@@ -106,7 +106,7 @@ function StatCell({ icon: Icon, value, label }) {
   );
 }
 
-function ViewProfileCta({ profileUrl, compact, reducedMotion }) {
+function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLoggedIn, onGatedClick }) {
   const ctaInner = (
     <>
       <span className="pointer-events-none absolute inset-0 rounded-[999px] bg-gradient-to-r from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
@@ -141,6 +141,17 @@ function ViewProfileCta({ profileUrl, compact, reducedMotion }) {
   }`;
 
   const liveProfilePath = profileUrl && profileUrl !== "/profile" ? profileUrl : null;
+
+  // Gated: not featured + not logged in → show login popup
+  const isGated = !isFeatured && !isLoggedIn;
+
+  if (isGated) {
+    return (
+      <button type="button" className={className} onClick={onGatedClick}>
+        {ctaInner}
+      </button>
+    );
+  }
 
   if (liveProfilePath) {
     return (
@@ -206,6 +217,7 @@ function AdvisorProfileCardCompact({
   clients, clientsLabel = "Clients", recs,
   profileUrl, avatarUrl, showIdentityVerified = false,
   serviceTypes = [], achievementTags = [],
+  isFeatured = true, isLoggedIn = true, onGatedClick,
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const numericScore = Math.min(100, Math.max(0, Number(score) || 0));
@@ -305,7 +317,10 @@ function AdvisorProfileCardCompact({
               ))}
             </div>
 
-            <ViewProfileCta profileUrl={profileUrl} compact reducedMotion={reducedMotion} />
+            <ViewProfileCta
+              profileUrl={profileUrl} compact reducedMotion={reducedMotion}
+              isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
+            />
           </div>
 
         </div>
@@ -320,6 +335,7 @@ export function AdvisorProfileCard({
   clients, clientsLabel = "Clients", recs,
   profileUrl, avatarUrl, showIdentityVerified = false,
   serviceTypes = [], achievementTags = [], variant = "default",
+  isFeatured = true, isLoggedIn = true, onGatedClick,
 }) {
   if (variant === "compact") {
     return (
@@ -328,6 +344,7 @@ export function AdvisorProfileCard({
         avgRating={avgRating} profileUrl={profileUrl} avatarUrl={avatarUrl}
         showIdentityVerified={showIdentityVerified}
         serviceTypes={serviceTypes} achievementTags={achievementTags}
+        isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
       />
     );
   }
@@ -433,7 +450,10 @@ export function AdvisorProfileCard({
               ))}
             </div>
 
-            <ViewProfileCta profileUrl={profileUrl} compact={false} reducedMotion={reducedMotion} />
+            <ViewProfileCta
+              profileUrl={profileUrl} compact={false} reducedMotion={reducedMotion}
+              isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
+            />
           </div>
 
         </div>
