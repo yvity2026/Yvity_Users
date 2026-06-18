@@ -210,6 +210,7 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
   const [expandedServiceId, setExpandedServiceId] = useState("");
   const [documents, setDocuments] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState("free");
+  const [planPriceOverrides, setPlanPriceOverrides] = useState(null);
   const [stepAlert, setStepAlert] = useState("");
   const [invalidFields, setInvalidFields] = useState({});
   const stepAlertRef = useRef(null);
@@ -234,6 +235,18 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
   );
 
   const hasEnteredData = selectedServices.length > 0 || documents.length > 0;
+
+  /* ── Admin plan prices — load once so plan cards show live prices ── */
+  useEffect(() => {
+    fetch("/api/advisor/subscription/plan-prices")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result?.success && Array.isArray(result.data)) {
+          setPlanPriceOverrides(result.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   /* ── Roles fetch — checked early so errors surface at review ── */
   useEffect(() => {
@@ -1388,6 +1401,7 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
       onSelectPlan={handlePlanSelect}
       paymentDone={paymentDone}
       paidPlanId={paidPlanId}
+      planPriceOverrides={planPriceOverrides}
     />
   );
 
