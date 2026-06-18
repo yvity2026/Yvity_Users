@@ -8,7 +8,7 @@ import {
   emailExists,
   normalizeEmail,
   normalizeIndianMobile,
-  phoneExists,
+  phoneExistsAsync,
   readVerifiedCookie,
   registerUserRecord,
   toAuthUser,
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (phoneExists(mobile)) {
+    if (await phoneExistsAsync(mobile)) {
       return NextResponse.json(
         { error: EXISTING_PHONE_MESSAGE, phoneExists: true, redirectToLogin: true },
         { status: 409 },

@@ -5,7 +5,7 @@ import {
   emailExists,
   normalizeEmail,
   normalizeIndianMobile,
-  phoneExists,
+  phoneExistsAsync,
 } from "@/lib/server/registration";
 
 export async function POST(request: Request) {
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const phoneTaken = shouldCheckPhone && phoneExists(mobile);
+    const phoneTaken = shouldCheckPhone && (await phoneExistsAsync(mobile));
     const emailTaken = shouldCheckEmail && emailExists(email);
 
     return NextResponse.json({

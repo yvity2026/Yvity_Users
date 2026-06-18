@@ -8,7 +8,6 @@ import { previewCouponDiscount, reserveCouponForOrder } from "@/lib/server/coupo
 import { getAdminPlanPrices, getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { createPendingPayment } from "@/lib/server/payment-store";
-import { resolveRegisteredUser } from "@/lib/server/profile";
 import {
   createRazorpayOrder,
   getRazorpayKeyId,
@@ -16,7 +15,7 @@ import {
 } from "@/lib/server/razorpay";
 import { getSessionUser } from "@/lib/server/session";
 import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
-import { upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
+import { loadUserByIdFromDb, upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,9 +76,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Ensure user exists in DB before inserting payment (FK: advisor_payments.user_id → users.id)
-    const registered = resolveRegisteredUser(session);
-    if (registered && useSupabasePersistence()) {
+    // Ensure user exists in users table before inserting payment (FK: advisor_payments.user_id → users.id).
+    // resolveRegisteredUser uses the local JSON store which is always empty on Vercel, so we
+    // load from Supabase directly and upsert to guarantee the row exists.
+    let registered = useSupabasePersistence() ? await loadUserByIdFromDb(session.id) : null;
+    if (registered) {
       await upsertUserToDb(registered);
     }
 
