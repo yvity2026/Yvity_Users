@@ -12,24 +12,27 @@ import "./yvity-landing.css";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
   title: {
-    default: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
+    default: `${COMPANY_NAME} — India's First Credibility Platform for Insurance Advisors`,
     template: `%s — ${COMPANY_NAME}`,
   },
-  description: `${COMPANY_TAGLINE}. Premium, verified career profiles for advisors and professionals.`,
+  description:
+    "Find verified, IRDAI-ready insurance advisors near you — or build your own credible profile that speaks before you do. Free to join. Trusted by advisors & clients across India.",
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
-    description: `${COMPANY_TAGLINE}. Verified career profiles built for advisors and professionals.`,
+    title: `${COMPANY_NAME} — India's First Credibility Platform for Insurance Advisors`,
+    description:
+      "Find verified, IRDAI-ready insurance advisors near you — or build your own credible profile that speaks before you do. Free to join. Trusted by advisors & clients across India.",
     type: "website",
     images: [platformOpenGraphImage()],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${COMPANY_NAME} — ${COMPANY_TAGLINE}`,
-    description: `${COMPANY_TAGLINE}. Verified career profiles built for advisors and professionals.`,
+    title: `${COMPANY_NAME} — India's First Credibility Platform for Insurance Advisors`,
+    description:
+      "Find verified, IRDAI-ready insurance advisors near you — or build your own credible profile that speaks before you do. Free to join. Trusted by advisors & clients across India.",
     images: [platformOpenGraphImage().url],
   },
 };
