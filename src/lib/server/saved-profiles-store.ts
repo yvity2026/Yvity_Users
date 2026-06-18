@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { canUseLocalDataFiles } from "@/lib/server/json-store";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const SAVED_FILE = path.join(DATA_DIR, "saved-profiles.json");
@@ -21,7 +22,12 @@ function emptyDb(): SavedProfilesDb {
 }
 
 function ensureDataDir() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!canUseLocalDataFiles()) return;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch {
+    // Read-only filesystem (Vercel)
+  }
 }
 
 export function loadSavedProfilesDb(): SavedProfilesDb {
@@ -43,8 +49,13 @@ export function loadSavedProfilesDb(): SavedProfilesDb {
 
 export function saveSavedProfilesDb(next: SavedProfilesDb) {
   cache = next;
+  if (!canUseLocalDataFiles()) return;
   ensureDataDir();
-  fs.writeFileSync(SAVED_FILE, JSON.stringify(next, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(SAVED_FILE, JSON.stringify(next, null, 2), "utf-8");
+  } catch {
+    // Read-only filesystem (Vercel) — in-memory cache is the source of truth
+  }
 }
 
 export function mutateSavedProfilesDb(mutator: (db: SavedProfilesDb) => void) {

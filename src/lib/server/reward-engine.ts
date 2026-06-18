@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
+import { canUseLocalDataFiles } from "@/lib/server/json-store";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const REWARD_ENGINE_FILE = "reward-engine-campaigns.json";
@@ -50,8 +51,13 @@ function readJson<T>(filename: string, fallback: T): T {
 }
 
 function writeJson<T>(filename: string, data: T) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
+  if (!canUseLocalDataFiles()) return;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
+  } catch {
+    // Read-only filesystem (Vercel)
+  }
 }
 
 function computeEffectiveStatus(campaign: RewardCampaign, now = new Date()) {
