@@ -1,6 +1,7 @@
 import "server-only";
 
-import { loadJsonFile } from "@/lib/server/json-store";
+import { loadJsonFile, canUseLocalDataFiles } from "@/lib/server/json-store";
+import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
 import type { PlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { PLAN_LIMITS as DEFAULT_PLAN_LIMITS } from "@/lib/advisor-membership/plan-limits";
@@ -70,7 +71,19 @@ function toUsersPlanLimits(record: AdminLimitRecord = {}): PlanLimits {
   };
 }
 
+async function loadConfigFromSupabase(): Promise<FeatureControlsConfig> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return {};
+  const { data } = await supabase
+    .from("platform_configs")
+    .select("config")
+    .eq("key", "feature_controls")
+    .maybeSingle();
+  return (data?.config as FeatureControlsConfig) || {};
+}
+
 async function loadConfig(): Promise<FeatureControlsConfig> {
+  if (!canUseLocalDataFiles()) return loadConfigFromSupabase();
   return loadJsonFile<FeatureControlsConfig>(CONFIG_FILE, {});
 }
 
