@@ -20,6 +20,10 @@ export function useModalFocusTrap({
   focusKey,
 }: UseModalFocusTrapOptions) {
   const previouslyFocusedRef = useRef<Element | null>(null);
+  // Keep onEscape in a ref so it never needs to be a dependency — prevents
+  // the effect from re-firing (and stealing focus) on every parent re-render.
+  const onEscapeRef = useRef(onEscape);
+  onEscapeRef.current = onEscape;
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -35,7 +39,7 @@ export function useModalFocusTrap({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onEscape?.();
+        onEscapeRef.current?.();
         return;
       }
 
@@ -67,5 +71,5 @@ export function useModalFocusTrap({
         prev.focus();
       }
     };
-  }, [isOpen, onEscape, panelRef, focusKey]);
+  }, [isOpen, panelRef, focusKey]); // onEscape intentionally excluded — used via ref above
 }
