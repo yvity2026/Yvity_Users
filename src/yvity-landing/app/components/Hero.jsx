@@ -13,25 +13,6 @@ import { useLandingMobileNavOptional } from "@/yvity-landing/app/components/home
 import { scrollToSection } from "@/yvity-landing/lib/landing/scrollToSection";
 import { usePathname, useRouter } from "next/navigation";
 
-const HERO_PREVIEW_ADVISOR = {
-  name: "Krishna Mohan Noti",
-  title: "Chief Life Planner",
-  location: "Guntur, Andhra Pradesh",
-  score: 45,
-  exp: "7",
-  reviews: "2",
-  avgRating: "4.5",
-  recs: "0",
-  clients: "127",
-  clientsLabel: "Clients",
-  serviceTypes: ["Life Insurance", "Health Insurance", "General Insurance"],
-  achievementTags: ["MDRT x 2"],
-  profileUrl: "/krishnamohannoti",
-  profileSlug: "krishnamohannoti",
-  avatarUrl: "https://akwvvhntxbhjyixaxhpv.supabase.co/storage/v1/object/public/selfies/9705159705/9705159705-5d7f1012.jpg",
-  showVerifiedBadge: true,
-  showIdentityVerified: true,
-};
 
 const HERO_ADVISOR_POINTS = [
   "Verified, scored & shareable profile",
@@ -74,9 +55,7 @@ const Hero = ({ advisor = [] }) => {
   const reducedMotion = usePrefersReducedMotion();
   const [audience, setAudience] = useState("customer");
   const heroAdvisors = Array.isArray(advisor) ? advisor : [];
-  const displayAdvisor = toAdvisorCardGoldProps(
-    heroAdvisors[0] ?? HERO_PREVIEW_ADVISOR,
-  );
+  const displayAdvisor = heroAdvisors[0] ? toAdvisorCardGoldProps(heroAdvisors[0]) : null;
   const heroCopy = HERO_COPY[audience];
 
   const goToFindAdvisors = useCallback(() => {
@@ -141,11 +120,11 @@ const Hero = ({ advisor = [] }) => {
       className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+1rem)] sm:pt-[calc(4rem+1.125rem)] md:pb-10 lg:pt-[calc(4.375rem+1.25rem)] xl:pt-[calc(4.375rem+1.5rem)] ${LANDING_SECTION_ANCHOR}`}
     >
       <div
-        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10`}
+        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 ${displayAdvisor ? "lg:grid-cols-12" : ""} lg:gap-8 xl:gap-10`}
       >
         {/* Left side Panel */}
         <motion.div
-          className="relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-6 text-center md:gap-7 lg:col-span-6 lg:items-start lg:text-left xl:col-span-7"
+          className={`relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-6 text-center md:gap-7 lg:items-start lg:text-left ${displayAdvisor ? "lg:col-span-6 xl:col-span-7" : "lg:col-span-12"}`}
           {...(reducedMotion
             ? {}
             : {
@@ -274,24 +253,26 @@ const Hero = ({ advisor = [] }) => {
             )}
           </div>
         </motion.div>
-        {/* Right side panel */}
-<motion.div
-    className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
-    {...(reducedMotion
-      ? {}
-      : {
-          initial: { x: 100, opacity: 0 },
-          whileInView: { x: 0, opacity: 1 },
-          transition: { duration: 0.8, ease: "easeOut", delay: 0.2 },
-          viewport: { once: true, margin: "-100px" },
-        })}
-  >
-    <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
-      <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
-        <AdvisorProfileCard {...displayAdvisor} key={displayAdvisor.name} />
-      </div>
-    </div>
-  </motion.div>
+        {/* Right side panel — only shown when a real advisor exists in DB */}
+        {displayAdvisor && (
+          <motion.div
+            className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
+            {...(reducedMotion
+              ? {}
+              : {
+                  initial: { x: 100, opacity: 0 },
+                  whileInView: { x: 0, opacity: 1 },
+                  transition: { duration: 0.8, ease: "easeOut", delay: 0.2 },
+                  viewport: { once: true, margin: "-100px" },
+                })}
+          >
+            <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
+              <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
+                <AdvisorProfileCard {...displayAdvisor} key={displayAdvisor.name} />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
       </div>
       {/* Count Bar — hidden when all stats are zero (e.g. empty local DB) */}
