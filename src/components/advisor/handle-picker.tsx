@@ -113,7 +113,7 @@ export function HandlePicker({ defaultHandle = "", onChange, className }: Handle
             type="text"
             value={raw}
             onChange={(e) => handleInput(e.target.value)}
-            placeholder="krishnamohannoti"
+            placeholder="yourname"
             minLength={HANDLE_MIN}
             maxLength={HANDLE_MAX}
             autoComplete="off"
