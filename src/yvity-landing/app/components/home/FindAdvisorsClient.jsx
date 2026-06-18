@@ -34,9 +34,11 @@ function FilterField({ label, className = "", children }) {
 export default function FindAdvisorsClient({
   featuredAdvisors = [],
   allAdvisors = [],
-  featuredIds = new Set(),
+  featuredIdList = [],   // array — Set can't cross RSC boundary
   isLoggedIn = false,
 }) {
+  // Convert array to Set once for O(1) lookups
+  const featuredIds = useMemo(() => new Set(featuredIdList), [featuredIdList]);
   const [searchState, setSearchState] = useState("");
   const [searchCity, setSearchCity] = useState("");
   const [searchService, setSearchService] = useState("");

@@ -1,24 +1,16 @@
 import FindAdvisorsClient from "./FindAdvisorsClient";
 
-/**
- * @param {{
- *   featuredAdvisors?: import("@/lib/advisors/mock-public-advisors").PublicAdvisorCard[],
- *   allAdvisors?: import("@/lib/advisors/mock-public-advisors").PublicAdvisorCard[],
- *   featuredIds?: Set<string>,
- *   isLoggedIn?: boolean
- * }} props
- */
 export default function FindAdvisors({
   featuredAdvisors = [],
   allAdvisors = [],
-  featuredIds = new Set(),
+  featuredIdList = [],
   isLoggedIn = false,
 }) {
   return (
     <FindAdvisorsClient
       featuredAdvisors={featuredAdvisors}
       allAdvisors={allAdvisors}
-      featuredIds={featuredIds}
+      featuredIdList={featuredIdList}
       isLoggedIn={isLoggedIn}
     />
   );

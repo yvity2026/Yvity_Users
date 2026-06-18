@@ -38,7 +38,8 @@ export default async function LandingPage() {
   const heroAdvisors = pickHeroAdvisors(advisors);
   const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
   const isLoggedIn = Boolean(session);
-  const featuredIds = new Set<string>(landingAdvisors.map((a) => a.id).filter(Boolean));
+  // Array — Set is not serializable across the RSC boundary
+  const featuredIdList: string[] = landingAdvisors.map((a) => a.id).filter(Boolean);
 
   const landingSections: LandingSection[] = [
     {
@@ -58,7 +59,7 @@ export default async function LandingPage() {
             {...({
               featuredAdvisors: landingAdvisors,
               allAdvisors: advisors,
-              featuredIds,
+              featuredIdList,
               isLoggedIn,
             } as any)}
           />
