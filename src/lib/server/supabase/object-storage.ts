@@ -38,6 +38,25 @@ export function isSupabasePublicStorageUrl(
   return trimmed.includes(`/storage/v1/object/public/${bucket}/`);
 }
 
+/** Public buckets serve files via a public URL (selfies, gallery, intro video). */
+const PUBLIC_BUCKETS = new Set<StorageBucket>(["selfies", "gallery", "intro-video"]);
+
+/**
+ * Ensures a storage bucket exists, creating it if missing.
+ * Safe to call on every upload — Supabase returns a no-op if the bucket already exists.
+ */
+async function ensureBucket(supabase: NonNullable<ReturnType<typeof getAdminClientOrNull>>, bucket: StorageBucket): Promise<void> {
+  const isPublic = PUBLIC_BUCKETS.has(bucket);
+  const { error } = await supabase.storage.createBucket(bucket, {
+    public: isPublic,
+    allowedMimeTypes: undefined, // allow all — validation is done in app layer
+  });
+  // "already exists" is not a real error
+  if (error && !error.message.toLowerCase().includes("already exist")) {
+    console.warn(`[storage] Could not ensure bucket "${bucket}": ${error.message}`);
+  }
+}
+
 export async function uploadObject(
   bucket: StorageBucket,
   objectPath: string,
@@ -47,6 +66,9 @@ export async function uploadObject(
 ): Promise<void> {
   const supabase = getAdminClientOrNull();
   if (!supabase) throw new Error("Supabase is not configured");
+
+  // Auto-create bucket if it doesn't exist (handles first-time Supabase setup)
+  await ensureBucket(supabase, bucket);
 
   const path = objectPath.replace(/^\/+/, "");
   const { error } = await supabase.storage.from(bucket).upload(path, body, {

@@ -781,7 +781,12 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
       onClose?.();
       router.replace("/dashboard/my-space?setup=submitted");
     } catch (error) {
-      toast.error(error?.message || "Submission failed");
+      const msg = error?.message || "Submission failed";
+      // Give a clearer message for known Supabase storage errors
+      const friendlyMsg = msg.toLowerCase().includes("bucket")
+        ? "Document upload failed — storage not configured. Please try again or contact support."
+        : msg;
+      toast.error(friendlyMsg, { duration: 6000 });
     } finally {
       setSubmitting(false);
       setUploadingDocs(false);
