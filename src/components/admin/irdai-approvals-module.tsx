@@ -303,32 +303,38 @@ export function IrdaiApprovalsModule() {
                   {selected.rejectionReason}
                 </p>
               )}
-              {selected.licenseUrl && (
-                <a
-                  href={selected.licenseUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-                >
-                  <ExternalLink className="size-3.5" />
-                  View IRDAI certificate
-                </a>
-              )}
-              {selected.document_urls.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selected.document_urls.map((url) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs rounded-lg border border-white/10 px-2 py-1 hover:bg-white/5"
-                    >
-                      Document
-                    </a>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Uploaded proof</p>
+                {(selected.licenseUrl || selected.document_urls.length > 0) ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selected.licenseUrl && (
+                      <a
+                        href={selected.licenseUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        View IRDAI certificate
+                      </a>
+                    )}
+                    {selected.document_urls.map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs rounded-lg border border-white/10 px-2 py-1 hover:bg-white/5"
+                      >
+                        <FileText className="size-3" />
+                        Document
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">No documents uploaded by this advisor.</p>
+                )}
+              </div>
               {selected.status === "pending" && (
                 <div className="flex gap-2 pt-2">
                   <Button
