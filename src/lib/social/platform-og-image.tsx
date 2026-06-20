@@ -1,10 +1,8 @@
-import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
+import { COMPANY_NAME } from "@/lib/brand";
 
 export type PlatformOgImageInput = {
   logoSrc: string;
 };
-
-const FEATURES = ["IRDAI-ready profiles", "YVITY Score", "Shareable & verified"] as const;
 
 /** JSX tree for `next/og` ImageResponse — YVITY platform / home share card. */
 export function PlatformOgImage({ logoSrc }: PlatformOgImageInput) {
@@ -16,95 +14,168 @@ export function PlatformOgImage({ logoSrc }: PlatformOgImageInput) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: 56,
-        background: "linear-gradient(135deg, #071f1f 0%, #0f4f4f 40%, #0a3535 100%)",
+        padding: "52px 60px",
+        background: "linear-gradient(135deg, #061a1a 0%, #0b3d3d 45%, #072828 100%)",
         color: "#f8faf9",
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          alignSelf: "flex-start",
-          padding: "10px 18px",
-          borderRadius: 999,
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.14)",
-        }}
-      >
-        <img src={logoSrc} alt="" width={44} height={44} style={{ objectFit: "contain" }} />
-        <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: 3 }}>{COMPANY_NAME}</span>
+      {/* Top bar — logo + brand name */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 52,
+            height: 52,
+            borderRadius: 14,
+            background: "rgba(255,255,255,0.95)",
+            border: "2px solid rgba(245,158,11,0.5)",
+          }}
+        >
+          <img src={logoSrc} alt="" width={36} height={36} style={{ objectFit: "contain" }} />
+        </div>
+        <span
+          style={{
+            fontSize: 26,
+            fontWeight: 800,
+            letterSpacing: 4,
+            color: "#ffffff",
+          }}
+        >
+          {COMPANY_NAME}
+        </span>
+        <div
+          style={{
+            marginLeft: 12,
+            padding: "5px 14px",
+            borderRadius: 999,
+            background: "rgba(245,158,11,0.15)",
+            border: "1px solid rgba(245,158,11,0.4)",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#F59E0B",
+            letterSpacing: 0.5,
+          }}
+        >
+          yvity.com
+        </div>
       </div>
 
+      {/* Main content */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
           gap: 20,
         }}
       >
+        {/* Eyebrow badge */}
         <div
           style={{
-            width: 148,
-            height: 148,
-            borderRadius: 36,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(255,255,255,0.95)",
-            border: "4px solid rgba(245, 158, 11, 0.55)",
-            boxShadow: "0 20px 56px rgba(0,0,0,0.35)",
+            gap: 8,
+            width: "fit-content",
           }}
         >
-          <img src={logoSrc} alt="" width={108} height={108} style={{ objectFit: "contain" }} />
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#F59E0B",
+            }}
+          />
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.65)",
+              letterSpacing: 0.3,
+            }}
+          >
+            India&apos;s First Credibility Platform
+          </span>
         </div>
 
-        <div style={{ fontSize: 64, fontWeight: 800, letterSpacing: 2, lineHeight: 1 }}>
-          {COMPANY_NAME}
-        </div>
+        {/* Headline */}
         <div
           style={{
-            fontSize: 34,
-            fontWeight: 700,
-            color: "#F59E0B",
-            letterSpacing: 0.5,
-            lineHeight: 1.2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
           }}
         >
-          {COMPANY_TAGLINE}
+          <span
+            style={{
+              fontSize: 62,
+              fontWeight: 800,
+              lineHeight: 1.08,
+              color: "#ffffff",
+              letterSpacing: -1,
+            }}
+          >
+            For Insurance Advisors
+          </span>
+          <span
+            style={{
+              fontSize: 62,
+              fontWeight: 800,
+              lineHeight: 1.08,
+              color: "#F59E0B",
+              letterSpacing: -1,
+            }}
+          >
+            &amp; Their Clients.
+          </span>
         </div>
+
+        {/* Description */}
         <div
           style={{
             fontSize: 24,
-            lineHeight: 1.45,
-            color: "rgba(255,255,255,0.72)",
+            lineHeight: 1.5,
+            color: "rgba(255,255,255,0.68)",
             maxWidth: 820,
           }}
         >
-          Build a verified, scored, and shareable profile — or find trusted insurance advisors
-          near you.
+          Build a verified, IRDAI-ready profile that earns trust — or find the right advisor near
+          you with real credentials, real reviews.
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 14 }}>
-        {FEATURES.map((label) => (
+      {/* Bottom CTA row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            padding: "14px 28px",
+            borderRadius: 999,
+            background: "#F59E0B",
+            fontSize: 18,
+            fontWeight: 700,
+            color: "#071f1f",
+            letterSpacing: 0.3,
+          }}
+        >
+          Join Free Today →
+        </div>
+        {["IRDAI-Ready Profiles", "YVITY Score", "Verified Badge"].map((label) => (
           <div
             key={label}
             style={{
               padding: "12px 20px",
               borderRadius: 999,
-              background: "rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.07)",
               border: "1px solid rgba(255,255,255,0.14)",
               fontSize: 16,
               fontWeight: 600,
-              color: "rgba(255,255,255,0.88)",
+              color: "rgba(255,255,255,0.8)",
             }}
           >
-            {label}
+            ✓ {label}
           </div>
         ))}
       </div>

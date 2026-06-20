@@ -4,7 +4,13 @@ import { Check } from "lucide-react";
 import { MEMBERSHIP_PLANS } from "@/lib/advisor-membership/plans";
 import { cn } from "@/lib/utils";
 
-export function SetupPlanStep({ selectedPlan, onSelectPlan, paymentDone, paidPlanId }) {
+export function SetupPlanStep({ selectedPlan, onSelectPlan, paymentDone, paidPlanId, planPriceOverrides }) {
+  // planPriceOverrides: Array<{ id, priceAnnualInr, priceLabel }> from admin platform_configs
+  const getDisplayPrice = (plan) => {
+    const override = planPriceOverrides?.find((p) => p.id === plan.id);
+    return override ? override.priceLabel : plan.priceLabel;
+  };
+
   return (
     <div className="space-y-4">
       <p className="font-poppins text-sm leading-relaxed text-[#64748B]">
@@ -42,7 +48,7 @@ export function SetupPlanStep({ selectedPlan, onSelectPlan, paymentDone, paidPla
                   ) : null}
                 </div>
                 <p className="mt-2 font-poppins text-lg font-bold text-[#0F172A]">
-                  {plan.priceLabel}
+                  {getDisplayPrice(plan)}
                 </p>
                 <p className="mt-1 font-poppins text-xs leading-relaxed text-[#64748B]">
                   {plan.tagline}

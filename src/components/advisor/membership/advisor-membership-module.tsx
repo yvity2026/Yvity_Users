@@ -65,6 +65,17 @@ export function AdvisorMembershipModule() {
   const accountStatus = advisor?.account_status;
   const [payments, setPayments] = useState<MembershipPaymentRow[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(true);
+  const [planPriceOverrides, setPlanPriceOverrides] = useState<Array<{ id: string; priceAnnualInr: number; priceLabel: string }> | null>(null);
+
+  useEffect(() => {
+    fetch("/api/advisor/subscription/plan-prices")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result?.success && Array.isArray(result.data)) setPlanPriceOverrides(result.data);
+      })
+      .catch(() => {});
+  }, []);
+
   const model = useMemo(
     () =>
       buildMembershipModel({
@@ -87,6 +98,17 @@ export function AdvisorMembershipModule() {
     target?: MembershipPlanId;
     couponCode?: string;
   }>({ open: false, mode: "renew" });
+
+  const plansWithPrices = useMemo(
+    () =>
+      model.plans.map((p) => {
+        const override = planPriceOverrides?.find((o) => o.id === p.id);
+        return override
+          ? { ...p, priceAnnualInr: override.priceAnnualInr, priceLabel: override.priceLabel }
+          : p;
+      }),
+    [model.plans, planPriceOverrides],
+  );
 
   const upgradeTarget = upgradePlanId(model.current.planId);
   const { current, renewal } = model;
@@ -298,7 +320,7 @@ export function AdvisorMembershipModule() {
         }
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {model.plans.map((plan) => (
+          {plansWithPrices.map((plan) => (
             <PlanCompareCard
               key={plan.id}
               plan={plan}
@@ -307,7 +329,7 @@ export function AdvisorMembershipModule() {
                 if (plan.id === current.planId) return;
                 if (
                   plan.priceAnnualInr >
-                  (model.plans.find((p) => p.id === current.planId)?.priceAnnualInr ?? 0)
+                  (plansWithPrices.find((p) => p.id === current.planId)?.priceAnnualInr ?? 0)
                 ) {
                   openUpgrade(plan.id);
                 }
@@ -321,7 +343,7 @@ export function AdvisorMembershipModule() {
             <thead>
               <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3 font-semibold">Feature</th>
-                {model.plans.map((p) => (
+                {plansWithPrices.map((p) => (
                   <th key={p.id} className="px-4 py-3 font-semibold text-center">
                     {p.name}
                   </th>
@@ -332,7 +354,7 @@ export function AdvisorMembershipModule() {
               {allPlanComparisonLabels().map((label) => (
                 <tr key={label} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-2.5 text-muted-foreground">{label}</td>
-                  {model.plans.map((p) => (
+                  {plansWithPrices.map((p) => (
                     <td key={p.id} className="px-4 py-2.5 text-center">
                       {planMarketingIncludes(p.id, label) ? (
                         <Check className="size-4 mx-auto text-[oklch(0.82_0.16_162)]" />
