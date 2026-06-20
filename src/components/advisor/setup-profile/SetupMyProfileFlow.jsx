@@ -595,7 +595,8 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
   };
 
   const handleRequestClose = () => {
-    if (hasEnteredData) {
+    // Show save dialog if user has progressed past step 0 or entered any data
+    if (stepIndex > 0 || hasEnteredData) {
       setShowCloseConfirm(true);
     } else {
       onClose?.();
@@ -857,9 +858,9 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
     const discardContent = (
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <AlertTriangle className="mb-3 h-10 w-10 text-[#F59E0B]" />
-        <h3 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">Save your progress?</h3>
+        <h3 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">Discard progress?</h3>
         <p className="mx-auto mt-2 max-w-xs font-poppins text-sm leading-relaxed text-[#6B7280]">
-          Save as a draft and continue later, or discard everything and start fresh next time.
+          Your setup is saved as a draft. You can continue from where you left off when you log in next time.
         </p>
         <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
           <button
@@ -878,14 +879,14 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
             }}
             className="w-full rounded-xl border border-[#0A4A4A]/30 bg-[#F0FAFA] py-3 font-poppins text-sm font-semibold text-[#0A4A4A] hover:border-[#0A4A4A]/60"
           >
-            Save draft &amp; close
+            Yes, save &amp; close
           </button>
           <button
             type="button"
             onClick={() => { clearDraft(); setShowCloseConfirm(false); onClose?.(); }}
-            className="w-full rounded-xl border border-[#E4E2DB] py-3 font-poppins text-sm font-semibold text-[#6B7280] hover:border-red-300 hover:text-red-600"
+            className="font-poppins text-xs text-[#9CA3AF] hover:text-red-500 transition-colors py-1"
           >
-            Discard &amp; close
+            Discard progress &amp; close
           </button>
         </div>
       </div>
