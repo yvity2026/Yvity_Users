@@ -96,8 +96,10 @@ export function ServicesEditorModal({
   );
 
   const verification = draft.verification;
-  const canSubmit = pendingDocs.length > 0;
+  const hasDocs = pendingDocs.length > 0;
   const isResubmit = verification.status === "rejected";
+  // Save is always allowed; docs are only required for verification submission
+  const canSubmit = true;
 
   // Used as the `max` attribute on the date input — advisors can't start
   // a service in the future, and the native picker will clamp accordingly.
@@ -143,7 +145,6 @@ export function ServicesEditorModal({
   };
 
   const save = () => {
-    if (!canSubmit) return;
     const areas = areasText
       .split(",")
       .map((s) => s.trim())
@@ -154,7 +155,7 @@ export function ServicesEditorModal({
     // Otherwise, if docs changed → new submission. Otherwise → keep record.
     const docsChanged =
       docsDirty ||
-      verification.status !== "verified" ||
+      (verification.status !== "verified" && hasDocs) ||
       pendingDocs.length !== (verification.documents ?? []).length;
 
     const nextVerification = needsReapproval
@@ -531,9 +532,9 @@ export function ServicesEditorModal({
             suggestedLabels={suggestedDocs}
           />
 
-          {!canSubmit && (
-            <p className="text-[11px] text-destructive font-medium">
-              At least one supporting document is required.
+          {!hasDocs && (
+            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+              Upload at least one document for YVITY verification. Without it, this service won&apos;t be verified on your public profile.
             </p>
           )}
         </section>
