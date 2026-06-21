@@ -11,11 +11,11 @@ import { handleFromName } from "@/lib/advisor/handle";
 import { Button } from "@/components/ui/button";
 
 export function AdvisorHandleSection() {
-  const { advisor, setAdvisor } = useAuth();
+  const { advisor, setAdvisor, user } = useAuth();
   const slug = advisor?.profile_slug?.trim() ?? "";
   const segment = toPublicProfileSlugSegment(slug);
   // Hyphenated suggestion derived from full name — shown as default in edit mode
-  const nameSuggestion = advisor?.name ? handleFromName(advisor.name) : segment;
+  const nameSuggestion = user?.name ? handleFromName(user.name) : segment;
 
   const siteUrl =
     typeof window !== "undefined" ? window.location.origin : "https://yvity.com";
