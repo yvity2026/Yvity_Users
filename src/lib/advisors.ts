@@ -73,10 +73,13 @@ export async function getPublicAdvisors(
     const fromSupabase = await fetchSupabasePublicAdvisors(excludeId);
     if (fromSupabase !== null) {
       advisors = await mergeLocalAdvisorCardMetrics(fromSupabase);
+      console.log(`[advisors] Supabase returned ${advisors.length} advisor(s)`);
       if (advisors.length > 0) return advisors;
+    } else {
+      console.warn("[advisors] Supabase client not configured — no admin client available");
     }
   } catch (error) {
-    console.warn("[advisors] Supabase fetch failed, using local data:", error);
+    console.error("[advisors] Supabase fetch failed:", error instanceof Error ? error.message : error);
   }
 
   const local = await loadLocalPublicAdvisors(excludeId);

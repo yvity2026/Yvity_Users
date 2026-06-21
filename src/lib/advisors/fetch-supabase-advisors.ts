@@ -229,11 +229,13 @@ export async function fetchSupabasePublicAdvisors(
       .in("advisor_id", advisorIds),
   ]);
 
+  // Users are required to build cards — throw so the caller can surface the error.
   if (usersResult.error) throw new Error(`Failed to load users: ${usersResult.error.message}`);
-  if (servicesResult.error) throw new Error(`Failed to load services: ${servicesResult.error.message}`);
-  if (achievementsResult.error) throw new Error(`Failed to load achievements: ${achievementsResult.error.message}`);
-  if (testimonialsResult.error) throw new Error(`Failed to load testimonials: ${testimonialsResult.error.message}`);
-  if (recommendationsResult.error) throw new Error(`Failed to load recommendations: ${recommendationsResult.error.message}`);
+  // Auxiliary data errors degrade gracefully (score=0, no tags, etc.) rather than hiding all advisors.
+  if (servicesResult.error) console.error("[advisors] services fetch error:", servicesResult.error.message);
+  if (achievementsResult.error) console.error("[advisors] achievements fetch error:", achievementsResult.error.message);
+  if (testimonialsResult.error) console.error("[advisors] testimonials fetch error:", testimonialsResult.error.message);
+  if (recommendationsResult.error) console.error("[advisors] recommendations fetch error:", recommendationsResult.error.message);
 
   const usersById = new Map(
     (usersResult.data ?? []).map((user) => [user.id, user as Record<string, unknown>]),
