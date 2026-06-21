@@ -167,6 +167,17 @@ export async function countUniqueProfileViewsInMonthDb(
   return viewers.size;
 }
 
+/** Total all-time unique profile views — counts distinct viewer_keys across all months. */
+export async function countAllTimeUniqueProfileViewsDb(advisorUserId: string): Promise<number> {
+  const { data, error } = await client()
+    .from("advisor_profile_views")
+    .select("viewer_key")
+    .eq("advisor_id", advisorUserId);
+
+  if (error) throw new Error(error.message);
+  return new Set((data ?? []).map((row) => String(row.viewer_key))).size;
+}
+
 // --- Login days (advisor_login_activity) ---
 
 export async function recordAdvisorLoginDayInDb(userId: string): Promise<void> {

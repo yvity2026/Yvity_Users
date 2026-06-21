@@ -125,13 +125,19 @@ export function AdvisorInsightsModule({
         subtitle="How visitors discover and engage with your public profile"
         defaultOpen
       >
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           <DashboardStatCard
-            label="Profile Views This Month"
+            label="Total Profile Views"
             value={pp.totalProfileViews.toLocaleString("en-IN")}
-            delta={pp.monthViewsDelta}
             icon={Eye}
             accent="cyan"
+          />
+          <DashboardStatCard
+            label="This Month Views"
+            value={pp.monthProfileViews.toLocaleString("en-IN")}
+            delta={pp.monthViewsDelta}
+            icon={TrendingUp}
+            accent="emerald"
           />
           <DashboardStatCard
             label="Search Appearances"

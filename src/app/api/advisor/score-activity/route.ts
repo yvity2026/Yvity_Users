@@ -26,6 +26,7 @@ export async function GET() {
     : {
         profileViews: 0,
         profileViewsDelta: "0%",
+        totalProfileViews: 0,
         searchAppearances: 0,
         searchDelta: "0%",
       };
@@ -43,6 +44,7 @@ export async function GET() {
     negativeRules: buildDecayNegativeRules(state),
     profileViews: telemetry.profileViews,
     profileViewsDelta: telemetry.profileViewsDelta,
+    totalProfileViews: telemetry.totalProfileViews,
     searchAppearances: searchTelemetry.searchAppearances,
     searchDelta: searchTelemetry.searchDelta,
     analyticsEnabled: limits.profileAnalytics,

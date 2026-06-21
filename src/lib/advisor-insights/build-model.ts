@@ -130,6 +130,7 @@ export function buildInsightsModel(input: {
   monthlyActivity?: import("@/lib/advisor-score/decay").MonthlyScoreActivity;
   profileViews?: number;
   profileViewsDelta?: string;
+  totalProfileViews?: number;
   searchAppearances?: number;
   searchDelta?: string;
 }): InsightsModel {
@@ -184,14 +185,13 @@ export function buildInsightsModel(input: {
   const conversionRate =
     input.leads.length === 0 ? 0 : Math.round((leadStats.converted / input.leads.length) * 100);
 
-  // profileViews from score-activity is already the current-month unique viewer count.
-  // There is no separate all-time total — both "total" and "this month" cards show this value.
   const thisMonthViews = Math.max(0, input.profileViews ?? 0);
+  const allTimeViews = Math.max(0, input.totalProfileViews ?? thisMonthViews);
   const searchApps = Math.max(0, input.searchAppearances ?? 0);
 
   return {
     profilePerformance: {
-      totalProfileViews: thisMonthViews,
+      totalProfileViews: allTimeViews,
       monthProfileViews: thisMonthViews,
       monthViewsDelta: input.profileViewsDelta ?? "0%",
       searchAppearances: searchApps,

@@ -45,6 +45,7 @@ export function useAdvisorDashboardModel(): {
     monthlyActivity,
     profileViews,
     profileViewsDelta,
+    totalProfileViews,
     searchAppearances,
     searchDelta,
     loading: activityLoading,
