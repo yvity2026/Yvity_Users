@@ -93,16 +93,13 @@ export function suggestHandles(base: string, taken: Set<string>): string[] {
   return suggestions;
 }
 
-/** Build the full subdomain URL for a handle. */
+/** Build the full path URL for a handle — e.g. https://yvity.com/krishna-mohan-noti */
 export function buildHandleUrl(handle: string, baseUrl: string): string {
-  // In production: krishnamohannoti.yvity.com
-  // In dev: localhost:3002/{handle} (subdomains don't work on localhost)
   try {
     const url = new URL(baseUrl);
-    const isProd = !url.hostname.includes("localhost") && !url.hostname.includes("127.0.0.1");
-    if (isProd) {
-      return `${url.protocol}//${handle}.${url.hostname}`;
-    }
+    // Strip www. prefix so URL is always yvity.com/handle, not www.yvity.com/handle
+    const hostname = url.hostname.replace(/^www\./, "");
+    return `${url.protocol}//${hostname}/${handle}`;
   } catch {
     // fall through
   }

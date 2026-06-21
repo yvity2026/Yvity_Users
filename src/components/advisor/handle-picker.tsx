@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, Info, Loader2, XCircle } from "lucide-react";
 import { normalizeHandle, validateHandle, HANDLE_MIN, HANDLE_MAX } from "@/lib/advisor/handle";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ type HandlePickerProps = {
 const ROOT_DOMAIN =
   process.env.NEXT_PUBLIC_SITE_URL?.includes("localhost")
     ? null
-    : (process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "").split("/")[0] ?? "yvity.com");
+    : (process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0] ?? "yvity.com");
 
 export function HandlePicker({ defaultHandle = "", onChange, className }: HandlePickerProps) {
   const [raw, setRaw] = useState(defaultHandle);
@@ -87,9 +87,11 @@ export function HandlePicker({ defaultHandle = "", onChange, className }: Handle
     setRaw(value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, HANDLE_MAX));
   };
 
+  const normalizedRaw = normalizeHandle(raw) || "yourname";
   const previewUrl = ROOT_DOMAIN
-    ? `${normalizeHandle(raw) || "yourname"}.${ROOT_DOMAIN}`
-    : `yvity.com/${normalizeHandle(raw) || "yourname"}`;
+    ? `${ROOT_DOMAIN}/${normalizedRaw}`
+    : `yvity.com/${normalizedRaw}`;
+  const hasNoHyphens = normalizedRaw !== "yourname" && !normalizedRaw.includes("-");
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -136,9 +138,24 @@ export function HandlePicker({ defaultHandle = "", onChange, className }: Handle
 
         {/* Live URL preview */}
         <p className="mt-1.5 text-[11px] text-[#6B7280]">
-          Your profile URL:{" "}
+          Your public profile URL:{" "}
           <span className="font-semibold text-[#0A4A4A]">{previewUrl}</span>
         </p>
+
+        {/* Hyphen tip — shown when user types without hyphens */}
+        {hasNoHyphens && (
+          <div className="mt-2 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+            <Info className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+            <p className="text-[11px] leading-snug text-amber-800">
+              <span className="font-semibold">Tip: add hyphens between your name parts</span>
+              {" — e.g. "}
+              <span className="font-semibold">krishna-mohan-noti</span>
+              {" instead of "}
+              <span className="font-semibold">krishnamohannoti</span>
+              {". Hyphenated URLs are easier to read, share on WhatsApp, and rank higher on Google Search."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Status messages */}
