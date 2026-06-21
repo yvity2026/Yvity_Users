@@ -3,15 +3,15 @@
 }
 
 @layer utilities {
-  /* YVITY glass nav — frosted ivory surface, teal + saffron gold accent frame */
+  /* YVITY glass nav — surface follows the active profile theme via CSS vars */
   .glass-nav-mobile,
   .glass-nav-desktop {
-    background: linear-gradient(
+    background: var(--yvity-dash-nav-surface, linear-gradient(
       168deg,
       rgba(255, 255, 255, 0.92) 0%,
       rgba(252, 250, 246, 0.88) 55%,
       rgba(248, 246, 241, 0.84) 100%
-    );
+    ));
     -webkit-backdrop-filter: blur(22px) saturate(175%);
     backdrop-filter: blur(22px) saturate(175%);
     box-shadow:
@@ -495,7 +495,7 @@
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-nav-mobile,
   .glass-nav-desktop {
-    background: rgba(252, 250, 246, 0.96);
+    background: var(--yvity-dash-nav-surface, rgba(252, 250, 246, 0.96));
   }
 
   .advisor-glass-premium-body {
