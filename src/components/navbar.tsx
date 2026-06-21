@@ -29,8 +29,9 @@ function navLinkClass(active: boolean, base: string) {
 }
 
 function isActivePath(pathname: string, href: string, homeHref: string) {
-  if (href === "/profile") {
-    return pathname === "/profile" || isPublicAdvisorSlugPath(pathname);
+  // Home link — matches the slug home path or /profile
+  if (href === homeHref || href === "/profile") {
+    return pathname === "/profile" || isPublicAdvisorSlugPath(pathname) || pathname === homeHref;
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -155,8 +156,8 @@ export function Navbar() {
         onToggle={() => setExpanded((v) => !v)}
         pathname={pathname}
         homeHref={homeHref}
-        servicesHref="/services"
-        testimonialsHref="/testimonials"
+        servicesHref={homeHref === "/profile" ? "/services" : `${homeHref}/services`}
+        testimonialsHref={homeHref === "/profile" ? "/testimonials" : `${homeHref}/testimonials`}
       />
 
       {expanded && (
@@ -242,7 +243,7 @@ function MobileBottomBar({
   servicesHref: string;
   testimonialsHref: string;
 }) {
-  const homeActive = isActivePath(pathname, "/profile", homeHref);
+  const homeActive = isActivePath(pathname, homeHref, homeHref);
 
   return (
     <nav

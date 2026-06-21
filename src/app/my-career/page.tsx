@@ -1,17 +1,19 @@
 "use client";
 
+import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
 import { useCareerData } from "@/lib/career-store";
 import { CareerSectionsAccordion } from "@/components/career/career-sections-accordion";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { useAuth } from "@/context/AuthUserContext";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export default function MyCareerPage() {
+  const homeHref = usePublicProfileNavHome();
   const [data, , loading] = useCareerData();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { advisor } = useAuth();
@@ -19,6 +21,11 @@ export default function MyCareerPage() {
   const profileApproved = publicAdvisor
     ? isAdvisorProfileApproved(publicAdvisor.profile)
     : isAdvisorProfileApproved(advisor);
+
+  // Redirect visitors to slug-prefixed URL
+  if (homeHref && homeHref !== "/profile") {
+    return <PublicProfileSectionRedirect section="my-career" />;
+  }
 
   if (loading || settingsLoading) {
     return (

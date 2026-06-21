@@ -1,21 +1,16 @@
-import type { Metadata } from "next";
+"use client";
+
+import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 import { ServicesShowcase } from "@/components/sections/services-showcase";
-import type { ServiceCategory } from "@/lib/sections/types";
 
-export const metadata: Metadata = { title: "Services" };
+export default function ServicesPage() {
+  const homeHref = usePublicProfileNavHome();
 
-const VALID_CATEGORIES: ServiceCategory[] = ["life", "health", "general", "mutual"];
+  // Redirect visitors to slug-prefixed URL
+  if (homeHref && homeHref !== "/profile") {
+    return <PublicProfileSectionRedirect section="services" />;
+  }
 
-export default async function ServicesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  const params = await searchParams;
-  const raw = params.category;
-  const highlightCategory = VALID_CATEGORIES.includes(raw as ServiceCategory)
-    ? (raw as ServiceCategory)
-    : undefined;
-
-  return <ServicesShowcase highlightCategory={highlightCategory} />;
+  return <ServicesShowcase />;
 }
