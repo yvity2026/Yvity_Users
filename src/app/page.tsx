@@ -53,7 +53,9 @@ export default async function LandingPage() {
   };
 
   const [advisors, session, adminPlanPrices] = await Promise.all([
-    getPublicAdvisors(),
+    // Landing page shows all featured advisors — don't exclude the logged-in user
+    // (they may be the only/featured advisor and must appear in hero/find-advisors)
+    getPublicAdvisors({ excludeSelf: false }),
     getSessionUser(),
     getAdminPlanPrices(),
   ]);
