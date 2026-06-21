@@ -12,6 +12,11 @@ import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { useCareerData } from "@/lib/career-store";
 import { useGalleryData } from "@/lib/gallery-store";
 import { useAchievementsData, useServicesData, useTestimonialsData } from "@/lib/sections/stores";
+import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
+import { useVerifiedRecommendationCount } from "@/hooks/use-verified-recommendation-count";
+import { useProfileShareCounts } from "@/hooks/use-profile-share-counts";
+import { useScoreActivity } from "@/hooks/use-score-activity";
 
 export function useAdvisorInsightsModel(): {
   model: InsightsModel | null;
@@ -29,6 +34,21 @@ export function useAdvisorInsightsModel(): {
   const { limits } = usePlanLimits();
   const photoUrl = resolveProfilePhotoUrl(user?.selfie_url);
   const underReview = advisor?.account_status === "under_review";
+  const profileApproved = isAdvisorProfileApproved(advisor);
+  const { count: verifiedRecommendationCount, loading: recsLoading } =
+    useVerifiedRecommendationCount();
+  const {
+    decayPenalty,
+    decayActive,
+    graceDaysRemaining,
+    monthlyActivity,
+    profileViews,
+    profileViewsDelta,
+    searchAppearances,
+    searchDelta,
+    loading: activityLoading,
+  } = useScoreActivity();
+  const { selfShareCount, loading: sharesLoading } = useProfileShareCounts();
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +85,10 @@ export function useAdvisorInsightsModel(): {
     testimonialsLoading ||
     galleryLoading ||
     leadsLoading ||
-    settingsLoading;
+    settingsLoading ||
+    recsLoading ||
+    sharesLoading ||
+    activityLoading;
 
   const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
 
@@ -83,7 +106,19 @@ export function useAdvisorInsightsModel(): {
             introVideoUrl,
             photoUrl,
             underReview,
+            profileApproved,
+            irdaiCertificateUploaded: hasIrdaiCertificateUploaded(advisor),
             publicProfileActive: settings.publicProfile.profileActive,
+            verifiedRecommendationCount,
+            selfShareCount,
+            decayPenalty,
+            decayActive,
+            decayGraceDaysRemaining: graceDaysRemaining,
+            monthlyActivity: monthlyActivity ?? undefined,
+            profileViews,
+            profileViewsDelta,
+            searchAppearances,
+            searchDelta,
           }),
     [
       loading,
@@ -96,7 +131,19 @@ export function useAdvisorInsightsModel(): {
       introVideoUrl,
       photoUrl,
       underReview,
+      profileApproved,
+      advisor,
       settings.publicProfile.profileActive,
+      verifiedRecommendationCount,
+      selfShareCount,
+      decayPenalty,
+      decayActive,
+      graceDaysRemaining,
+      monthlyActivity,
+      profileViews,
+      profileViewsDelta,
+      searchAppearances,
+      searchDelta,
     ],
   );
 
