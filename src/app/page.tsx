@@ -25,6 +25,7 @@ import {
 import { getSessionUser } from "@/lib/server/session";
 import { getSiteOrigin } from "@/lib/social/site-origin";
 import { COMPANY_NAME } from "@/lib/brand";
+import { getAdminPlanPrices } from "@/lib/server/feature-controls-store";
 
 function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
@@ -51,7 +52,11 @@ export default async function LandingPage() {
     sameAs: [],
   };
 
-  const [advisors, session] = await Promise.all([getPublicAdvisors(), getSessionUser()]);
+  const [advisors, session, adminPlanPrices] = await Promise.all([
+    getPublicAdvisors(),
+    getSessionUser(),
+    getAdminPlanPrices(),
+  ]);
   const heroAdvisors = pickHeroAdvisors(advisors);
   const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
   const isLoggedIn = Boolean(session);
@@ -95,7 +100,8 @@ export default async function LandingPage() {
       id: "pricing",
       content: (
         <Suspense fallback={<SectionFallback />}>
-          <Pricing />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Pricing {...({ livePrices: adminPlanPrices } as any)} />
         </Suspense>
       ),
     },

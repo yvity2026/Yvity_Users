@@ -105,21 +105,26 @@ const LANDING_CARD_STYLES = {
   },
 };
 
-const pricingData = MEMBERSHIP_PLAN_MARKETING.map((plan) => {
-  const styles = LANDING_CARD_STYLES[plan.id];
-  const shortTitle = plan.name.replace(" PLAN", "");
-  return {
-    title: shortTitle,
-    price: String(plan.priceAnnualInr),
-    period: plan.priceAnnualInr > 0 ? "/year" : "",
-    message: plan.tagline,
-    features: plan.included,
-    nonFeatures: plan.excluded.length > 0 ? plan.excluded : undefined,
-    ...styles,
-  };
-});
+function buildPricingData(livePrices = {}) {
+  return MEMBERSHIP_PLAN_MARKETING.map((plan) => {
+    const styles = LANDING_CARD_STYLES[plan.id];
+    const shortTitle = plan.name.replace(" PLAN", "");
+    const override = livePrices[plan.id];
+    const effectivePrice = override !== undefined ? override : plan.priceAnnualInr;
+    return {
+      title: shortTitle,
+      price: String(effectivePrice),
+      period: effectivePrice > 0 ? "/year" : "",
+      message: plan.tagline,
+      features: plan.included,
+      nonFeatures: plan.excluded.length > 0 ? plan.excluded : undefined,
+      ...styles,
+    };
+  });
+}
 
-const Pricing = () => {
+const Pricing = ({ livePrices = {} }) => {
+  const pricingData = buildPricingData(livePrices);
   const container = {
     hidden: {},
     show: {
