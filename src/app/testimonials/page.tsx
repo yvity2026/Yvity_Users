@@ -1,22 +1,19 @@
-import type { Metadata } from "next";
+"use client";
+
+import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 import { Suspense } from "react";
 import { TestimonialsShowcase } from "@/components/sections/testimonials-showcase";
 import { TestimonialsAutoOpen } from "@/components/testimonials/testimonials-auto-open";
-import { buildTestimonialSubmitMetadata } from "@/lib/testimonials/social-metadata";
-
-type PageProps = {
-  searchParams: Promise<{ advisor?: string; submit?: string }>;
-};
-
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const params = await searchParams;
-  if (params.submit === "1" && params.advisor?.trim()) {
-    return await buildTestimonialSubmitMetadata(params.advisor);
-  }
-  return { title: "Testimonials" };
-}
 
 export default function TestimonialsPage() {
+  const homeHref = usePublicProfileNavHome();
+
+  // Redirect visitors to slug-prefixed URL
+  if (homeHref && homeHref !== "/profile") {
+    return <PublicProfileSectionRedirect section="testimonials" />;
+  }
+
   return (
     <>
       <Suspense fallback={null}>

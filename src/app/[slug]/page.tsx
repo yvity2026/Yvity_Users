@@ -1,8 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 import { ProfileHomeHero } from "@/components/home/profile-home-hero";
-import { PublicProfileViewProvider } from "@/context/public-profile-view-context";
 import { isReservedPublicProfileSlug } from "@/lib/advisor/public-profile-slug";
 import {
   isAdvisorProfileLive,
@@ -57,14 +53,14 @@ export default async function AdvisorPublicProfilePage({ params, searchParams }:
   const jsonLd = buildAdvisorProfileJsonLd(payload, slug);
 
   return (
-    <PublicProfileViewProvider value={payload}>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="relative flex min-h-[calc(100dvh-4rem)] max-md:min-h-[calc(100dvh-4rem-5.25rem)] flex-col overflow-x-hidden">
+      <main className="relative flex min-h-[calc(100dvh-4rem)] max-md:min-h-[calc(100dvh-4rem-5.25rem)] flex-col overflow-x-hidden pt-6 sm:pt-8 lg:pt-12">
         <ProfileHomeHero />
       </main>
-    </PublicProfileViewProvider>
+    </>
   );
 }

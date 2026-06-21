@@ -47,10 +47,24 @@ export const PUBLIC_PROFILE_SURFACE_PATHS = new Set([
   "/gallery",
 ]);
 
+const PROFILE_SECTION_SLUGS = new Set([
+  "my-career",
+  "services",
+  "achievements",
+  "testimonials",
+  "gallery",
+]);
+
 export function isPublicProfileSurfacePath(pathname: string): boolean {
   const clean = pathname.split("?")[0].replace(/\/$/, "") || "/";
   if (isPublicAdvisorSlugPath(clean)) return true;
-  return PUBLIC_PROFILE_SURFACE_PATHS.has(clean);
+  if (PUBLIC_PROFILE_SURFACE_PATHS.has(clean)) return true;
+  // /{slug}/{section} — e.g. /krishna-mohan-noti/my-career
+  const parts = clean.split("/").filter(Boolean);
+  if (parts.length >= 2 && PROFILE_SECTION_SLUGS.has(parts[1]) && !isReservedPublicProfileSlug(parts[0])) {
+    return true;
+  }
+  return false;
 }
 
 /** Canonical URL segment: lowercase kebab-case (`krishna-mohan-noti`). */

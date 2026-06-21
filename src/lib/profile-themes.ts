@@ -1,8 +1,7 @@
 export type ProfileThemeId =
   | "signature-dark"
   | "warm-ivory"
-  | "clean-white"
-  | "midnight-amber";
+  | "clean-white";
 
 /** Official YVITY brand theme — default for all advisors; only theme on Free. */
 export const YVITY_BRAND_THEME_ID: ProfileThemeId = "warm-ivory";
@@ -13,12 +12,11 @@ export const PROFILE_THEME_IDS: ProfileThemeId[] = [
   "warm-ivory",
   "clean-white",
   "signature-dark",
-  "midnight-amber",
 ];
 
 /** Dark profile themes (system color-scheme + preview thumbnails). */
 export function isDarkProfileTheme(id: ProfileThemeId): boolean {
-  return id === "signature-dark" || id === "midnight-amber";
+  return id === "signature-dark";
 }
 
 export type ProfileThemeMeta = {
@@ -73,19 +71,6 @@ export const PROFILE_THEMES: ProfileThemeMeta[] = [
       accent: "oklch(0.78 0.13 200)",
       gold: "oklch(0.82 0.16 78)",
       text: "oklch(0.97 0.01 230)",
-    },
-  },
-  {
-    id: "midnight-amber",
-    name: "Midnight Amber",
-    tagline: "Gold plan · Navy depth · Amber glow",
-    goldOnly: true,
-    preview: {
-      background: "#1A1F36",
-      card: "#2A3055",
-      accent: "#FFB347",
-      gold: "#E8821A",
-      text: "#ECEEF8",
     },
   },
 ];

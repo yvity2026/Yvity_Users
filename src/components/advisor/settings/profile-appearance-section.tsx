@@ -95,7 +95,7 @@ export function ProfileAppearanceSection() {
       defaultOpen
     >
       <div className="py-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {PROFILE_THEMES.map((theme) => {
             const selected = activeTheme === theme.id;
             const locked = !allowedSet.has(theme.id);

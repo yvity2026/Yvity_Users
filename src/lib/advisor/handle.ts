@@ -1,6 +1,6 @@
 /**
  * Advisor handle — the unique identifier that becomes their subdomain.
- * e.g. "krishnamohannoti" → krishnamohannoti.yvity.com
+ * e.g. "krishna-mohan-noti" → krishna-mohan-noti.yvity.com
  *
  * Rules (mirrors subdomain DNS constraints):
  *  - 3–30 characters
@@ -63,10 +63,10 @@ export function normalizeHandle(raw: string): string {
     .slice(0, HANDLE_MAX);
 }
 
-/** Derive a base handle from a full name (no separators — reads well as a subdomain). */
+/** Derive a base handle from a full name (hyphen-separated — e.g. krishna-mohan-noti). */
 export function handleFromName(fullName: string): string {
   return normalizeHandle(
-    fullName.trim().toLowerCase().replace(/\s+/g, ""),
+    fullName.trim().toLowerCase().replace(/\s+/g, "-"),
   );
 }
 
@@ -93,16 +93,13 @@ export function suggestHandles(base: string, taken: Set<string>): string[] {
   return suggestions;
 }
 
-/** Build the full subdomain URL for a handle. */
+/** Build the full path URL for a handle — e.g. https://yvity.com/krishna-mohan-noti */
 export function buildHandleUrl(handle: string, baseUrl: string): string {
-  // In production: krishnamohannoti.yvity.com
-  // In dev: localhost:3002/{handle} (subdomains don't work on localhost)
   try {
     const url = new URL(baseUrl);
-    const isProd = !url.hostname.includes("localhost") && !url.hostname.includes("127.0.0.1");
-    if (isProd) {
-      return `${url.protocol}//${handle}.${url.hostname}`;
-    }
+    // Strip www. prefix so URL is always yvity.com/handle, not www.yvity.com/handle
+    const hostname = url.hostname.replace(/^www\./, "");
+    return `${url.protocol}//${hostname}/${handle}`;
   } catch {
     // fall through
   }

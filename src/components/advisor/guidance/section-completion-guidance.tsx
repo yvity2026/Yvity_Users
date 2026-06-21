@@ -49,7 +49,7 @@ export function SectionCompletionGuidance({
     >
       <div className="flex gap-3">
         {Icon ? (
-          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/10 text-amber-100 ring-1 ring-amber-400/25">
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/20 text-amber-500 ring-1 ring-amber-400/40">
             <Icon className="size-5" aria-hidden />
           </span>
         ) : (
@@ -63,7 +63,7 @@ export function SectionCompletionGuidance({
             {guidance.description}
           </p>
           {guidance.goal ? (
-            <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-amber-200/80">
+            <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-amber-600/80 dark:text-amber-300/80">
               Goal · {guidance.goal}
             </p>
           ) : null}

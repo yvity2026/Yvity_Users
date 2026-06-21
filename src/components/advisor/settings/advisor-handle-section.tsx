@@ -7,12 +7,15 @@ import { useAuth } from "@/context/AuthUserContext";
 import { SettingsGroup } from "@/components/advisor/settings/settings-ui";
 import { HandlePicker } from "@/components/advisor/handle-picker";
 import { buildPublicProfileUrl, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
+import { handleFromName } from "@/lib/advisor/handle";
 import { Button } from "@/components/ui/button";
 
 export function AdvisorHandleSection() {
-  const { advisor, setAdvisor } = useAuth();
+  const { advisor, setAdvisor, user } = useAuth();
   const slug = advisor?.profile_slug?.trim() ?? "";
   const segment = toPublicProfileSlugSegment(slug);
+  // Hyphenated suggestion derived from full name — shown as default in edit mode
+  const nameSuggestion = user?.name ? handleFromName(user.name) : segment;
 
   const siteUrl =
     typeof window !== "undefined" ? window.location.origin : "https://yvity.com";
@@ -57,8 +60,13 @@ export function AdvisorHandleSection() {
       <div className="px-1 py-2 space-y-3">
         {editing ? (
           <>
+            <p className="text-[11px] leading-snug text-muted-foreground pb-1">
+              We recommend using hyphens between your name parts — e.g.{" "}
+              <span className="font-semibold text-foreground">krishna-mohan-noti</span>.
+              Hyphenated URLs are easier to read, share, and rank higher on Google Search.
+            </p>
             <HandlePicker
-              defaultHandle={segment || undefined}
+              defaultHandle={nameSuggestion || segment || undefined}
               onChange={setPendingHandle}
             />
             <div className="flex gap-2 pt-1">
@@ -119,7 +127,14 @@ export function AdvisorHandleSection() {
               </button>
             </div>
             <p className="text-[11px] leading-snug text-muted-foreground">
-              Your handle is <strong className="text-foreground">{segment}</strong>. Click the pencil to change it.
+              Your handle is <strong className="text-foreground">{segment}</strong>.{" "}
+              {!segment.includes("-") && (
+                <span className="text-amber-600">
+                  Consider switching to a hyphenated format like{" "}
+                  <strong>{nameSuggestion}</strong> for better readability and SEO.{" "}
+                </span>
+              )}
+              Click the pencil to change it.
             </p>
           </>
         ) : (

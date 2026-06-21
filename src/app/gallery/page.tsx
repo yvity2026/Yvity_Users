@@ -1,5 +1,6 @@
 "use client";
 
+import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { ImageIcon } from "lucide-react";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
 import { GalleryShowcase } from "@/components/gallery/gallery-showcase";
@@ -7,10 +8,17 @@ import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useGalleryData } from "@/lib/gallery-store";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export default function GalleryPage() {
+  const homeHref = usePublicProfileNavHome();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const [items, , galleryLoading] = useGalleryData();
+
+  // Redirect visitors to slug-prefixed URL
+  if (homeHref && homeHref !== "/profile") {
+    return <PublicProfileSectionRedirect section="gallery" />;
+  }
 
   if (settingsLoading || galleryLoading) {
     return (

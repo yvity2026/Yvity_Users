@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 import { useShowPublicVisitorNav } from "@/lib/use-public-visitor-nav";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export type PublicNavLink = {
   href: string;
@@ -19,17 +20,21 @@ export type PublicNavLink = {
   icon: LucideIcon;
 };
 
-const ALL_PUBLIC_NAV_LINKS: PublicNavLink[] = [
-  { href: "/profile", label: "Home", icon: Home },
-  { href: "/my-career", label: "My Career", icon: Briefcase },
-  { href: "/services", label: "Services", icon: Sparkles },
-  { href: "/achievements", label: "Achievements", icon: Trophy },
-  { href: "/testimonials", label: "Testimonials", icon: Quote },
-  { href: "/gallery", label: "Gallery", icon: ImageIcon },
-];
+function buildPublicNavLinks(slug: string): PublicNavLink[] {
+  const base = slug ? `/${slug}` : "";
+  return [
+    { href: base || "/profile", label: "Home", icon: Home },
+    { href: `${base}/my-career`, label: "My Career", icon: Briefcase },
+    { href: `${base}/services`, label: "Services", icon: Sparkles },
+    { href: `${base}/achievements`, label: "Achievements", icon: Trophy },
+    { href: `${base}/testimonials`, label: "Testimonials", icon: Quote },
+    { href: `${base}/gallery`, label: "Gallery", icon: ImageIcon },
+  ];
+}
 
 function filterLinksByVisibility(
   links: PublicNavLink[],
+  slug: string,
   visibility: {
     careerJourney: boolean;
     educationalJourney: boolean;
@@ -37,12 +42,13 @@ function filterLinksByVisibility(
     gallery: boolean;
   },
 ): PublicNavLink[] {
+  const base = slug ? `/${slug}` : "";
   return links.filter((link) => {
-    if (link.href === "/my-career") {
+    if (link.href === `${base}/my-career`) {
       return visibility.careerJourney || visibility.educationalJourney;
     }
-    if (link.href === "/achievements") return visibility.achievements;
-    if (link.href === "/gallery") return visibility.gallery;
+    if (link.href === `${base}/achievements`) return visibility.achievements;
+    if (link.href === `${base}/gallery`) return visibility.gallery;
     return true;
   });
 }
@@ -51,9 +57,13 @@ function filterLinksByVisibility(
 export function useVisiblePublicNavLinks(): PublicNavLink[] {
   const showVisitorNav = useShowPublicVisitorNav();
   const { settings, loading } = useAdvisorSettings();
+  const homeHref = usePublicProfileNavHome();
 
   return useMemo(() => {
-    if (!showVisitorNav || loading) return ALL_PUBLIC_NAV_LINKS;
-    return filterLinksByVisibility(ALL_PUBLIC_NAV_LINKS, settings.visibility);
-  }, [showVisitorNav, loading, settings.visibility]);
+    // Extract slug from homeHref: "/krishna-mohan-noti" → "krishna-mohan-noti"
+    const slug = homeHref === "/profile" ? "" : homeHref.replace(/^\//, "");
+    const allLinks = buildPublicNavLinks(slug);
+    if (!showVisitorNav || loading) return allLinks;
+    return filterLinksByVisibility(allLinks, slug, settings.visibility);
+  }, [showVisitorNav, loading, settings.visibility, homeHref]);
 }
