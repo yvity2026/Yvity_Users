@@ -35,13 +35,16 @@ export function createSectionStore<T>(endpoint: string, fallback: T, evt: string
 
     const update = (next: T) => {
       setData(next);
+      // Persist to server — local state is already updated via setData(next) above.
+      // We intentionally do NOT dispatch the custom event after PUT because that
+      // would trigger reload() in this same hook, re-fetching server data that may
+      // not yet reflect the save (race condition), which would clear draft state
+      // and close any open editor modals.
       void fetch(endpoint, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({ data: next }),
-      }).then(() => {
-        window.dispatchEvent(new CustomEvent(evt));
       });
     };
 
