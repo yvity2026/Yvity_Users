@@ -202,8 +202,6 @@ const Testimonials = () => {
         transition: { duration: 0.6, ease: "easeOut" },
       };
 
-  if (visibleTestimonials.length === 0) return null;
-
   return (
     <section
       id="testimonials"
@@ -219,29 +217,33 @@ const Testimonials = () => {
           />
         </motion.div>
 
-        <LandingSnapScroll ariaLabel="Reviews" className="lg:hidden">
-          {visibleTestimonials.map((testimonial) => (
-            <LandingSnapItem
-              key={`snap-${testimonial.id}`}
-              className="w-[88vw] max-w-[400px] py-3"
-            >
-              {renderTestimonialCard(testimonial)}
-            </LandingSnapItem>
-          ))}
-        </LandingSnapScroll>
-        {visibleTestimonials.length > 1 ? (
-          <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
-            Swipe for more stories
-          </p>
-        ) : null}
+        {visibleTestimonials.length > 0 && (
+          <>
+            <LandingSnapScroll ariaLabel="Reviews" className="lg:hidden">
+              {visibleTestimonials.map((testimonial) => (
+                <LandingSnapItem
+                  key={`snap-${testimonial.id}`}
+                  className="w-[88vw] max-w-[400px] py-3"
+                >
+                  {renderTestimonialCard(testimonial)}
+                </LandingSnapItem>
+              ))}
+            </LandingSnapScroll>
+            {visibleTestimonials.length > 1 ? (
+              <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
+                Swipe for more stories
+              </p>
+            ) : null}
 
-        <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-          {visibleTestimonials.map((testimonial) => (
-            <div key={`grid-${testimonial.id}`} className="py-3">
-              {renderTestimonialCard(testimonial)}
+            <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
+              {visibleTestimonials.map((testimonial) => (
+                <div key={`grid-${testimonial.id}`} className="py-3">
+                  {renderTestimonialCard(testimonial)}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </section>
   );
