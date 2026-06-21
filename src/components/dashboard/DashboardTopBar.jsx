@@ -91,8 +91,8 @@ function BrandBlock({ layout = "column" }) {
       showTagline
       layout={layout}
       logoClassName="h-9 w-9 object-contain"
-      nameClassName="font-cormorant text-base font-bold leading-none text-[#0A4A4A]"
-      taglineClassName="font-poppins text-[10px] font-semibold leading-tight text-[#F59E0B]"
+      nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none"
+      taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
     />
   );
 }
