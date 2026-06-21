@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
 import { AchievementsShowcase } from "@/components/sections/achievements-showcase";
@@ -9,10 +10,13 @@ import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export default function AchievementsPage() {
   const homeHref = usePublicProfileNavHome();
+  const pathname = usePathname();
   const { settings, loading } = useAdvisorSettings();
 
-  // Redirect visitors to slug-prefixed URL
-  if (homeHref && homeHref !== "/profile") {
+  // Redirect visitors from /achievements to /{slug}/achievements — skip if already there
+  const needsRedirect =
+    homeHref && homeHref !== "/profile" && !pathname.startsWith(homeHref + "/");
+  if (needsRedirect) {
     return <PublicProfileSectionRedirect section="achievements" />;
   }
 

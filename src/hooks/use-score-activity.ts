@@ -12,6 +12,7 @@ type ScoreActivityResponse = {
   negativeRules?: ScoreNegativeRule[];
   profileViews?: number;
   profileViewsDelta?: string;
+  totalProfileViews?: number;
   searchAppearances?: number;
   searchDelta?: string;
 };
@@ -24,6 +25,7 @@ export function useScoreActivity(): {
   negativeRules: ScoreNegativeRule[] | null;
   profileViews: number;
   profileViewsDelta: string;
+  totalProfileViews: number;
   searchAppearances: number;
   searchDelta: string;
   loading: boolean;
@@ -35,6 +37,7 @@ export function useScoreActivity(): {
   const [negativeRules, setNegativeRules] = useState<ScoreNegativeRule[] | null>(null);
   const [profileViews, setProfileViews] = useState(0);
   const [profileViewsDelta, setProfileViewsDelta] = useState("0%");
+  const [totalProfileViews, setTotalProfileViews] = useState(0);
   const [searchAppearances, setSearchAppearances] = useState(0);
   const [searchDelta, setSearchDelta] = useState("0%");
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,7 @@ export function useScoreActivity(): {
         setNegativeRules(json.negativeRules ?? null);
         setProfileViews(Math.max(0, json.profileViews ?? 0));
         setProfileViewsDelta(json.profileViewsDelta ?? "0%");
+        setTotalProfileViews(Math.max(0, json.totalProfileViews ?? 0));
         setSearchAppearances(Math.max(0, json.searchAppearances ?? 0));
         setSearchDelta(json.searchDelta ?? "0%");
       })
@@ -61,6 +65,7 @@ export function useScoreActivity(): {
         setNegativeRules(null);
         setProfileViews(0);
         setProfileViewsDelta("0%");
+        setTotalProfileViews(0);
         setSearchAppearances(0);
         setSearchDelta("0%");
       })
@@ -75,6 +80,7 @@ export function useScoreActivity(): {
     negativeRules,
     profileViews,
     profileViewsDelta,
+    totalProfileViews,
     searchAppearances,
     searchDelta,
     loading,

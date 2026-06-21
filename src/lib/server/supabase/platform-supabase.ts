@@ -103,6 +103,24 @@ export async function upsertUserToDb(user: RegisteredUser): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/** Targeted update of profile fields (name, city, profession) by user ID.
+ *  Safer than upsertUserToDb — never overwrites roles or other system fields. */
+export async function updateUserProfileFields(
+  userId: string,
+  fields: { name?: string; city?: string; profession?: string },
+): Promise<void> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase || !userId.trim()) return;
+
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (fields.name) patch.name = fields.name;
+  if (fields.city) patch.city = fields.city;
+  if (fields.profession) patch.profession = fields.profession;
+
+  const { error } = await supabase.from("users").update(patch).eq("id", userId);
+  if (error) throw new Error(error.message);
+}
+
 export async function loadAdvisorRolesFromDb(): Promise<
   Array<{ id: string; title: string; description?: string; icon?: string }>
 > {

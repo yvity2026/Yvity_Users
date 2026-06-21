@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { ImageIcon } from "lucide-react";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
@@ -12,11 +13,14 @@ import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export default function GalleryPage() {
   const homeHref = usePublicProfileNavHome();
+  const pathname = usePathname();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const [items, , galleryLoading] = useGalleryData();
 
-  // Redirect visitors to slug-prefixed URL
-  if (homeHref && homeHref !== "/profile") {
+  // Redirect visitors from /gallery to /{slug}/gallery — skip if already there
+  const needsRedirect =
+    homeHref && homeHref !== "/profile" && !pathname.startsWith(homeHref + "/");
+  if (needsRedirect) {
     return <PublicProfileSectionRedirect section="gallery" />;
   }
 

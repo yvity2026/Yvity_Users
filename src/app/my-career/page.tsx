@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
 import { useCareerData } from "@/lib/career-store";
@@ -14,6 +15,7 @@ import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
 
 export default function MyCareerPage() {
   const homeHref = usePublicProfileNavHome();
+  const pathname = usePathname();
   const [data, , loading] = useCareerData();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { advisor } = useAuth();
@@ -22,8 +24,10 @@ export default function MyCareerPage() {
     ? isAdvisorProfileApproved(publicAdvisor.profile)
     : isAdvisorProfileApproved(advisor);
 
-  // Redirect visitors to slug-prefixed URL
-  if (homeHref && homeHref !== "/profile") {
+  // Redirect visitors from /my-career to /{slug}/my-career — skip if already there
+  const needsRedirect =
+    homeHref && homeHref !== "/profile" && !pathname.startsWith(homeHref + "/");
+  if (needsRedirect) {
     return <PublicProfileSectionRedirect section="my-career" />;
   }
 
