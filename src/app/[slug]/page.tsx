@@ -62,7 +62,7 @@ export default async function AdvisorPublicProfilePage({ params, searchParams }:
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="relative flex min-h-[calc(100dvh-4rem)] max-md:min-h-[calc(100dvh-4rem-5.25rem)] flex-col overflow-x-hidden">
+      <main className="relative flex min-h-[calc(100dvh-4rem)] max-md:min-h-[calc(100dvh-4rem-5.25rem)] flex-col overflow-x-hidden pt-6 sm:pt-8 lg:pt-12">
         <ProfileHomeHero />
       </main>
     </PublicProfileViewProvider>
