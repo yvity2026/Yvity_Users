@@ -8,6 +8,8 @@ import {
   updateRegisteredUserProfile,
 } from "@/lib/server/profile";
 import { getSessionUser, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadUserByIdFromDb, upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +68,19 @@ export async function PATCH(request: Request) {
       pincode,
       about,
     });
+
+    // Write city/name/profession directly to Supabase so search results reflect the update
+    if (useSupabasePersistence() && session.id) {
+      const dbUser = await loadUserByIdFromDb(session.id);
+      if (dbUser) {
+        await upsertUserToDb({
+          ...dbUser,
+          fullName: name || dbUser.fullName,
+          profession: profession || dbUser.profession,
+          city: city || dbUser.city,
+        });
+      }
+    }
 
     const nextSession = mergeSessionProfile(
       {
