@@ -61,7 +61,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const planPrices = await getAdminPlanPrices();
+    const adminPrices = await getAdminPlanPrices();
+    // checkout-pricing expects planId → number (sale price)
+    const planPrices: Partial<Record<string, number>> = Object.fromEntries(
+      Object.entries(adminPrices).map(([id, p]) => [id, p.salePriceInr]),
+    );
     const quote = resolveCheckoutQuoteForProfile(profile, {
       checkoutKind,
       targetPlanId,

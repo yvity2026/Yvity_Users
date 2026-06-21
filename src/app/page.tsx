@@ -101,7 +101,7 @@ export default async function LandingPage() {
       content: (
         <Suspense fallback={<SectionFallback />}>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Pricing {...({ livePrices: adminPlanPrices } as any)} />
+          <Pricing {...({ livePrices: adminPlanPrices, showOriginalPrice: true } as any)} />
         </Suspense>
       ),
     },

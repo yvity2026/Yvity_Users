@@ -65,7 +65,7 @@ export function AdvisorMembershipModule() {
   const accountStatus = advisor?.account_status;
   const [payments, setPayments] = useState<MembershipPaymentRow[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(true);
-  const [planPriceOverrides, setPlanPriceOverrides] = useState<Array<{ id: string; priceAnnualInr: number; priceLabel: string }> | null>(null);
+  const [planPriceOverrides, setPlanPriceOverrides] = useState<Array<{ id: string; priceAnnualInr: number; originalPriceInr: number | null; priceLabel: string }> | null>(null);
 
   useEffect(() => {
     fetch("/api/advisor/subscription/plan-prices")
@@ -104,7 +104,7 @@ export function AdvisorMembershipModule() {
       model.plans.map((p) => {
         const override = planPriceOverrides?.find((o) => o.id === p.id);
         return override
-          ? { ...p, priceAnnualInr: override.priceAnnualInr, priceLabel: override.priceLabel }
+          ? { ...p, priceAnnualInr: override.priceAnnualInr, originalPriceInr: override.originalPriceInr, priceLabel: override.priceLabel }
           : p;
       }),
     [model.plans, planPriceOverrides],

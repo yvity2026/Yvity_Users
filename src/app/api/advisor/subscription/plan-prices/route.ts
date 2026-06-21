@@ -10,11 +10,13 @@ export async function GET() {
     const adminPrices = await getAdminPlanPrices();
 
     const plans = MEMBERSHIP_PLAN_MARKETING.filter((p) => p.id !== "free").map((p) => {
-      const overridePrice = adminPrices[p.id];
-      const effectivePrice = overridePrice ?? p.priceAnnualInr;
+      const override = adminPrices[p.id];
+      const effectivePrice = override?.salePriceInr ?? p.priceAnnualInr;
+      const originalPrice = override?.listPriceInr ?? null;
       return {
         id: p.id,
         priceAnnualInr: effectivePrice,
+        originalPriceInr: originalPrice,
         priceLabel: effectivePrice === 0 ? "₹0" : `₹${effectivePrice.toLocaleString("en-IN")}/year`,
       };
     });

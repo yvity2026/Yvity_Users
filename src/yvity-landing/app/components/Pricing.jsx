@@ -23,12 +23,25 @@ function PricingCard({ item }) {
       <p className="text-sm font-semibold tracking-[1.4px] text-(--ct-as-badges-accents,#F59E0B) uppercase font-poppins leading-none">
         {item.title}
       </p>
-      <p className="text-3xl font-bold font-poppins text-[#0A4A4A]">
-        ₹{item.price}
-        {item.period ? (
-          <span className="text-gray-400 text-base font-bold">{item.period}</span>
+      <div className="flex flex-col items-center sm:items-start gap-0.5">
+        {item.originalPrice ? (
+          <p className="text-sm font-medium text-gray-400 line-through font-poppins">
+            ₹{item.originalPrice}
+            {item.period}
+          </p>
         ) : null}
-      </p>
+        <p className="text-3xl font-bold font-poppins text-[#0A4A4A]">
+          ₹{item.price}
+          {item.period ? (
+            <span className="text-gray-400 text-base font-bold">{item.period}</span>
+          ) : null}
+        </p>
+        {item.originalPrice ? (
+          <p className="text-xs font-semibold text-emerald-600 font-poppins">
+            Save ₹{(Number(item.originalPrice.replace(/,/g, "")) - Number(item.price.replace(/,/g, ""))).toLocaleString("en-IN")}
+          </p>
+        ) : null}
+      </div>
       {item.message ? (
         <p className="text-[14px] md:text-[11px] lg:text-[13px] xl:text-[16px] font-normal leading-[22px] md:leading-[26px] text-[var(--Body-content,#374151)] font-poppins">
           {item.message}
@@ -110,11 +123,22 @@ function buildPricingData(livePrices = {}) {
     const styles = LANDING_CARD_STYLES[plan.id];
     const shortTitle = plan.name.replace(" PLAN", "");
     const override = livePrices[plan.id];
-    const effectivePrice = override !== undefined ? override : plan.priceAnnualInr;
+    // override is now { salePriceInr, listPriceInr } from admin, or a plain number (legacy)
+    const salePriceInr =
+      override !== undefined
+        ? typeof override === "object"
+          ? override.salePriceInr
+          : override
+        : plan.priceAnnualInr;
+    const listPriceInr =
+      override !== undefined && typeof override === "object" && override.listPriceInr > 0
+        ? override.listPriceInr
+        : null;
     return {
       title: shortTitle,
-      price: String(effectivePrice),
-      period: effectivePrice > 0 ? "/year" : "",
+      price: salePriceInr > 0 ? salePriceInr.toLocaleString("en-IN") : "0",
+      originalPrice: listPriceInr ? listPriceInr.toLocaleString("en-IN") : null,
+      period: salePriceInr > 0 ? "/year" : "",
       message: plan.tagline,
       features: plan.included,
       nonFeatures: plan.excluded.length > 0 ? plan.excluded : undefined,

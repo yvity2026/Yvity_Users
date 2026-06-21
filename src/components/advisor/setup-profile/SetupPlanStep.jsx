@@ -5,10 +5,16 @@ import { MEMBERSHIP_PLANS } from "@/lib/advisor-membership/plans";
 import { cn } from "@/lib/utils";
 
 export function SetupPlanStep({ selectedPlan, onSelectPlan, paymentDone, paidPlanId, planPriceOverrides }) {
-  // planPriceOverrides: Array<{ id, priceAnnualInr, priceLabel }> from admin platform_configs
+  // planPriceOverrides: Array<{ id, priceAnnualInr, originalPriceInr, priceLabel }> from admin
+  const getOverride = (plan) => planPriceOverrides?.find((p) => p.id === plan.id) ?? null;
   const getDisplayPrice = (plan) => {
-    const override = planPriceOverrides?.find((p) => p.id === plan.id);
+    const override = getOverride(plan);
     return override ? override.priceLabel : plan.priceLabel;
+  };
+  const getOriginalPrice = (plan) => {
+    const override = getOverride(plan);
+    if (!override?.originalPriceInr) return null;
+    return `₹${Number(override.originalPriceInr).toLocaleString("en-IN")}/year`;
   };
 
   return (
@@ -47,9 +53,16 @@ export function SetupPlanStep({ selectedPlan, onSelectPlan, paymentDone, paidPla
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-2 font-poppins text-lg font-bold text-[#0F172A]">
-                  {getDisplayPrice(plan)}
-                </p>
+                <div className="mt-2">
+                  {getOriginalPrice(plan) ? (
+                    <p className="font-poppins text-xs text-gray-400 line-through leading-none">
+                      {getOriginalPrice(plan)}
+                    </p>
+                  ) : null}
+                  <p className="font-poppins text-lg font-bold text-[#0F172A]">
+                    {getDisplayPrice(plan)}
+                  </p>
+                </div>
                 <p className="mt-1 font-poppins text-xs leading-relaxed text-[#64748B]">
                   {plan.tagline}
                 </p>
