@@ -109,12 +109,17 @@ type AdminPlanPricingConfig = {
   plans?: Array<{ id: string; salePriceInr?: number; listPriceInr?: number }>;
 };
 
+export type AdminPlanPrice = {
+  salePriceInr: number;
+  listPriceInr: number | null;
+};
+
 /**
  * Reads plan prices set in the admin app (platform_configs key "plan_pricing").
- * Returns a map of planId → effective price in INR (salePriceInr).
+ * Returns a map of planId → { salePriceInr, listPriceInr }.
  * Falls back to empty map (callers fall back to hardcoded plan-catalog prices).
  */
-export async function getAdminPlanPrices(): Promise<Partial<Record<string, number>>> {
+export async function getAdminPlanPrices(): Promise<Partial<Record<string, AdminPlanPrice>>> {
   const supabase = getAdminClientOrNull();
   if (!supabase) return {};
   try {
@@ -125,10 +130,16 @@ export async function getAdminPlanPrices(): Promise<Partial<Record<string, numbe
       .maybeSingle();
     const config = data?.config as AdminPlanPricingConfig | null;
     if (!config?.plans) return {};
-    const prices: Partial<Record<string, number>> = {};
+    const prices: Partial<Record<string, AdminPlanPrice>> = {};
     for (const plan of config.plans) {
-      const price = Number(plan.salePriceInr ?? 0);
-      if (price > 0) prices[plan.id] = price;
+      const sale = Number(plan.salePriceInr ?? 0);
+      if (sale > 0) {
+        const list = Number(plan.listPriceInr ?? 0);
+        prices[plan.id] = {
+          salePriceInr: sale,
+          listPriceInr: list > sale ? list : null,
+        };
+      }
     }
     return prices;
   } catch {

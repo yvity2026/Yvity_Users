@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
-import { loadJsonFile, saveJsonFile } from "@/lib/server/json-store";
+import { loadJsonFile, saveJsonFile, canUseLocalDataFiles } from "@/lib/server/json-store";
+import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 
 const COUPONS_FILE = "coupons.json";
 
@@ -105,6 +106,36 @@ export function applyCouponToAmount(baseAmountInr: number, coupon: CouponRecord)
   };
 }
 
+// ─── Supabase row mapper ────────────────────────────────────────────────────
+
+function dbRowToCoupon(row: Record<string, unknown>): CouponRecord {
+  return normalizeCoupon({
+    id: String(row.id ?? ""),
+    code: String(row.code ?? ""),
+    label: String(row.label ?? ""),
+    discountType: row.discount_type as CouponDiscountType,
+    discountValue: Number(row.discount_value ?? 0),
+    appliesTo: Array.isArray(row.applies_to) ? row.applies_to as string[] : [],
+    assignedEmail: row.assigned_email ? String(row.assigned_email) : null,
+    assignedUserId: row.assigned_user_id ? String(row.assigned_user_id) : null,
+    maxRedemptions: Number(row.max_redemptions ?? 1),
+    redemptionCount: Number(row.redemption_count ?? 0),
+    status: String(row.status ?? "active") as CouponStatus,
+    expiresAt: row.expires_at ? String(row.expires_at) : null,
+    createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
+    createdByAdminId: row.created_by_admin_id ? String(row.created_by_admin_id) : null,
+    reservedAt: row.reserved_at ? String(row.reserved_at) : null,
+    reservedByUserId: row.reserved_by_user_id ? String(row.reserved_by_user_id) : null,
+    reservedOrderId: row.reserved_order_id ? String(row.reserved_order_id) : null,
+    redeemedAt: row.redeemed_at ? String(row.redeemed_at) : null,
+    redeemedByUserId: row.redeemed_by_user_id ? String(row.redeemed_by_user_id) : null,
+    redeemedByEmail: row.redeemed_by_email ? String(row.redeemed_by_email) : null,
+    redeemedPaymentId: row.redeemed_payment_id ? String(row.redeemed_payment_id) : null,
+  });
+}
+
+// ─── Local JSON helpers (dev only) ─────────────────────────────────────────
+
 async function loadDb() {
   return loadJsonFile<CouponsDb>(COUPONS_FILE, emptyDb());
 }
@@ -113,7 +144,7 @@ async function saveDb(db: CouponsDb) {
   await saveJsonFile(COUPONS_FILE, db);
 }
 
-async function findCouponByCode(code: string) {
+async function findCouponByCodeLocal(code: string): Promise<CouponRecord | null> {
   const normalized = normalizeCouponCode(code);
   if (!normalized) return null;
   const db = await loadDb();
@@ -121,6 +152,78 @@ async function findCouponByCode(code: string) {
     Object.values(db.coupons).find((item) => normalizeCouponCode(item.code) === normalized) ?? null
   );
 }
+
+// ─── Supabase helpers (Vercel/production) ──────────────────────────────────
+
+async function findCouponByCodeFromDb(code: string): Promise<CouponRecord | null> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return null;
+  const normalized = normalizeCouponCode(code);
+  if (!normalized) return null;
+  const { data } = await supabase
+    .from("coupons")
+    .select("*")
+    .eq("code", normalized)
+    .maybeSingle();
+  if (!data) return null;
+  return dbRowToCoupon(data as Record<string, unknown>);
+}
+
+async function reserveCouponInDb(
+  couponId: string,
+  input: { userId: string; userEmail?: string | null; planId: string; orderId: string },
+): Promise<{ coupon: CouponRecord } | { error: string }> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return { error: "Database not available" };
+
+  const { data: updated, error } = await supabase
+    .from("coupons")
+    .update({
+      status: "reserved",
+      reserved_at: new Date().toISOString(),
+      reserved_by_user_id: input.userId,
+      reserved_order_id: input.orderId,
+    })
+    .eq("id", couponId)
+    .select()
+    .single();
+
+  if (error || !updated) return { error: "Failed to reserve coupon" };
+  return { coupon: dbRowToCoupon(updated as Record<string, unknown>) };
+}
+
+async function redeemCouponInDb(
+  couponId: string,
+  currentCount: number,
+  maxRedemptions: number,
+  input: { userId: string; userEmail?: string | null; paymentId?: string },
+): Promise<{ success: true; coupon: CouponRecord } | { error: string }> {
+  const supabase = getAdminClientOrNull();
+  if (!supabase) return { error: "Database not available" };
+
+  const nextCount = currentCount + 1;
+  const { data: updated, error } = await supabase
+    .from("coupons")
+    .update({
+      redemption_count: nextCount,
+      redeemed_at: new Date().toISOString(),
+      redeemed_by_user_id: input.userId,
+      redeemed_by_email: input.userEmail?.trim().toLowerCase() ?? null,
+      redeemed_payment_id: input.paymentId ?? null,
+      reserved_at: null,
+      reserved_by_user_id: null,
+      reserved_order_id: null,
+      status: nextCount >= maxRedemptions ? "redeemed" : "active",
+    })
+    .eq("id", couponId)
+    .select()
+    .single();
+
+  if (error || !updated) return { error: "Failed to redeem coupon" };
+  return { success: true, coupon: dbRowToCoupon(updated as Record<string, unknown>) };
+}
+
+// ─── Validation (shared) ────────────────────────────────────────────────────
 
 function validateCouponForCheckout(
   coupon: CouponRecord,
@@ -169,6 +272,8 @@ function validateCouponForCheckout(
   return null;
 }
 
+// ─── Public API ─────────────────────────────────────────────────────────────
+
 export async function previewCouponDiscount(
   code: string,
   input: {
@@ -178,7 +283,10 @@ export async function previewCouponDiscount(
     planId?: string;
   },
 ) {
-  const coupon = await findCouponByCode(code);
+  const coupon = canUseLocalDataFiles()
+    ? await findCouponByCodeLocal(code)
+    : await findCouponByCodeFromDb(code);
+
   if (!coupon) return { error: "Coupon not found" as const };
 
   const validationError = validateCouponForCheckout(coupon, input);
@@ -204,29 +312,41 @@ export async function reserveCouponForOrder(
     orderId: string;
   },
 ) {
-  const db = await loadDb();
-  const coupon = await findCouponByCode(code);
+  const coupon = canUseLocalDataFiles()
+    ? await findCouponByCodeLocal(code)
+    : await findCouponByCodeFromDb(code);
+
   if (!coupon) return { error: "Coupon not found" as const };
 
   const validationError = validateCouponForCheckout(coupon, input);
   if (validationError) return { error: validationError };
 
-  const record = db.coupons[coupon.id];
-  if (!record) return { error: "Coupon not found" as const };
+  if (canUseLocalDataFiles()) {
+    // Local JSON path
+    const db = await loadDb();
+    const record = db.coupons[coupon.id];
+    if (!record) return { error: "Coupon not found" as const };
 
-  if (record.status === "reserved" && record.reservedByUserId === input.userId) {
+    if (record.status === "reserved" && record.reservedByUserId === input.userId) {
+      record.reservedAt = new Date().toISOString();
+      record.reservedOrderId = input.orderId;
+      await saveDb(db);
+      return { coupon: record };
+    }
+
+    record.status = "reserved";
     record.reservedAt = new Date().toISOString();
+    record.reservedByUserId = input.userId;
     record.reservedOrderId = input.orderId;
     await saveDb(db);
     return { coupon: record };
   }
 
-  record.status = "reserved";
-  record.reservedAt = new Date().toISOString();
-  record.reservedByUserId = input.userId;
-  record.reservedOrderId = input.orderId;
-  await saveDb(db);
-  return { coupon: record };
+  // Supabase path
+  if (coupon.status === "reserved" && coupon.reservedByUserId === input.userId) {
+    return reserveCouponInDb(coupon.id, { ...input, orderId: input.orderId });
+  }
+  return reserveCouponInDb(coupon.id, input);
 }
 
 export async function redeemCoupon(
@@ -237,31 +357,46 @@ export async function redeemCoupon(
     paymentId?: string;
   },
 ) {
-  const db = await loadDb();
-  const coupon = await findCouponByCode(code);
+  const coupon = canUseLocalDataFiles()
+    ? await findCouponByCodeLocal(code)
+    : await findCouponByCodeFromDb(code);
+
   if (!coupon) return { error: "Coupon not found" as const };
 
-  const record = db.coupons[coupon.id];
-  if (!record) return { error: "Coupon not found" as const };
+  if (canUseLocalDataFiles()) {
+    // Local JSON path
+    const db = await loadDb();
+    const record = db.coupons[coupon.id];
+    if (!record) return { error: "Coupon not found" as const };
 
-  if (record.status === "redeemed" || record.redemptionCount >= record.maxRedemptions) {
-    return { error: "Coupon already redeemed" as const };
+    if (record.status === "redeemed" || record.redemptionCount >= record.maxRedemptions) {
+      return { error: "Coupon already redeemed" as const };
+    }
+    if (record.status === "reserved" && record.reservedByUserId !== input.userId) {
+      return { error: "Coupon reserved by another user" as const };
+    }
+
+    const nextCount = record.redemptionCount + 1;
+    record.redemptionCount = nextCount;
+    record.redeemedAt = new Date().toISOString();
+    record.redeemedByUserId = input.userId;
+    record.redeemedByEmail = input.userEmail?.trim().toLowerCase() || null;
+    record.redeemedPaymentId = input.paymentId || null;
+    record.reservedAt = null;
+    record.reservedByUserId = null;
+    record.reservedOrderId = null;
+    record.status = nextCount >= record.maxRedemptions ? "redeemed" : "active";
+    await saveDb(db);
+    return { success: true as const, coupon: record };
   }
 
-  if (record.status === "reserved" && record.reservedByUserId !== input.userId) {
+  // Supabase path
+  if (coupon.status === "redeemed" || coupon.redemptionCount >= coupon.maxRedemptions) {
+    return { error: "Coupon already redeemed" as const };
+  }
+  if (coupon.status === "reserved" && coupon.reservedByUserId !== input.userId) {
     return { error: "Coupon reserved by another user" as const };
   }
 
-  const nextCount = record.redemptionCount + 1;
-  record.redemptionCount = nextCount;
-  record.redeemedAt = new Date().toISOString();
-  record.redeemedByUserId = input.userId;
-  record.redeemedByEmail = input.userEmail?.trim().toLowerCase() || null;
-  record.redeemedPaymentId = input.paymentId || null;
-  record.reservedAt = null;
-  record.reservedByUserId = null;
-  record.reservedOrderId = null;
-  record.status = nextCount >= record.maxRedemptions ? "redeemed" : "active";
-  await saveDb(db);
-  return { success: true as const, coupon: record };
+  return redeemCouponInDb(coupon.id, coupon.redemptionCount, coupon.maxRedemptions, input);
 }

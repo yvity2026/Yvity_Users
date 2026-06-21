@@ -49,10 +49,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const [globalFlags, planPrices] = await Promise.all([
+    const [globalFlags, adminPrices] = await Promise.all([
       getGlobalFeatureFlags(),
       getAdminPlanPrices(),
     ]);
+    const planPrices: Partial<Record<string, number>> = Object.fromEntries(
+      Object.entries(adminPrices).map(([id, p]) => [id, p?.salePriceInr]),
+    );
 
     if (!globalFlags.membershipCheckoutEnabled) {
       return NextResponse.json(

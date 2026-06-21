@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { canAcceptTestimonialType } from "@/lib/advisor-membership/plan-enforcement";
 import { getAdvisorPlanContext } from "@/lib/advisor-membership/plan-enforcement-server";
 import { uid } from "@/lib/id";
 import { isRegisteredTestimonialService } from "@/lib/sections/testimonial-service-options";
@@ -113,8 +114,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await loadTestimonials();
-    void existing;
+    const existing = await loadTestimonials(advisorUserId);
+
+    // Enforce per-plan testimonial limits
+    const limitCheck = canAcceptTestimonialType(planCtx.limits, existing, type, planCtx.planId);
+    if (!limitCheck.ok) {
+      return NextResponse.json({ error: limitCheck.reason ?? "Testimonial limit reached for this plan." }, { status: 403 });
+    }
 
     const contentErr = validateGiveContent(draft);
     if (contentErr) return NextResponse.json({ error: contentErr }, { status: 400 });
