@@ -38,7 +38,7 @@ export function GalleryEditorLightbox(props: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    setDraft(source ?? null);
+    if (source) setDraft(source);
   }, [source]);
 
   useEffect(() => {
