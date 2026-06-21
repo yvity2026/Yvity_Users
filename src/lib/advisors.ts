@@ -57,13 +57,20 @@ async function mergeLocalAdvisorCardMetrics(
   });
 }
 
-/** Public advisors — Supabase when configured, otherwise demo mocks. */
-export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
+/** Public advisors — Supabase when configured, otherwise demo mocks.
+ *  excludeSelf: exclude the logged-in advisor from results (default true).
+ *  Set false for the landing page hero/find-advisors which must show all
+ *  featured advisors regardless of who is viewing. */
+export async function getPublicAdvisors(
+  options: { excludeSelf?: boolean } = {},
+): Promise<PublicAdvisorCard[]> {
+  const { excludeSelf = true } = options;
   const session = await getSessionUser();
+  const excludeId = excludeSelf ? (session?.id ?? null) : null;
   let advisors: PublicAdvisorCard[] = [];
 
   try {
-    const fromSupabase = await fetchSupabasePublicAdvisors(session?.id ?? null);
+    const fromSupabase = await fetchSupabasePublicAdvisors(excludeId);
     if (fromSupabase !== null) {
       advisors = await mergeLocalAdvisorCardMetrics(fromSupabase);
       if (advisors.length > 0) return advisors;
@@ -72,11 +79,11 @@ export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
     console.warn("[advisors] Supabase fetch failed, using local data:", error);
   }
 
-  const local = await loadLocalPublicAdvisors(session?.id ?? null);
+  const local = await loadLocalPublicAdvisors(excludeId);
   if (local.length > 0) return local;
 
   const mocks = getMockPublicAdvisors();
-  if (session?.id) {
+  if (excludeSelf && session?.id) {
     return mocks.filter((advisor) => advisor.id !== session.id);
   }
 
