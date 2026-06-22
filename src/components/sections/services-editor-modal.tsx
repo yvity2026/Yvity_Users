@@ -182,8 +182,9 @@ export function ServicesEditorModal({
       className="z-[100]"
       onClose={onClose}
       backdropTone="heavy"
-      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl p-5 sm:p-6 md:p-8 space-y-4 max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto"
+      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
     >
+        <div className="overflow-y-auto flex-1 min-h-0 p-5 sm:p-6 md:p-8 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -544,7 +545,8 @@ export function ServicesEditorModal({
             Saving will reset this service to <span className="font-medium text-foreground">pending</span> status — your updated documents will go back to admin for review.
           </p>
         )}
-        <div className="flex flex-wrap gap-2 pt-2">
+        </div>{/* end scroll body */}
+        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <Button onClick={save} disabled={!canSubmit} className="gap-2">
             <Save className="size-4" />
             {needsReapproval ? "Save & Submit for Re-approval" : isResubmit ? "Save & Resubmit" : isNew ? "Save Service" : "Save"}
