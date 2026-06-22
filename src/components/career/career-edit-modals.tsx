@@ -22,13 +22,13 @@ function ModalShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 pb-[3.75rem] sm:pb-0 sm:p-4 animate-in fade-in">
       <button
         type="button"
         className="absolute inset-0 bg-background/95 backdrop-blur-xl"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full sm:max-w-lg max-h-[92dvh] sm:max-h-[90vh] flex flex-col glass-strong rounded-t-2xl sm:rounded-2xl border border-white/15 shadow-2xl">
+      <div className="relative z-10 w-full sm:max-w-lg max-h-[calc(92dvh-3.75rem)] sm:max-h-[90vh] flex flex-col glass-strong rounded-t-2xl sm:rounded-2xl border border-white/15 shadow-2xl">
         <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0">
           <p className="font-semibold text-sm">{title}</p>
           <button

@@ -104,10 +104,10 @@ export function AchievementsEditorModal({
   return (
     <>
     <AnimatedModalShell
-      className="z-[100]"
+      className="z-[100] pb-[3.75rem] sm:pb-0"
       onClose={handleClose}
       backdropTone="heavy"
-      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
+      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl flex flex-col max-h-[calc(92dvh-3.75rem)] sm:max-h-[90vh]"
     >
         <div className="overflow-y-auto flex-1 min-h-0 p-5 sm:p-6 md:p-8 space-y-4">
         <div className="flex items-center justify-between gap-2">
@@ -194,7 +194,7 @@ export function AchievementsEditorModal({
         />
 
         </div>{/* end scroll body */}
-        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0">
           <Button onClick={save} className="gap-2">
             <Save className="size-4" /> Save
           </Button>
