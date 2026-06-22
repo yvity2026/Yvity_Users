@@ -33,6 +33,12 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid career data" }, { status: 400 });
   }
 
-  await saveCareerForUser(user.id, body);
+  try {
+    await saveCareerForUser(user.id, body);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[career PUT]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, data: body });
 }

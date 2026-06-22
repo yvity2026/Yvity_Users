@@ -29,10 +29,11 @@ export async function loadCareerFromDb(userId: string): Promise<CareerData> {
 
 export async function syncCareerToDb(userId: string, career: CareerData): Promise<CareerData> {
   const supabase = client();
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("advisor_journey")
     .select("id")
     .eq("user_id", userId);
+  if (fetchErr) throw new Error(`[advisor_journey] fetch failed: ${fetchErr.message}`);
 
   const allItems = [
     ...career.experiences.map((e) => ({ kind: "experience" as const, item: e })),
@@ -46,7 +47,12 @@ export async function syncCareerToDb(userId: string, career: CareerData): Promis
     .filter((id) => !payloadIds.has(id));
 
   if (toDelete.length) {
-    await supabase.from("advisor_journey").delete().eq("user_id", userId).in("id", toDelete);
+    const { error: delErr } = await supabase
+      .from("advisor_journey")
+      .delete()
+      .eq("user_id", userId)
+      .in("id", toDelete);
+    if (delErr) throw new Error(`[advisor_journey] delete failed: ${delErr.message}`);
   }
 
   for (const entry of allItems) {
@@ -58,9 +64,15 @@ export async function syncCareerToDb(userId: string, career: CareerData): Promis
           : mapCareerEducationToRow(entry.item, userId);
 
     if (isUuid(entry.item.id)) {
-      await supabase.from("advisor_journey").update(row).eq("id", entry.item.id).eq("user_id", userId);
+      const { error: updErr } = await supabase
+        .from("advisor_journey")
+        .update(row)
+        .eq("id", entry.item.id)
+        .eq("user_id", userId);
+      if (updErr) throw new Error(`[advisor_journey] update failed: ${updErr.message}`);
     } else {
-      await supabase.from("advisor_journey").insert(row);
+      const { error: insErr } = await supabase.from("advisor_journey").insert(row);
+      if (insErr) throw new Error(`[advisor_journey] insert failed: ${insErr.message}`);
     }
   }
 

@@ -37,6 +37,7 @@ export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] 
   }, [reload]);
 
   const update = (d: CareerData) => {
+    const prev = data;
     setData(d);
     // Intentionally NOT dispatching EVT after PUT — doing so would trigger
     // reload() and re-fetch server data before the save is reflected,
@@ -46,6 +47,19 @@ export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] 
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
       body: JSON.stringify(d),
+    }).then((res) => {
+      if (!res.ok) {
+        res.json().then((body: unknown) => {
+          const msg = (body as { error?: string })?.error ?? `HTTP ${res.status}`;
+          console.error("[career PUT] save failed:", msg);
+        }).catch(() => {
+          console.error("[career PUT] save failed: HTTP", res.status);
+        });
+        setData(prev);
+      }
+    }).catch((err: unknown) => {
+      console.error("[career PUT] network error:", err);
+      setData(prev);
     });
   };
 

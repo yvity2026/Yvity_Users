@@ -145,10 +145,11 @@ export async function insertTestimonialToDb(
 
 export async function syncServices(advisorId: string, items: ServiceItem[]) {
   const supabase = client();
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("advisor_services")
     .select("id")
     .eq("advisor_id", advisorId);
+  if (fetchErr) throw new Error(`[advisor_services] fetch failed: ${fetchErr.message}`);
 
   const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
   const toDelete = (existing ?? [])
@@ -156,7 +157,12 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
     .filter((id) => !payloadIds.has(id));
 
   if (toDelete.length) {
-    await supabase.from("advisor_services").delete().eq("advisor_id", advisorId).in("id", toDelete);
+    const { error: delErr } = await supabase
+      .from("advisor_services")
+      .delete()
+      .eq("advisor_id", advisorId)
+      .in("id", toDelete);
+    if (delErr) throw new Error(`[advisor_services] delete failed: ${delErr.message}`);
   }
 
   for (const item of items) {
@@ -174,9 +180,15 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
     };
 
     if (isUuid(item.id)) {
-      await supabase.from("advisor_services").update(row).eq("id", item.id).eq("advisor_id", advisorId);
+      const { error: updErr } = await supabase
+        .from("advisor_services")
+        .update(row)
+        .eq("id", item.id)
+        .eq("advisor_id", advisorId);
+      if (updErr) throw new Error(`[advisor_services] update failed: ${updErr.message}`);
     } else {
-      await supabase.from("advisor_services").insert(row);
+      const { error: insErr } = await supabase.from("advisor_services").insert(row);
+      if (insErr) throw new Error(`[advisor_services] insert failed: ${insErr.message}`);
     }
   }
 
@@ -185,10 +197,11 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
 
 export async function syncAchievements(advisorId: string, items: AchievementItem[]) {
   const supabase = client();
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("advisor_achievements")
     .select("id")
     .eq("advisor_id", advisorId);
+  if (fetchErr) throw new Error(`[advisor_achievements] fetch failed: ${fetchErr.message}`);
 
   const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
   const toDelete = (existing ?? [])
@@ -196,11 +209,12 @@ export async function syncAchievements(advisorId: string, items: AchievementItem
     .filter((id) => !payloadIds.has(id));
 
   if (toDelete.length) {
-    await supabase
+    const { error: delErr } = await supabase
       .from("advisor_achievements")
       .delete()
       .eq("advisor_id", advisorId)
       .in("id", toDelete);
+    if (delErr) throw new Error(`[advisor_achievements] delete failed: ${delErr.message}`);
   }
 
   for (const item of items) {
@@ -224,13 +238,15 @@ export async function syncAchievements(advisorId: string, items: AchievementItem
     };
 
     if (isUuid(item.id)) {
-      await supabase
+      const { error: updErr } = await supabase
         .from("advisor_achievements")
         .update(row)
         .eq("id", item.id)
         .eq("advisor_id", advisorId);
+      if (updErr) throw new Error(`[advisor_achievements] update failed: ${updErr.message}`);
     } else {
-      await supabase.from("advisor_achievements").insert(row);
+      const { error: insErr } = await supabase.from("advisor_achievements").insert(row);
+      if (insErr) throw new Error(`[advisor_achievements] insert failed: ${insErr.message}`);
     }
   }
 
@@ -239,10 +255,11 @@ export async function syncAchievements(advisorId: string, items: AchievementItem
 
 export async function syncGallery(advisorId: string, items: GalleryItem[]) {
   const supabase = client();
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("advisor_gallery")
     .select("id")
     .eq("advisor_id", advisorId);
+  if (fetchErr) throw new Error(`[advisor_gallery] fetch failed: ${fetchErr.message}`);
 
   const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
   const toDelete = (existing ?? [])
@@ -250,14 +267,16 @@ export async function syncGallery(advisorId: string, items: GalleryItem[]) {
     .filter((id) => !payloadIds.has(id));
 
   if (toDelete.length) {
-    await supabase.from("advisor_gallery").delete().eq("advisor_id", advisorId).in("id", toDelete);
+    const { error: delErr } = await supabase
+      .from("advisor_gallery")
+      .delete()
+      .eq("advisor_id", advisorId)
+      .in("id", toDelete);
+    if (delErr) throw new Error(`[advisor_gallery] delete failed: ${delErr.message}`);
   }
 
   for (let index = 0; index < items.length; index++) {
     const item = items[index];
-    // Store title separately in the caption field prefixed so we can recover
-    // it losslessly. Format: title\n\ncaption (double newline separator).
-    // Legacy rows without this separator are handled in mapDbGallery.
     const captionPayload = item.title
       ? `${item.title}\n\n${item.caption ?? ""}`.trim()
       : (item.caption ?? "").trim();
@@ -268,16 +287,20 @@ export async function syncGallery(advisorId: string, items: GalleryItem[]) {
       category: item.category,
       sort_order: index,
       is_featured: Boolean(item.featured),
-      // Store layout and location as JSON in the caption suffix if the DB
-      // columns don't exist yet; fall back to extra fields when available.
       location: item.location ?? null,
       layout: item.layout ?? "default",
     };
 
     if (isUuid(item.id)) {
-      await supabase.from("advisor_gallery").update(row).eq("id", item.id).eq("advisor_id", advisorId);
+      const { error: updErr } = await supabase
+        .from("advisor_gallery")
+        .update(row)
+        .eq("id", item.id)
+        .eq("advisor_id", advisorId);
+      if (updErr) throw new Error(`[advisor_gallery] update failed: ${updErr.message}`);
     } else if (item.imageUrl) {
-      await supabase.from("advisor_gallery").insert(row);
+      const { error: insErr } = await supabase.from("advisor_gallery").insert(row);
+      if (insErr) throw new Error(`[advisor_gallery] insert failed: ${insErr.message}`);
     }
   }
 
