@@ -1,70 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createSectionStore } from "@/lib/section-store";
 import type { CareerData } from "./career-types";
 import { emptyCareerData } from "./empty-data";
 
 export { emptyCareerData as defaultCareerData } from "./empty-data";
 
-const EVT = "career-data-updated";
-
-async function fetchCareerData(): Promise<CareerData> {
-  const res = await fetch("/api/career", { cache: "no-store", credentials: "same-origin" });
-  if (!res.ok) return emptyCareerData;
-  const json = (await res.json()) as { data?: CareerData };
-  return json.data ?? emptyCareerData;
-}
+const useCareerDataStore = createSectionStore<CareerData>(
+  "/api/career",
+  emptyCareerData,
+  "career-data-updated",
+);
 
 export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] {
-  const [data, setData] = useState<CareerData>(emptyCareerData);
-  const [loading, setLoading] = useState(true);
-
-  const reload = useCallback(async () => {
-    try {
-      setData(await fetchCareerData());
-    } catch {
-      setData(emptyCareerData);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    reload();
-    const onUpdate = () => reload();
-    window.addEventListener(EVT, onUpdate);
-    return () => window.removeEventListener(EVT, onUpdate);
-  }, [reload]);
-
-  const update = (d: CareerData) => {
-    const prev = data;
-    console.log("[career-store] update called, experiences:", d.experiences.length, "certs:", d.certifications.length, "edu:", d.education.length);
-    setData(d);
-    // Intentionally NOT dispatching EVT after PUT — doing so would trigger
-    // reload() and re-fetch server data before the save is reflected,
-    // clearing the optimistic state and making newly-added items disappear.
-    void fetch("/api/career", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify(d),
-    }).then((res) => {
-      if (!res.ok) {
-        res.json().then((body: unknown) => {
-          const msg = (body as { error?: string })?.error ?? `HTTP ${res.status}`;
-          console.error("[career PUT] save failed:", msg);
-        }).catch(() => {
-          console.error("[career PUT] save failed: HTTP", res.status);
-        });
-        setData(prev);
-      }
-    }).catch((err: unknown) => {
-      console.error("[career PUT] network error:", err);
-      setData(prev);
-    });
-  };
-
-  return [data, update, loading];
+  return useCareerDataStore();
 }
 
 export function uid(prefix = "id"): string {

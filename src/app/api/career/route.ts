@@ -7,22 +7,22 @@ import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
 
 export async function GET() {
   const dataUserId = await resolveAdvisorDataUserId();
-  console.log("[career GET] dataUserId:", dataUserId);
   const data = await loadCareerForUser(dataUserId ?? undefined);
-  console.log("[career GET] loaded experiences:", data.experiences.length, "certs:", data.certifications.length, "edu:", data.education.length);
   return NextResponse.json({ data });
 }
 
 export async function PUT(request: Request) {
   const user = await requireSession();
-  console.log("[career PUT] session user.id:", user?.id);
   if (!user?.id) {
     return unauthorized();
   }
 
+  // createSectionStore sends { data: T } — same as services/achievements/gallery
   let body: CareerData;
   try {
-    body = (await request.json()) as CareerData;
+    const raw = (await request.json()) as { data?: CareerData } | CareerData;
+    // Accept both { data: CareerData } (new) and bare CareerData (legacy)
+    body = "data" in raw && raw.data != null ? raw.data : (raw as CareerData);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
