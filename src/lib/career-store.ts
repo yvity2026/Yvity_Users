@@ -38,6 +38,7 @@ export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] 
 
   const update = (d: CareerData) => {
     const prev = data;
+    console.log("[career-store] update called, experiences:", d.experiences.length, "certs:", d.certifications.length, "edu:", d.education.length);
     setData(d);
     // Intentionally NOT dispatching EVT after PUT — doing so would trigger
     // reload() and re-fetch server data before the save is reflected,
