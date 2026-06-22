@@ -56,13 +56,13 @@ export async function loadCareerForUser(userId: string | undefined): Promise<Car
   return normalizeCareer(raw as CareerData);
 }
 
-export async function saveCareerForUser(userId: string, data: CareerData): Promise<void> {
+export async function saveCareerForUser(userId: string, data: CareerData): Promise<CareerData> {
   const normalized = normalizeCareer(data);
   if (useSupabasePersistence()) {
-    await syncCareerToDb(userId, normalized);
-    return;
+    return syncCareerToDb(userId, normalized);
   }
   await saveJsonFile(careerFileForUser(userId), normalized);
+  return normalized;
 }
 
 /** @deprecated Use loadCareerForUser(session.id) */

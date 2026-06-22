@@ -1,14 +1,8 @@
 import "server-only";
 
 import type { CareerData } from "@/lib/career-types";
+import { emptyCareerData } from "@/lib/empty-data";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
-import {
-  isUuid,
-  mapCareerCertificationToRow,
-  mapCareerEducationToRow,
-  mapCareerExperienceToRow,
-  mapJourneyToCareer,
-} from "@/lib/server/supabase/career-mapper";
 
 function client() {
   const supabase = getAdminClientOrNull();
@@ -18,63 +12,21 @@ function client() {
 
 export async function loadCareerFromDb(userId: string): Promise<CareerData> {
   const { data, error } = await client()
-    .from("advisor_journey")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
+    .from("advisor_profiles")
+    .select("career_data")
+    .eq("advisor_id", userId)
+    .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  return mapJourneyToCareer((data ?? []) as Record<string, unknown>[]);
+  if (error) throw new Error(`[career load] ${error.message}`);
+  return (data?.career_data as CareerData | null) ?? emptyCareerData;
 }
 
 export async function syncCareerToDb(userId: string, career: CareerData): Promise<CareerData> {
-  const supabase = client();
-  const { data: existing, error: fetchErr } = await supabase
-    .from("advisor_journey")
-    .select("id")
-    .eq("user_id", userId);
-  if (fetchErr) throw new Error(`[advisor_journey] fetch failed: ${fetchErr.message}`);
+  const { error } = await client()
+    .from("advisor_profiles")
+    .update({ career_data: career, updated_at: new Date().toISOString() })
+    .eq("advisor_id", userId);
 
-  const allItems = [
-    ...career.experiences.map((e) => ({ kind: "experience" as const, item: e })),
-    ...career.certifications.map((c) => ({ kind: "certification" as const, item: c })),
-    ...career.education.map((e) => ({ kind: "education" as const, item: e })),
-  ];
-
-  const payloadIds = new Set(allItems.filter((x) => isUuid(x.item.id)).map((x) => x.item.id));
-  const toDelete = (existing ?? [])
-    .map((r) => String(r.id))
-    .filter((id) => !payloadIds.has(id));
-
-  if (toDelete.length) {
-    const { error: delErr } = await supabase
-      .from("advisor_journey")
-      .delete()
-      .eq("user_id", userId)
-      .in("id", toDelete);
-    if (delErr) throw new Error(`[advisor_journey] delete failed: ${delErr.message}`);
-  }
-
-  for (const entry of allItems) {
-    const row =
-      entry.kind === "experience"
-        ? mapCareerExperienceToRow(entry.item, userId)
-        : entry.kind === "certification"
-          ? mapCareerCertificationToRow(entry.item, userId)
-          : mapCareerEducationToRow(entry.item, userId);
-
-    if (isUuid(entry.item.id)) {
-      const { error: updErr } = await supabase
-        .from("advisor_journey")
-        .update(row)
-        .eq("id", entry.item.id)
-        .eq("user_id", userId);
-      if (updErr) throw new Error(`[advisor_journey] update failed: ${updErr.message}`);
-    } else {
-      const { error: insErr } = await supabase.from("advisor_journey").insert(row);
-      if (insErr) throw new Error(`[advisor_journey] insert failed: ${insErr.message}`);
-    }
-  }
-
-  return loadCareerFromDb(userId);
+  if (error) throw new Error(`[career save] ${error.message}`);
+  return career;
 }
