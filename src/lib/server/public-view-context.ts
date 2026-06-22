@@ -8,6 +8,12 @@ import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
 import { slugMatches, toPublicProfileSlugSegment } from "@/lib/advisor/public-profile-slug";
 import { getSessionUser } from "@/lib/server/session";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
+import { loadAdvisorSettings } from "@/lib/server/advisor-settings-persistence";
+import { DEFAULT_PROFILE_THEME_ID, isProfileThemeId } from "@/lib/profile-themes";
+import { resolveThemeForPlan } from "@/lib/advisor-membership/plan-enforcement";
+import { getEffectivePlan } from "@/lib/advisor/planFeatures";
+import type { MembershipPlanId } from "@/lib/advisor-membership/types";
+import type { ProfileThemeId } from "@/lib/profile-themes";
 
 export const PUBLIC_VIEW_COOKIE = "yvity-view-advisor";
 
@@ -103,6 +109,8 @@ export type PublicViewAdvisorPayload = {
   selfie_url?: string;
   /** Score from advisor_scores.total_score — single source of truth */
   dbScore?: number | null;
+  /** Advisor's chosen profile theme — applied on public profile pages */
+  profileTheme: ProfileThemeId;
 };
 
 async function resolveRegisteredUserForPublicView(
@@ -127,11 +135,19 @@ export async function loadPublicViewAdvisorByUserId(
   const profile = await getAdvisorProfileForUser(userId);
   if (!profile) return null;
 
-  const [user, dbScore] = await Promise.all([
+  const [user, dbScore, settings] = await Promise.all([
     resolveRegisteredUserForPublicView(userId),
     loadAdvisorDbScore(userId),
+    loadAdvisorSettings(userId).catch(() => null),
   ]);
   if (!user) return null;
+
+  const planId = getEffectivePlan(profile.subscription_plan, profile.account_status) as MembershipPlanId;
+  const rawTheme = settings?.appearance?.theme;
+  const profileTheme = resolveThemeForPlan(
+    planId,
+    isProfileThemeId(rawTheme) ? rawTheme : DEFAULT_PROFILE_THEME_ID,
+  );
 
   return {
     userId,
@@ -145,6 +161,7 @@ export async function loadPublicViewAdvisorByUserId(
     about: user.about?.trim() || "",
     selfie_url: user.selfieUrl?.trim() || undefined,
     dbScore,
+    profileTheme,
   };
 }
 

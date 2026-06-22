@@ -69,7 +69,7 @@ export function GalleryEditorLightbox(props: Props) {
         aria-label="Close editor"
       />
 
-      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[100dvh] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[100dvh] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300 pb-[env(safe-area-inset-bottom)] sm:pb-0">
         <div className="glass-strong rounded-t-2xl sm:rounded-2xl border border-white/15 shadow-2xl shadow-black/50 flex flex-col max-h-[inherit] overflow-hidden">
           {/* Header — compact */}
           <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0">
