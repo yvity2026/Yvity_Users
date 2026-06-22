@@ -38,13 +38,14 @@ export function useCareerData(): [CareerData, (d: CareerData) => void, boolean] 
 
   const update = (d: CareerData) => {
     setData(d);
+    // Intentionally NOT dispatching EVT after PUT — doing so would trigger
+    // reload() and re-fetch server data before the save is reflected,
+    // clearing the optimistic state and making newly-added items disappear.
     void fetch("/api/career", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
       body: JSON.stringify(d),
-    }).then(() => {
-      window.dispatchEvent(new CustomEvent(EVT));
     });
   };
 
