@@ -58,11 +58,15 @@ export async function loadCareerForUser(userId: string | undefined): Promise<Car
 
 export async function saveCareerForUser(userId: string, data: CareerData): Promise<void> {
   const normalized = normalizeCareer(data);
-  if (useSupabasePersistence()) {
+  const useSupabase = useSupabasePersistence();
+  console.log("[career save] userId:", userId, "useSupabase:", useSupabase, "items:", normalized.experiences.length + normalized.certifications.length + normalized.education.length);
+  if (useSupabase) {
     await syncCareerToDb(userId, normalized);
+    console.log("[career save] syncCareerToDb done");
     return;
   }
   await saveJsonFile(careerFileForUser(userId), normalized);
+  console.log("[career save] saveJsonFile done:", careerFileForUser(userId));
 }
 
 /** @deprecated Use loadCareerForUser(session.id) */
