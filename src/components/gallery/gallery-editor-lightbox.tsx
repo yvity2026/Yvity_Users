@@ -61,7 +61,7 @@ export function GalleryEditorLightbox(props: Props) {
   const isLocal = draft.imageUrl.startsWith("/api/");
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 pb-[3.75rem] sm:pb-0 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <button
         type="button"
         className="absolute inset-0 bg-background/95 backdrop-blur-xl"
@@ -69,7 +69,7 @@ export function GalleryEditorLightbox(props: Props) {
         aria-label="Close editor"
       />
 
-      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[100dvh] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300 pb-[env(safe-area-inset-bottom)] sm:pb-0">
+      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[calc(100dvh-3.75rem)] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
         <div className="glass-strong rounded-t-2xl sm:rounded-2xl border border-white/15 shadow-2xl shadow-black/50 flex flex-col max-h-[inherit] overflow-hidden">
           {/* Header — compact */}
           <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0">
@@ -183,7 +183,7 @@ export function GalleryEditorLightbox(props: Props) {
           </div>
 
           {/* Footer actions */}
-          <div className="flex flex-wrap gap-2 p-4 border-t border-white/10 shrink-0 bg-[oklch(0.2_0.035_235/0.5)] pb-[max(4.5rem,env(safe-area-inset-bottom))] sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="flex flex-wrap gap-2 p-4 border-t border-white/10 shrink-0 bg-[oklch(0.2_0.035_235/0.5)]">
             <Button onClick={() => onSave(draft)} className="gap-2 flex-1 sm:flex-none">
               <Save className="size-4" /> Save
             </Button>
