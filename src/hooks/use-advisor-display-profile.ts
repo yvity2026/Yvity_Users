@@ -14,7 +14,7 @@ import {
   buildAdvisorDisplayProfile,
   type AdvisorDisplayProfile,
 } from "@/lib/advisor-display-profile";
-import { buildPublicProfileBannerStats } from "@/lib/home/public-profile-banner-stats";
+import { buildCareerSectionBannerStats, buildPublicProfileBannerStats } from "@/lib/home/public-profile-banner-stats";
 import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
 import { useCareerData } from "@/lib/career-store";
@@ -88,6 +88,7 @@ export function useAdvisorDisplayProfile(
       companyName: bannerStats.companyName,
       mdrtMember: bannerStats.mdrtMember,
       stats: bannerStats.sectionBannerStats,
+      careerStats: bannerStats.careerSectionBannerStats,
       highlights: bannerStats.highlightLabels,
     };
   }, [

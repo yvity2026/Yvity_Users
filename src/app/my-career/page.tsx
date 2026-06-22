@@ -12,11 +12,13 @@ import { useAuth } from "@/context/AuthUserContext";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
 import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 
 export default function MyCareerPage() {
   const homeHref = usePublicProfileNavHome();
   const pathname = usePathname();
   const [data, , loading] = useCareerData();
+  const display = useAdvisorDisplayProfile();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { advisor } = useAuth();
   const publicAdvisor = useResolvedPublicAdvisorPayload();
@@ -50,7 +52,7 @@ export default function MyCareerPage() {
             My Career
           </h1>
         </div>
-        <SectionProfileBanner className="mb-6 sm:mb-8" />
+        <SectionProfileBanner className="mb-6 sm:mb-8" statsOverride={display.careerStats} />
         {!settings.visibility.careerJourney && !settings.visibility.educationalJourney ? (
           <PublicSectionUnavailable title="Career sections hidden" />
         ) : (
