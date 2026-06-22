@@ -183,7 +183,7 @@ export function GalleryEditorLightbox(props: Props) {
           </div>
 
           {/* Footer actions */}
-          <div className="flex flex-wrap gap-2 p-4 border-t border-white/10 shrink-0 bg-[oklch(0.2_0.035_235/0.5)]">
+          <div className="flex flex-wrap gap-2 p-4 border-t border-white/10 shrink-0 bg-[oklch(0.2_0.035_235/0.5)] pb-[max(4.5rem,env(safe-area-inset-bottom))] sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button onClick={() => onSave(draft)} className="gap-2 flex-1 sm:flex-none">
               <Save className="size-4" /> Save
             </Button>

@@ -194,7 +194,7 @@ export function AchievementsEditorModal({
         />
 
         </div>{/* end scroll body */}
-        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0 pb-[max(4.5rem,env(safe-area-inset-bottom))] sm:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <Button onClick={save} className="gap-2">
             <Save className="size-4" /> Save
           </Button>
