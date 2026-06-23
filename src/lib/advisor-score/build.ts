@@ -503,7 +503,7 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       label: "Add intro video to your profile",
       points: 10,
       cta: "Add now",
-      target: { kind: "profile-section", section: "profile" },
+      target: { kind: "intro-video" },
     });
   }
   if (videoTestimonials < 3) {

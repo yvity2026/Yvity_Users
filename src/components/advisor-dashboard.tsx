@@ -18,6 +18,8 @@ import {
   type PublicProfileViewMode,
 } from "@/components/advisor/public-profile/public-profile-preview-module";
 import { AdvisorScoreModule } from "@/components/advisor/score/advisor-score-module";
+import { IntroVideoUploadModal } from "@/components/intro-video/intro-video-upload-modal";
+import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 import { GalleryShowcase } from "@/components/gallery/gallery-showcase";
 import { ServicesShowcase } from "@/components/sections/services-showcase";
 import { AchievementsShowcase } from "@/components/sections/achievements-showcase";
@@ -67,8 +69,10 @@ export function AdvisorDashboard({
   // narrow-iframe layout reads as a phone preview; "desktop" mode hides the
   // workspace header so the iframe fills the entire content area.
   const [publicViewMode, setPublicViewMode] = useState<PublicProfileViewMode>("mobile");
+  const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
   const display = useAdvisorDisplayProfile();
   const { previewPath } = usePublicProfileUrls();
+  const { share: shareProfile } = useShareProfileLink();
 
   useEffect(() => {
     if (!embedMode && ready && !isAuthed) router.replace("/login");
@@ -178,7 +182,13 @@ export function AdvisorDashboard({
         case "gallery":
           return <GalleryShowcase editable embedded />;
         case "score":
-          return <AdvisorScoreModule onNavigateProfileSection={navigateProfile} />;
+          return (
+            <AdvisorScoreModule
+              onNavigateProfileSection={navigateProfile}
+              onShareProfile={() => void shareProfile()}
+              onOpenIntroVideoModal={() => setIntroVideoModalOpen(true)}
+            />
+          );
       }
     }
     if (topSection === "leads") return <AdvisorLeadsModule />;
@@ -311,6 +321,11 @@ export function AdvisorDashboard({
           navigateProfile(section);
           window.scrollTo({ top: 0, behavior: "auto" });
         }}
+      />
+
+      <IntroVideoUploadModal
+        open={introVideoModalOpen}
+        onClose={() => setIntroVideoModalOpen(false)}
       />
     </div>
   );
