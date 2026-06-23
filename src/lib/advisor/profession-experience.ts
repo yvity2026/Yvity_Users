@@ -125,16 +125,16 @@ export function resolveProfileExperienceDisplay(
   return resolveServiceExperienceDisplay(services, profileApproved);
 }
 
-/** Highest `clients` count across visible registration services. */
+/** Total clients count summed across all services. */
 export function computeHighestClientsCount(
   services: Pick<ServiceItem, "clients">[],
 ): number {
-  let max = 0;
+  let total = 0;
   for (const service of services) {
     const value = Number(service.clients ?? 0);
-    if (Number.isFinite(value)) max = Math.max(max, value);
+    if (Number.isFinite(value) && value > 0) total += value;
   }
-  return max;
+  return total;
 }
 
 export function resolveProfileClientsCount(
