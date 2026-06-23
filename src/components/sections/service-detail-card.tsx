@@ -273,7 +273,7 @@ export function ServiceDetailCard({
                 width={48}
                 height={48}
                 className="size-full object-contain p-1"
-                unoptimized={logoUrl.startsWith("/api/")}
+                unoptimized={logoUrl.startsWith("/api/") || logoUrl.includes("/storage/v1/object/public/")}
               />
             ) : initials ? (
               <span

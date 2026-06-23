@@ -304,7 +304,7 @@ function BannerOnlyServiceCard({
                 width={48}
                 height={48}
                 className="size-full object-contain p-1"
-                unoptimized={logoUrl.startsWith("/api/")}
+                unoptimized={logoUrl.startsWith("/api/") || logoUrl.includes("/storage/v1/object/public/")}
               />
             ) : (
               <Icon className={cn("size-6", accent.text)} />
