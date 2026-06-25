@@ -109,28 +109,28 @@ export function RequestTestimonialModal() {
     >
       <button
         type="button"
-        className="absolute inset-0 bg-background/85 backdrop-blur-md"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={closeRequestTestimonial}
         aria-label="Close"
       />
 
-      <div className="relative z-10 w-full sm:max-w-md glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
-        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-white/10">
+      <div className="relative z-10 w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl border border-gray-200 shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-gray-100">
           <div>
-            <h2 id="request-testimonial-title" className="text-lg font-bold tracking-tight">
+            <h2 id="request-testimonial-title" className="text-lg font-bold tracking-tight text-gray-900">
               Request Testimonial
             </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-gray-500">
               Share your link — customers submit on your public profile
             </p>
           </div>
           <button
             type="button"
             onClick={closeRequestTestimonial}
-            className="inline-flex size-9 items-center justify-center rounded-full border border-white/12 bg-white/[0.06]"
+            className="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 transition"
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-4 text-gray-600" />
           </button>
         </div>
 
@@ -138,16 +138,16 @@ export function RequestTestimonialModal() {
           {/* Social preview hint */}
           <div
             className={cn(
-              "overflow-hidden rounded-2xl border border-white/12",
-              "bg-gradient-to-br from-[oklch(0.28_0.055_232)] to-[oklch(0.22_0.04_232)]",
+              "overflow-hidden rounded-2xl border border-gray-200",
+              "bg-white shadow-sm",
             )}
           >
-            <div className="h-1.5 bg-gradient-to-r from-primary via-[oklch(0.82_0.13_205)] to-[oklch(0.82_0.16_162)]" />
+            <div className="h-1.5 bg-gradient-to-r from-[oklch(0.52_0.14_232)] via-[oklch(0.65_0.18_205)] to-[oklch(0.62_0.18_162)]" />
             <div className="p-4 flex gap-3">
               <div
                 className={cn(
                   "size-14 shrink-0 rounded-xl flex items-center justify-center text-lg font-bold",
-                  "bg-gradient-to-br from-primary to-accent text-primary-foreground",
+                  "bg-gradient-to-br from-[oklch(0.52_0.14_232)] to-[oklch(0.42_0.14_220)] text-white",
                 )}
               >
                 {initials}
@@ -156,20 +156,20 @@ export function RequestTestimonialModal() {
                 <YvityLogo
                   size={20}
                   showWordmark
-                  wordmarkClassName="text-[10px] font-bold uppercase tracking-wider text-[oklch(0.82_0.13_205)]"
+                  wordmarkClassName="text-[10px] font-bold uppercase tracking-wider text-[oklch(0.42_0.14_220)]"
                   className="gap-1.5"
                 />
-                <p className="text-sm font-semibold text-foreground leading-tight mt-0.5">
+                <p className="text-sm font-semibold text-gray-900 leading-tight mt-0.5">
                   {testimonialShareCopy.ogTitle}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                   {testimonialSubmitShareDescription(advisorProfile.name, advisorProfile.title)}
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="text-[11px] text-center text-muted-foreground break-all px-1 font-mono leading-relaxed">
+          <p className="text-[11px] text-center text-gray-400 break-all px-1 font-mono leading-relaxed">
             {link || "…"}
           </p>
 
@@ -192,7 +192,7 @@ export function RequestTestimonialModal() {
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 w-full rounded-2xl text-base font-semibold gap-2 border-white/15 bg-white/[0.04]"
+                className="h-12 w-full rounded-2xl text-base font-semibold gap-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                 onClick={() => void shareNative()}
                 disabled={!link}
               >
@@ -204,13 +204,13 @@ export function RequestTestimonialModal() {
             <Button
               type="button"
               variant="outline"
-              className="h-12 w-full rounded-2xl text-base font-semibold gap-2 border-white/15 bg-white/[0.04]"
+              className="h-12 w-full rounded-2xl text-base font-semibold gap-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
               onClick={() => void copyLink()}
               disabled={!link}
             >
               {linkCopied ? (
                 <>
-                  <Check className="size-5 text-[oklch(0.82_0.16_162)]" />
+                  <Check className="size-5 text-green-600" />
                   Link Copied!
                 </>
               ) : (
@@ -222,13 +222,13 @@ export function RequestTestimonialModal() {
             </Button>
           </div>
 
-          <p className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+          <p className="flex items-center justify-center gap-1.5 text-[10px] text-gray-400">
             <Share2 className="size-3" />
             Rich preview on WhatsApp, Telegram, Facebook & LinkedIn
           </p>
 
           {error && (
-            <p className="text-sm text-destructive text-center" role="alert">
+            <p className="text-sm text-red-600 text-center" role="alert">
               {error}
             </p>
           )}
