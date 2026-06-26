@@ -7,7 +7,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { ADVISOR_PROFILE_LABELS } from "@/lib/advisor-display-profile";
 
-function buildCtaFallback() {
+function buildCtaFallback(): string {
   return "Whether it's Term insurance, Health plans, Retirement planning, or any financial goal — I'll study your needs and suggest the most suitable plan. Connect with me now to get started.";
 }
 import {
