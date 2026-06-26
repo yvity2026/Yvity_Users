@@ -7,8 +7,22 @@ import { StarRating } from "@/components/ui/star-rating";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { ADVISOR_PROFILE_LABELS } from "@/lib/advisor-display-profile";
 
-function buildCtaFallback() {
-  return "Whether it's Term insurance, Health plans, Retirement planning, or any financial goal — I'll study your needs and suggest the most suitable plan. Connect with me now to get started.";
+function buildCtaFallback(profile: {
+  experienceDisplay: string;
+  title: string;
+  companyName: string;
+}): string {
+  const exp = profile.experienceDisplay?.trim();
+  const role = profile.title?.trim() || "insurance advisor";
+  const company = profile.companyName?.trim();
+
+  if (exp && company) {
+    return `With ${exp} of experience as a ${role} at ${company}, I provide honest, personalised guidance to help you find the right cover for your life, health and financial goals. Connect with me to get started.`;
+  }
+  if (exp) {
+    return `With ${exp} of experience as a ${role}, I provide honest, personalised guidance to help you find the right cover for your life, health and financial goals. Connect with me to get started.`;
+  }
+  return `As a licensed ${role}, I provide honest, personalised guidance tailored to your life stage and goals. Connect with me to get started.`;
 }
 import {
   useAdvisorProfilePhoto,
@@ -82,7 +96,11 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
             {advisorProfile.ctaDescription &&
             advisorProfile.ctaDescription !== ADVISOR_PROFILE_LABELS.ctaDescription
               ? advisorProfile.ctaDescription
-              : buildCtaFallback()}
+              : buildCtaFallback({
+                  experienceDisplay: advisorProfile.experienceDisplay,
+                  title: advisorProfile.title,
+                  companyName: advisorProfile.companyName,
+                })}
           </p>
 
           {highlightItems.length > 0 ? (

@@ -5,6 +5,7 @@ import {
   buildWhyChooseMeIntro,
   getWhyChooseMeStrengths,
 } from "@/lib/home/why-choose-me-strengths";
+import { ADVISOR_PROFILE_LABELS } from "@/lib/advisor-display-profile";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
@@ -76,7 +77,11 @@ export function WhyChooseMeSection() {
   const state = publicAdvisor?.state?.trim() || user?.state?.trim() || "";
   const profession =
     publicAdvisor?.profession?.trim() || user?.profession?.trim() || advisorProfile.title;
-  const about = advisorProfile.home.heroBio || advisorProfile.ctaDescription;
+  const customCta =
+    advisorProfile.ctaDescription !== ADVISOR_PROFILE_LABELS.ctaDescription
+      ? advisorProfile.ctaDescription
+      : "";
+  const about = advisorProfile.home.heroBio || customCta;
 
   const journeyExperienceDisplay = resolveCareerExperienceDisplay(career);
 
