@@ -24,6 +24,13 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  const data = await saveAchievementsForUser(session.id, body.data);
+  let data: Awaited<ReturnType<typeof saveAchievementsForUser>>;
+  try {
+    data = await saveAchievementsForUser(session.id, body.data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[achievements PUT]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, data });
 }

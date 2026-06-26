@@ -44,11 +44,9 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       clients,
       claims,
       sumInsured: "—",
-      claimSettled: "—",
-      claimRatio: clients > 0 ? Math.round((claims / clients) * 100) : 0,
       statusMessage,
       statusCaption: "",
-      areas: [],
+      areas: Array.isArray(meta.areas) ? (meta.areas as import("@/lib/sections/types").ServiceArea[]) : [],
       verified: true,
       verification: { status: "verified" as const, documents: [], updatedAt: new Date().toISOString() },
       companyLogoUrl: typeof row.company_logo_url === "string" ? row.company_logo_url : undefined,
@@ -58,6 +56,8 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       teamSize: parsed.teamSize,
       activeAgents: parsed.activeAgents,
       branchCount: parsed.branchCount,
+      claimSettled: parsed.claimSettled ?? "—",
+      claimRatio: parsed.claimRatio ?? 0,
       showDetailCard: true,
     };
   });

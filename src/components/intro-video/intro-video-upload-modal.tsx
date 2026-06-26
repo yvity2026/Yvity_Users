@@ -142,22 +142,35 @@ export function IntroVideoUploadModal({ open, onClose }: IntroVideoUploadModalPr
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (durationSeconds > 0) {
-        formData.append("durationSeconds", String(Math.round(durationSeconds)));
-      }
-      const res = await fetch("/api/intro-video/upload", {
+      // Step 1: get a signed upload URL from the server (no file body — bypasses Next.js size limit)
+      const urlRes = await fetch("/api/intro-video/upload-url", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
+        body: JSON.stringify({ contentType: file.type }),
       });
-      const json = (await res.json()) as { ok?: boolean; url?: string; error?: string };
-      if (!res.ok || !json.url) {
-        throw new Error(json.error ?? "Upload failed");
+      const urlText = await urlRes.text();
+      let urlJson: { signedUrl?: string; publicUrl?: string; error?: string };
+      try {
+        urlJson = JSON.parse(urlText) as typeof urlJson;
+      } catch {
+        throw new Error("Server error — please try again.");
       }
-      setUrl(json.url);
+      if (!urlRes.ok || !urlJson.signedUrl || !urlJson.publicUrl) {
+        throw new Error(urlJson.error ?? "Could not start upload.");
+      }
 
+      // Step 2: upload the file directly to Supabase Storage (no Next.js body limit)
+      const uploadRes = await fetch(urlJson.signedUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+      if (!uploadRes.ok) {
+        throw new Error("Upload to storage failed — please try again.");
+      }
+
+      setUrl(urlJson.publicUrl);
       const label = formatDurationFromSeconds(durationSeconds);
       if (label) setDurationLabel(label);
     } catch (e) {

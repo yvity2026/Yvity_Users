@@ -54,6 +54,7 @@ export type AdvisorDisplayProfile = {
   whatsapp: string;
   consultationHref: string;
   stats: { value: string; label: string }[];
+  careerStats: { value: string; label: string }[];
   highlights: { label: string }[];
   home: typeof ADVISOR_PROFILE_LABELS.home;
 };
@@ -104,6 +105,7 @@ export function buildAdvisorDisplayProfile(input: {
     experienceDisplay: "",
     whatsapp,
     stats: [],
+    careerStats: [],
     highlights: [...ADVISOR_PROFILE_LABELS.defaultHighlights],
     home: {
       ...ADVISOR_PROFILE_LABELS.home,

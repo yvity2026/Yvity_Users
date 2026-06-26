@@ -13,9 +13,16 @@ const PLACEHOLDER_STATS = [
   { value: "—", label: "Organisations" },
 ] as const;
 
-export function SectionProfileBanner({ className }: { className?: string }) {
+export function SectionProfileBanner({
+  className,
+  statsOverride,
+}: {
+  className?: string;
+  statsOverride?: { value: string; label: string }[];
+}) {
   const display = useAdvisorDisplayProfile();
-  const stats = display.stats.length > 0 ? display.stats : PLACEHOLDER_STATS;
+  const resolvedStats = statsOverride ?? display.stats;
+  const stats = resolvedStats.length > 0 ? resolvedStats : PLACEHOLDER_STATS;
 
   return (
     <section

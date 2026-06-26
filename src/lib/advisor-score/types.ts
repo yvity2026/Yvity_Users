@@ -105,6 +105,7 @@ export type ScoreImprovement = {
         section: "profile" | "services" | "achievements" | "testimonials" | "gallery";
       }
     | { kind: "share" }
+    | { kind: "intro-video" }
     | { kind: "external"; href: string };
 };
 

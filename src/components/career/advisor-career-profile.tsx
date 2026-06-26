@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicProfileUrls } from "@/hooks/use-public-profile-urls";
 import { useAuth } from "@/context/AuthUserContext";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 
 type EditTarget =
   | { kind: "experience"; item: Experience }
@@ -39,6 +40,7 @@ export function AdvisorCareerProfile({
   const { previewPath } = usePublicProfileUrls();
   const { advisor } = useAuth();
   const profileApproved = isAdvisorProfileApproved(advisor);
+  const display = useAdvisorDisplayProfile();
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
@@ -135,7 +137,7 @@ export function AdvisorCareerProfile({
 
   return (
     <>
-      <SectionProfileBanner className="mb-6 sm:mb-8" />
+      <SectionProfileBanner className="mb-6 sm:mb-8" statsOverride={display.careerStats} />
 
       <SectionCompletionGuidance healthId="photo" icon={UserRound} />
       <SectionCompletionGuidance healthId="career" icon={Briefcase} />

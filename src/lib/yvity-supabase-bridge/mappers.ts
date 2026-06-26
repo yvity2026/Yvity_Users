@@ -36,7 +36,7 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       claims,
       sumInsured: "—",
       claimSettled: "—",
-      claimRatio: clients > 0 ? Math.round((claims / clients) * 100) : 0,
+      claimRatio: 0,
       statusMessage: String(row.short_summary || ""),
       statusCaption: "",
       areas: [],

@@ -38,6 +38,11 @@ export function buildServiceGoldMeta(item: ServiceItem): Record<string, unknown>
   if (typeof item.branchCount === "number" && item.branchCount > 0) {
     meta.branchCount = item.branchCount;
   }
+  if (item.areas && item.areas.length > 0) meta.areas = item.areas;
+  if (typeof item.claimRatio === "number") meta.claimRatio = item.claimRatio;
+  if (item.claimSettled && item.claimSettled.trim() && item.claimSettled !== "—") {
+    meta.claimSettled = item.claimSettled.trim();
+  }
   return meta;
 }
 
@@ -52,6 +57,8 @@ export function parseServiceGoldMeta(meta: Record<string, unknown>, capacityFall
     teamSize: typeof meta.teamSize === "number" ? meta.teamSize : undefined,
     activeAgents: typeof meta.activeAgents === "number" ? meta.activeAgents : undefined,
     branchCount: typeof meta.branchCount === "number" ? meta.branchCount : undefined,
+    claimRatio: typeof meta.claimRatio === "number" ? meta.claimRatio : undefined,
+    claimSettled: typeof meta.claimSettled === "string" ? meta.claimSettled : undefined,
   };
 }
 

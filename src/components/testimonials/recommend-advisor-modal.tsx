@@ -260,7 +260,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
     >
       <button
         type="button"
-        className="absolute inset-0 bg-background/85 backdrop-blur-md"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         aria-label="Close"
       />
@@ -268,13 +268,13 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
       <div
         className={cn(
           "relative z-10 w-full sm:max-w-lg max-h-[92dvh] overflow-hidden",
-          "glass-strong border border-white/12 rounded-t-3xl sm:rounded-3xl shadow-2xl",
+          "bg-white border border-gray-200 rounded-t-3xl sm:rounded-3xl shadow-2xl",
           "flex flex-col",
           "animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-2 duration-300",
         )}
       >
         {/* ── Header ── */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-white/10 bg-[oklch(0.18_0.035_235/0.95)] backdrop-blur-md px-5 py-4 shrink-0">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-gray-100 bg-white px-5 py-4 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <span
               className={cn(
@@ -288,25 +288,25 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
             <div className="min-w-0">
               <h2
                 id="recommend-advisor-title"
-                className="text-sm font-bold tracking-tight truncate"
+                className="text-sm font-bold tracking-tight truncate text-gray-900"
               >
                 Recommend {advisorProfile.name.split(" ")[0]}
               </h2>
-              <p className="text-[11px] text-muted-foreground">Share why you trust this advisor</p>
+              <p className="text-[11px] text-gray-500">Share why you trust this advisor</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-9 items-center justify-center rounded-full border border-white/12 hover:bg-white/10 transition"
+            className="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 transition"
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-4 text-gray-600" />
           </button>
         </div>
 
         {/* ── Scrollable body ── */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto text-gray-900 [&_label]:text-gray-700">
           {success ? (
             <SuccessState onClose={onClose} firstName={advisorProfile.name.split(" ")[0]} />
           ) : (
@@ -321,7 +321,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="h-11 rounded-xl border-white/15 bg-white/[0.04]"
+                  className="h-11 rounded-xl border-gray-200 bg-white text-gray-900"
                   autoComplete="name"
                   disabled={submitting}
                 />
@@ -333,11 +333,11 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                   <Label id="rec-tags-label" className="leading-none">
                     Why do you recommend this advisor? <span className="text-destructive">*</span>
                   </Label>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">
                     {tagsArray.length} selected
                   </span>
                 </div>
-                <p id="rec-tags-help" className="text-[11px] text-muted-foreground -mt-1">
+                <p id="rec-tags-help" className="text-[11px] text-gray-500 -mt-1">
                   Pick all that apply. Highlighted chips are selected.
                 </p>
                 {/* Multi-select chip group. Each chip is a `button` with
@@ -372,8 +372,8 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                                 "ring-1 ring-[oklch(0.85_0.16_78/0.4)]",
                               )
                             : cn(
-                                "border-white/12 bg-white/[0.04] text-foreground/80",
-                                "hover:border-white/22 hover:bg-white/[0.07] hover:text-foreground",
+                                "border-gray-200 bg-gray-50 text-gray-600",
+                                "hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900",
                               ),
                         )}
                       >
@@ -399,13 +399,13 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Why would you recommend this advisor to friends or family?"
                   rows={3}
-                  className="rounded-xl border-white/15 bg-white/[0.04] resize-none"
+                  className="rounded-xl border-gray-200 bg-white text-gray-900 resize-none"
                   disabled={submitting}
                 />
               </div>
 
               {/* Mobile + OTP block */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+              <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="rec-mobile">
                     Mobile number <span className="text-destructive">*</span>
@@ -416,7 +416,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="+91 00000 00000"
-                    className="h-11 rounded-xl border-white/15 bg-white/[0.04]"
+                    className="h-11 rounded-xl border-gray-200 bg-white text-gray-900"
                     autoComplete="tel"
                     disabled={submitting || (!isLoggedIn && mobileVerified && otpSent)}
                   />
@@ -426,11 +426,11 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                   <div
                     className={cn(
                       "flex items-center gap-2 rounded-xl px-3 py-2.5",
-                      "border border-[oklch(0.78_0.16_162/0.4)] bg-[oklch(0.78_0.16_162/0.1)]",
+                      "border border-green-200 bg-green-50",
                     )}
                   >
-                    <ShieldCheck className="size-4 shrink-0 text-[oklch(0.86_0.14_162)]" />
-                    <p className="text-xs font-semibold text-[oklch(0.92_0.12_165)]">
+                    <ShieldCheck className="size-4 shrink-0 text-green-600" />
+                    <p className="text-xs font-semibold text-green-700">
                       Signed in to YVITY — OTP verification skipped
                     </p>
                   </div>
@@ -438,12 +438,12 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                   <div
                     className={cn(
                       "flex items-center gap-2 rounded-xl px-3 py-2.5",
-                      "border border-[oklch(0.78_0.16_162/0.4)] bg-[oklch(0.78_0.16_162/0.1)]",
+                      "border border-green-200 bg-green-50",
                       "animate-in fade-in slide-in-from-top-1 duration-200",
                     )}
                   >
-                    <ShieldCheck className="size-4 shrink-0 text-[oklch(0.86_0.14_162)]" />
-                    <p className="text-xs font-semibold text-[oklch(0.92_0.12_165)]">
+                    <ShieldCheck className="size-4 shrink-0 text-green-600" />
+                    <p className="text-xs font-semibold text-green-700">
                       Mobile verified
                     </p>
                   </div>
@@ -467,11 +467,11 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                 ) : (
                   <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="flex items-center justify-between gap-2 text-xs">
-                      <p className="text-muted-foreground">
-                        OTP sent to <span className="text-foreground font-medium">{mobile}</span>
+                      <p className="text-gray-500">
+                        OTP sent to <span className="text-gray-900 font-medium">{mobile}</span>
                       </p>
                       {otpSecondsLeft > 0 ? (
-                        <span className="tabular-nums text-[oklch(0.85_0.16_78)] font-medium">
+                        <span className="tabular-nums text-amber-600 font-medium">
                           Resend in {formatTimer(otpSecondsLeft)}
                         </span>
                       ) : null}
@@ -488,16 +488,16 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                           onChange={(e) => handleOtpChange(e.target.value)}
                           placeholder="123456"
                           className={cn(
-                            "h-12 rounded-xl bg-white/[0.04] text-center text-lg tracking-[0.4em] font-mono",
+                            "h-12 rounded-xl bg-white text-gray-900 text-center text-lg tracking-[0.4em] font-mono",
                             mobileVerified
-                              ? "border-[oklch(0.78_0.16_162/0.5)] ring-1 ring-[oklch(0.78_0.16_162/0.3)]"
-                              : "border-white/15",
+                              ? "border-green-400 ring-1 ring-green-200"
+                              : "border-gray-200",
                           )}
                           autoComplete="one-time-code"
                           disabled={submitting}
                         />
                         {verifyingOtp && (
-                          <Loader2 className="size-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                          <Loader2 className="size-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         )}
                       </div>
                     </div>
@@ -506,7 +506,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="w-full rounded-full border-white/15"
+                      className="w-full rounded-full border-gray-200 text-gray-700"
                       onClick={() => void sendOtp()}
                       disabled={!canResend || sendingOtp || submitting}
                     >
@@ -537,7 +537,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
 
         {/* ── Sticky footer with Submit button ── */}
         {!success && (
-          <div className="shrink-0 border-t border-white/10 bg-[oklch(0.18_0.035_235/0.85)] backdrop-blur-md p-4">
+          <div className="shrink-0 border-t border-gray-100 bg-white p-4">
             <Button
               type="button"
               className={cn(
@@ -562,7 +562,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
               )}
             </Button>
             {!canSubmit && !submitting && (
-              <p className="mt-2 text-center text-[10.5px] text-muted-foreground">
+              <p className="mt-2 text-center text-[10.5px] text-gray-400">
                 {!mobileVerified
                   ? "Verify your mobile to enable submission"
                   : tagsArray.length === 0
@@ -597,8 +597,8 @@ function SuccessState({ onClose, firstName }: { onClose: () => void; firstName: 
       </div>
       <div className="space-y-1.5">
         <p className="text-lg font-bold tracking-tight">Thank you!</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Your recommendation for <span className="text-foreground font-medium">{firstName}</span>{" "}
+        <p className="text-sm text-gray-500 leading-relaxed">
+          Your recommendation for <span className="text-gray-900 font-medium">{firstName}</span>{" "}
           has been verified and recorded. Your endorsement helps others discover trusted advice.
         </p>
       </div>

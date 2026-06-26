@@ -54,7 +54,7 @@ export function GalleryImageUpload({
     e.target.value = "";
   };
 
-  const isLocal = imageUrl.startsWith("/api/");
+  const isLocal = imageUrl.startsWith("/api/") || imageUrl.includes("/storage/v1/object/public/");
 
   return (
     <div className="space-y-3">

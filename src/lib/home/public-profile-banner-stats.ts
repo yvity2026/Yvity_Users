@@ -1,4 +1,5 @@
 import type { CareerData } from "@/lib/career-types";
+import { computeCareerTotalExperienceYears } from "@/lib/advisor/profession-experience";
 import { formatMdrtStatusLabel, hasMdrtAchievement } from "@/lib/sections/achievement-tiers";
 import { normalizeCompanyName } from "@/lib/sections/service-display";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/lib/sections/types";
@@ -22,6 +23,8 @@ export type PublicProfileBannerStats = {
   irdaiVerified: boolean;
   profileApproved: boolean;
   sectionBannerStats: { value: string; label: string }[];
+  /** Stats for the career section banner — experience and orgs from career entries only. */
+  careerSectionBannerStats: { value: string; label: string }[];
   communityTrustStats: CommunityTrustStat[];
   highlightLabels: { label: string }[];
 };
@@ -51,6 +54,29 @@ export function resolvePrimaryCompanyName(
 
 export function isIrdaiVerified(profileApproved: boolean): boolean {
   return profileApproved;
+}
+
+/** Career-page-specific banner stats — experience and orgs from career entries only. */
+export function buildCareerSectionBannerStats(
+  career: CareerData,
+  avgRating: number | null,
+): { value: string; label: string }[] {
+  const years = computeCareerTotalExperienceYears(career);
+  const experienceValue =
+    years === null ? "—" : years === 0 ? "< 1 yr" : `${years}+ yrs`;
+
+  const orgSet = new Set(
+    career.experiences.map((e) => e.company.trim().toLowerCase()).filter(Boolean),
+  );
+  const orgCount = orgSet.size;
+  const orgValue = orgCount > 0 ? String(orgCount) : "—";
+  const orgLabel = orgCount === 1 ? "Organisation" : "Organisations";
+
+  return [
+    { value: experienceValue, label: "Years experience" },
+    { value: avgRating != null ? `${avgRating}/5` : "—", label: "Rating" },
+    { value: orgValue, label: orgLabel },
+  ];
 }
 
 export function buildSectionProfileBannerStats(input: {
@@ -217,6 +243,7 @@ export function buildPublicProfileBannerStats(input: {
       avgRating,
       organizationCount,
     }),
+    careerSectionBannerStats: buildCareerSectionBannerStats(input.career, avgRating),
     communityTrustStats: buildCommunityTrustStatsFromCounts({
       testimonialCount: input.testimonials.length,
       recommendationCount: input.recommendationCount,

@@ -158,6 +158,8 @@ export type AdvisorScoreModuleProps = {
   onNavigateProfileSection?: (section: AdvisorProfileSection) => void;
   /** Triggers the share-profile flow (used by the improvements card). */
   onShareProfile?: () => void;
+  /** Opens the intro video upload modal. */
+  onOpenIntroVideoModal?: () => void;
 };
 
 /**
@@ -174,6 +176,7 @@ export type AdvisorScoreModuleProps = {
 export function AdvisorScoreModule({
   onNavigateProfileSection,
   onShareProfile,
+  onOpenIntroVideoModal,
 }: AdvisorScoreModuleProps) {
   const { model, loading } = useAdvisorScore();
 
@@ -209,6 +212,7 @@ export function AdvisorScoreModule({
         potentialScore={model.potentialTotal}
         onNavigateProfileSection={onNavigateProfileSection}
         onShareProfile={onShareProfile}
+        onOpenIntroVideoModal={onOpenIntroVideoModal}
       />
     </div>
   );
@@ -1537,12 +1541,14 @@ function ScoreImproveCard({
   potentialScore,
   onNavigateProfileSection,
   onShareProfile,
+  onOpenIntroVideoModal,
 }: {
   items: ScoreImprovement[];
   currentScore: number;
   potentialScore: number;
   onNavigateProfileSection?: (section: AdvisorProfileSection) => void;
   onShareProfile?: () => void;
+  onOpenIntroVideoModal?: () => void;
 }) {
   if (items.length === 0) {
     return (
@@ -1567,6 +1573,10 @@ function ScoreImproveCard({
       onNavigateProfileSection(it.target.section);
     } else if (it.target.kind === "share" && onShareProfile) {
       onShareProfile();
+    } else if (it.target.kind === "intro-video" && onOpenIntroVideoModal) {
+      onOpenIntroVideoModal();
+    } else if (it.target.kind === "external") {
+      window.open(it.target.href, "_blank", "noopener,noreferrer");
     }
   };
 
