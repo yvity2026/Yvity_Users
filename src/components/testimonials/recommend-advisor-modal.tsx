@@ -366,10 +366,8 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                           "active:scale-[0.97]",
                           active
                             ? cn(
-                                "border-[oklch(0.85_0.16_78/0.6)]",
-                                "bg-gradient-to-br from-[oklch(0.85_0.16_78/0.22)] to-[oklch(0.72_0.15_55/0.22)]",
-                                "text-[oklch(0.95_0.12_82)] shadow-[0_4px_14px_-6px_oklch(0.85_0.16_78/0.5)]",
-                                "ring-1 ring-[oklch(0.85_0.16_78/0.4)]",
+                                "border-amber-400 bg-amber-50 text-amber-800",
+                                "shadow-sm ring-1 ring-amber-200",
                               )
                             : cn(
                                 "border-gray-200 bg-gray-50 text-gray-600",
@@ -379,7 +377,7 @@ export function RecommendAdvisorModal({ open, onClose }: RecommendAdvisorModalPr
                       >
                         {active && (
                           <Check
-                            className="size-3 shrink-0 text-[oklch(0.92_0.14_82)] animate-in fade-in zoom-in-75 duration-150"
+                            className="size-3 shrink-0 text-amber-600 animate-in fade-in zoom-in-75 duration-150"
                             strokeWidth={3}
                           />
                         )}
