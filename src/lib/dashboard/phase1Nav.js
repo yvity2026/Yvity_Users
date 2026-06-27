@@ -6,6 +6,7 @@ import {
 export const DASHBOARD_HOME_PATH = "/dashboard";
 export const DASHBOARD_NETWORK_PATH = "/dashboard/my-network";
 export const DASHBOARD_MY_SPACE_PATH = "/dashboard/my-space";
+export const DASHBOARD_INSURANCE_DIRECTORY_PATH = "/dashboard/insurance-directory";
 
 export const DASHBOARD_PRIMARY_NAV = [
   {
@@ -22,6 +23,12 @@ export const DASHBOARD_PRIMARY_NAV = [
     phase: 2,
   },
   {
+    id: "insurance-directory",
+    label: "Insurance Directory",
+    href: DASHBOARD_INSURANCE_DIRECTORY_PATH,
+    ariaLabel: "Insurance Directory — company contacts and info",
+  },
+  {
     id: "my-space",
     label: "My Space",
     href: DASHBOARD_MY_SPACE_PATH,
@@ -35,6 +42,7 @@ export const DASHBOARD_TOP_ROUTES = {
   notifications: "/dashboard/activity",
   activity: "/dashboard/activity",
   myNetwork: DASHBOARD_NETWORK_PATH,
+  insuranceDirectory: DASHBOARD_INSURANCE_DIRECTORY_PATH,
   mySpace: DASHBOARD_MY_SPACE_PATH,
 };
 
@@ -64,6 +72,13 @@ export function isDashboardNavActive(pathname, item, resolvedHref, user, advisor
     return (
       pathname === DASHBOARD_NETWORK_PATH ||
       pathname.startsWith(`${DASHBOARD_NETWORK_PATH}/`)
+    );
+  }
+
+  if (item.id === "insurance-directory") {
+    return (
+      pathname === DASHBOARD_INSURANCE_DIRECTORY_PATH ||
+      pathname.startsWith(`${DASHBOARD_INSURANCE_DIRECTORY_PATH}/`)
     );
   }
 
