@@ -8,6 +8,8 @@ import {
   Building2,
   Calendar,
   CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Database,
   FileText,
@@ -25,6 +27,7 @@ import {
   MapPin,
   Mail,
   Phone,
+  Scale,
   Search,
   Share2,
   Shield,
@@ -73,6 +76,15 @@ const COMPANIES = [
 ];
 
 const FILTERS = ["All", "Life", "Health", "General", "Repository", "Governing Body", "Ombudsman"];
+
+const MOBILE_CATEGORIES = [
+  { key: "Life",          label: "Life Insurance",      Icon: Heart,     iconBg: "bg-[#FEE2E2]", iconColor: "text-[#DC2626]", filter: (e) => e.serviceType?.toLowerCase().includes("life") },
+  { key: "Health",        label: "Health Insurance",    Icon: Shield,    iconBg: "bg-[#DCFCE7]", iconColor: "text-[#16A34A]", filter: (e) => e.serviceType?.toLowerCase().includes("health") },
+  { key: "General",       label: "General Insurance",   Icon: Building2, iconBg: "bg-[#FEF3C7]", iconColor: "text-[#D97706]", filter: (e) => e.serviceType?.toLowerCase().includes("general") },
+  { key: "Repository",    label: "Insurance Repository",Icon: Database,  iconBg: "bg-[#E8F7F7]", iconColor: "text-[#2ab5b5]", filter: (e) => e.entityType === "Repository" },
+  { key: "Governing Body",label: "Governing Bodies",    Icon: Landmark,  iconBg: "bg-[#E4EDED]", iconColor: "text-[#0A4A4A]", filter: (e) => e.entityType === "Governing Body" },
+  { key: "Ombudsman",     label: "Insurance Ombudsman", Icon: Scale,     iconBg: "bg-[#EFF6FF]", iconColor: "text-[#1D4ED8]", filter: (e) => e.entityType === "Ombudsman" },
+];
 
 // ─── Static repository data ───────────────────────────────────────────────────
 
@@ -1417,11 +1429,88 @@ function OmbudsmanCard({ office }) {
   );
 }
 
+// ─── Mobile helpers ───────────────────────────────────────────────────────────
+
+function getEntryMeta(entry) {
+  if (entry.entityType === "Ombudsman") {
+    return { label: entry.officeCode, avatarBg: "bg-[#EFF6FF]", avatarText: "text-[#1D4ED8]", subtitle: entry.subtitle ?? "Insurance Ombudsman" };
+  }
+  if (entry.entityType === "Repository") {
+    return { label: entry.initials, avatarBg: "bg-[#E8F7F7]", avatarText: "text-[#2ab5b5]", subtitle: "Insurance Repository" };
+  }
+  if (entry.entityType === "Governing Body") {
+    return { label: entry.initials, avatarBg: "bg-[#E4EDED]", avatarText: "text-[#0A4A4A]", subtitle: "Governing Body" };
+  }
+  const isLife = entry.serviceType?.includes("Life");
+  const isHealth = entry.serviceType?.includes("Health");
+  return {
+    label: entry.initials,
+    avatarBg: isLife ? "bg-[#FEE2E2]" : isHealth ? "bg-[#DCFCE7]" : "bg-[#FEF3C7]",
+    avatarText: isLife ? "text-[#DC2626]" : isHealth ? "text-[#16A34A]" : "text-[#D97706]",
+    subtitle: entry.serviceType,
+  };
+}
+
+function renderCard(entry) {
+  if (entry.entityType === "Repository") return <RepositoryCard repo={entry} />;
+  if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} />;
+  if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} />;
+  if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} />;
+  return <CompanyCard company={entry} />;
+}
+
+function MobileAccordionItem({ entry, isOpen, onToggle }) {
+  const [imgErr, setImgErr] = useState(false);
+  const meta = getEntryMeta(entry);
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
+      >
+        <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
+          {entry.logo && !imgErr ? (
+            <img
+              src={entry.logo}
+              alt=""
+              className="h-full w-full object-contain p-0.5"
+              onError={() => setImgErr(true)}
+            />
+          ) : (
+            <span className={cn("font-cormorant text-[11px] font-bold leading-none", meta.avatarText)}>
+              {meta.label}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">{entry.name}</p>
+          <p className="font-poppins text-[10px] text-[#9CA3AF]">{meta.subtitle}</p>
+        </div>
+        <ChevronDown
+          size={16}
+          className={cn("shrink-0 text-[#9CA3AF] transition-transform duration-200", isOpen && "rotate-180")}
+        />
+      </button>
+      {isOpen && (
+        <div className="mt-1.5">
+          {renderCard(entry)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
 
 export default function InsuranceDirectory() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [mobileCategory, setMobileCategory] = useState(null);
+  const [openCardId, setOpenCardId] = useState(null);
+
+  const mobileCat = MOBILE_CATEGORIES.find((c) => c.key === mobileCategory) ?? null;
+  const mobileEntries = mobileCat ? ALL_ENTRIES.filter(mobileCat.filter) : [];
 
   const filtered = ALL_ENTRIES.filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
@@ -1439,74 +1528,206 @@ export default function InsuranceDirectory() {
   return (
     <div className="mx-auto w-full max-w-[1200px] px-3 py-5 sm:px-4 sm:py-8">
 
-      {/* Page header */}
-      <div className="mb-6 sm:mb-8">
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8F4F4] text-[#0A4A4A]">
-          <Building2 size={24} strokeWidth={1.75} />
+      {/* ── DESKTOP ─────────────────────────────────────────────────────── */}
+      <div className="hidden lg:block">
+
+        {/* Page header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8F4F4] text-[#0A4A4A]">
+            <Building2 size={24} strokeWidth={1.75} />
+          </div>
+          <h1 className="font-cormorant text-3xl font-bold text-[#0A4A4A] sm:text-4xl">
+            Insurance Directory
+          </h1>
+          <p className="mt-2 max-w-xl font-poppins text-sm leading-relaxed text-[#6B7280] sm:text-base">
+            Official contact details and verified information for top insurance companies in India.
+          </p>
         </div>
-        <h1 className="font-cormorant text-3xl font-bold text-[#0A4A4A] sm:text-4xl">
-          Insurance Directory
-        </h1>
-        <p className="mt-2 max-w-xl font-poppins text-sm leading-relaxed text-[#6B7280] sm:text-base">
-          Official contact details and verified information for top insurance companies in India.
-        </p>
+
+        {/* Search + Filter bar */}
+        <div className="mb-6 flex flex-col gap-3">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 shadow-sm focus-within:border-[#2ab5b5] focus-within:ring-1 focus-within:ring-[#2ab5b5]/20 transition-shadow">
+            <Search size={15} className="shrink-0 text-[#9CA3AF]" />
+            <input
+              type="text"
+              placeholder="Search by company name…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent font-poppins text-[13px] text-[#374151] outline-none placeholder:text-[#9CA3AF]"
+            />
+          </div>
+
+          {/* Filter chips — single unified row */}
+          <div className="flex flex-wrap gap-1.5">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={cn(
+                  "rounded-full px-3 py-1 font-poppins text-[11px] font-semibold transition-colors",
+                  activeFilter === f
+                    ? "bg-[#0A4A4A] text-white"
+                    : "border border-[#E4E2DB] bg-white text-[#6B7280] hover:border-[#0A4A4A] hover:text-[#0A4A4A]",
+                )}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards grid */}
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
+            <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {filtered.map((entry) =>
+              entry.entityType === "Repository" ? (
+                <RepositoryCard key={entry.id} repo={entry} />
+              ) : entry.id === "bima-bharosa" ? (
+                <BimaBharosaCard key={entry.id} body={entry} />
+              ) : entry.entityType === "Governing Body" ? (
+                <GoverningBodyCard key={entry.id} body={entry} />
+              ) : entry.entityType === "Ombudsman" ? (
+                <OmbudsmanCard key={entry.id} office={entry} />
+              ) : (
+                <CompanyCard key={entry.id} company={entry} />
+              )
+            )}
+          </div>
+        )}
+
       </div>
 
-      {/* Search + Filter bar */}
-      <div className="mb-6 flex flex-col gap-3">
-        <div className="flex items-center gap-2.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 shadow-sm focus-within:border-[#2ab5b5] focus-within:ring-1 focus-within:ring-[#2ab5b5]/20 transition-shadow">
-          <Search size={15} className="shrink-0 text-[#9CA3AF]" />
-          <input
-            type="text"
-            placeholder="Search by company name…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent font-poppins text-[13px] text-[#374151] outline-none placeholder:text-[#9CA3AF]"
-          />
-        </div>
+      {/* ── MOBILE ──────────────────────────────────────────────────────── */}
+      <div className="lg:hidden">
+        {mobileCategory === null ? (
 
-        {/* Filter chips — single unified row */}
-        <div className="flex flex-wrap gap-1.5">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={cn(
-                "rounded-full px-3 py-1 font-poppins text-[11px] font-semibold transition-colors",
-                activeFilter === f
-                  ? "bg-[#0A4A4A] text-white"
-                  : "border border-[#E4E2DB] bg-white text-[#6B7280] hover:border-[#0A4A4A] hover:text-[#0A4A4A]",
-              )}
+          /* Level 1 — Category tiles */
+          <div>
+            <div className="mb-5">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F4F4] text-[#0A4A4A]">
+                <Building2 size={20} strokeWidth={1.75} />
+              </div>
+              <h1 className="font-cormorant text-2xl font-bold text-[#0A4A4A] sm:text-3xl">
+                Insurance Directory
+              </h1>
+              <p className="mt-1.5 font-poppins text-[12px] leading-relaxed text-[#6B7280]">
+                Official contacts and verified information for insurance companies and bodies in India.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {MOBILE_CATEGORIES.map((cat) => {
+                const count = ALL_ENTRIES.filter(cat.filter).length;
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => {
+                      setMobileCategory(cat.key);
+                      setOpenCardId(null);
+                    }}
+                    className="flex w-full items-center gap-3.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3.5 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
+                  >
+                    <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl", cat.iconBg)}>
+                      <cat.Icon size={22} className={cat.iconColor} strokeWidth={1.75} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-poppins text-[14px] font-semibold text-[#0A4A4A]">{cat.label}</p>
+                      <p className="font-poppins text-[11px] text-[#9CA3AF]">
+                        {count === 0 ? "Coming soon" : count === 1 ? "1 entry" : `${count} entries`}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {count > 0 && (
+                        <span className="flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-[#0A4A4A]/10 px-1.5 font-poppins text-[11px] font-bold text-[#0A4A4A]">
+                          {count}
+                        </span>
+                      )}
+                      <ChevronRight size={16} className="text-[#9CA3AF]" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+        ) : (
+
+          /* Level 2 — Accordion list */
+          <div>
+            {/* Sticky back bar — sits just below the fixed navbar */}
+            <div
+              className="sticky z-30 -mx-3 mb-4 flex items-center gap-3 border-b border-[#E4E2DB] bg-white/95 px-3 py-2.5 backdrop-blur-sm sm:-mx-4 sm:px-4"
+              style={{ top: "calc(3.75rem + env(safe-area-inset-top, 0px))" }}
             >
-              {f}
-            </button>
-          ))}
-        </div>
+              <button
+                onClick={() => {
+                  setMobileCategory(null);
+                  setOpenCardId(null);
+                }}
+                className="flex items-center gap-1.5 rounded-full border border-[#E4E2DB] bg-white px-3 py-1.5 font-poppins text-[12px] font-semibold text-[#0A4A4A] shadow-sm transition-colors active:bg-[#F8F6F1]"
+              >
+                <ChevronLeft size={14} />
+                Back
+              </button>
+              {mobileCat && (
+                <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">
+                  {mobileCat.label}
+                </p>
+              )}
+            </div>
+
+            {/* Category mini-header */}
+            {mobileCat && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", mobileCat.iconBg)}>
+                    <mobileCat.Icon size={16} className={mobileCat.iconColor} strokeWidth={1.75} />
+                  </div>
+                  <h2 className="font-cormorant text-xl font-bold text-[#0A4A4A]">{mobileCat.label}</h2>
+                </div>
+                <p className="mt-1 pl-[2.625rem] font-poppins text-[11px] text-[#9CA3AF]">
+                  {mobileEntries.length === 0
+                    ? "No entries yet — check back soon."
+                    : mobileEntries.length === 1
+                    ? "1 entry listed"
+                    : `${mobileEntries.length} entries listed`}
+                </p>
+              </div>
+            )}
+
+            {/* Accordion items or empty-state */}
+            {mobileEntries.length === 0 && mobileCat ? (
+              <div className="py-12 text-center">
+                <div className={cn("mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl", mobileCat.iconBg)}>
+                  <mobileCat.Icon size={32} className={mobileCat.iconColor} strokeWidth={1.5} />
+                </div>
+                <p className="font-poppins text-[13px] font-semibold text-[#0A4A4A]">Coming soon</p>
+                <p className="mt-1 font-poppins text-[11px] text-[#9CA3AF]">
+                  We&apos;re adding more entries. Please check back later.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {mobileEntries.map((entry) => (
+                  <MobileAccordionItem
+                    key={entry.id}
+                    entry={entry}
+                    isOpen={openCardId === entry.id}
+                    onToggle={() => setOpenCardId((prev) => (prev === entry.id ? null : entry.id))}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+        )}
       </div>
 
-      {/* Cards grid */}
-      {filtered.length === 0 ? (
-        <div className="py-16 text-center">
-          <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
-          <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          {filtered.map((entry) =>
-            entry.entityType === "Repository" ? (
-              <RepositoryCard key={entry.id} repo={entry} />
-            ) : entry.id === "bima-bharosa" ? (
-              <BimaBharosaCard key={entry.id} body={entry} />
-            ) : entry.entityType === "Governing Body" ? (
-              <GoverningBodyCard key={entry.id} body={entry} />
-            ) : entry.entityType === "Ombudsman" ? (
-              <OmbudsmanCard key={entry.id} office={entry} />
-            ) : (
-              <CompanyCard key={entry.id} company={entry} />
-            )
-          )}
-        </div>
-      )}
     </div>
   );
 }
