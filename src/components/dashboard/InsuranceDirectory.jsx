@@ -71,7 +71,7 @@ const FILTERS = ["All", "Life", "Health", "General", "Repository", "Governing Bo
 const REPOSITORIES = [
   {
     id: "nsdl-ir",
-    logo: "/images/companies/nsdl.png",
+    logo: "/images/companies/nsdl-nir.avif",
     initials: "NIR",
     name: "NSDL National Insurance Repository (NIR)",
     entityType: "Repository",
