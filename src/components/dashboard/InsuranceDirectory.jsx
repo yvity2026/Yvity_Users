@@ -130,7 +130,16 @@ function CompanyCard({ company }) {
                   {company.name}{" "}
                   <CheckCircle2 size={15} className="inline-block align-middle text-[#2ab5b5]" strokeWidth={2.5} />
                 </h2>
+                {/* Verified badge — inside name column so it sits tight below h2,
+                    not after the taller buttons column */}
+                <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
+                  <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
+                  <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
+                    Verified Official Information
+                  </span>
+                </div>
               </div>
+
               {/* Buttons — vertical, inside layout (not absolute) */}
               <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
                 <button
@@ -154,17 +163,8 @@ function CompanyCard({ company }) {
               </div>
             </div>
 
-            {/* Verified badge */}
-            <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
-              <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
-              <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
-                Verified Official Information
-              </span>
-            </div>
-
             {/* Meta rows */}
             <div className="mt-2 flex flex-col gap-1">
-              {/* Established + IRDAI always side by side, wrap only if no space */}
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 <div className="flex items-center gap-1.5">
                   <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
