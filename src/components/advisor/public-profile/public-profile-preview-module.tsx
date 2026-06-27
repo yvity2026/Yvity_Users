@@ -497,12 +497,12 @@ function SharePanel({
       )}
     >
       <header>
-        <p className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-foreground/60">
           <Share2 className="size-3" aria-hidden />
           Share profile
         </p>
         <h2 className="mt-1 text-base sm:text-lg font-semibold tracking-tight">Spread the word</h2>
-        <p className="mt-0.5 text-[12px] text-muted-foreground">
+        <p className="mt-0.5 text-[12px] text-foreground/70">
           {canShare
             ? "Copy the link or share directly to your favourite channels."
             : "Sharing is locked until YVITY approves your profile."}
@@ -510,7 +510,7 @@ function SharePanel({
       </header>
 
       <div className="space-y-2">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1.5">
+        <p className="text-[10px] uppercase tracking-wider text-foreground/60 inline-flex items-center gap-1.5">
           <Link2 className="size-3" aria-hidden />
           Profile link
         </p>
@@ -569,7 +569,7 @@ function SharePanel({
       )}
 
       <div className="space-y-2">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Share to</p>
+        <p className="text-[10px] uppercase tracking-wider text-foreground/60">Share to</p>
         <div className="grid grid-cols-1 gap-1.5">
           {channels.map((c) => (
             <a
