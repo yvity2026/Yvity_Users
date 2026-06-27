@@ -107,52 +107,57 @@ function CompanyCard({ company }) {
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
-        {/* Favorite + Share */}
-        <div className="absolute right-3 top-3 flex flex-col gap-1.5 sm:right-4 sm:top-4">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#F59E0B] hover:text-[#F59E0B]"
-          >
-            <Heart
-              size={14}
-              strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#F59E0B] text-[#F59E0B]")}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
-          >
-            <Share2 size={13} strokeWidth={2} />
-          </button>
-        </div>
-
         {/* Logo + Company info */}
-        <div className="flex items-start gap-3 pr-12 sm:gap-4">
-          {/* Logo box */}
-          <div className="flex h-[80px] w-[80px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[105px] sm:w-[105px]">
+        <div className="flex items-start gap-3 sm:gap-4">
+          {/* Logo — round */}
+          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
             <Image
               src={company.logo}
               alt={`${company.name} logo`}
-              width={100}
-              height={100}
+              width={96}
+              height={96}
               className="h-full w-full object-contain"
             />
           </div>
 
-          {/* Company info */}
+          {/* Company info — takes all remaining width */}
           <div className="min-w-0 flex-1 pt-0.5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <h2 className="font-cormorant text-[19px] font-bold leading-snug text-[#0A4A4A] sm:text-[22px]">
-                {company.name}
-              </h2>
-              <CheckCircle2 size={17} className="shrink-0 text-[#2ab5b5]" strokeWidth={2.5} />
+
+            {/* Name row: name+checkmark on left, buttons on right */}
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1">
+                  <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
+                    {company.name}
+                  </h2>
+                  <CheckCircle2 size={16} className="shrink-0 text-[#2ab5b5]" strokeWidth={2.5} />
+                </div>
+              </div>
+              {/* Buttons — vertical, inside layout (not absolute) */}
+              <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+                <button
+                  onClick={() => setFavorited((f) => !f)}
+                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#F59E0B] hover:text-[#F59E0B]"
+                >
+                  <Heart
+                    size={13}
+                    strokeWidth={2}
+                    className={cn("transition-all", favorited && "fill-[#F59E0B] text-[#F59E0B]")}
+                  />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
+                >
+                  <Share2 size={12} strokeWidth={2} />
+                </button>
+              </div>
             </div>
 
             {/* Verified badge */}
-            <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
+            <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
               <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
               <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
                 Verified Official Information
@@ -160,32 +165,32 @@ function CompanyCard({ company }) {
             </div>
 
             {/* Meta rows */}
-            <div className="mt-2.5 flex flex-col gap-1.5">
-              {/* Established + IRDAI side by side on desktop */}
-              <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-5">
-                <div className="flex items-center gap-2">
-                  <Calendar size={11} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[11px] text-[#6B7280]">
+            <div className="mt-2 flex flex-col gap-1">
+              {/* Established + IRDAI always side by side, wrap only if no space */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                <div className="flex items-center gap-1.5">
+                  <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
+                  <span className="font-poppins text-[10px] text-[#6B7280]">
                     Established
-                    <span className="ml-1.5 font-semibold text-[#374151]">{company.established}</span>
+                    <span className="ml-1 font-semibold text-[#374151]">{company.established}</span>
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Shield size={11} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[11px] text-[#6B7280]">
+                <div className="flex items-center gap-1.5">
+                  <Shield size={10} className="shrink-0 text-[#9CA3AF]" />
+                  <span className="font-poppins text-[10px] text-[#6B7280]">
                     IRDAI Reg. No.
-                    <span className="ml-1.5 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
+                    <span className="ml-1 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Globe size={11} className="shrink-0 text-[#9CA3AF]" />
-                <span className="font-poppins text-[11px] text-[#6B7280]">Official Website</span>
+              <div className="flex items-center gap-1.5">
+                <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
+                <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
                 <a
                   href={company.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-poppins text-[11px] font-semibold text-[#2ab5b5] hover:underline"
+                  className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
                 >
                   {company.websiteDisplay}
                 </a>
