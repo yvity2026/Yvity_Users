@@ -77,6 +77,7 @@ export function AdvisorSidebar({
           <YvityLogo
             size={36}
             showTagline
+            imageClassName="rounded-full bg-[#f8f6f1] p-1 shadow-sm"
             wordmarkClassName="text-sm tracking-[0.16em]"
             taglineClassName="text-[9px] uppercase tracking-[0.18em] text-muted-foreground"
           />

@@ -65,6 +65,7 @@ import {
 import { SetupPlanStep } from "./SetupPlanStep";
 import { HandlePicker } from "@/components/advisor/handle-picker";
 import { handleFromName } from "@/lib/advisor/handle";
+import { InsuranceCompanyCombobox } from "@/components/ui/insurance-company-combobox";
 
 const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
 
@@ -1110,13 +1111,12 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
                 <label className={labelClass} htmlFor={`field-${fieldKey(serviceId, "company")}`}>
                   Company name <span className="text-[#EF4444]">*</span>
                 </label>
-                <input
+                <InsuranceCompanyCombobox
                   id={`field-${fieldKey(serviceId, "company")}`}
-                  type="text"
+                  serviceId={serviceId}
                   value={detail.company}
-                  onChange={(e) => updateServiceDetail(serviceId, { company: e.target.value })}
-                  placeholder="e.g. LIC of India, HDFC Life"
-                  className={`${fieldClass} ${invalidClass(fieldKey(serviceId, "company"))}`}
+                  onChange={(val) => updateServiceDetail(serviceId, { company: val })}
+                  className={invalidClass(fieldKey(serviceId, "company")) ? "border-red-400" : ""}
                 />
               </div>
 

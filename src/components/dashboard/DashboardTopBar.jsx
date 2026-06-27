@@ -90,7 +90,7 @@ function BrandBlock({ layout = "column" }) {
       showName
       showTagline
       layout={layout}
-      logoClassName="h-9 w-9 object-contain"
+      logoClassName="h-9 w-9 object-contain rounded-full bg-[#f8f6f1] p-1 shadow-sm"
       nameClassName="yvity-dash-nav-brand-name font-cormorant text-base font-bold leading-none"
       taglineClassName="yvity-dash-nav-brand-tagline font-poppins text-[10px] font-semibold leading-tight"
     />

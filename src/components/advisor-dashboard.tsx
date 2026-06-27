@@ -225,7 +225,7 @@ export function AdvisorDashboard({
       <header className="md:hidden sticky top-0 z-40 border-b yvity-workspace-chrome">
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-3">
           <Link href="/advisor" className="flex items-center gap-2.5 shrink-0">
-            <YvityLogo size={36} wordmarkClassName="text-sm tracking-[0.16em]" />
+            <YvityLogo size={36} imageClassName="rounded-full bg-[#f8f6f1] p-1 shadow-sm" wordmarkClassName="text-sm tracking-[0.16em]" />
           </Link>
 
           <div className="flex items-center gap-2">

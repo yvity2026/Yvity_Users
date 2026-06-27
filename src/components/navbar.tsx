@@ -63,7 +63,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0">
+      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0" data-profile-theme="warm-ivory">
         <div className="mob-nav-top-frame lg:hidden">
           <div className="glass-nav-mobile mob-nav-top-inner">
           <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
@@ -116,14 +116,14 @@ export function Navbar() {
                   />
                 </Link>
 
-                <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 sm:gap-1">
+                <ul className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 xl:gap-1">
                   {links.map((l) => (
                     <li key={l.href} className="pointer-events-auto">
                       <Link
                         href={l.href === "/profile" ? homeHref : l.href}
                         className={navLinkClass(
                           isActivePath(pathname, l.href, homeHref),
-                          "yvity-dash-nav-link relative rounded-full px-3.5 py-1.5 text-sm font-medium font-poppins transition-colors",
+                          "yvity-dash-nav-link relative rounded-full px-2.5 py-1.5 text-sm font-medium font-poppins whitespace-nowrap transition-colors xl:px-3.5",
                         )}
                       >
                         {l.label}
@@ -248,6 +248,7 @@ function MobileBottomBar({
   return (
     <nav
       aria-label="Mobile profile navigation"
+      data-profile-theme="warm-ivory"
       className="lg:hidden fixed inset-x-0 bottom-0 z-[60]"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >

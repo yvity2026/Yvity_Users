@@ -114,7 +114,7 @@ const Footer = () => {
               showTagline
               layout="row"
               className="items-center justify-center lg:justify-start"
-              logoClassName="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14"
+              logoClassName="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 rounded-full bg-[#f8f6f1] p-1.5 shadow-sm"
               nameClassName={`${FOOTER_FONT} text-center text-xl font-bold leading-none text-[#F8F6F1] sm:text-2xl lg:text-left`}
               taglineClassName={`${FOOTER_FONT} text-center text-[11px] font-semibold text-(--ct-as-badges-accents,#F59E0B) sm:text-sm lg:text-left`}
             />

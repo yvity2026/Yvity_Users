@@ -26,6 +26,8 @@ import {
   TextInput,
   ExistingAccountNotice,
 } from "@/components/auth/registration/registrationUi";
+import { StateCombobox } from "@/components/ui/state-combobox";
+import { CityCombobox } from "@/components/ui/city-combobox";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -1280,13 +1282,17 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                   <div className="space-y-3">
                     <div>
                       <FieldLabel htmlFor="reg-state" required>
-                        State
+                        State / Union Territory
                       </FieldLabel>
-                      <TextInput
+                      <StateCombobox
                         id="reg-state"
-                        {...register("state")}
-                        placeholder="e.g. Telangana"
-                        autoComplete="address-level1"
+                        value={watch("state") || ""}
+                        onChange={(val) => {
+                          setValue("state", val, { shouldValidate: true });
+                          // Clear city when state changes
+                          setValue("city", "", { shouldValidate: false });
+                        }}
+                        onBlur={() => trigger("state")}
                         error={errors.state}
                       />
                       <FieldHint>
@@ -1296,13 +1302,14 @@ const RegistrationModal = ({ isOpen, onClose, onSwitchToLogin, referralCode = nu
                     </div>
                     <div>
                       <FieldLabel htmlFor="reg-city" required>
-                        City
+                        City / Town
                       </FieldLabel>
-                      <TextInput
+                      <CityCombobox
                         id="reg-city"
-                        {...register("city")}
-                        placeholder="e.g. Hyderabad"
-                        autoComplete="address-level2"
+                        state={watch("state") || ""}
+                        value={watch("city") || ""}
+                        onChange={(val) => setValue("city", val, { shouldValidate: true })}
+                        onBlur={() => trigger("city")}
                         error={errors.city}
                       />
                       <FieldHint>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { StateCombobox } from "@/components/ui/state-combobox";
+import { CityCombobox } from "@/components/ui/city-combobox";
 import Link from "next/link";
 import { CheckCircle2, Copy, ExternalLink, Link2, MapPin, Pencil, X } from "lucide-react";
 import { FiLogOut } from "react-icons/fi";
@@ -489,33 +491,26 @@ export default function DashboardProfile() {
                 >
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     <div>
-                      <label className={labelClass}>City</label>
+                      <label className={labelClass}>State / Union Territory</label>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          autoComplete="address-level2"
-                          value={form.city}
-                          onChange={(e) => updateField("city", e.target.value)}
-                          className={inputClass}
-                          placeholder="e.g. Hyderabad"
-                        />
-                      ) : (
-                        <p className={inputDisabledClass}>{form.city || "—"}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className={labelClass}>State</label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          autoComplete="address-level1"
+                        <StateCombobox
                           value={form.state}
-                          onChange={(e) => updateField("state", e.target.value)}
-                          className={inputClass}
-                          placeholder="e.g. Telangana"
+                          onChange={(val) => updateField("state", val)}
                         />
                       ) : (
                         <p className={inputDisabledClass}>{form.state || "—"}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelClass}>City / Town</label>
+                      {isEditing ? (
+                        <CityCombobox
+                          state={form.state}
+                          value={form.city}
+                          onChange={(val) => updateField("city", val)}
+                        />
+                      ) : (
+                        <p className={inputDisabledClass}>{form.city || "—"}</p>
                       )}
                     </div>
                   </div>
