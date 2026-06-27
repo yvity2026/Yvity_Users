@@ -19,9 +19,9 @@ export function ProfileThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Advisor theme only applies inside the dashboard — all public/landing pages
-    // always use the brand "warm-ivory" theme so the navbar stays light.
-    if (!pathname.startsWith("/dashboard")) {
+    // Advisor theme only applies in My Space — their profile preview area.
+    // All other pages (landing, other dashboard sections, public pages) stay warm-ivory.
+    if (!pathname.startsWith("/dashboard/my-space")) {
       root.setAttribute("data-profile-theme", DEFAULT_PROFILE_THEME_ID);
       root.style.colorScheme = "light";
       return;
