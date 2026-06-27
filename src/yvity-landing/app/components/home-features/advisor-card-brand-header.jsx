@@ -26,7 +26,7 @@ export function AdvisorCardBrandHeader({
         showName
         showTagline
         className="min-w-0 flex-1"
-        logoClassName={`shrink-0 object-contain ${isDark ? "h-8 w-8 sm:h-9 sm:w-9" : "h-9 w-9 drop-shadow-sm"}`}
+        logoClassName={`shrink-0 object-contain ${isDark ? "h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-[#f8f6f1] p-1 shadow-sm" : "h-9 w-9 drop-shadow-sm"}`}
         nameClassName={
           isDark
             ? "font-cormorant text-sm font-bold leading-none text-white sm:text-base"
