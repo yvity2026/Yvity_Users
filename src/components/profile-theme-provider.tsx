@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import {
   DEFAULT_PROFILE_THEME_ID,
   isDarkProfileTheme,
@@ -13,9 +14,19 @@ import { useAdvisorSettings } from "@/lib/advisor-settings-store";
 export function ProfileThemeProvider({ children }: { children: ReactNode }) {
   const { settings, loading } = useAdvisorSettings();
   const { planId } = usePlanLimits();
+  const pathname = usePathname();
 
   useEffect(() => {
     const root = document.documentElement;
+
+    // Advisor theme only applies inside the dashboard — all public/landing pages
+    // always use the brand "warm-ivory" theme so the navbar stays light.
+    if (!pathname.startsWith("/dashboard")) {
+      root.setAttribute("data-profile-theme", DEFAULT_PROFILE_THEME_ID);
+      root.style.colorScheme = "light";
+      return;
+    }
+
     const savedTheme = isProfileThemeId(settings.appearance.theme)
       ? settings.appearance.theme
       : DEFAULT_PROFILE_THEME_ID;
@@ -25,7 +36,7 @@ export function ProfileThemeProvider({ children }: { children: ReactNode }) {
 
     root.setAttribute("data-profile-theme", theme);
     root.style.colorScheme = isDarkProfileTheme(theme) ? "dark" : "light";
-  }, [settings.appearance.theme, loading, planId]);
+  }, [settings.appearance.theme, loading, planId, pathname]);
 
   return <>{children}</>;
 }
