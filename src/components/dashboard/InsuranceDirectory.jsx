@@ -31,6 +31,7 @@ const COMPANIES = [
   {
     id: "tata-aia",
     logo: "/images/companies/tata-aia.png",
+    initials: "TA",
     name: "TATA AIA Life Insurance Co. Ltd.",
     serviceType: "Life Insurance",
     entityType: "Company",
@@ -47,6 +48,7 @@ const COMPANIES = [
   {
     id: "star-health",
     logo: "/images/companies/star-health.png",
+    initials: "SH",
     name: "Star Health and Allied Insurance Co. Ltd.",
     serviceType: "Health Insurance",
     entityType: "Company",
@@ -70,22 +72,24 @@ const REPOSITORIES = [
   {
     id: "nsdl-ir",
     logo: "/images/companies/nsdl.png",
-    name: "NSDL Insurance Repository",
+    initials: "NIR",
+    name: "NSDL National Insurance Repository (NIR)",
     entityType: "Repository",
     established: 2013,
     irdaiRegNo: "IRDA/IR/Reg/01/2013",
-    website: "https://ir.nsdl.com",
-    websiteDisplay: "ir.nsdl.com",
-    phone: "022-4886 7000",
-    phoneHours: "10:00 AM – 6:00 PM",
-    email: "info@nsdl.co.in",
+    website: "https://nir.ndml.in",
+    websiteDisplay: "nir.ndml.in",
+    phone: "+91-22-4914 2631",
+    phone2: "+91-22-4914 2630",
+    phoneHours: null,
+    email: "helpdesk.nir@ndml.in",
     about:
-      "NSDL Insurance Repository securely stores insurance policies in electronic form and helps policyholders access, manage and retrieve their policies anytime, anywhere.",
+      "NSDL National Insurance Repository (NIR), operated by NDML, securely stores insurance policies in electronic form and helps policyholders access, manage and retrieve their policies anytime, anywhere across 83 cities via 181 service centres.",
     quickActions: [
       {
         label: "Login to Your Insurance Account",
         description: "Access your e-Insurance account securely",
-        href: "https://einsurance.nsdl.com",
+        href: "https://nironline.ndml.in/NIR/loginPwd.html",
         Icon: Lock,
         iconBg: "bg-[#DCFCE7]",
         iconColor: "text-[#16A34A]",
@@ -93,7 +97,7 @@ const REPOSITORIES = [
       {
         label: "Explore Repository Services",
         description: "Explore services offered by NSDL Insurance Repository",
-        href: "https://ir.nsdl.com",
+        href: "https://nir.ndml.in",
         Icon: FileText,
         iconBg: "bg-[#EDE9FE]",
         iconColor: "text-[#7C3AED]",
@@ -101,7 +105,7 @@ const REPOSITORIES = [
       {
         label: "What is an e-Insurance Account?",
         description: "Learn more about e-Insurance account and its benefits",
-        href: "https://ir.nsdl.com",
+        href: "https://nir.ndml.in",
         Icon: BookOpen,
         iconBg: "bg-[#FEF3C7]",
         iconColor: "text-[#D97706]",
@@ -117,6 +121,7 @@ const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES];
 
 function CompanyCard({ company }) {
   const [favorited, setFavorited] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -164,13 +169,20 @@ function CompanyCard({ company }) {
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — round */}
           <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
-            <Image
-              src={company.logo}
-              alt={`${company.name} logo`}
-              width={96}
-              height={96}
-              className="h-full w-full object-contain"
-            />
+            {imgError ? (
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#FFF8E8]">
+                <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{company.initials}</span>
+              </div>
+            ) : (
+              <Image
+                src={company.logo}
+                alt={`${company.name} logo`}
+                width={96}
+                height={96}
+                className="h-full w-full object-contain"
+                onError={() => setImgError(true)}
+              />
+            )}
           </div>
 
           {/* Company info — takes all remaining width */}
@@ -393,6 +405,7 @@ function CompanyCard({ company }) {
 
 function RepositoryCard({ repo }) {
   const [favorited, setFavorited] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -459,13 +472,20 @@ function RepositoryCard({ repo }) {
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — circular, teal border */}
           <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#B2E0E0] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
-            <Image
-              src={repo.logo}
-              alt={`${repo.name} logo`}
-              width={96}
-              height={96}
-              className="h-full w-full object-contain"
-            />
+            {imgError ? (
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#E8F7F7]">
+                <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{repo.initials}</span>
+              </div>
+            ) : (
+              <Image
+                src={repo.logo}
+                alt={`${repo.name} logo`}
+                width={96}
+                height={96}
+                className="h-full w-full object-contain"
+                onError={() => setImgError(true)}
+              />
+            )}
           </div>
 
           {/* Info — right padding to clear the absolute buttons */}
@@ -529,15 +549,22 @@ function RepositoryCard({ repo }) {
             <Phone size={17} className="text-[#2ab5b5] transition-colors group-hover:text-white" strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
-          <a
-            href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
-            className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
-          >
-            {repo.phone}
-          </a>
-          {repo.phoneHours && (
-            <span className="font-poppins text-[9px] text-[#9CA3AF]">{repo.phoneHours}</span>
-          )}
+          <div className="flex flex-col gap-0.5">
+            <a
+              href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
+              className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+            >
+              {repo.phone}
+            </a>
+            {repo.phone2 && (
+              <a
+                href={`tel:${repo.phone2.replace(/[\s-]/g, "")}`}
+                className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+              >
+                {repo.phone2}
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Email */}
