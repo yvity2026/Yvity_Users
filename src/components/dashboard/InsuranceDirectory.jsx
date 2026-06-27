@@ -126,12 +126,10 @@ function CompanyCard({ company }) {
             {/* Name row: name+checkmark on left, buttons on right */}
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1">
-                  <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
-                    {company.name}
-                  </h2>
-                  <CheckCircle2 size={16} className="shrink-0 text-[#2ab5b5]" strokeWidth={2.5} />
-                </div>
+                <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
+                  {company.name}{" "}
+                  <CheckCircle2 size={15} className="inline-block align-middle text-[#2ab5b5]" strokeWidth={2.5} />
+                </h2>
               </div>
               {/* Buttons — vertical, inside layout (not absolute) */}
               <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
@@ -157,7 +155,7 @@ function CompanyCard({ company }) {
             </div>
 
             {/* Verified badge */}
-            <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
+            <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
               <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
               <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
                 Verified Official Information

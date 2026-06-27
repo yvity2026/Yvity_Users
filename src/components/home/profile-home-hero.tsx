@@ -352,10 +352,10 @@ function HeroServicesSection() {
                     <Icon className={cn("size-5 sm:size-6", accent.text)} />
                   </span>
                   <span className="relative min-w-0 flex-1 text-left">
-                    <span className={cn("block text-sm sm:text-base font-semibold", accent.text)}>
+                    <span className={cn("block text-sm font-semibold truncate", accent.text)}>
                       {chip.label}
                     </span>
-                    <span className="mt-0.5 block text-[11px] text-muted-foreground group-hover:text-foreground/70 transition line-clamp-1">
+                    <span className="mt-0.5 block text-[11px] text-muted-foreground group-hover:text-foreground/70 transition truncate">
                       {chip.subtitle}
                     </span>
                   </span>
