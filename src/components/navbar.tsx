@@ -63,7 +63,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0">
+      <header className="fixed inset-x-0 top-0 z-50 m-0 p-0 lg:pt-0" data-profile-theme="warm-ivory">
         <div className="mob-nav-top-frame lg:hidden">
           <div className="glass-nav-mobile mob-nav-top-inner">
           <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
@@ -248,6 +248,7 @@ function MobileBottomBar({
   return (
     <nav
       aria-label="Mobile profile navigation"
+      data-profile-theme="warm-ivory"
       className="lg:hidden fixed inset-x-0 bottom-0 z-[60]"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
