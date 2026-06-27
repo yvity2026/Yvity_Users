@@ -9,7 +9,7 @@ export function PublicProfileFooter() {
           <YvityLogo
             size={26}
             showTagline
-            taglineClassName="text-[9px] text-[#6b7280]"
+            taglineClassName="text-[9px] text-[#F59E0B]"
             wordmarkClassName="text-xs font-bold text-[#0A4A4A]"
           />
         </div>
