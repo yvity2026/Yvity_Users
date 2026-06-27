@@ -74,6 +74,7 @@ function CompanyCard({ company }) {
   };
 
   const shortName = company.name.split(" ").slice(0, 2).join(" ");
+  const findAdvisorsUrl = `/dashboard/explore?company=${encodeURIComponent(shortName)}&service=${encodeURIComponent(company.serviceType)}`;
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#E4E2DB] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
@@ -107,7 +108,7 @@ function CompanyCard({ company }) {
         />
 
         {/* Favorite + Share */}
-        <div className="absolute right-3 top-3 flex gap-1.5 sm:right-4 sm:top-4">
+        <div className="absolute right-3 top-3 flex flex-col gap-1.5 sm:right-4 sm:top-4">
           <button
             onClick={() => setFavorited((f) => !f)}
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
@@ -129,9 +130,9 @@ function CompanyCard({ company }) {
         </div>
 
         {/* Logo + Company info */}
-        <div className="flex items-start gap-3 pr-20 sm:gap-4">
+        <div className="flex items-start gap-3 pr-12 sm:gap-4">
           {/* Logo box */}
-          <div className="flex h-[80px] w-[80px] shrink-0 items-center justify-center rounded-xl border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[105px] sm:w-[105px]">
+          <div className="flex h-[80px] w-[80px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[105px] sm:w-[105px]">
             <Image
               src={company.logo}
               alt={`${company.name} logo`}
@@ -160,19 +161,22 @@ function CompanyCard({ company }) {
 
             {/* Meta rows */}
             <div className="mt-2.5 flex flex-col gap-1.5">
-              <div className="flex items-center gap-2">
-                <Calendar size={11} className="shrink-0 text-[#9CA3AF]" />
-                <span className="font-poppins text-[11px] text-[#6B7280]">
-                  Established
-                  <span className="ml-2 font-semibold text-[#374151]">{company.established}</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield size={11} className="shrink-0 text-[#9CA3AF]" />
-                <span className="font-poppins text-[11px] text-[#6B7280]">
-                  IRDAI Reg. No.
-                  <span className="ml-2 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
-                </span>
+              {/* Established + IRDAI side by side on desktop */}
+              <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-5">
+                <div className="flex items-center gap-2">
+                  <Calendar size={11} className="shrink-0 text-[#9CA3AF]" />
+                  <span className="font-poppins text-[11px] text-[#6B7280]">
+                    Established
+                    <span className="ml-1.5 font-semibold text-[#374151]">{company.established}</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield size={11} className="shrink-0 text-[#9CA3AF]" />
+                  <span className="font-poppins text-[11px] text-[#6B7280]">
+                    IRDAI Reg. No.
+                    <span className="ml-1.5 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
+                  </span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Globe size={11} className="shrink-0 text-[#9CA3AF]" />
@@ -194,11 +198,15 @@ function CompanyCard({ company }) {
       {/* ── Section 2: Contact (4-column grid) ── */}
       <div className="grid grid-cols-2 gap-px bg-[#E4E2DB] sm:grid-cols-4">
 
-        {/* Customer Care */}
-        <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8]">
-            <Phone size={17} className="text-[#F59E0B]" strokeWidth={1.75} />
-          </span>
+        {/* Customer Care — hover on cell, icon flips dark teal */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F8F6F1]">
+          <a
+            href={`tel:${company.phone.replace(/\s/g, "")}`}
+            aria-label={`Call ${company.name} customer care`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+          >
+            <Phone size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+          </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <div className="flex flex-col gap-0.5">
             <a
@@ -218,11 +226,15 @@ function CompanyCard({ company }) {
           </div>
         </div>
 
-        {/* Email */}
-        <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8]">
-            <Mail size={17} className="text-[#F59E0B]" strokeWidth={1.75} />
-          </span>
+        {/* Email — hover on cell, icon flips dark teal */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F8F6F1]">
+          <a
+            href={`mailto:${company.email}`}
+            aria-label={`Email ${company.name}`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+          >
+            <Mail size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+          </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care Email</span>
           <a
             href={`mailto:${company.email}`}
@@ -232,11 +244,17 @@ function CompanyCard({ company }) {
           </a>
         </div>
 
-        {/* WhatsApp */}
-        <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F0FDF4]">
-            <FaWhatsapp size={19} className="text-[#25D366]" />
-          </span>
+        {/* WhatsApp — hover on cell, icon flips WhatsApp green */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FDF4]">
+          <a
+            href={`https://wa.me/${company.whatsapp.replace(/[^0-9]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`WhatsApp ${company.name}`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F0FDF4] transition-colors group-hover:bg-[#25D366]"
+          >
+            <FaWhatsapp size={19} className="text-[#25D366] transition-colors group-hover:text-white" />
+          </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">WhatsApp</span>
           <a
             href={`https://wa.me/${company.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -248,7 +266,7 @@ function CompanyCard({ company }) {
           </a>
         </div>
 
-        {/* 24x7 */}
+        {/* 24x7 — informational, no click */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8]">
             <Headphones size={17} className="text-[#F59E0B]" strokeWidth={1.75} />
@@ -285,7 +303,7 @@ function CompanyCard({ company }) {
             </span>
           </div>
           <Link
-            href="/dashboard/my-network"
+            href={findAdvisorsUrl}
             className="inline-flex items-center gap-2 rounded-xl bg-[#0A4A4A] px-5 py-2.5 font-poppins text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
           >
             Find Advisors <span aria-hidden>→</span>
