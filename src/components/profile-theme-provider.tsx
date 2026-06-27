@@ -10,6 +10,7 @@ import {
 import { resolveThemeForPlan } from "@/lib/advisor-membership/plan-enforcement";
 import { usePlanLimits } from "@/hooks/use-plan-limits";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { isPublicProfileSurfacePath } from "@/lib/advisor/public-profile-slug";
 
 export function ProfileThemeProvider({ children }: { children: ReactNode }) {
   const { settings, loading } = useAdvisorSettings();
@@ -19,8 +20,12 @@ export function ProfileThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Advisor theme only applies in My Space — their profile preview area.
-    // All other pages (landing, other dashboard sections, public pages) stay warm-ivory.
+    // Public profile pages (/<slug> and /<slug>/*) are handled by
+    // PublicProfileThemeApplier — leave them alone.
+    if (isPublicProfileSurfacePath(pathname)) return;
+
+    // Advisor theme only applies in My Space (their profile preview).
+    // All other pages reset to brand warm-ivory.
     if (!pathname.startsWith("/dashboard/my-space")) {
       root.setAttribute("data-profile-theme", DEFAULT_PROFILE_THEME_ID);
       root.style.colorScheme = "light";
