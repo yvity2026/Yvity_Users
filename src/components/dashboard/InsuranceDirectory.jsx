@@ -16,10 +16,13 @@ import {
   Headphones,
   Heart,
   HelpCircle,
+  Clock,
   Info,
   Landmark,
   Lightbulb,
   Lock,
+  Map,
+  MapPin,
   Mail,
   Phone,
   Search,
@@ -192,7 +195,31 @@ const GOVERNING_BODIES = [
   },
 ];
 
-const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES, ...GOVERNING_BODIES];
+// ─── Static ombudsman data ────────────────────────────────────────────────────
+
+const OMBUDSMAN_OFFICES = [
+  {
+    id: "ombudsman-hyd",
+    entityType: "Ombudsman",
+    officeCode: "HYD",
+    name: "Hyderabad Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Andhra Pradesh", "Telangana", "Yanam (UT)"],
+    address: '6-2-46, 1st Floor, "Moin Court", Lane Opp. Saleem Function Palace, A.C. Guards, Lakdi-ka-pul, Hyderabad – 500 004, Telangana, India',
+    phone: "040-23312122",
+    phone2: "040-23376599",
+    email: "bimalokpal.hyd@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Hyderabad+AC+Guards+500004",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "15 May 2024",
+  },
+];
+
+const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES, ...GOVERNING_BODIES, ...OMBUDSMAN_OFFICES];
 
 // ─── CompanyCard ──────────────────────────────────────────────────────────────
 
@@ -1225,6 +1252,171 @@ function BimaBharosaCard({ body }) {
   );
 }
 
+// ─── OmbudsmanCard ───────────────────────────────────────────────────────────
+
+function OmbudsmanCard({ office }) {
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C5D0E0] bg-white shadow-[0_4px_20px_rgba(30,58,138,0.08)]">
+
+      {/* ── Section 1: Header ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#EEF2F8] via-[#E8EFF8] to-[#DCE8F5] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+
+        {/* Wave decoration */}
+        <svg className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
+          viewBox="0 0 400 50" fill="none" xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none" aria-hidden>
+          <path d="M0,38 C80,8 200,48 400,18" stroke="#3B82F6" strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke="#3B82F6" strokeWidth="1" opacity="0.35" />
+        </svg>
+
+        {/* Bottom bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#1E3A8A]" style={{ borderRadius: "6px 6px 0 0" }} />
+
+        <div className="flex items-start gap-3 sm:gap-4">
+          {/* City avatar */}
+          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#BFDBFE] bg-white shadow-sm sm:h-[90px] sm:w-[90px]">
+            <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-[#EFF6FF]">
+              <Landmark size={28} className="text-[#1D4ED8]" strokeWidth={1.5} />
+              <span className="mt-0.5 font-poppins text-[10px] font-bold text-[#1D4ED8]">{office.officeCode}</span>
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h2 className="font-cormorant text-[20px] font-bold leading-tight text-[#1E3A8A] sm:text-[23px]">
+                  {office.name}
+                </h2>
+                <p className="font-poppins text-[11px] text-[#374151]">{office.subtitle}</p>
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#16A34A]/30 bg-[#DCFCE7] px-2.5 py-0.5">
+                  <CheckCircle2 size={10} className="text-[#16A34A]" strokeWidth={2.5} />
+                  <span className="font-poppins text-[9px] font-semibold text-[#15803D]">{office.status}</span>
+                </div>
+              </div>
+              {/* Office Code box */}
+              <div className="flex shrink-0 flex-col items-center justify-center rounded-xl border border-[#BFDBFE] bg-white px-3 py-2 shadow-sm">
+                <Landmark size={16} className="text-[#3B82F6]" strokeWidth={1.5} />
+                <span className="mt-0.5 font-poppins text-[9px] text-[#6B7280]">Office Code</span>
+                <span className="font-poppins text-[14px] font-bold text-[#1E3A8A]">{office.officeCode}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 2: Jurisdiction ── */}
+      <div className="border-b border-[#E4E2DB] px-4 py-3 sm:px-5">
+        <div className="flex items-start gap-2">
+          <Users size={14} className="mt-0.5 shrink-0 text-[#3B82F6]" strokeWidth={1.75} />
+          <div className="min-w-0">
+            <p className="font-poppins text-[11px] font-bold text-[#1E3A8A]">Jurisdiction</p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {office.jurisdiction.map((state) => (
+                <span key={state} className="rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-0.5 font-poppins text-[10px] font-semibold text-[#1D4ED8]">
+                  {state}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 3: Address ── */}
+      <div className="border-b border-[#E4E2DB] px-4 py-3 sm:px-5">
+        <div className="flex items-start gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF]">
+            <MapPin size={15} className="text-[#3B82F6]" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="font-poppins text-[11px] font-bold text-[#374151]">Address</p>
+            <p className="mt-0.5 font-poppins text-[11px] leading-relaxed text-[#6B7280]">{office.address}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 4: Phone + Email ── */}
+      <div className="grid grid-cols-2 gap-px border-b border-[#E4E2DB] bg-[#E4E2DB]">
+        <div className="bg-white px-4 py-3">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7]">
+              <Phone size={14} className="text-[#16A34A]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="font-poppins text-[11px] font-bold text-[#374151]">Phone</p>
+              <a href={`tel:${office.phone.replace(/[\s-]/g, "")}`} className="mt-0.5 block font-poppins text-[12px] font-semibold text-[#1E3A8A] hover:underline">{office.phone}</a>
+              {office.phone2 && (
+                <a href={`tel:${office.phone2.replace(/[\s-]/g, "")}`} className="block font-poppins text-[12px] font-semibold text-[#1E3A8A] hover:underline">{office.phone2}</a>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="bg-white px-4 py-3">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EDE9FE]">
+              <Mail size={14} className="text-[#7C3AED]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="font-poppins text-[11px] font-bold text-[#374151]">Email</p>
+              <a href={`mailto:${office.email}`} className="mt-0.5 block break-all font-poppins text-[11px] font-semibold text-[#1E3A8A] hover:underline">{office.email}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 5: Office Hours ── */}
+      <div className="border-b border-[#E4E2DB] px-4 py-3 sm:px-5">
+        <div className="flex items-start gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FEF3C7]">
+            <Clock size={14} className="text-[#D97706]" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="font-poppins text-[11px] font-bold text-[#374151]">Office Hours</p>
+            <p className="mt-0.5 font-poppins text-[12px] font-semibold text-[#1E3A8A]">{office.officeHours}</p>
+            <p className="font-poppins text-[10px] text-[#9CA3AF]">({office.officeHoursNote})</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 6: Action buttons ── */}
+      <div className="grid grid-cols-3 gap-2 px-4 py-3 sm:px-5">
+        <a href={office.mapsUrl} target="_blank" rel="noopener noreferrer"
+          className="col-span-3 flex items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 py-2.5 font-poppins text-[12px] font-semibold text-white transition-opacity hover:opacity-90 sm:col-span-1">
+          <Map size={14} strokeWidth={2} /> Open in Google Maps
+        </a>
+        <a href={`tel:${office.phone.replace(/[\s-]/g, "")}`}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-[#16A34A] px-3 py-2.5 font-poppins text-[12px] font-semibold text-[#16A34A] transition-colors hover:bg-[#DCFCE7]">
+          <Phone size={13} strokeWidth={2} /> Call Office
+        </a>
+        <a href={`mailto:${office.email}`}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-[#7C3AED] px-3 py-2.5 font-poppins text-[12px] font-semibold text-[#7C3AED] transition-colors hover:bg-[#EDE9FE]">
+          <Mail size={13} strokeWidth={2} /> Send Email
+        </a>
+      </div>
+
+      {/* ── Section 7: Footer ── */}
+      <div className="flex flex-col gap-1.5 border-t border-[#E4E2DB] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex items-center gap-1.5">
+          <Info size={12} className="shrink-0 text-[#9CA3AF]" />
+          <p className="font-poppins text-[10px] text-[#9CA3AF]">
+            This office handles insurance complaints from the jurisdiction mentioned above.{" "}
+            <a href={office.sourceUrl} target="_blank" rel="noopener noreferrer"
+              className="font-semibold text-[#3B82F6] hover:underline">
+              Source: {office.sourceDisplay}
+            </a>
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Calendar size={10} className="text-[#9CA3AF]" />
+          <span className="font-poppins text-[10px] text-[#9CA3AF]">
+            Last Updated: <span className="font-semibold text-[#F59E0B]">{office.lastUpdated}</span>
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
 
 export default function InsuranceDirectory() {
@@ -1307,6 +1499,8 @@ export default function InsuranceDirectory() {
               <BimaBharosaCard key={entry.id} body={entry} />
             ) : entry.entityType === "Governing Body" ? (
               <GoverningBodyCard key={entry.id} body={entry} />
+            ) : entry.entityType === "Ombudsman" ? (
+              <OmbudsmanCard key={entry.id} office={entry} />
             ) : (
               <CompanyCard key={entry.id} company={entry} />
             )
