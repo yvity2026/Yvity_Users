@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Building2, Globe, Mail, MapPin, Phone, Search } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 // ─── Static company data ──────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ const COMPANIES = [
     website: "https://www.tataaia.com",
     websiteDisplay: "tataaia.com",
     phone: "1860-266-9966",
+    whatsapp: "+91 86559 07070",
     email: "customercare@tataaia.com",
     headOfficeAddress:
       "14th Floor, Tower A, Peninsula Business Park, Senapati Bapat Marg, Lower Parel, Mumbai – 400013, Maharashtra",
@@ -28,6 +30,7 @@ const COMPANIES = [
     website: "https://www.starhealth.in",
     websiteDisplay: "starhealth.in",
     phone: "044-69006900",
+    whatsapp: "+91 98404 00002",
     email: "support@starhealth.in",
     headOfficeAddress:
       "No. 1, New Tank Street, Valluvarkottam High Road, Nungambakkam, Chennai – 600034, Tamil Nadu",
@@ -45,6 +48,7 @@ function CompanyCard({ company }) {
     website,
     websiteDisplay,
     phone,
+    whatsapp,
     email,
     headOfficeAddress,
   } = company;
@@ -97,18 +101,37 @@ function CompanyCard({ company }) {
           Contact
         </p>
         <div className="flex flex-col gap-2">
-          <a
-            href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
-            className="group flex items-center gap-2.5"
-          >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#E8F4F4] text-[#0A4A4A] transition-colors group-hover:bg-[#0A4A4A] group-hover:text-white">
-              <Phone size={13} strokeWidth={2} aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-poppins text-[10px] text-[#9CA3AF]">Customer Care</span>
-              <span className="font-poppins text-[13px] font-semibold text-[#0A4A4A]">{phone}</span>
-            </span>
-          </a>
+          {/* Phone + WhatsApp: side by side on desktop, stacked on mobile */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+            <a
+              href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+              className="group flex items-center gap-2.5"
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#E8F4F4] text-[#0A4A4A] transition-colors group-hover:bg-[#0A4A4A] group-hover:text-white">
+                <Phone size={13} strokeWidth={2} aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-poppins text-[10px] text-[#9CA3AF]">Customer Care</span>
+                <span className="font-poppins text-[13px] font-semibold text-[#0A4A4A]">{phone}</span>
+              </span>
+            </a>
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#E8F4F4] text-[#25D366] transition-colors group-hover:bg-[#25D366] group-hover:text-white">
+                  <FaWhatsapp size={14} aria-hidden />
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-poppins text-[10px] text-[#9CA3AF]">WhatsApp</span>
+                  <span className="font-poppins text-[13px] font-semibold text-[#0A4A4A]">{whatsapp}</span>
+                </span>
+              </a>
+            )}
+          </div>
           <a
             href={`mailto:${email}`}
             className="group flex items-center gap-2.5"
