@@ -53,7 +53,7 @@ function CompanyCard({ company }) {
     <article className="flex flex-col gap-0 overflow-hidden rounded-2xl border border-[#E4E2DB] bg-white shadow-[0_2px_12px_rgba(10,74,74,0.06)]">
 
       {/* ── Section 1: Header ── */}
-      <div className="flex items-start gap-4 p-4 sm:p-5">
+      <div className="flex items-start gap-4 bg-[#F8F6F1] p-4 sm:p-5">
         {/* Company logo */}
         <div className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-xl border border-[#E2DDD4] bg-white p-1.5 shadow-sm">
           <Image
