@@ -12,8 +12,11 @@ import {
   Database,
   FileText,
   Globe,
+  GraduationCap,
   Headphones,
   Heart,
+  HelpCircle,
+  Landmark,
   Lock,
   Mail,
   Phone,
@@ -115,7 +118,83 @@ const REPOSITORIES = [
   },
 ];
 
-const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES];
+// ─── Static governing body data ──────────────────────────────────────────────
+
+const GOVERNING_BODIES = [
+  {
+    id: "irdai",
+    logo: "/images/companies/irdai.svg",
+    initials: "IR",
+    name: "IRDAI",
+    fullName: "Insurance Regulatory and Development Authority of India",
+    entityType: "Governing Body",
+    established: 1999,
+    website: "https://www.irdai.gov.in",
+    websiteDisplay: "www.irdai.gov.in",
+    phone: "155255",
+    phoneLabel: "Toll Free Helpline",
+    phoneHours: "9:30 AM – 5:30 PM",
+    phone2: "011-23682441",
+    phone2Label: "General Enquiries",
+    phone2Hours: "9:30 AM – 5:30 PM",
+    email: "consumer@irdai.gov.in",
+    about:
+      "IRDAI is the regulatory body responsible for promoting, regulating and protecting the interests of policyholders and ensuring growth and stability of the insurance industry in India.",
+    quickActions: [
+      {
+        label: "Explore IRDAI Services",
+        description: "Know more about IRDAI and its functions",
+        href: "https://www.irdai.gov.in",
+        Icon: Landmark,
+        iconBg: "bg-[#DBEAFE]",
+        iconColor: "text-[#1D4ED8]",
+      },
+      {
+        label: "Circulars & Notifications",
+        description: "Latest circulars, notifications and press releases",
+        href: "https://www.irdai.gov.in",
+        Icon: FileText,
+        iconBg: "bg-[#EDE9FE]",
+        iconColor: "text-[#7C3AED]",
+      },
+      {
+        label: "Consumer Education",
+        description: "Insurance awareness and consumer education materials",
+        href: "https://www.irdai.gov.in",
+        Icon: GraduationCap,
+        iconBg: "bg-[#DCFCE7]",
+        iconColor: "text-[#16A34A]",
+      },
+      {
+        label: "Grievance Redressal",
+        description: "Learn about your rights and grievance redressal process",
+        href: "https://bimabharosa.irdai.gov.in",
+        Icon: Users,
+        iconBg: "bg-[#FEE2E2]",
+        iconColor: "text-[#DC2626]",
+      },
+      {
+        label: "Insurance Ombudsman",
+        description: "Information about Insurance Ombudsman Scheme",
+        href: "https://www.irdai.gov.in",
+        Icon: BookOpen,
+        iconBg: "bg-[#CCFBF1]",
+        iconColor: "text-[#0D9488]",
+      },
+      {
+        label: "FAQs",
+        description: "Frequently asked questions about insurance",
+        href: "https://www.irdai.gov.in",
+        Icon: HelpCircle,
+        iconBg: "bg-[#FEF3C7]",
+        iconColor: "text-[#D97706]",
+      },
+    ],
+    lastUpdated: "15 May 2024",
+  },
+];
+
+const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES, ...GOVERNING_BODIES];
 
 // ─── CompanyCard ──────────────────────────────────────────────────────────────
 
@@ -658,6 +737,272 @@ function RepositoryCard({ repo }) {
   );
 }
 
+// ─── GoverningBodyCard ────────────────────────────────────────────────────────
+
+function GoverningBodyCard({ body }) {
+  const [favorited, setFavorited] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: body.name, url: body.website }).catch(() => {});
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(body.website).catch(() => {});
+    }
+  };
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C8D5D5] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
+
+      {/* ── Section 1: Header ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#EEF3F3] via-[#E4EDED] to-[#D6E5E5] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+
+        {/* Landmark watermark */}
+        <Landmark
+          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#0A4A4A] opacity-[0.06]"
+          strokeWidth={0.75}
+        />
+
+        {/* Dark teal wave decoration */}
+        <svg
+          className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
+          viewBox="0 0 400 50"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path d="M0,38 C80,8 200,48 400,18" stroke="#0A4A4A" strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke="#0A4A4A" strokeWidth="1" opacity="0.35" />
+        </svg>
+
+        {/* Dark teal bottom bar */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]"
+          style={{ borderRadius: "6px 6px 0 0" }}
+        />
+
+        {/* Favorite + Share — absolute top-right */}
+        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
+          <button
+            onClick={() => setFavorited((f) => !f)}
+            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+          >
+            <Heart
+              size={13}
+              strokeWidth={2}
+              className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")}
+            />
+          </button>
+          <button
+            onClick={handleShare}
+            aria-label="Share"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+          >
+            <Share2 size={12} strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Logo + Info */}
+        <div className="flex items-start gap-3 sm:gap-4">
+          {/* Logo — circular, muted teal border */}
+          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#C8D5D5] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
+            {imgError ? (
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#E4EDED]">
+                <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{body.initials}</span>
+              </div>
+            ) : (
+              <Image
+                src={body.logo}
+                alt={`${body.name} logo`}
+                width={96}
+                height={96}
+                className="h-full w-full object-contain"
+                onError={() => setImgError(true)}
+              />
+            )}
+          </div>
+
+          {/* Info — right padding to clear the absolute buttons */}
+          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
+            <h2 className="font-cormorant text-[24px] font-bold leading-none text-[#0A4A4A] sm:text-[28px]">
+              {body.name}
+            </h2>
+            {body.fullName && (
+              <p className="mt-0.5 font-poppins text-[11px] font-medium leading-snug text-[#374151]">
+                {body.fullName}
+              </p>
+            )}
+
+            {/* Two badges */}
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#2ab5b5]/40 bg-white/70 px-2.5 py-0.5">
+                <CheckCircle2 size={10} className="text-[#2ab5b5]" strokeWidth={2.5} />
+                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
+                  Verified Official Information
+                </span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/30 bg-[#EFF6FF] px-2.5 py-0.5">
+                <Shield size={10} className="text-[#3B82F6]" strokeWidth={2.5} />
+                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#1E3A8A]">
+                  Statutory Body under Govt. of India
+                </span>
+              </div>
+            </div>
+
+            {/* Meta */}
+            <div className="mt-2 flex flex-col gap-1">
+              <div className="flex items-center gap-1.5">
+                <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
+                <span className="font-poppins text-[10px] text-[#6B7280]">
+                  Established
+                  <span className="ml-1 font-semibold text-[#374151]">{body.established}</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
+                <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
+                <a
+                  href={body.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-poppins text-[10px] font-semibold text-[#0A4A4A] hover:underline"
+                >
+                  {body.websiteDisplay}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 2: Contact (3-column) ── */}
+      <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
+
+        {/* Toll Free */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EEF3F3]">
+          <a
+            href={`tel:${body.phone.replace(/[\s-]/g, "")}`}
+            aria-label={`Call ${body.name} toll free`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E4EDED] transition-colors group-hover:bg-[#0A4A4A]"
+          >
+            <Phone size={17} className="text-[#0A4A4A] transition-colors group-hover:text-white" strokeWidth={1.75} />
+          </a>
+          <span className="font-poppins text-[9px] text-[#9CA3AF]">{body.phoneLabel}</span>
+          <a
+            href={`tel:${body.phone.replace(/[\s-]/g, "")}`}
+            className="font-poppins text-[13px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+          >
+            {body.phone}
+          </a>
+          {body.phoneHours && (
+            <span className="font-poppins text-[9px] text-[#9CA3AF]">{body.phoneHours}</span>
+          )}
+        </div>
+
+        {/* Email */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EEF3F3]">
+          <a
+            href={`mailto:${body.email}`}
+            aria-label={`Email ${body.name}`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E4EDED] transition-colors group-hover:bg-[#0A4A4A]"
+          >
+            <Mail size={17} className="text-[#0A4A4A] transition-colors group-hover:text-white" strokeWidth={1.75} />
+          </a>
+          <span className="font-poppins text-[9px] text-[#9CA3AF]">Email</span>
+          <a
+            href={`mailto:${body.email}`}
+            className="break-all font-poppins text-[11px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+          >
+            {body.email}
+          </a>
+        </div>
+
+        {/* General Enquiries */}
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EEF3F3]">
+          <a
+            href={`tel:${body.phone2.replace(/[\s-]/g, "")}`}
+            aria-label={`Call ${body.name} general enquiries`}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E4EDED] transition-colors group-hover:bg-[#0A4A4A]"
+          >
+            <Headphones size={17} className="text-[#0A4A4A] transition-colors group-hover:text-white" strokeWidth={1.75} />
+          </a>
+          <span className="font-poppins text-[9px] text-[#9CA3AF]">{body.phone2Label}</span>
+          <a
+            href={`tel:${body.phone2.replace(/[\s-]/g, "")}`}
+            className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+          >
+            {body.phone2}
+          </a>
+          {body.phone2Hours && (
+            <span className="font-poppins text-[9px] text-[#9CA3AF]">{body.phone2Hours}</span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Section 3: About ── */}
+      <div className="bg-[#EEF3F3] px-4 py-4 sm:px-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#D6E5E5] text-[#0A4A4A]">
+            <Landmark size={22} strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="font-poppins text-[13px] font-bold text-[#0A4A4A]">About {body.name}</p>
+            <p className="mt-0.5 font-poppins text-[11px] leading-relaxed text-[#6B7280]">
+              {body.about}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 4: Quick Actions (3×2 grid) ── */}
+      <div className="px-4 py-4 sm:px-5">
+        <p className="mb-3 font-poppins text-[13px] font-bold text-[#0A4A4A]">Quick Actions</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {body.quickActions.map((action, i) => (
+            <a
+              key={i}
+              href={action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col gap-2 rounded-xl border border-[#E4E2DB] p-3 transition-colors hover:border-[#0A4A4A] hover:bg-[#EEF3F3]"
+            >
+              <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", action.iconBg)}>
+                <action.Icon size={18} className={action.iconColor} strokeWidth={1.75} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-poppins text-[11px] font-semibold leading-snug text-[#0A4A4A]">{action.label}</p>
+                <p className="mt-0.5 font-poppins text-[10px] leading-relaxed text-[#6B7280]">{action.description}</p>
+              </div>
+              <ChevronRight size={13} className="self-end text-[#9CA3AF]" />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Section 5: Footer ── */}
+      <div className="flex flex-col gap-1.5 border-t border-[#E4E2DB] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#E4E2DB] font-poppins text-[9px] font-bold text-[#9CA3AF]">
+            i
+          </span>
+          <p className="font-poppins text-[10px] text-[#9CA3AF]">
+            All information is sourced from the official website of {body.name}.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Calendar size={10} className="text-[#9CA3AF]" />
+          <span className="font-poppins text-[10px] text-[#9CA3AF]">
+            Last Updated:{" "}
+            <span className="font-semibold text-[#F59E0B]">{body.lastUpdated}</span>
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
 
 export default function InsuranceDirectory() {
@@ -736,6 +1081,8 @@ export default function InsuranceDirectory() {
           {filtered.map((entry) =>
             entry.entityType === "Repository" ? (
               <RepositoryCard key={entry.id} repo={entry} />
+            ) : entry.entityType === "Governing Body" ? (
+              <GoverningBodyCard key={entry.id} body={entry} />
             ) : (
               <CompanyCard key={entry.id} company={entry} />
             )
