@@ -535,8 +535,8 @@ function SharePanel({
               "text-[12px] font-semibold",
               "transition-all duration-200 ease-out active:scale-[0.97]",
               copied
-                ? "bg-[oklch(0.78_0.16_152/0.15)] text-[oklch(0.78_0.16_152)] ring-1 ring-[oklch(0.78_0.16_152/0.45)]"
-                : "bg-primary/15 text-primary ring-1 ring-primary/35 hover:bg-primary/22",
+                ? "bg-[oklch(0.78_0.16_152/0.2)] text-[oklch(0.78_0.16_152)] ring-1 ring-[oklch(0.78_0.16_152/0.5)]"
+                : "bg-[oklch(0.82_0.13_205/0.15)] text-[oklch(0.82_0.13_205)] ring-1 ring-[oklch(0.82_0.13_205/0.4)] hover:bg-[oklch(0.82_0.13_205/0.25)]",
             )}
             aria-live="polite"
           >
@@ -556,10 +556,10 @@ function SharePanel({
           onClick={nativeShare}
           className={cn(
             "inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2.5",
-            "text-sm font-semibold text-primary",
-            "bg-gradient-to-br from-primary/18 via-primary/8 to-transparent",
-            "ring-1 ring-primary/35 shadow-[0_4px_18px_-8px_oklch(0.78_0.13_200/0.55)]",
-            "transition-all duration-200 ease-out hover:from-primary/25 hover:via-primary/12",
+            "text-sm font-semibold text-[oklch(0.82_0.13_205)]",
+            "bg-gradient-to-br from-[oklch(0.82_0.13_205/0.18)] via-[oklch(0.82_0.13_205/0.08)] to-transparent",
+            "ring-1 ring-[oklch(0.82_0.13_205/0.4)] shadow-[0_4px_18px_-8px_oklch(0.82_0.13_205/0.4)]",
+            "transition-all duration-200 ease-out hover:from-[oklch(0.82_0.13_205/0.28)] hover:via-[oklch(0.82_0.13_205/0.14)]",
             "active:scale-[0.985]",
           )}
         >
