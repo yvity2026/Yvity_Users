@@ -63,24 +63,20 @@ export async function clearPublicViewAdvisorCookie() {
 
 /**
  * Whose persisted section data (services, career, …) to load.
- * When a visitor browses another advisor's public profile, the view cookie wins.
+ * A logged-in session always takes priority over the public-view cookie
+ * so an advisor can never accidentally see another advisor's data in their
+ * own dashboard — even if they previously visited that advisor's public profile.
+ * The cookie is only used for anonymous (logged-out) visitors.
  */
 export async function resolveAdvisorDataUserId(): Promise<string | null> {
   const session = await getSessionUser();
-  const cookieStore = await cookies();
-  const viewId = cookieStore.get(PUBLIC_VIEW_COOKIE)?.value?.trim();
 
-  if (viewId) {
-    const viewProfile = await getAdvisorProfileForUser(viewId);
-    if (isAdvisorProfileLive(viewProfile)) {
-      if (!session?.id || session.id !== viewId) {
-        return viewId;
-      }
-    }
-  }
-
+  // Logged-in user always loads their own data
   if (session?.id) return session.id;
 
+  // Anonymous visitor: use the public-view cookie set by the [slug] page
+  const cookieStore = await cookies();
+  const viewId = cookieStore.get(PUBLIC_VIEW_COOKIE)?.value?.trim();
   if (viewId) {
     const viewProfile = await getAdvisorProfileForUser(viewId);
     if (isAdvisorProfileLive(viewProfile)) return viewId;

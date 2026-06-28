@@ -1,3 +1,4 @@
+import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
 import { testimonialShareCopy } from "@/lib/testimonials/share-copy";
 import type { AdvisorOgShareContext } from "@/lib/social/advisor-og-share";
 
@@ -31,8 +32,8 @@ export function TestimonialSubmitOgImage({
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 56,
-        background: "linear-gradient(135deg, #0f2438 0%, #1a3a52 45%, #0d2840 100%)",
-        color: "#f4f8fb",
+        background: "linear-gradient(135deg, #0a2e2e 0%, #0f4f4f 42%, #0a3d3d 100%)",
+        color: "#f8faf9",
         fontFamily: "system-ui, sans-serif",
       }}
     >
@@ -42,14 +43,20 @@ export function TestimonialSubmitOgImage({
             display: "flex",
             alignItems: "center",
             gap: 12,
-            padding: "10px 18px",
+            padding: "10px 22px 10px 14px",
             borderRadius: 999,
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.15)",
+            background: "#F8F6F1",
           }}
         >
-          <img src={logoSrc} alt="" width={36} height={36} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: 4 }}>YVITY</span>
+          <img src={logoSrc} alt="" width={40} height={40} style={{ objectFit: "contain" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 2, color: "#0A4A4A", lineHeight: 1.1 }}>
+              {COMPANY_NAME}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#F59E0B", letterSpacing: 0.5, lineHeight: 1 }}>
+              {COMPANY_TAGLINE}
+            </span>
+          </div>
         </div>
         {verified ? (
           <span
@@ -58,7 +65,7 @@ export function TestimonialSubmitOgImage({
               fontWeight: 700,
               letterSpacing: 1.5,
               textTransform: "uppercase",
-              color: "#8ecae6",
+              color: "#F59E0B",
             }}
           >
             Verified profile
@@ -76,7 +83,7 @@ export function TestimonialSubmitOgImage({
             style={{
               borderRadius: 999,
               objectFit: "cover",
-              border: "4px solid rgba(130, 210, 255, 0.5)",
+              border: "4px solid rgba(42, 181, 181, 0.55)",
             }}
           />
         ) : (
@@ -90,8 +97,8 @@ export function TestimonialSubmitOgImage({
               justifyContent: "center",
               fontSize: 64,
               fontWeight: 700,
-              background: "linear-gradient(135deg, #2d6a8f, #5eead4)",
-              border: "4px solid rgba(130, 210, 255, 0.5)",
+              background: "linear-gradient(135deg, #0A4A4A, #2ab5b5)",
+              border: "4px solid rgba(42, 181, 181, 0.55)",
             }}
           >
             {initials}
@@ -110,10 +117,10 @@ export function TestimonialSubmitOgImage({
             {testimonialShareCopy.ogTitle}
           </div>
           <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>{displayName}</div>
-          <div style={{ fontSize: 22, color: "#a8d4f0", marginBottom: 20 }}>
+          <div style={{ fontSize: 22, color: "#F59E0B", marginBottom: 20 }}>
             {displayDesignation}
           </div>
-          <div style={{ fontSize: 20, lineHeight: 1.45, color: "#c5dce8", maxWidth: 680 }}>
+          <div style={{ fontSize: 20, lineHeight: 1.45, color: "rgba(255,255,255,0.62)", maxWidth: 680 }}>
             {testimonialShareCopy.ogDescription}
           </div>
         </div>
@@ -126,11 +133,11 @@ export function TestimonialSubmitOgImage({
           justifyContent: "center",
           padding: "14px 28px",
           borderRadius: 999,
-          background: "rgba(94, 234, 212, 0.15)",
-          border: "1px solid rgba(94, 234, 212, 0.4)",
+          background: "rgba(42, 181, 181, 0.15)",
+          border: "1px solid rgba(42, 181, 181, 0.45)",
           fontSize: 18,
           fontWeight: 600,
-          color: "#5eead4",
+          color: "#2ab5b5",
         }}
       >
         Tap to share your testimonial →
@@ -150,24 +157,40 @@ export function TestimonialSubmitOgImageFallback({ logoSrc }: { logoSrc: string 
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 56,
-        background: "linear-gradient(135deg, #0f2438 0%, #1a3a52 45%, #0d2840 100%)",
-        color: "#f4f8fb",
+        background: "linear-gradient(135deg, #0a2e2e 0%, #0f4f4f 42%, #0a3d3d 100%)",
+        color: "#f8faf9",
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <img src={logoSrc} alt="" width={48} height={48} style={{ objectFit: "contain" }} />
-        <span style={{ fontSize: 28, fontWeight: 700, letterSpacing: 4 }}>YVITY</span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "10px 22px 10px 14px",
+          borderRadius: 999,
+          background: "#F8F6F1",
+        }}
+      >
+        <img src={logoSrc} alt="" width={40} height={40} style={{ objectFit: "contain" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 2, color: "#0A4A4A", lineHeight: 1.1 }}>
+            {COMPANY_NAME}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#F59E0B", letterSpacing: 0.5, lineHeight: 1 }}>
+            {COMPANY_TAGLINE}
+          </span>
+        </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.1 }}>
           {testimonialShareCopy.ogTitle}
         </div>
-        <div style={{ fontSize: 24, lineHeight: 1.45, color: "#c5dce8", maxWidth: 900 }}>
+        <div style={{ fontSize: 24, lineHeight: 1.45, color: "rgba(255,255,255,0.62)", maxWidth: 900 }}>
           {testimonialShareCopy.ogDescription}
         </div>
       </div>
-      <div style={{ fontSize: 18, fontWeight: 600, color: "#5eead4" }}>
+      <div style={{ fontSize: 18, fontWeight: 600, color: "#2ab5b5" }}>
         Share text, audio, or video feedback on YVITY
       </div>
     </div>
