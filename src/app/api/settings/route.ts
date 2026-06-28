@@ -8,13 +8,17 @@ import {
 import { getAdvisorPlanContext } from "@/lib/advisor-membership/plan-enforcement-server";
 import { parseDurationLabelToSeconds } from "@/lib/intro-video";
 import { unauthorized, requireSession } from "@/lib/server/api-auth";
+import { getSessionUser } from "@/lib/server/session";
 import {
   loadAdvisorSettings,
   saveAdvisorSettings,
 } from "@/lib/server/advisor-settings-persistence";
 
 export async function GET() {
-  const data = await loadAdvisorSettings();
+  // Always load the logged-in advisor's own settings regardless of the
+  // public-view cookie (prevents cross-advisor data leak in upload flows)
+  const session = await getSessionUser();
+  const data = await loadAdvisorSettings(session?.id ?? undefined);
   return NextResponse.json({ data });
 }
 

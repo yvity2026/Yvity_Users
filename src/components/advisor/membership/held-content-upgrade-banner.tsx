@@ -81,7 +81,9 @@ export function HeldContentUpgradeBanner({
           <p className="text-sm font-semibold">Client activity waiting to go live</p>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
             {summary} received from customers but hidden on your public profile due to plan limits.
-            {upgradePlan ? ` Upgrade to ${upgradeName} to publish them.` : " Upgrade to publish them."}
+            {upgradePlan
+              ? ` Upgrade to ${upgradeName} to publish them.`
+              : " Contact YVITY about a custom enterprise plan to publish them."}
           </p>
           {upgradePlan ? (
             <Link
@@ -91,7 +93,15 @@ export function HeldContentUpgradeBanner({
               <Lock className="size-3.5" />
               View upgrade options
             </Link>
-          ) : null}
+          ) : (
+            <a
+              href="mailto:support@yvity.com?subject=Enterprise%20plan%20enquiry"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
+            >
+              <Lock className="size-3.5" />
+              Contact YVITY for a custom enterprise plan →
+            </a>
+          )}
         </div>
       </div>
     </div>

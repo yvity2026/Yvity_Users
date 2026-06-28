@@ -57,6 +57,414 @@ const COMPANIES = [
     lastUpdated: "15 June 2026",
   },
   {
+    id: "lic",
+    logo: "/images/companies/lic.png",
+    initials: "LIC",
+    name: "Life Insurance Corporation of India",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 1956,
+    irdaiRegNo: "512",
+    website: "https://www.licindia.in",
+    websiteDisplay: "www.licindia.in",
+    phone: "022-6827-6827",
+    phone2: "1800-33-4433",
+    whatsapp: "+91 89768 62090",
+    email: "co_complaints@licindia.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "hdfc-life",
+    logo: "/images/companies/hdfc-life.png",
+    initials: "HL",
+    name: "HDFC Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2000,
+    irdaiRegNo: "101",
+    website: "https://www.hdfclife.com",
+    websiteDisplay: "www.hdfclife.com",
+    phone: "1860-267-9999",
+    phone2: null,
+    whatsapp: "+91 82918 90569",
+    email: "service@hdfclife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "icici-prudential",
+    logo: "/images/companies/icici-prudential.png",
+    initials: "IP",
+    name: "ICICI Prudential Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2000,
+    irdaiRegNo: "105",
+    website: "https://www.iciciprulife.com",
+    websiteDisplay: "www.iciciprulife.com",
+    phone: "1860-266-7766",
+    phone2: null,
+    whatsapp: "+91 99206 67766",
+    email: "claimsupport@iciciprulife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "sbi-life",
+    logo: "/images/companies/sbi-life.png",
+    initials: "SL",
+    name: "SBI Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "111",
+    website: "https://www.sbilife.co.in",
+    websiteDisplay: "www.sbilife.co.in",
+    phone: "1800-267-9090",
+    phone2: null,
+    whatsapp: "+91 90290 06575",
+    email: "info@sbilife.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "max-life",
+    logo: "/images/companies/max-life.png",
+    initials: "ML",
+    name: "Axis Max Life Insurance Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "104",
+    website: "https://www.axismaxlife.com",
+    websiteDisplay: "www.axismaxlife.com",
+    phone: "1860-120-5577",
+    phone2: null,
+    whatsapp: "+91 74283 96005",
+    email: "service.helpdesk@maxlifeinsurance.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "bajaj-allianz-life",
+    logo: "/images/companies/bajaj-allianz-life.png",
+    initials: "BL",
+    name: "Bajaj Allianz Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "116",
+    website: "https://www.bajajallianzlife.com",
+    websiteDisplay: "www.bajajallianzlife.com",
+    phone: "1800-209-7272",
+    phone2: null,
+    whatsapp: "+91 88067 27272",
+    email: "customercare@bajajallianzlife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "kotak-life",
+    logo: "/images/companies/kotak-life.png",
+    initials: "KL",
+    name: "Kotak Mahindra Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "107",
+    website: "https://www.kotaklife.com",
+    websiteDisplay: "www.kotaklife.com",
+    phone: "1800-209-8800",
+    phone2: null,
+    whatsapp: "+91 93210 03007",
+    email: "clientservices.li@kotak.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "aditya-birla-sunlife",
+    logo: "/images/companies/aditya-birla-sunlife.png",
+    initials: "ABSLI",
+    name: "Aditya Birla Sun Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2000,
+    irdaiRegNo: "109",
+    website: "https://lifeinsurance.adityabirlacapital.com",
+    websiteDisplay: "lifeinsurance.adityabirlacapital.com",
+    phone: "1800-270-7000",
+    phone2: null,
+    whatsapp: "+91 88288 00040",
+    email: "care.lifeinsurance@adityabirlacapital.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "pnb-metlife",
+    logo: "/images/companies/pnb-metlife.png",
+    initials: "PM",
+    name: "PNB MetLife India Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "117",
+    website: "https://www.pnbmetlife.com",
+    websiteDisplay: "www.pnbmetlife.com",
+    phone: "1800-425-6969",
+    phone2: "+91 80-2650-2244",
+    whatsapp: "+91 76698 00577",
+    email: "indiaservice@pnbmetlife.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "indusind-nippon",
+    logo: "/images/companies/indusind-nippon.png",
+    initials: "IN",
+    name: "IndusInd Nippon Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "121",
+    website: "https://www.indusindnipponlife.com",
+    websiteDisplay: "www.indusindnipponlife.com",
+    phone: "1800-102-1010",
+    phone2: "1800-102-3330",
+    whatsapp: "+91 72088 52700",
+    email: "customerservice@indusindnipponlife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "canara-hsbc-life",
+    logo: "/images/companies/canara-hsbc-life.png",
+    initials: "CHL",
+    name: "Canara HSBC Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "136",
+    website: "https://www.canarahsbclife.com",
+    websiteDisplay: "www.canarahsbclife.com",
+    phone: "1800-891-0003",
+    phone2: "1800-103-0003",
+    whatsapp: "+91 91529 98795",
+    email: "customerservice@canarahsbclife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "indiafirst-life",
+    logo: "/images/companies/indiafirst-life.png",
+    initials: "IF",
+    name: "IndiaFirst Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2009,
+    irdaiRegNo: "143",
+    website: "https://www.indiafirstlife.com",
+    websiteDisplay: "www.indiafirstlife.com",
+    phone: "1800-209-8700",
+    phone2: "+91 88288 40199",
+    whatsapp: "+91 93222 22266",
+    email: "customer.first@indiafirstlife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "ageas-federal",
+    logo: "/images/companies/ageas-federal.png",
+    initials: "AF",
+    name: "Ageas Federal Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "135",
+    website: "https://www.ageasfederal.com",
+    websiteDisplay: "www.ageasfederal.com",
+    phone: "1800-209-0502",
+    phone2: "022-4168-9000",
+    whatsapp: null,
+    email: "support@ageasfederal.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "shriram-life",
+    logo: "/images/companies/shriram-life.png",
+    initials: "SRI",
+    name: "Shriram Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2005,
+    irdaiRegNo: "128",
+    website: "https://www.shriramlife.com",
+    websiteDisplay: "www.shriramlife.com",
+    phone: "1800-103-6116",
+    phone2: "1800-103-2671",
+    whatsapp: null,
+    email: "customercare@shriramlife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "generali-central-life",
+    logo: "/images/companies/generali-central-life.png",
+    initials: "GCL",
+    name: "Generali Central Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2007,
+    irdaiRegNo: "133",
+    website: "https://www.generalicentrallife.com",
+    websiteDisplay: "www.generalicentrallife.com",
+    phone: "1800-102-2355",
+    phone2: null,
+    whatsapp: "+91 81081 98633",
+    email: "care@generalicentral.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "sud-life",
+    logo: "/images/companies/sud-life.png",
+    initials: "SUD",
+    name: "Star Union Dai-ichi Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2009,
+    irdaiRegNo: "142",
+    website: "https://www.sudlife.in",
+    websiteDisplay: "www.sudlife.in",
+    phone: "1800-266-8833",
+    phone2: "022-3954-6300",
+    whatsapp: "+91 72088 67122",
+    email: "customercare@sudlife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "aviva-life",
+    logo: "/images/companies/aviva-life.png",
+    initials: "AV",
+    name: "Aviva Life Insurance Company India Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2002,
+    irdaiRegNo: "122",
+    website: "https://www.avivaindia.com",
+    websiteDisplay: "www.avivaindia.com",
+    phone: "1800-103-7766",
+    phone2: null,
+    whatsapp: "+91 98731 49080",
+    email: "customerservices@avivaindia.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "bharti-axa-life",
+    logo: "/images/companies/bharti-axa-life.png",
+    initials: "BA",
+    name: "Bharti AXA Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2006,
+    irdaiRegNo: "130",
+    website: "https://www.bhartiaxa.com",
+    websiteDisplay: "www.bhartiaxa.com",
+    phone: "1800-102-4444",
+    phone2: null,
+    whatsapp: null,
+    email: "service@bhartiaxa.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "bandhan-life",
+    logo: "/images/companies/bandhan-life.png",
+    initials: "BDL",
+    name: "Bandhan Life Insurance Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "138",
+    website: "https://www.bandhanlife.com",
+    websiteDisplay: "www.bandhanlife.com",
+    phone: "1800-209-9090",
+    phone2: null,
+    whatsapp: "+91 98674 52226",
+    email: "customer.care@bandhanlife.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "pramerica-life",
+    logo: "/images/companies/pramerica-life.png",
+    initials: "PL",
+    name: "Pramerica Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "140",
+    website: "https://pramericalife.in",
+    websiteDisplay: "pramericalife.in",
+    phone: "1860-500-7070",
+    phone2: null,
+    whatsapp: "+91 92891 87070",
+    email: "contactus@pramericalife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "edelweiss-life",
+    logo: "/images/companies/edelweiss-life.png",
+    initials: "EL",
+    name: "Edelweiss Life Insurance Company Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2011,
+    irdaiRegNo: "147",
+    website: "https://www.edelweisslife.in",
+    websiteDisplay: "www.edelweisslife.in",
+    phone: "1800-2121-212",
+    phone2: null,
+    whatsapp: "+91 98335 21212",
+    email: "care@edelweisslife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "creditaccess-life",
+    logo: "/images/companies/creditaccess-life.png",
+    initials: "CAL",
+    name: "CreditAccess Life Insurance Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2019,
+    irdaiRegNo: "163",
+    website: "https://creditaccesslife.in",
+    websiteDisplay: "creditaccesslife.in",
+    phone: "1800-569-0801",
+    phone2: null,
+    whatsapp: null,
+    email: "contact@calife.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "acko-life",
+    logo: "/images/companies/acko-life.png",
+    initials: "ACK",
+    name: "Acko Life Insurance Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2022,
+    irdaiRegNo: "164",
+    website: "https://www.acko.com/life",
+    websiteDisplay: "www.acko.com/life",
+    phone: "1800-210-1992",
+    phone2: null,
+    whatsapp: null,
+    email: "hello@acko.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "go-digit-life",
+    logo: "/images/companies/go-digit-life.png",
+    initials: "GDL",
+    name: "Go Digit Life Insurance Limited",
+    serviceType: "Life Insurance",
+    entityType: "Company",
+    established: 2023,
+    irdaiRegNo: "165",
+    website: "https://www.godigit.com",
+    websiteDisplay: "www.godigit.com",
+    phone: "1800-296-2626",
+    phone2: null,
+    whatsapp: "+91 99601 26126",
+    email: "life@godigit.com",
+    lastUpdated: "June 2026",
+  },
+  {
     id: "star-health",
     logo: "/images/companies/star-health.png",
     initials: "SH",
@@ -72,6 +480,125 @@ const COMPANIES = [
     whatsapp: "+91 95919 19191",
     email: "customercare@starhealth.in",
     lastUpdated: "15 June 2026",
+  },
+  {
+    id: "niva-bupa",
+    logo: "/images/companies/niva-bupa.png",
+    initials: "NB",
+    name: "Niva Bupa Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "145",
+    website: "https://www.nivabupa.com",
+    websiteDisplay: "www.nivabupa.com",
+    phone: "1860-500-8888",
+    phone2: "1800-309-3333",
+    whatsapp: "+91 98119 56696",
+    email: "customercare@nivabupa.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "care-health",
+    logo: "/images/companies/care-health.png",
+    initials: "CH",
+    name: "Care Health Insurance Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2012,
+    irdaiRegNo: "148",
+    website: "https://www.careinsurance.com",
+    websiteDisplay: "www.careinsurance.com",
+    phone: "1800-102-4488",
+    phone2: "1800-102-6655",
+    whatsapp: "+91 88604 02452",
+    email: "customerfirst@careinsurance.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "manipalcigna",
+    logo: "/images/companies/manipalcigna.png",
+    initials: "MC",
+    name: "ManipalCigna Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2014,
+    irdaiRegNo: "151",
+    website: "https://www.manipalcigna.com",
+    websiteDisplay: "www.manipalcigna.com",
+    phone: "1800-102-4462",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@manipalcigna.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "aditya-birla-health",
+    logo: "/images/companies/aditya-birla-health.png",
+    initials: "AB",
+    name: "Aditya Birla Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2015,
+    irdaiRegNo: "153",
+    website: "https://www.adityabirlacapital.com/healthinsurance",
+    websiteDisplay: "www.adityabirlacapital.com",
+    phone: "1800-270-7000",
+    phone2: null,
+    whatsapp: "+91 88288 00035",
+    email: "care.healthinsurance@adityabirlacapital.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "galaxy-health",
+    logo: "/images/companies/galaxy-health.png",
+    initials: "GH",
+    name: "Galaxy Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2023,
+    irdaiRegNo: "167",
+    website: "https://www.galaxyhealth.com",
+    websiteDisplay: "www.galaxyhealth.com",
+    phone: "1800 203 0007",
+    phone2: null,
+    whatsapp: null,
+    email: "support@galaxyhealth.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "hdfc-ergo",
+    logo: "/images/companies/hdfc-ergo.png",
+    initials: "HE",
+    name: "HDFC ERGO General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2002,
+    irdaiRegNo: "146",
+    website: "https://www.hdfcergo.com",
+    websiteDisplay: "www.hdfcergo.com",
+    phone: "022-6234-6234",
+    phone2: "8000-829-0829",
+    whatsapp: "+91 81695 00500",
+    email: "care@hdfcergo.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "narayana-health",
+    logo: "/images/companies/narayana-health.png",
+    initials: "NH",
+    name: "Narayana Health Insurance Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2023,
+    irdaiRegNo: "166",
+    website: "https://www.narayanahealth.insurance",
+    websiteDisplay: "www.narayanahealth.insurance",
+    phone: "1800 203 0234",
+    phone2: "+91 98210 34071",
+    whatsapp: null,
+    email: "support@narayanahealth.insurance",
+    lastUpdated: "June 2026",
   },
 ];
 
@@ -235,7 +762,7 @@ const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES, ...GOVERNING_BODIES, ...OMBU
 
 // ─── CompanyCard ──────────────────────────────────────────────────────────────
 
-function CompanyCard({ company }) {
+function CompanyCard({ company, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -247,6 +774,59 @@ function CompanyCard({ company }) {
     }
   };
 
+  const isHealth  = company.serviceType?.includes("Health");
+  const isGeneral = company.serviceType?.includes("General");
+
+  const theme = isHealth ? {
+    gradient:     "from-[#F0FAFA] via-[#E8F7F7] to-[#D6F1F1]",
+    watermark:    "text-[#2ab5b5] opacity-[0.08]",
+    waveColor:    "#2ab5b5",
+    bottomBar:    "bg-[#0A4A4A]",
+    logoBorder:   "border-[#C8E8E8]",
+    logoFallback: "bg-[#E8F7F7]",
+    badgeBorder:  "border-[#2ab5b5]/40",
+    badgeBg:      "bg-[#E8F7F7]",
+    badgeIcon:    "text-[#2ab5b5]",
+    badgeText:    "text-[#0A4A4A]",
+    iconCircle:   "bg-[#E8F7F7]",
+    iconColor:    "text-[#2ab5b5]",
+    iconHoverBg:  "group-hover:bg-[#0A4A4A]",
+    heartHover:   "hover:border-[#2ab5b5] hover:text-[#2ab5b5]",
+    heartActive:  "fill-[#2ab5b5] text-[#2ab5b5]",
+  } : isGeneral ? {
+    gradient:     "from-[#FFFBF0] via-[#FEF3C7] to-[#FDE68A]",
+    watermark:    "text-[#D97706] opacity-[0.08]",
+    waveColor:    "#D97706",
+    bottomBar:    "bg-[#92400E]",
+    logoBorder:   "border-[#FCD34D]",
+    logoFallback: "bg-[#FEF3C7]",
+    badgeBorder:  "border-[#D97706]/40",
+    badgeBg:      "bg-[#FEF3C7]",
+    badgeIcon:    "text-[#D97706]",
+    badgeText:    "text-[#92400E]",
+    iconCircle:   "bg-[#FEF3C7]",
+    iconColor:    "text-[#D97706]",
+    iconHoverBg:  "group-hover:bg-[#92400E]",
+    heartHover:   "hover:border-[#D97706] hover:text-[#D97706]",
+    heartActive:  "fill-[#D97706] text-[#D97706]",
+  } : {
+    gradient:     "from-[#FFFDF5] via-[#FFF8E8] to-[#FFF0CC]",
+    watermark:    "text-[#F59E0B] opacity-[0.07]",
+    waveColor:    "#F59E0B",
+    bottomBar:    "bg-[#0A4A4A]",
+    logoBorder:   "border-[#E2DDD4]",
+    logoFallback: "bg-[#FFF8E8]",
+    badgeBorder:  "border-[#F59E0B]/40",
+    badgeBg:      "bg-[#FFFBEB]",
+    badgeIcon:    "text-[#F59E0B]",
+    badgeText:    "text-[#92400E]",
+    iconCircle:   "bg-[#FFF8E8]",
+    iconColor:    "text-[#F59E0B]",
+    iconHoverBg:  "group-hover:bg-[#0A4A4A]",
+    heartHover:   "hover:border-[#F59E0B] hover:text-[#F59E0B]",
+    heartActive:  "fill-[#F59E0B] text-[#F59E0B]",
+  };
+
   const shortName = company.name.split(" ").slice(0, 2).join(" ");
   const findAdvisorsUrl = `/dashboard/explore?company=${encodeURIComponent(shortName)}&service=${encodeURIComponent(company.serviceType)}`;
 
@@ -254,15 +834,15 @@ function CompanyCard({ company }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#E4E2DB] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
 
       {/* ── Section 1: Header ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E8] to-[#FFF0CC] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+      <div className={cn("relative overflow-hidden bg-gradient-to-br px-4 pb-7 pt-4 sm:px-5 sm:pt-5", theme.gradient)}>
 
         {/* Shield watermark */}
         <Shield
-          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#F59E0B] opacity-[0.07]"
+          className={cn("pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none", theme.watermark)}
           strokeWidth={0.75}
         />
 
-        {/* Gold wave decoration */}
+        {/* Accent wave decoration */}
         <svg
           className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
           viewBox="0 0 400 50"
@@ -271,22 +851,22 @@ function CompanyCard({ company }) {
           preserveAspectRatio="none"
           aria-hidden
         >
-          <path d="M0,38 C80,8 200,48 400,18" stroke="#F59E0B" strokeWidth="1.5" />
-          <path d="M0,48 C80,18 200,58 400,28" stroke="#F59E0B" strokeWidth="1" opacity="0.45" />
+          <path d="M0,38 C80,8 200,48 400,18" stroke={theme.waveColor} strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke={theme.waveColor} strokeWidth="1" opacity="0.45" />
         </svg>
 
-        {/* Dark teal bottom bar */}
+        {/* Bottom accent bar */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]"
+          className={cn("absolute bottom-0 left-0 right-0 h-2", theme.bottomBar)}
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
         {/* Logo + Company info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — round */}
-          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
+          <div className={cn("flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]", theme.logoBorder)}>
             {imgError ? (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#FFF8E8]">
+              <div className={cn("flex h-full w-full items-center justify-center rounded-full", theme.logoFallback)}>
                 <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{company.initials}</span>
               </div>
             ) : (
@@ -311,13 +891,43 @@ function CompanyCard({ company }) {
                   {company.name}{" "}
                   <CheckCircle2 size={15} className="inline-block align-middle text-[#2ab5b5]" strokeWidth={2.5} />
                 </h2>
-                {/* Verified badge — inside name column so it sits tight below h2,
-                    not after the taller buttons column */}
-                <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
-                  <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
-                  <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
+                <div className={cn("mt-0.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5", theme.badgeBorder, theme.badgeBg)}>
+                  <CheckCircle2 size={10} className={theme.badgeIcon} strokeWidth={2.5} />
+                  <span className={cn("font-poppins text-[9px] font-semibold tracking-wide", theme.badgeText)}>
                     Verified Official Information
                   </span>
+                </div>
+
+                {/* Meta rows — inside text column so they sit tight below badge */}
+                <div className="mt-1.5 flex flex-col gap-1">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
+                      <span className="font-poppins text-[10px] text-[#6B7280]">
+                        Established
+                        <span className="ml-1 font-semibold text-[#374151]">{company.established}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Shield size={10} className="shrink-0 text-[#9CA3AF]" />
+                      <span className="font-poppins text-[10px] text-[#6B7280]">
+                        IRDAI Reg. No.
+                        <span className="ml-1 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
+                    <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
+                    <a
+                      href={company.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
+                    >
+                      {company.websiteDisplay}
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -326,12 +936,12 @@ function CompanyCard({ company }) {
                 <button
                   onClick={() => setFavorited((f) => !f)}
                   aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#F59E0B] hover:text-[#F59E0B]"
+                  className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors", theme.heartHover)}
                 >
                   <Heart
                     size={13}
                     strokeWidth={2}
-                    className={cn("transition-all", favorited && "fill-[#F59E0B] text-[#F59E0B]")}
+                    className={cn("transition-all", favorited && theme.heartActive)}
                   />
                 </button>
                 <button
@@ -341,55 +951,34 @@ function CompanyCard({ company }) {
                 >
                   <Share2 size={12} strokeWidth={2} />
                 </button>
-              </div>
-            </div>
-
-            {/* Meta rows */}
-            <div className="mt-2 flex flex-col gap-1">
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[10px] text-[#6B7280]">
-                    Established
-                    <span className="ml-1 font-semibold text-[#374151]">{company.established}</span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Shield size={10} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[10px] text-[#6B7280]">
-                    IRDAI Reg. No.
-                    <span className="ml-1 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
-                <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
-                >
-                  {company.websiteDisplay}
-                </a>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Section 2: Contact (4-column grid) ── */}
-      <div className="grid grid-cols-2 gap-px bg-[#E4E2DB] sm:grid-cols-4">
+      {!collapsed && (<>
+
+      {/* ── Section 2: Contact grid ── */}
+      <div className={cn("grid gap-px bg-[#E4E2DB]", company.whatsapp ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
 
         {/* Customer Care — hover on cell, icon flips dark teal */}
         <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F8F6F1]">
           <a
             href={`tel:${company.phone.replace(/\s/g, "")}`}
             aria-label={`Call ${company.name} customer care`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+            className={cn("flex h-10 w-10 items-center justify-center rounded-full transition-colors", theme.iconCircle, theme.iconHoverBg)}
           >
-            <Phone size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Phone size={17} className={cn("transition-colors group-hover:text-white", theme.iconColor)} strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <div className="flex flex-col gap-0.5">
@@ -415,9 +1004,9 @@ function CompanyCard({ company }) {
           <a
             href={`mailto:${company.email}`}
             aria-label={`Email ${company.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+            className={cn("flex h-10 w-10 items-center justify-center rounded-full transition-colors", theme.iconCircle, theme.iconHoverBg)}
           >
-            <Mail size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Mail size={17} className={cn("transition-colors group-hover:text-white", theme.iconColor)} strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care Email</span>
           <a
@@ -428,7 +1017,8 @@ function CompanyCard({ company }) {
           </a>
         </div>
 
-        {/* WhatsApp — hover on cell, icon flips WhatsApp green */}
+        {/* WhatsApp — only rendered when company has a WhatsApp number */}
+        {company.whatsapp && (
         <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FDF4]">
           <a
             href={`https://wa.me/${company.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -449,11 +1039,12 @@ function CompanyCard({ company }) {
             {company.whatsapp}
           </a>
         </div>
+        )}
 
         {/* 24x7 — informational, no click */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8]">
-            <Headphones size={17} className="text-[#F59E0B]" strokeWidth={1.75} />
+          <span className={cn("flex h-10 w-10 items-center justify-center rounded-full", theme.iconCircle)}>
+            <Headphones size={17} className={theme.iconColor} strokeWidth={1.75} />
           </span>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <span className="font-poppins text-[15px] font-bold text-[#0A4A4A]">24 x 7</span>
@@ -513,13 +1104,15 @@ function CompanyCard({ company }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── RepositoryCard ───────────────────────────────────────────────────────────
 
-function RepositoryCard({ repo }) {
+function RepositoryCard({ repo, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -532,18 +1125,18 @@ function RepositoryCard({ repo }) {
   };
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C8E8E8] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#BFDBFE] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
 
       {/* ── Section 1: Header ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#F0FAFA] via-[#E8F7F7] to-[#D4EEEE] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-[#DBEAFE] to-[#BFDBFE] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
 
         {/* Database watermark */}
         <Database
-          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#2ab5b5] opacity-[0.07]"
+          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#1D4ED8] opacity-[0.07]"
           strokeWidth={0.75}
         />
 
-        {/* Teal wave decoration */}
+        {/* Blue wave decoration */}
         <svg
           className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
           viewBox="0 0 400 50"
@@ -552,44 +1145,22 @@ function RepositoryCard({ repo }) {
           preserveAspectRatio="none"
           aria-hidden
         >
-          <path d="M0,38 C80,8 200,48 400,18" stroke="#2ab5b5" strokeWidth="1.5" />
-          <path d="M0,48 C80,18 200,58 400,28" stroke="#2ab5b5" strokeWidth="1" opacity="0.45" />
+          <path d="M0,38 C80,8 200,48 400,18" stroke="#1D4ED8" strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke="#1D4ED8" strokeWidth="1" opacity="0.45" />
         </svg>
 
-        {/* Dark teal bottom bar */}
+        {/* Bottom accent bar */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]"
+          className="absolute bottom-0 left-0 right-0 h-2 bg-[#1E3A8A]"
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
-        {/* Favorite + Share — absolute top-right */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
-          >
-            <Heart
-              size={13}
-              strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#2ab5b5] text-[#2ab5b5]")}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
-          {/* Logo — circular, teal border */}
-          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#B2E0E0] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
+          {/* Logo — circular, blue border */}
+          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#93C5FD] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
             {imgError ? (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#E8F7F7]">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#EFF6FF]">
                 <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{repo.initials}</span>
               </div>
             ) : (
@@ -604,30 +1175,32 @@ function RepositoryCard({ repo }) {
             )}
           </div>
 
-          {/* Info — right padding to clear the absolute buttons */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
-            <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
-              {repo.name}
-            </h2>
+          {/* Info */}
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
+                  {repo.name}
+                </h2>
 
-            {/* Two badges */}
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#2ab5b5]/40 bg-white/70 px-2.5 py-0.5">
-                <CheckCircle2 size={10} className="text-[#2ab5b5]" strokeWidth={2.5} />
-                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
-                  Verified Official Information
-                </span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
-                <Shield size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
-                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
-                  Authorized by IRDAI
-                </span>
-              </div>
-            </div>
+                {/* Two badges */}
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[#1D4ED8]/30 bg-white/70 px-2.5 py-0.5">
+                    <CheckCircle2 size={10} className="text-[#1D4ED8]" strokeWidth={2.5} />
+                    <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
+                      Verified Official Information
+                    </span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
+                    <Shield size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
+                    <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
+                      Authorized by IRDAI
+                    </span>
+                  </div>
+                </div>
 
-            {/* Meta */}
-            <div className="mt-2 flex flex-col gap-1">
+                {/* Meta */}
+                <div className="mt-2 flex flex-col gap-1">
               <div className="flex items-center gap-1.5">
                 <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
                 <span className="font-poppins text-[10px] text-[#6B7280]">
@@ -642,40 +1215,71 @@ function RepositoryCard({ repo }) {
                   href={repo.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
+                  className="font-poppins text-[10px] font-semibold text-[#1D4ED8] hover:underline"
                 >
                   {repo.websiteDisplay}
                 </a>
               </div>
             </div>
           </div>
+
+          {/* Buttons — vertical */}
+          <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+            <button
+              onClick={() => setFavorited((f) => !f)}
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+            >
+              <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")} />
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+            >
+              <Share2 size={12} strokeWidth={2} />
+            </button>
+            {onToggle && (
+              <button
+                onClick={onToggle}
+                aria-label={collapsed ? "Expand card" : "Collapse card"}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+              >
+                <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
 
         {/* Phone */}
-        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FAFA]">
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EFF6FF]">
           <a
             href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
             aria-label={`Call ${repo.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7] transition-colors group-hover:bg-[#0A4A4A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] transition-colors group-hover:bg-[#1E3A8A]"
           >
-            <Phone size={17} className="text-[#2ab5b5] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Phone size={17} className="text-[#1D4ED8] transition-colors group-hover:text-white" strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <div className="flex flex-col gap-0.5">
             <a
               href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
-              className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+              className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
             >
               {repo.phone}
             </a>
             {repo.phone2 && (
               <a
                 href={`tel:${repo.phone2.replace(/[\s-]/g, "")}`}
-                className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+                className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
               >
                 {repo.phone2}
               </a>
@@ -684,18 +1288,18 @@ function RepositoryCard({ repo }) {
         </div>
 
         {/* Email */}
-        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FAFA]">
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EFF6FF]">
           <a
             href={`mailto:${repo.email}`}
             aria-label={`Email ${repo.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7] transition-colors group-hover:bg-[#0A4A4A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] transition-colors group-hover:bg-[#1E3A8A]"
           >
-            <Mail size={17} className="text-[#2ab5b5] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Mail size={17} className="text-[#1D4ED8] transition-colors group-hover:text-white" strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Email Support</span>
           <a
             href={`mailto:${repo.email}`}
-            className="break-all font-poppins text-[11px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+            className="break-all font-poppins text-[11px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
           >
             {repo.email}
           </a>
@@ -703,8 +1307,8 @@ function RepositoryCard({ repo }) {
 
         {/* Support */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7]">
-            <Headphones size={17} className="text-[#2ab5b5]" strokeWidth={1.75} />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE]">
+            <Headphones size={17} className="text-[#1D4ED8]" strokeWidth={1.75} />
           </span>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Support</span>
           <span className="font-poppins text-[12px] font-bold text-[#0A4A4A]">Available</span>
@@ -713,9 +1317,9 @@ function RepositoryCard({ repo }) {
       </div>
 
       {/* ── Section 3: About ── */}
-      <div className="bg-[#F0FAFA] px-4 py-4 sm:px-5">
+      <div className="bg-[#EFF6FF] px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#D4EEEE] text-[#0A4A4A]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#1D4ED8]">
             <Database size={22} strokeWidth={1.75} />
           </div>
           <div>
@@ -737,7 +1341,7 @@ function RepositoryCard({ repo }) {
               href={action.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl border border-[#E4E2DB] px-3.5 py-3 transition-colors hover:border-[#2ab5b5] hover:bg-[#F0FAFA]"
+              className="flex items-center gap-3 rounded-xl border border-[#E4E2DB] px-3.5 py-3 transition-colors hover:border-[#1D4ED8] hover:bg-[#EFF6FF]"
             >
               <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", action.iconBg)}>
                 <action.Icon size={18} className={action.iconColor} strokeWidth={1.75} />
@@ -770,13 +1374,15 @@ function RepositoryCard({ repo }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── GoverningBodyCard ────────────────────────────────────────────────────────
 
-function GoverningBodyCard({ body }) {
+function GoverningBodyCard({ body, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -819,28 +1425,6 @@ function GoverningBodyCard({ body }) {
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
-        {/* Favorite + Share — absolute top-right */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Heart
-              size={13}
-              strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — circular, muted teal border */}
@@ -861,9 +1445,10 @@ function GoverningBodyCard({ body }) {
             )}
           </div>
 
-          {/* Info — right padding to clear the absolute buttons */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
-            <h2 className="font-cormorant text-[24px] font-bold leading-none text-[#0A4A4A] sm:text-[28px]">
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-cormorant text-[24px] font-bold leading-none text-[#0A4A4A] sm:text-[28px]">
               {body.name}
             </h2>
             {body.fullName && (
@@ -911,8 +1496,39 @@ function GoverningBodyCard({ body }) {
               </div>
             </div>
           </div>
+
+              {/* Buttons — vertical */}
+              <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+                <button
+                  onClick={() => setFavorited((f) => !f)}
+                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                >
+                  <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                >
+                  <Share2 size={12} strokeWidth={2} />
+                </button>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
@@ -1036,13 +1652,15 @@ function GoverningBodyCard({ body }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── BimaBharosaCard ─────────────────────────────────────────────────────────
 
-function BimaBharosaCard({ body }) {
+function BimaBharosaCard({ body, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -1079,22 +1697,6 @@ function BimaBharosaCard({ body }) {
         {/* Dark teal bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]" style={{ borderRadius: "6px 6px 0 0" }} />
 
-        {/* Favorite + Share */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
-          </button>
-          <button onClick={handleShare} aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — rectangular (logo has wide aspect ratio) */}
@@ -1115,8 +1717,7 @@ function BimaBharosaCard({ body }) {
             )}
           </div>
 
-          {/* Info */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
+          <div className="min-w-0 flex-1 pt-0.5">
             <h2 className="font-cormorant text-[22px] font-bold leading-tight text-[#0A4A4A] sm:text-[26px]">
               {body.name}
             </h2>
@@ -1159,8 +1760,36 @@ function BimaBharosaCard({ body }) {
               </div>
             </div>
           </div>
+
+          <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+            <button
+              onClick={() => setFavorited((f) => !f)}
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <Share2 size={12} strokeWidth={2} />
+            </button>
+            {onToggle && (
+              <button
+                onClick={onToggle}
+                aria-label={collapsed ? "Expand card" : "Collapse card"}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+              >
+                <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
@@ -1260,13 +1889,25 @@ function BimaBharosaCard({ body }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── OmbudsmanCard ───────────────────────────────────────────────────────────
 
-function OmbudsmanCard({ office }) {
+function OmbudsmanCard({ office, collapsed = false, onToggle }) {
+  const [favorited, setFavorited] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: office.name, url: window.location.href }).catch(() => {});
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href).catch(() => {});
+    }
+  };
+
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C5D0E0] bg-white shadow-[0_4px_20px_rgba(30,58,138,0.08)]">
 
@@ -1295,8 +1936,8 @@ function OmbudsmanCard({ office }) {
 
           {/* Info */}
           <div className="min-w-0 flex-1 pt-0.5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
                 <h2 className="font-cormorant text-[20px] font-bold leading-tight text-[#1E3A8A] sm:text-[23px]">
                   {office.name}
                 </h2>
@@ -1312,10 +1953,38 @@ function OmbudsmanCard({ office }) {
                 <span className="mt-0.5 font-poppins text-[9px] text-[#6B7280]">Office Code</span>
                 <span className="font-poppins text-[14px] font-bold text-[#1E3A8A]">{office.officeCode}</span>
               </div>
+              {/* Buttons — vertical */}
+              <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+                <button
+                  onClick={() => setFavorited((f) => !f)}
+                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+                >
+                  <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+                >
+                  <Share2 size={12} strokeWidth={2} />
+                </button>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Jurisdiction ── */}
       <div className="border-b border-[#E4E2DB] px-4 py-3 sm:px-5">
@@ -1425,6 +2094,8 @@ function OmbudsmanCard({ office }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
@@ -1451,54 +2122,22 @@ function getEntryMeta(entry) {
   };
 }
 
-function renderCard(entry) {
-  if (entry.entityType === "Repository") return <RepositoryCard repo={entry} />;
-  if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} />;
-  if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} />;
-  if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} />;
-  return <CompanyCard company={entry} />;
+function renderCard(entry, { collapsed = false, onToggle } = {}) {
+  if (entry.entityType === "Repository") return <RepositoryCard repo={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} collapsed={collapsed} onToggle={onToggle} />;
+  return <CompanyCard company={entry} collapsed={collapsed} onToggle={onToggle} />;
 }
 
 function MobileAccordionItem({ entry, isOpen, onToggle }) {
-  const [imgErr, setImgErr] = useState(false);
-  const meta = getEntryMeta(entry);
+  return renderCard(entry, { collapsed: !isOpen, onToggle });
+}
 
-  return (
-    <div>
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
-      >
-        <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
-          {entry.logo && !imgErr ? (
-            <img
-              src={entry.logo}
-              alt=""
-              className="h-full w-full object-contain p-0.5"
-              onError={() => setImgErr(true)}
-            />
-          ) : (
-            <span className={cn("font-cormorant text-[11px] font-bold leading-none", meta.avatarText)}>
-              {meta.label}
-            </span>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">{entry.name}</p>
-          <p className="font-poppins text-[10px] text-[#9CA3AF]">{meta.subtitle}</p>
-        </div>
-        <ChevronDown
-          size={16}
-          className={cn("shrink-0 text-[#9CA3AF] transition-transform duration-200", isOpen && "rotate-180")}
-        />
-      </button>
-      {isOpen && (
-        <div className="mt-1.5">
-          {renderCard(entry)}
-        </div>
-      )}
-    </div>
-  );
+// ─── Desktop accordion ────────────────────────────────────────────────────────
+
+function DesktopAccordionItem({ entry, isOpen, onToggle }) {
+  return renderCard(entry, { collapsed: !isOpen, onToggle });
 }
 
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
@@ -1508,6 +2147,8 @@ export default function InsuranceDirectory() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [mobileCategory, setMobileCategory] = useState(null);
   const [openCardId, setOpenCardId] = useState(null);
+  const [openDesktopIds, setOpenDesktopIds] = useState({});
+  const toggleDesktop = (id) => setOpenDesktopIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const mobileCat = MOBILE_CATEGORIES.find((c) => c.key === mobileCategory) ?? null;
   const mobileEntries = mobileCat ? ALL_ENTRIES.filter(mobileCat.filter) : [];
@@ -1576,27 +2217,22 @@ export default function InsuranceDirectory() {
           </div>
         </div>
 
-        {/* Cards grid */}
+        {/* Accordion list */}
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
             <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {filtered.map((entry) =>
-              entry.entityType === "Repository" ? (
-                <RepositoryCard key={entry.id} repo={entry} />
-              ) : entry.id === "bima-bharosa" ? (
-                <BimaBharosaCard key={entry.id} body={entry} />
-              ) : entry.entityType === "Governing Body" ? (
-                <GoverningBodyCard key={entry.id} body={entry} />
-              ) : entry.entityType === "Ombudsman" ? (
-                <OmbudsmanCard key={entry.id} office={entry} />
-              ) : (
-                <CompanyCard key={entry.id} company={entry} />
-              )
-            )}
+          <div className="grid grid-cols-2 items-start gap-2.5">
+            {filtered.map((entry) => (
+              <DesktopAccordionItem
+                key={entry.id}
+                entry={entry}
+                isOpen={!!openDesktopIds[entry.id]}
+                onToggle={() => toggleDesktop(entry.id)}
+              />
+            ))}
           </div>
         )}
 

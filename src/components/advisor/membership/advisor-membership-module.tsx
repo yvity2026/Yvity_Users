@@ -283,6 +283,21 @@ export function AdvisorMembershipModule() {
               </Button>
             )}
           </div>
+
+          {!upgradeTarget && (
+            <div className="mt-4 rounded-2xl border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-4 py-3">
+              <p className="text-xs font-semibold text-[oklch(0.92_0.14_78)]">Need more than Gold?</p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                Custom enterprise plans are available for large teams and organizations — higher limits, white-label options, and dedicated support.
+              </p>
+              <a
+                href="mailto:support@yvity.com?subject=Enterprise%20plan%20enquiry"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
+              >
+                Contact YVITY support →
+              </a>
+            </div>
+          )}
         </div>
       </DashboardSection>
 

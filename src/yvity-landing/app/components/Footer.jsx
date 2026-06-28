@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
+import { useState } from "react";
 import BrandMark from "@/yvity-landing/components/brand/BrandMark";
 import { FaArrowRight } from "react-icons/fa";
 import { scrollToSection } from "@/yvity-landing/lib/landing/scrollToSection";
@@ -8,6 +9,7 @@ import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationMo
 import { usePathname, useRouter } from "next/navigation";
 import { LANDING_INNER } from "@/yvity-landing/app/components/home/landingLayout";
 import { useLandingMobileNavOptional } from "@/yvity-landing/app/components/home/LandingMobileNavContext";
+import { PlatformReviewModal } from "@/components/platform-review/platform-review-modal";
 
 const MOBILE_PANEL_SECTIONS = new Set([
   "how-it-works",
@@ -45,6 +47,14 @@ const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const mobileNav = useLandingMobileNavOptional();
+  const [reviewOpen, setReviewOpen] = useState(false);
+
+  const handleReviewSuccess = () => {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("yvity_platform_review_done", "1");
+    }
+    setReviewOpen(false);
+  };
 
   const platformLinks = [
     { name: "Find Advisors", link: "find-advisors" },
@@ -175,6 +185,12 @@ const Footer = () => {
                     />
                   </li>
                 ))}
+                <li>
+                  <FooterLinkButton
+                    label="⭐ Rate YVITY"
+                    onClick={() => setReviewOpen(true)}
+                  />
+                </li>
               </ul>
             </div>
           </div>
@@ -190,6 +206,13 @@ const Footer = () => {
           <p>A brand of Medhaara Innovations Pvt Ltd</p>
         </div>
       </div>
+
+      <PlatformReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        onSuccess={handleReviewSuccess}
+        respondentType="customer"
+      />
     </footer>
   );
 };

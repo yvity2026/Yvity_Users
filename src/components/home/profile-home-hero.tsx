@@ -44,6 +44,7 @@ import {
   IntroVideoTrustCard,
   YvityScoreTrustCard,
 } from "@/components/home/home-trust-section";
+import { PlatformReviewNudge } from "@/components/platform-review/platform-review-nudge";
 import { useResolvedPlanLimits } from "@/hooks/use-resolved-plan-limits";
 import { usePublicYvityScore } from "@/hooks/use-public-yvity-score";
 import { Button } from "@/components/ui/button";
@@ -375,6 +376,25 @@ function HeroServicesSection() {
   );
 }
 
+function AdvisorReviewNudge() {
+  const { advisor } = useAuth();
+  const publicView = usePublicProfileView();
+  const display = useAdvisorDisplayProfile();
+
+  const isOwnWorkspace = !publicView && Boolean(advisor);
+  const profileApproved = isAdvisorProfileApproved(advisor);
+
+  if (!isOwnWorkspace || !profileApproved) return null;
+
+  return (
+    <PlatformReviewNudge
+      advisorName={display.name}
+      respondentType="advisor"
+      autoTrigger
+    />
+  );
+}
+
 export function ProfileHomeHero() {
   return (
     <section
@@ -388,6 +408,7 @@ export function ProfileHomeHero() {
 
       <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col justify-start px-4 pt-4 pb-6 sm:px-6 sm:pt-5 sm:pb-8 lg:px-6 lg:pt-3 lg:pb-8">
         <div className="flex flex-col gap-6 sm:gap-8 lg:gap-9">
+          <AdvisorReviewNudge />
           <ProfileHeaderBanner />
           <HeroServicesSection />
           <CommunityTrustSection />

@@ -31,6 +31,8 @@ export async function GET() {
       profession: payload.profession,
       about: payload.about ?? "",
       selfie_url: payload.selfie_url,
+      officeAddress: payload.officeAddress,
+      mapsLink: payload.mapsLink,
     },
   });
 }

@@ -154,10 +154,24 @@ function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLogg
   }
 
   if (liveProfilePath) {
+    const saveScroll = () => {
+      try { sessionStorage.setItem("yvity_landing_scroll", String(window.scrollY)); } catch {}
+    };
     return (
-      <Link href={liveProfilePath} className={className} target="_blank" rel="noopener noreferrer">
-        {ctaInner}
-      </Link>
+      <>
+        {/* Mobile / PWA — same-tab navigation so the back button works inside the app */}
+        <div className="md:hidden w-full">
+          <Link href={liveProfilePath} className={className} onClick={saveScroll}>
+            {ctaInner}
+          </Link>
+        </div>
+        {/* Desktop — new tab; landing page stays open in original tab */}
+        <div className="hidden md:block w-full">
+          <Link href={liveProfilePath} className={className} target="_blank" rel="noopener noreferrer">
+            {ctaInner}
+          </Link>
+        </div>
+      </>
     );
   }
 

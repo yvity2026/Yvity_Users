@@ -106,18 +106,27 @@ export async function getGlobalFeatureFlags(): Promise<Record<string, boolean>> 
 }
 
 type AdminPlanPricingConfig = {
-  plans?: Array<{ id: string; salePriceInr?: number; listPriceInr?: number }>;
+  plans?: Array<{
+    id: string;
+    salePriceInr?: number;
+    listPriceInr?: number;
+    included?: string[];
+    excluded?: string[];
+  }>;
 };
 
 export type AdminPlanPrice = {
   salePriceInr: number;
   listPriceInr: number | null;
+  included?: string[];
+  excluded?: string[];
 };
 
 /**
- * Reads plan prices set in the admin app (platform_configs key "plan_pricing").
- * Returns a map of planId → { salePriceInr, listPriceInr }.
- * Falls back to empty map (callers fall back to hardcoded plan-catalog prices).
+ * Reads plan prices AND marketing entitlements set in the admin app
+ * (platform_configs key "plan_pricing").
+ * Returns a map of planId → { salePriceInr, listPriceInr, included, excluded }.
+ * Falls back to empty map (callers fall back to hardcoded plan-catalog prices/features).
  */
 export async function getAdminPlanPrices(): Promise<Partial<Record<string, AdminPlanPrice>>> {
   const supabase = getAdminClientOrNull();
@@ -133,13 +142,15 @@ export async function getAdminPlanPrices(): Promise<Partial<Record<string, Admin
     const prices: Partial<Record<string, AdminPlanPrice>> = {};
     for (const plan of config.plans) {
       const sale = Number(plan.salePriceInr ?? 0);
-      if (sale > 0) {
-        const list = Number(plan.listPriceInr ?? 0);
-        prices[plan.id] = {
-          salePriceInr: sale,
-          listPriceInr: list > sale ? list : null,
-        };
-      }
+      const list = Number(plan.listPriceInr ?? 0);
+      const entry: AdminPlanPrice = {
+        salePriceInr: sale,
+        listPriceInr: list > sale ? list : null,
+      };
+      if (Array.isArray(plan.included) && plan.included.length > 0) entry.included = plan.included;
+      if (Array.isArray(plan.excluded) && plan.excluded.length > 0) entry.excluded = plan.excluded;
+      // Include entry if it has a price or live entitlements
+      if (sale > 0 || entry.included || entry.excluded) prices[plan.id] = entry;
     }
     return prices;
   } catch {

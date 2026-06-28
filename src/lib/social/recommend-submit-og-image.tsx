@@ -1,3 +1,4 @@
+import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
 import { recommendShareCopy } from "@/lib/testimonials/recommend-share-copy";
 import type { AdvisorOgShareContext } from "@/lib/social/advisor-og-share";
 
@@ -41,14 +42,20 @@ export function RecommendSubmitOgImage({
             display: "flex",
             alignItems: "center",
             gap: 12,
-            padding: "10px 18px",
+            padding: "10px 22px 10px 14px",
             borderRadius: 999,
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(245, 158, 11, 0.35)",
+            background: "#F8F6F1",
           }}
         >
-          <img src={logoSrc} alt="" width={36} height={36} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: 4 }}>YVITY</span>
+          <img src={logoSrc} alt="" width={40} height={40} style={{ objectFit: "contain" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 2, color: "#0A4A4A", lineHeight: 1.1 }}>
+              {COMPANY_NAME}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#F59E0B", letterSpacing: 0.5, lineHeight: 1 }}>
+              {COMPANY_TAGLINE}
+            </span>
+          </div>
         </div>
         {verified ? (
           <span style={{ fontSize: 13, fontWeight: 700, color: "#F59E0B", letterSpacing: 1.5 }}>
@@ -135,7 +142,26 @@ export function RecommendSubmitOgImageFallback({ logoSrc }: { logoSrc: string })
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      <img src={logoSrc} alt="" width={48} height={48} style={{ objectFit: "contain" }} />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "10px 22px 10px 14px",
+          borderRadius: 999,
+          background: "#F8F6F1",
+        }}
+      >
+        <img src={logoSrc} alt="" width={40} height={40} style={{ objectFit: "contain" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 2, color: "#0A4A4A", lineHeight: 1.1 }}>
+            {COMPANY_NAME}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#F59E0B", letterSpacing: 0.5, lineHeight: 1 }}>
+            {COMPANY_TAGLINE}
+          </span>
+        </div>
+      </div>
       <div style={{ fontSize: 56, fontWeight: 800 }}>{recommendShareCopy.ogTitle}</div>
       <div style={{ fontSize: 22, color: "#e7d5b8" }}>{recommendShareCopy.ogDescription}</div>
     </div>
