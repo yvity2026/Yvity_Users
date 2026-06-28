@@ -311,13 +311,43 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
                   {company.name}{" "}
                   <CheckCircle2 size={15} className="inline-block align-middle text-[#2ab5b5]" strokeWidth={2.5} />
                 </h2>
-                {/* Verified badge — inside name column so it sits tight below h2,
-                    not after the taller buttons column */}
                 <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
                   <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
                   <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
                     Verified Official Information
                   </span>
+                </div>
+
+                {/* Meta rows — inside text column so they sit tight below badge */}
+                <div className="mt-1.5 flex flex-col gap-1">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
+                      <span className="font-poppins text-[10px] text-[#6B7280]">
+                        Established
+                        <span className="ml-1 font-semibold text-[#374151]">{company.established}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Shield size={10} className="shrink-0 text-[#9CA3AF]" />
+                      <span className="font-poppins text-[10px] text-[#6B7280]">
+                        IRDAI Reg. No.
+                        <span className="ml-1 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
+                    <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
+                    <a
+                      href={company.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
+                    >
+                      {company.websiteDisplay}
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -350,38 +380,6 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
                     <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Meta rows */}
-            <div className="mt-2 flex flex-col gap-1">
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[10px] text-[#6B7280]">
-                    Established
-                    <span className="ml-1 font-semibold text-[#374151]">{company.established}</span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Shield size={10} className="shrink-0 text-[#9CA3AF]" />
-                  <span className="font-poppins text-[10px] text-[#6B7280]">
-                    IRDAI Reg. No.
-                    <span className="ml-1 font-semibold text-[#374151]">{company.irdaiRegNo}</span>
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Globe size={10} className="shrink-0 text-[#9CA3AF]" />
-                <span className="font-poppins text-[10px] text-[#6B7280]">Official Website</span>
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
-                >
-                  {company.websiteDisplay}
-                </a>
               </div>
             </div>
           </div>
@@ -1621,7 +1619,7 @@ export default function InsuranceDirectory() {
             <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 items-start gap-2.5">
             {filtered.map((entry) => (
               <DesktopAccordionItem
                 key={entry.id}
