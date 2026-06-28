@@ -1463,41 +1463,46 @@ function MobileAccordionItem({ entry, isOpen, onToggle }) {
   const [imgErr, setImgErr] = useState(false);
   const meta = getEntryMeta(entry);
 
+  if (isOpen) {
+    return (
+      <div>
+        <button
+          onClick={onToggle}
+          className="mb-1.5 flex w-full items-center justify-between rounded-xl border border-[#E4E2DB] bg-[#F8F6F1] px-4 py-2 transition-colors active:bg-[#EEEAE4]"
+        >
+          <span className="font-poppins text-[11px] text-[#9CA3AF]">Tap to collapse</span>
+          <ChevronDown size={14} className="rotate-180 text-[#9CA3AF]" />
+        </button>
+        {renderCard(entry)}
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
-      >
-        <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
-          {entry.logo && !imgErr ? (
-            <img
-              src={entry.logo}
-              alt=""
-              className="h-full w-full object-contain p-0.5"
-              onError={() => setImgErr(true)}
-            />
-          ) : (
-            <span className={cn("font-cormorant text-[11px] font-bold leading-none", meta.avatarText)}>
-              {meta.label}
-            </span>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">{entry.name}</p>
-          <p className="font-poppins text-[10px] text-[#9CA3AF]">{meta.subtitle}</p>
-        </div>
-        <ChevronDown
-          size={16}
-          className={cn("shrink-0 text-[#9CA3AF] transition-transform duration-200", isOpen && "rotate-180")}
-        />
-      </button>
-      {isOpen && (
-        <div className="mt-1.5">
-          {renderCard(entry)}
-        </div>
-      )}
-    </div>
+    <button
+      onClick={onToggle}
+      className="flex w-full items-center gap-3 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
+    >
+      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
+        {entry.logo && !imgErr ? (
+          <img
+            src={entry.logo}
+            alt=""
+            className="h-full w-full object-contain p-0.5"
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          <span className={cn("font-cormorant text-[11px] font-bold leading-none", meta.avatarText)}>
+            {meta.label}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">{entry.name}</p>
+        <p className="font-poppins text-[10px] text-[#9CA3AF]">{meta.subtitle}</p>
+      </div>
+      <ChevronDown size={16} className="shrink-0 text-[#9CA3AF]" />
+    </button>
   );
 }
 
@@ -1518,44 +1523,48 @@ function DesktopAccordionItem({ entry, isOpen, onToggle }) {
     metaLine = parts.join(" · ");
   }
 
+  if (isOpen) {
+    return (
+      <div>
+        <button
+          onClick={onToggle}
+          className="mb-2 flex w-full items-center justify-between rounded-xl border border-[#E4E2DB] bg-[#F8F6F1] px-5 py-2 transition-colors hover:bg-[#EEEAE4]"
+        >
+          <span className="font-poppins text-[11px] text-[#9CA3AF]">Click to collapse</span>
+          <ChevronDown size={15} className="rotate-180 text-[#9CA3AF]" />
+        </button>
+        {renderCard(entry)}
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center gap-4 rounded-2xl border border-[#E4E2DB] bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-[#FAFAF9]"
-      >
-        <div className={cn("relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
-          {entry.logo && !imgErr ? (
-            <img src={entry.logo} alt="" className="h-full w-full object-contain p-0.5" onError={() => setImgErr(true)} />
-          ) : (
-            <span className={cn("font-cormorant text-sm font-bold leading-none", meta.avatarText)}>{meta.label}</span>
-          )}
-        </div>
+    <button
+      onClick={onToggle}
+      className="flex w-full items-center gap-4 rounded-2xl border border-[#E4E2DB] bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-[#FAFAF9]"
+    >
+      <div className={cn("relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
+        {entry.logo && !imgErr ? (
+          <img src={entry.logo} alt="" className="h-full w-full object-contain p-0.5" onError={() => setImgErr(true)} />
+        ) : (
+          <span className={cn("font-cormorant text-sm font-bold leading-none", meta.avatarText)}>{meta.label}</span>
+        )}
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-poppins text-[14px] font-semibold text-[#0A4A4A]">{entry.name}</p>
-            <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 font-poppins text-[10px] font-semibold", meta.avatarBg, meta.avatarText)}>
-              {meta.subtitle}
-            </span>
-          </div>
-          {metaLine && (
-            <p className="mt-0.5 font-poppins text-[11px] text-[#9CA3AF]">{metaLine}</p>
-          )}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate font-poppins text-[14px] font-semibold text-[#0A4A4A]">{entry.name}</p>
+          <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 font-poppins text-[10px] font-semibold", meta.avatarBg, meta.avatarText)}>
+            {meta.subtitle}
+          </span>
         </div>
+        {metaLine && (
+          <p className="mt-0.5 font-poppins text-[11px] text-[#9CA3AF]">{metaLine}</p>
+        )}
+      </div>
 
-        <ChevronDown
-          size={18}
-          className={cn("shrink-0 text-[#9CA3AF] transition-transform duration-200", isOpen && "rotate-180")}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="mt-2">
-          {renderCard(entry)}
-        </div>
-      )}
-    </div>
+      <ChevronDown size={18} className="shrink-0 text-[#9CA3AF]" />
+    </button>
   );
 }
 
