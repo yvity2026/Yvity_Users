@@ -747,37 +747,6 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
-        {/* Favorite + Share — absolute top-right */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
-          >
-            <Heart
-              size={13}
-              strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-          {onToggle && (
-            <button
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand card" : "Collapse card"}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
-            >
-              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
-            </button>
-          )}
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — circular, blue border */}
@@ -798,30 +767,32 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
             )}
           </div>
 
-          {/* Info — right padding to clear the absolute buttons */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
-            <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
-              {repo.name}
-            </h2>
+          {/* Info */}
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-cormorant text-[18px] font-bold leading-snug text-[#0A4A4A] sm:text-[21px]">
+                  {repo.name}
+                </h2>
 
-            {/* Two badges */}
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#1D4ED8]/30 bg-white/70 px-2.5 py-0.5">
-                <CheckCircle2 size={10} className="text-[#1D4ED8]" strokeWidth={2.5} />
-                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
-                  Verified Official Information
-                </span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
-                <Shield size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
-                <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
-                  Authorized by IRDAI
-                </span>
-              </div>
-            </div>
+                {/* Two badges */}
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[#1D4ED8]/30 bg-white/70 px-2.5 py-0.5">
+                    <CheckCircle2 size={10} className="text-[#1D4ED8]" strokeWidth={2.5} />
+                    <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
+                      Verified Official Information
+                    </span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
+                    <Shield size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
+                    <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
+                      Authorized by IRDAI
+                    </span>
+                  </div>
+                </div>
 
-            {/* Meta */}
-            <div className="mt-2 flex flex-col gap-1">
+                {/* Meta */}
+                <div className="mt-2 flex flex-col gap-1">
               <div className="flex items-center gap-1.5">
                 <Calendar size={10} className="shrink-0 text-[#9CA3AF]" />
                 <span className="font-poppins text-[10px] text-[#6B7280]">
@@ -843,8 +814,37 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
               </div>
             </div>
           </div>
+
+          {/* Buttons — vertical */}
+          <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+            <button
+              onClick={() => setFavorited((f) => !f)}
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+            >
+              <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")} />
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+            >
+              <Share2 size={12} strokeWidth={2} />
+            </button>
+            {onToggle && (
+              <button
+                onClick={onToggle}
+                aria-label={collapsed ? "Expand card" : "Collapse card"}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+              >
+                <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+    </div>
+  </div>
 
       {!collapsed && (<>
 
@@ -1017,37 +1017,6 @@ function GoverningBodyCard({ body, collapsed = false, onToggle }) {
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
-        {/* Favorite + Share — absolute top-right */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Heart
-              size={13}
-              strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-          {onToggle && (
-            <button
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand card" : "Collapse card"}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-            >
-              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
-            </button>
-          )}
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — circular, muted teal border */}
@@ -1068,9 +1037,10 @@ function GoverningBodyCard({ body, collapsed = false, onToggle }) {
             )}
           </div>
 
-          {/* Info — right padding to clear the absolute buttons */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
-            <h2 className="font-cormorant text-[24px] font-bold leading-none text-[#0A4A4A] sm:text-[28px]">
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-cormorant text-[24px] font-bold leading-none text-[#0A4A4A] sm:text-[28px]">
               {body.name}
             </h2>
             {body.fullName && (
@@ -1115,6 +1085,35 @@ function GoverningBodyCard({ body, collapsed = false, onToggle }) {
                 >
                   {body.websiteDisplay}
                 </a>
+              </div>
+            </div>
+          </div>
+
+              {/* Buttons — vertical */}
+              <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+                <button
+                  onClick={() => setFavorited((f) => !f)}
+                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                >
+                  <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                >
+                  <Share2 size={12} strokeWidth={2} />
+                </button>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1290,31 +1289,6 @@ function BimaBharosaCard({ body, collapsed = false, onToggle }) {
         {/* Dark teal bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]" style={{ borderRadius: "6px 6px 0 0" }} />
 
-        {/* Favorite + Share */}
-        <div className="absolute right-4 top-4 flex gap-1.5 sm:right-5 sm:top-5">
-          <button
-            onClick={() => setFavorited((f) => !f)}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
-          </button>
-          <button onClick={handleShare} aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-          >
-            <Share2 size={12} strokeWidth={2} />
-          </button>
-          {onToggle && (
-            <button
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand card" : "Collapse card"}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
-            >
-              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
-            </button>
-          )}
-        </div>
-
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — rectangular (logo has wide aspect ratio) */}
@@ -1335,8 +1309,7 @@ function BimaBharosaCard({ body, collapsed = false, onToggle }) {
             )}
           </div>
 
-          {/* Info */}
-          <div className="min-w-0 flex-1 pr-16 pt-0.5 sm:pr-20">
+          <div className="min-w-0 flex-1 pt-0.5">
             <h2 className="font-cormorant text-[22px] font-bold leading-tight text-[#0A4A4A] sm:text-[26px]">
               {body.name}
             </h2>
@@ -1378,6 +1351,32 @@ function BimaBharosaCard({ body, collapsed = false, onToggle }) {
                 </a>
               </div>
             </div>
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+            <button
+              onClick={() => setFavorited((f) => !f)}
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <Share2 size={12} strokeWidth={2} />
+            </button>
+            {onToggle && (
+              <button
+                onClick={onToggle}
+                aria-label={collapsed ? "Expand card" : "Collapse card"}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+              >
+                <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1491,6 +1490,16 @@ function BimaBharosaCard({ body, collapsed = false, onToggle }) {
 // ─── OmbudsmanCard ───────────────────────────────────────────────────────────
 
 function OmbudsmanCard({ office, collapsed = false, onToggle }) {
+  const [favorited, setFavorited] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: office.name, url: window.location.href }).catch(() => {});
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href).catch(() => {});
+    }
+  };
+
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C5D0E0] bg-white shadow-[0_4px_20px_rgba(30,58,138,0.08)]">
 
@@ -1508,18 +1517,6 @@ function OmbudsmanCard({ office, collapsed = false, onToggle }) {
         {/* Bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#1E3A8A]" style={{ borderRadius: "6px 6px 0 0" }} />
 
-        {onToggle && (
-          <div className="absolute right-4 top-4 sm:right-5 sm:top-5">
-            <button
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand card" : "Collapse card"}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
-            >
-              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
-            </button>
-          </div>
-        )}
-
         <div className="flex items-start gap-3 sm:gap-4">
           {/* City avatar */}
           <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#BFDBFE] bg-white shadow-sm sm:h-[90px] sm:w-[90px]">
@@ -1531,8 +1528,8 @@ function OmbudsmanCard({ office, collapsed = false, onToggle }) {
 
           {/* Info */}
           <div className="min-w-0 flex-1 pt-0.5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
                 <h2 className="font-cormorant text-[20px] font-bold leading-tight text-[#1E3A8A] sm:text-[23px]">
                   {office.name}
                 </h2>
@@ -1547,6 +1544,32 @@ function OmbudsmanCard({ office, collapsed = false, onToggle }) {
                 <Landmark size={16} className="text-[#3B82F6]" strokeWidth={1.5} />
                 <span className="mt-0.5 font-poppins text-[9px] text-[#6B7280]">Office Code</span>
                 <span className="font-poppins text-[14px] font-bold text-[#1E3A8A]">{office.officeCode}</span>
+              </div>
+              {/* Buttons — vertical */}
+              <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+                <button
+                  onClick={() => setFavorited((f) => !f)}
+                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+                >
+                  <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+                >
+                  <Share2 size={12} strokeWidth={2} />
+                </button>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C5D0E0] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
