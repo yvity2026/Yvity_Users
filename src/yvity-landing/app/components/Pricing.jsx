@@ -134,14 +134,16 @@ function buildPricingData(livePrices = {}) {
       override !== undefined && typeof override === "object" && override.listPriceInr > 0
         ? override.listPriceInr
         : null;
+    const liveIncluded = override?.included;
+    const liveExcluded = override?.excluded;
     return {
       title: shortTitle,
       price: salePriceInr > 0 ? salePriceInr.toLocaleString("en-IN") : "0",
       originalPrice: listPriceInr ? listPriceInr.toLocaleString("en-IN") : null,
       period: salePriceInr > 0 ? "/year" : "",
       message: plan.tagline,
-      features: plan.included,
-      nonFeatures: plan.excluded.length > 0 ? plan.excluded : undefined,
+      features: liveIncluded?.length > 0 ? liveIncluded : plan.included,
+      nonFeatures: liveExcluded?.length > 0 ? liveExcluded : (plan.excluded.length > 0 ? plan.excluded : undefined),
       ...styles,
     };
   });
