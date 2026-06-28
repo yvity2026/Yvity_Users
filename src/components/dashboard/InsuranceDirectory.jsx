@@ -349,6 +349,59 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
     }
   };
 
+  const isHealth  = company.serviceType?.includes("Health");
+  const isGeneral = company.serviceType?.includes("General");
+
+  const theme = isHealth ? {
+    gradient:     "from-[#F0FAFA] via-[#E8F7F7] to-[#D6F1F1]",
+    watermark:    "text-[#2ab5b5] opacity-[0.08]",
+    waveColor:    "#2ab5b5",
+    bottomBar:    "bg-[#0A4A4A]",
+    logoBorder:   "border-[#C8E8E8]",
+    logoFallback: "bg-[#E8F7F7]",
+    badgeBorder:  "border-[#2ab5b5]/40",
+    badgeBg:      "bg-[#E8F7F7]",
+    badgeIcon:    "text-[#2ab5b5]",
+    badgeText:    "text-[#0A4A4A]",
+    iconCircle:   "bg-[#E8F7F7]",
+    iconColor:    "text-[#2ab5b5]",
+    iconHoverBg:  "group-hover:bg-[#0A4A4A]",
+    heartHover:   "hover:border-[#2ab5b5] hover:text-[#2ab5b5]",
+    heartActive:  "fill-[#2ab5b5] text-[#2ab5b5]",
+  } : isGeneral ? {
+    gradient:     "from-[#F3F8F8] via-[#EAF2F2] to-[#DDE9E9]",
+    watermark:    "text-[#0A4A4A] opacity-[0.06]",
+    waveColor:    "#0A4A4A",
+    bottomBar:    "bg-[#2ab5b5]",
+    logoBorder:   "border-[#C8D8D8]",
+    logoFallback: "bg-[#EAF2F2]",
+    badgeBorder:  "border-[#0A4A4A]/20",
+    badgeBg:      "bg-[#E4EDED]",
+    badgeIcon:    "text-[#0A4A4A]",
+    badgeText:    "text-[#0A4A4A]",
+    iconCircle:   "bg-[#EAF2F2]",
+    iconColor:    "text-[#0A4A4A]",
+    iconHoverBg:  "group-hover:bg-[#2ab5b5]",
+    heartHover:   "hover:border-[#0A4A4A] hover:text-[#0A4A4A]",
+    heartActive:  "fill-[#0A4A4A] text-[#0A4A4A]",
+  } : {
+    gradient:     "from-[#FFFDF5] via-[#FFF8E8] to-[#FFF0CC]",
+    watermark:    "text-[#F59E0B] opacity-[0.07]",
+    waveColor:    "#F59E0B",
+    bottomBar:    "bg-[#0A4A4A]",
+    logoBorder:   "border-[#E2DDD4]",
+    logoFallback: "bg-[#FFF8E8]",
+    badgeBorder:  "border-[#F59E0B]/40",
+    badgeBg:      "bg-[#FFFBEB]",
+    badgeIcon:    "text-[#F59E0B]",
+    badgeText:    "text-[#92400E]",
+    iconCircle:   "bg-[#FFF8E8]",
+    iconColor:    "text-[#F59E0B]",
+    iconHoverBg:  "group-hover:bg-[#0A4A4A]",
+    heartHover:   "hover:border-[#F59E0B] hover:text-[#F59E0B]",
+    heartActive:  "fill-[#F59E0B] text-[#F59E0B]",
+  };
+
   const shortName = company.name.split(" ").slice(0, 2).join(" ");
   const findAdvisorsUrl = `/dashboard/explore?company=${encodeURIComponent(shortName)}&service=${encodeURIComponent(company.serviceType)}`;
 
@@ -356,15 +409,15 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#E4E2DB] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
 
       {/* ── Section 1: Header ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E8] to-[#FFF0CC] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+      <div className={cn("relative overflow-hidden bg-gradient-to-br px-4 pb-7 pt-4 sm:px-5 sm:pt-5", theme.gradient)}>
 
         {/* Shield watermark */}
         <Shield
-          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#F59E0B] opacity-[0.07]"
+          className={cn("pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none", theme.watermark)}
           strokeWidth={0.75}
         />
 
-        {/* Gold wave decoration */}
+        {/* Accent wave decoration */}
         <svg
           className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
           viewBox="0 0 400 50"
@@ -373,22 +426,22 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
           preserveAspectRatio="none"
           aria-hidden
         >
-          <path d="M0,38 C80,8 200,48 400,18" stroke="#F59E0B" strokeWidth="1.5" />
-          <path d="M0,48 C80,18 200,58 400,28" stroke="#F59E0B" strokeWidth="1" opacity="0.45" />
+          <path d="M0,38 C80,8 200,48 400,18" stroke={theme.waveColor} strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke={theme.waveColor} strokeWidth="1" opacity="0.45" />
         </svg>
 
-        {/* Dark teal bottom bar */}
+        {/* Bottom accent bar */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]"
+          className={cn("absolute bottom-0 left-0 right-0 h-2", theme.bottomBar)}
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
         {/* Logo + Company info */}
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Logo — round */}
-          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#E2DDD4] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
+          <div className={cn("flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]", theme.logoBorder)}>
             {imgError ? (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#FFF8E8]">
+              <div className={cn("flex h-full w-full items-center justify-center rounded-full", theme.logoFallback)}>
                 <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{company.initials}</span>
               </div>
             ) : (
@@ -413,9 +466,9 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
                   {company.name}{" "}
                   <CheckCircle2 size={15} className="inline-block align-middle text-[#2ab5b5]" strokeWidth={2.5} />
                 </h2>
-                <div className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/40 bg-[#FFFBEB] px-2.5 py-0.5">
-                  <CheckCircle2 size={10} className="text-[#F59E0B]" strokeWidth={2.5} />
-                  <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#92400E]">
+                <div className={cn("mt-0.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5", theme.badgeBorder, theme.badgeBg)}>
+                  <CheckCircle2 size={10} className={theme.badgeIcon} strokeWidth={2.5} />
+                  <span className={cn("font-poppins text-[9px] font-semibold tracking-wide", theme.badgeText)}>
                     Verified Official Information
                   </span>
                 </div>
@@ -458,12 +511,12 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
                 <button
                   onClick={() => setFavorited((f) => !f)}
                   aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#F59E0B] hover:text-[#F59E0B]"
+                  className={cn("flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors", theme.heartHover)}
                 >
                   <Heart
                     size={13}
                     strokeWidth={2}
-                    className={cn("transition-all", favorited && "fill-[#F59E0B] text-[#F59E0B]")}
+                    className={cn("transition-all", favorited && theme.heartActive)}
                   />
                 </button>
                 <button
@@ -498,9 +551,9 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
           <a
             href={`tel:${company.phone.replace(/\s/g, "")}`}
             aria-label={`Call ${company.name} customer care`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+            className={cn("flex h-10 w-10 items-center justify-center rounded-full transition-colors", theme.iconCircle, theme.iconHoverBg)}
           >
-            <Phone size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Phone size={17} className={cn("transition-colors group-hover:text-white", theme.iconColor)} strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <div className="flex flex-col gap-0.5">
@@ -526,9 +579,9 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
           <a
             href={`mailto:${company.email}`}
             aria-label={`Email ${company.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8] transition-colors group-hover:bg-[#0A4A4A]"
+            className={cn("flex h-10 w-10 items-center justify-center rounded-full transition-colors", theme.iconCircle, theme.iconHoverBg)}
           >
-            <Mail size={17} className="text-[#F59E0B] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Mail size={17} className={cn("transition-colors group-hover:text-white", theme.iconColor)} strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care Email</span>
           <a
@@ -565,8 +618,8 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
 
         {/* 24x7 — informational, no click */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF8E8]">
-            <Headphones size={17} className="text-[#F59E0B]" strokeWidth={1.75} />
+          <span className={cn("flex h-10 w-10 items-center justify-center rounded-full", theme.iconCircle)}>
+            <Headphones size={17} className={theme.iconColor} strokeWidth={1.75} />
           </span>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <span className="font-poppins text-[15px] font-bold text-[#0A4A4A]">24 x 7</span>
