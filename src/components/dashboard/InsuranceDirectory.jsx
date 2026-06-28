@@ -1501,6 +1501,64 @@ function MobileAccordionItem({ entry, isOpen, onToggle }) {
   );
 }
 
+// ─── Desktop accordion ────────────────────────────────────────────────────────
+
+function DesktopAccordionItem({ entry, isOpen, onToggle }) {
+  const [imgErr, setImgErr] = useState(false);
+  const meta = getEntryMeta(entry);
+
+  let metaLine = null;
+  if (entry.entityType === "Ombudsman") {
+    metaLine = entry.jurisdiction?.slice(0, 2).join(", ");
+  } else {
+    const parts = [];
+    if (entry.established) parts.push(`Est. ${entry.established}`);
+    if (entry.irdaiRegNo) parts.push(`IRDAI Reg. ${entry.irdaiRegNo}`);
+    else if (entry.websiteDisplay) parts.push(entry.websiteDisplay);
+    metaLine = parts.join(" · ");
+  }
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-4 rounded-2xl border border-[#E4E2DB] bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-[#FAFAF9]"
+      >
+        <div className={cn("relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
+          {entry.logo && !imgErr ? (
+            <img src={entry.logo} alt="" className="h-full w-full object-contain p-0.5" onError={() => setImgErr(true)} />
+          ) : (
+            <span className={cn("font-cormorant text-sm font-bold leading-none", meta.avatarText)}>{meta.label}</span>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-poppins text-[14px] font-semibold text-[#0A4A4A]">{entry.name}</p>
+            <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 font-poppins text-[10px] font-semibold", meta.avatarBg, meta.avatarText)}>
+              {meta.subtitle}
+            </span>
+          </div>
+          {metaLine && (
+            <p className="mt-0.5 font-poppins text-[11px] text-[#9CA3AF]">{metaLine}</p>
+          )}
+        </div>
+
+        <ChevronDown
+          size={18}
+          className={cn("shrink-0 text-[#9CA3AF] transition-transform duration-200", isOpen && "rotate-180")}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="mt-2">
+          {renderCard(entry)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
 
 export default function InsuranceDirectory() {
@@ -1508,6 +1566,8 @@ export default function InsuranceDirectory() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [mobileCategory, setMobileCategory] = useState(null);
   const [openCardId, setOpenCardId] = useState(null);
+  const [openDesktopIds, setOpenDesktopIds] = useState({});
+  const toggleDesktop = (id) => setOpenDesktopIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const mobileCat = MOBILE_CATEGORIES.find((c) => c.key === mobileCategory) ?? null;
   const mobileEntries = mobileCat ? ALL_ENTRIES.filter(mobileCat.filter) : [];
@@ -1576,27 +1636,22 @@ export default function InsuranceDirectory() {
           </div>
         </div>
 
-        {/* Cards grid */}
+        {/* Accordion list */}
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
             <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {filtered.map((entry) =>
-              entry.entityType === "Repository" ? (
-                <RepositoryCard key={entry.id} repo={entry} />
-              ) : entry.id === "bima-bharosa" ? (
-                <BimaBharosaCard key={entry.id} body={entry} />
-              ) : entry.entityType === "Governing Body" ? (
-                <GoverningBodyCard key={entry.id} body={entry} />
-              ) : entry.entityType === "Ombudsman" ? (
-                <OmbudsmanCard key={entry.id} office={entry} />
-              ) : (
-                <CompanyCard key={entry.id} company={entry} />
-              )
-            )}
+          <div className="flex flex-col gap-2.5">
+            {filtered.map((entry) => (
+              <DesktopAccordionItem
+                key={entry.id}
+                entry={entry}
+                isOpen={!!openDesktopIds[entry.id]}
+                onToggle={() => toggleDesktop(entry.id)}
+              />
+            ))}
           </div>
         )}
 
