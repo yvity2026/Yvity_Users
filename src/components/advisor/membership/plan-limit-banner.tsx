@@ -99,6 +99,13 @@ export function PlanLimitBanner({
             >
               View upgrade options
             </Link>
+          ) : !upgradePlan && showUpgradeLink && usage.atLimit ? (
+            <a
+              href="mailto:support@yvity.com?subject=Enterprise%20plan%20enquiry"
+              className="mt-2 inline-flex text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
+            >
+              Contact YVITY for a custom enterprise plan →
+            </a>
           ) : null}
         </div>
       </div>
