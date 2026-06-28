@@ -77,10 +77,11 @@ const Hero = ({ advisor = [] }) => {
   }, [mobileNav, pathname, router]);
 
   const [countData, setCountData] = useState([
-    { count: 0, title: "Total Users", isRating: false },
-    { count: 0, title: "Verified Advisors", isRating: false },
-    { count: 0, title: "Cities Covered", isRating: false },
-    { count: 0, title: "Platform Rating", isRating: true },
+    { count: 0, title: "Total Users", isRating: false, ratingCount: null },
+    { count: 0, title: "Verified Advisors", isRating: false, ratingCount: null },
+    { count: 0, title: "Cities Covered", isRating: false, ratingCount: null },
+    { count: 0, title: "Avg Advisor Rating", isRating: true, ratingCount: null },
+    { count: 0, title: "Platform Rating", isRating: true, ratingCount: 0 },
   ]);
   useEffect(() => {
     let ignore = false;
@@ -97,10 +98,11 @@ const Hero = ({ advisor = [] }) => {
         }
 
         setCountData([
-          { count: Number(result.data?.totalUsers || 0), title: "Total Users", isRating: false },
-          { count: Number(result.data?.verifiedAdvisors || 0), title: "Verified Advisors", isRating: false },
-          { count: Number(result.data?.citiesCovered || 0), title: "Cities Covered", isRating: false },
-          { count: Number(result.data?.platformRating || 0), title: "Platform Rating", isRating: true },
+          { count: Number(result.data?.totalUsers || 0), title: "Total Users", isRating: false, ratingCount: null },
+          { count: Number(result.data?.verifiedAdvisors || 0), title: "Verified Advisors", isRating: false, ratingCount: null },
+          { count: Number(result.data?.citiesCovered || 0), title: "Cities Covered", isRating: false, ratingCount: null },
+          { count: Number(result.data?.avgAdvisorRating || 0), title: "Avg Advisor Rating", isRating: true, ratingCount: null },
+          { count: Number(result.data?.platformRating || 0), title: "Platform Rating", isRating: true, ratingCount: Number(result.data?.platformRatingCount || 0) },
         ]);
       } catch (error) {
         console.error("Failed to load landing stats:", error);
@@ -278,33 +280,49 @@ const Hero = ({ advisor = [] }) => {
       {/* Count Bar — hidden when all stats are zero (e.g. empty local DB) */}
       {countData.some((item) => item.count > 0) ? (
       <div className="landing-hero-stats mt-16 w-full sm:mt-14 md:mt-20">
-        <div className={`${LANDING_INNER} grid grid-cols-2 py-4 sm:grid-cols-4 md:py-5`}>
-          {countData.map((item, index) => (
-            <div
-              key={item.title}
-              className={`flex flex-col items-center justify-center gap-1 px-2 py-2 text-center sm:flex-row sm:gap-3 sm:px-4 sm:py-0 ${
-                index % 2 === 0 ? "border-r landing-hero-stats-divider sm:border-r" : ""
-              } ${
-                index < 2 ? "border-b landing-hero-stats-divider sm:border-b-0" : ""
-              } ${
-                index === 3 ? "sm:border-r-0" : index < 3 ? "sm:border-r landing-hero-stats-divider" : ""
-              }`}
-            >
-              {item.isRating ? (
-                <span className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl">
-                  {item.count > 0 ? item.count.toFixed(1) : "—"} <span className="text-[#F59E0B]">★</span>
-                </span>
-              ) : (
-                <AnimatedCounter
-                  value={item.count}
-                  className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
-                />
-              )}
-              <p className="landing-hero-stats-label font-poppins text-[10px] leading-snug sm:max-w-[8rem] sm:text-left md:text-xs lg:text-sm">
-                {item.title}
-              </p>
-            </div>
-          ))}
+        {/* Mobile: row 1 = 3 stats, row 2 = 2 ratings | Desktop: single row of 5 */}
+        <div className={`${LANDING_INNER} grid grid-cols-6 py-4 sm:grid-cols-5 md:py-5`}>
+          {countData.map((item, index) => {
+            // Mobile: first 3 take 2 of 6 cols each; last 2 take 3 of 6 cols each
+            // Desktop: all equal (col-span-1 in 5-col grid)
+            const colSpan = index < 3 ? "col-span-2 sm:col-span-1" : "col-span-3 sm:col-span-1";
+            // Borders: mobile — right/bottom within each row; desktop — right between all 5
+            const hasBorder = index < 4 || index === 0 || index === 1 || index === 3;
+            const borderClass = [
+              (index === 0 || index === 1 || index === 3) ? "border-r" : "",
+              index < 3 ? "border-b sm:border-b-0" : "",
+              index < 4 ? "sm:border-r" : "",
+              hasBorder ? "landing-hero-stats-divider" : "",
+            ].filter(Boolean).join(" ");
+
+            return (
+              <div
+                key={item.title}
+                className={`flex flex-col items-center justify-center gap-1 px-2 py-2 text-center sm:flex-row sm:gap-3 sm:px-4 sm:py-0 ${colSpan} ${borderClass}`}
+              >
+                {item.isRating ? (
+                  <span className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl whitespace-nowrap">
+                    {item.count > 0 ? (
+                      <>
+                        {item.count.toFixed(1)}<span className="text-[#F59E0B]"> ★</span>
+                        {item.ratingCount != null && item.ratingCount > 0 && (
+                          <span className="text-xs font-normal text-[#0A4A4A]/55"> ({item.ratingCount})</span>
+                        )}
+                      </>
+                    ) : "—"}
+                  </span>
+                ) : (
+                  <AnimatedCounter
+                    value={item.count}
+                    className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
+                  />
+                )}
+                <p className="landing-hero-stats-label font-poppins text-[10px] leading-snug sm:max-w-[8rem] sm:text-left md:text-xs lg:text-sm">
+                  {item.title}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
       ) : null}

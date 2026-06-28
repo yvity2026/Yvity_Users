@@ -144,11 +144,13 @@ export async function loadLandingStatsFromDb(): Promise<{
   totalUsers: number;
   verifiedAdvisors: number;
   citiesCovered: number;
+  avgAdvisorRating: number;
   platformRating: number;
+  platformRatingCount: number;
 }> {
   const supabase = client();
 
-  const [usersRes, profilesRes, citiesRes, ratingsRes] = await Promise.all([
+  const [usersRes, profilesRes, citiesRes, advisorRatingsRes, platformRatingsRes] = await Promise.all([
     supabase.from("users").select("id", { count: "exact", head: true }),
     supabase
       .from("advisor_profiles")
@@ -164,12 +166,18 @@ export async function loadLandingStatsFromDb(): Promise<{
       .eq("status", "approved")
       .eq("is_mobile_verified", true)
       .not("testimonial_rating", "is", null),
+    supabase
+      .from("yvity_testimonials")
+      .select("testimonial_rating")
+      .eq("status", "approved")
+      .not("testimonial_rating", "is", null),
   ]);
 
   if (usersRes.error) throw new Error(usersRes.error.message);
   if (profilesRes.error) throw new Error(profilesRes.error.message);
   if (citiesRes.error) throw new Error(citiesRes.error.message);
-  if (ratingsRes.error) throw new Error(ratingsRes.error.message);
+  if (advisorRatingsRes.error) throw new Error(advisorRatingsRes.error.message);
+  if (platformRatingsRes.error) throw new Error(platformRatingsRes.error.message);
 
   const cities = new Set(
     (citiesRes.data ?? [])
@@ -180,16 +188,23 @@ export async function loadLandingStatsFromDb(): Promise<{
       .filter(Boolean),
   );
 
-  const ratings = (ratingsRes.data ?? []).map((r) => Number(r.testimonial_rating)).filter((n) => n > 0);
-  const platformRating = ratings.length > 0
-    ? Math.round((ratings.reduce((s, r) => s + r, 0) / ratings.length) * 10) / 10
+  const advisorRatings = (advisorRatingsRes.data ?? []).map((r) => Number(r.testimonial_rating)).filter((n) => n > 0);
+  const avgAdvisorRating = advisorRatings.length > 0
+    ? Math.round((advisorRatings.reduce((s, r) => s + r, 0) / advisorRatings.length) * 10) / 10
+    : 0;
+
+  const platformRatings = (platformRatingsRes.data ?? []).map((r) => Number(r.testimonial_rating)).filter((n) => n > 0);
+  const platformRating = platformRatings.length > 0
+    ? Math.round((platformRatings.reduce((s, r) => s + r, 0) / platformRatings.length) * 10) / 10
     : 0;
 
   return {
     totalUsers: usersRes.count ?? 0,
     verifiedAdvisors: profilesRes.count ?? 0,
     citiesCovered: cities.size,
+    avgAdvisorRating,
     platformRating,
+    platformRatingCount: platformRatings.length,
   };
 }
 
