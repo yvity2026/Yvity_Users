@@ -1643,7 +1643,7 @@ export default function InsuranceDirectory() {
             <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5">
             {filtered.map((entry) => (
               <DesktopAccordionItem
                 key={entry.id}
