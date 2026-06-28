@@ -235,7 +235,7 @@ const ALL_ENTRIES = [...COMPANIES, ...REPOSITORIES, ...GOVERNING_BODIES, ...OMBU
 
 // ─── CompanyCard ──────────────────────────────────────────────────────────────
 
-function CompanyCard({ company }) {
+function CompanyCard({ company, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -341,6 +341,15 @@ function CompanyCard({ company }) {
                 >
                   <Share2 size={12} strokeWidth={2} />
                 </button>
+                {onToggle && (
+                  <button
+                    onClick={onToggle}
+                    aria-label={collapsed ? "Expand card" : "Collapse card"}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E4E2DB] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+                  >
+                    <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -378,6 +387,8 @@ function CompanyCard({ company }) {
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (4-column grid) ── */}
       <div className="grid grid-cols-2 gap-px bg-[#E4E2DB] sm:grid-cols-4">
@@ -513,13 +524,15 @@ function CompanyCard({ company }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── RepositoryCard ───────────────────────────────────────────────────────────
 
-function RepositoryCard({ repo }) {
+function RepositoryCard({ repo, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -582,6 +595,15 @@ function RepositoryCard({ repo }) {
           >
             <Share2 size={12} strokeWidth={2} />
           </button>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              aria-label={collapsed ? "Expand card" : "Collapse card"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+            </button>
+          )}
         </div>
 
         {/* Logo + Info */}
@@ -651,6 +673,8 @@ function RepositoryCard({ repo }) {
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
@@ -770,13 +794,15 @@ function RepositoryCard({ repo }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── GoverningBodyCard ────────────────────────────────────────────────────────
 
-function GoverningBodyCard({ body }) {
+function GoverningBodyCard({ body, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -839,6 +865,15 @@ function GoverningBodyCard({ body }) {
           >
             <Share2 size={12} strokeWidth={2} />
           </button>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              aria-label={collapsed ? "Expand card" : "Collapse card"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+            </button>
+          )}
         </div>
 
         {/* Logo + Info */}
@@ -913,6 +948,8 @@ function GoverningBodyCard({ body }) {
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
@@ -1036,13 +1073,15 @@ function GoverningBodyCard({ body }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── BimaBharosaCard ─────────────────────────────────────────────────────────
 
-function BimaBharosaCard({ body }) {
+function BimaBharosaCard({ body, collapsed = false, onToggle }) {
   const [favorited, setFavorited] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -1093,6 +1132,15 @@ function BimaBharosaCard({ body }) {
           >
             <Share2 size={12} strokeWidth={2} />
           </button>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              aria-label={collapsed ? "Expand card" : "Collapse card"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+            >
+              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+            </button>
+          )}
         </div>
 
         {/* Logo + Info */}
@@ -1161,6 +1209,8 @@ function BimaBharosaCard({ body }) {
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Contact (3-column) ── */}
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
@@ -1260,13 +1310,15 @@ function BimaBharosaCard({ body }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
 
 // ─── OmbudsmanCard ───────────────────────────────────────────────────────────
 
-function OmbudsmanCard({ office }) {
+function OmbudsmanCard({ office, collapsed = false, onToggle }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C5D0E0] bg-white shadow-[0_4px_20px_rgba(30,58,138,0.08)]">
 
@@ -1283,6 +1335,18 @@ function OmbudsmanCard({ office }) {
 
         {/* Bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#1E3A8A]" style={{ borderRadius: "6px 6px 0 0" }} />
+
+        {onToggle && (
+          <div className="absolute right-4 top-4 sm:right-5 sm:top-5">
+            <button
+              onClick={onToggle}
+              aria-label={collapsed ? "Expand card" : "Collapse card"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+            >
+              <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+            </button>
+          </div>
+        )}
 
         <div className="flex items-start gap-3 sm:gap-4">
           {/* City avatar */}
@@ -1316,6 +1380,8 @@ function OmbudsmanCard({ office }) {
           </div>
         </div>
       </div>
+
+      {!collapsed && (<>
 
       {/* ── Section 2: Jurisdiction ── */}
       <div className="border-b border-[#E4E2DB] px-4 py-3 sm:px-5">
@@ -1425,6 +1491,8 @@ function OmbudsmanCard({ office }) {
           </span>
         </div>
       </div>
+
+      </>)}
     </article>
   );
 }
@@ -1451,121 +1519,22 @@ function getEntryMeta(entry) {
   };
 }
 
-function renderCard(entry) {
-  if (entry.entityType === "Repository") return <RepositoryCard repo={entry} />;
-  if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} />;
-  if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} />;
-  if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} />;
-  return <CompanyCard company={entry} />;
+function renderCard(entry, { collapsed = false, onToggle } = {}) {
+  if (entry.entityType === "Repository") return <RepositoryCard repo={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} collapsed={collapsed} onToggle={onToggle} />;
+  return <CompanyCard company={entry} collapsed={collapsed} onToggle={onToggle} />;
 }
 
 function MobileAccordionItem({ entry, isOpen, onToggle }) {
-  const [imgErr, setImgErr] = useState(false);
-  const meta = getEntryMeta(entry);
-
-  if (isOpen) {
-    return (
-      <div>
-        <button
-          onClick={onToggle}
-          className="mb-1.5 flex w-full items-center justify-between rounded-xl border border-[#E4E2DB] bg-[#F8F6F1] px-4 py-2 transition-colors active:bg-[#EEEAE4]"
-        >
-          <span className="font-poppins text-[11px] text-[#9CA3AF]">Tap to collapse</span>
-          <ChevronDown size={14} className="rotate-180 text-[#9CA3AF]" />
-        </button>
-        {renderCard(entry)}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={onToggle}
-      className="flex w-full items-center gap-3 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
-    >
-      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
-        {entry.logo && !imgErr ? (
-          <img
-            src={entry.logo}
-            alt=""
-            className="h-full w-full object-contain p-0.5"
-            onError={() => setImgErr(true)}
-          />
-        ) : (
-          <span className={cn("font-cormorant text-[11px] font-bold leading-none", meta.avatarText)}>
-            {meta.label}
-          </span>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">{entry.name}</p>
-        <p className="font-poppins text-[10px] text-[#9CA3AF]">{meta.subtitle}</p>
-      </div>
-      <ChevronDown size={16} className="shrink-0 text-[#9CA3AF]" />
-    </button>
-  );
+  return renderCard(entry, { collapsed: !isOpen, onToggle });
 }
 
 // ─── Desktop accordion ────────────────────────────────────────────────────────
 
 function DesktopAccordionItem({ entry, isOpen, onToggle }) {
-  const [imgErr, setImgErr] = useState(false);
-  const meta = getEntryMeta(entry);
-
-  let metaLine = null;
-  if (entry.entityType === "Ombudsman") {
-    metaLine = entry.jurisdiction?.slice(0, 2).join(", ");
-  } else {
-    const parts = [];
-    if (entry.established) parts.push(`Est. ${entry.established}`);
-    if (entry.irdaiRegNo) parts.push(`IRDAI Reg. ${entry.irdaiRegNo}`);
-    else if (entry.websiteDisplay) parts.push(entry.websiteDisplay);
-    metaLine = parts.join(" · ");
-  }
-
-  if (isOpen) {
-    return (
-      <div>
-        <button
-          onClick={onToggle}
-          className="mb-2 flex w-full items-center justify-between rounded-xl border border-[#E4E2DB] bg-[#F8F6F1] px-5 py-2 transition-colors hover:bg-[#EEEAE4]"
-        >
-          <span className="font-poppins text-[11px] text-[#9CA3AF]">Click to collapse</span>
-          <ChevronDown size={15} className="rotate-180 text-[#9CA3AF]" />
-        </button>
-        {renderCard(entry)}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={onToggle}
-      className="flex w-full items-center gap-4 rounded-2xl border border-[#E4E2DB] bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-[#FAFAF9]"
-    >
-      <div className={cn("relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E4E2DB]", meta.avatarBg)}>
-        {entry.logo && !imgErr ? (
-          <img src={entry.logo} alt="" className="h-full w-full object-contain p-0.5" onError={() => setImgErr(true)} />
-        ) : (
-          <span className={cn("font-cormorant text-sm font-bold leading-none", meta.avatarText)}>{meta.label}</span>
-        )}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate font-poppins text-[14px] font-semibold text-[#0A4A4A]">{entry.name}</p>
-          <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 font-poppins text-[10px] font-semibold", meta.avatarBg, meta.avatarText)}>
-            {meta.subtitle}
-          </span>
-        </div>
-        {metaLine && (
-          <p className="mt-0.5 font-poppins text-[11px] text-[#9CA3AF]">{metaLine}</p>
-        )}
-      </div>
-
-      <ChevronDown size={18} className="shrink-0 text-[#9CA3AF]" />
-    </button>
-  );
+  return renderCard(entry, { collapsed: !isOpen, onToggle });
 }
 
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
