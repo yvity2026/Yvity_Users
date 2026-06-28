@@ -1,4 +1,4 @@
-import { COMPANY_NAME } from "@/lib/brand";
+import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
 
 export type AdvisorProfileOgImageInput = {
   name: string;
@@ -49,11 +49,10 @@ export function AdvisorProfileOgImage({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 14,
-            padding: "10px 18px",
+            gap: 12,
+            padding: "10px 22px 10px 14px",
             borderRadius: 999,
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.14)",
+            background: "#F8F6F1",
           }}
         >
           <img
@@ -63,7 +62,14 @@ export function AdvisorProfileOgImage({
             height={40}
             style={{ objectFit: "contain" }}
           />
-          <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: 3 }}>{COMPANY_NAME}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 2, color: "#0A4A4A", lineHeight: 1.1 }}>
+              {COMPANY_NAME}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#F59E0B", letterSpacing: 0.5, lineHeight: 1 }}>
+              {COMPANY_TAGLINE}
+            </span>
+          </div>
         </div>
         {verified ? (
           <span
