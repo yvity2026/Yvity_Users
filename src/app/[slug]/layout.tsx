@@ -1,5 +1,6 @@
 import { PublicProfileViewProvider } from "@/context/public-profile-view-context";
 import { PublicProfileThemeApplier } from "@/components/public-profile-theme-applier";
+import { PublicProfileBackBar } from "@/components/public-profile-back-bar";
 import { isReservedPublicProfileSlug } from "@/lib/advisor/public-profile-slug";
 import { loadPublicViewAdvisorBySlug } from "@/lib/server/public-view-context";
 import { notFound } from "next/navigation";
@@ -26,6 +27,7 @@ export default async function SlugLayout({
   return (
     <PublicProfileViewProvider value={payload}>
       <PublicProfileThemeApplier />
+      <PublicProfileBackBar />
       {children}
     </PublicProfileViewProvider>
   );

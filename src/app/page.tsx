@@ -26,6 +26,7 @@ import { getSessionUser } from "@/lib/server/session";
 import { getSiteOrigin } from "@/lib/social/site-origin";
 import { COMPANY_NAME } from "@/lib/brand";
 import { getAdminPlanPrices } from "@/lib/server/feature-controls-store";
+import { LandingScrollRestorer } from "@/components/landing-scroll-restorer";
 
 function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
@@ -127,6 +128,7 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-full w-full bg-[#F8F6F1]">
+      <LandingScrollRestorer />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

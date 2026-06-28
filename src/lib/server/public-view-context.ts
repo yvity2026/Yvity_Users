@@ -63,24 +63,25 @@ export async function clearPublicViewAdvisorCookie() {
 
 /**
  * Whose persisted section data (services, career, …) to load.
- * A logged-in session always takes priority over the public-view cookie
- * so an advisor can never accidentally see another advisor's data in their
- * own dashboard — even if they previously visited that advisor's public profile.
- * The cookie is only used for anonymous (logged-out) visitors.
+ * When a visitor (logged-in or not) is viewing another advisor's public profile,
+ * the PUBLIC_VIEW_COOKIE identifies that advisor and takes priority so section
+ * pages render the correct advisor's content.
+ * Falls back to the session user (own dashboard) when no cross-advisor cookie is present.
  */
 export async function resolveAdvisorDataUserId(): Promise<string | null> {
   const session = await getSessionUser();
-
-  // Logged-in user always loads their own data
-  if (session?.id) return session.id;
-
-  // Anonymous visitor: use the public-view cookie set by the [slug] page
   const cookieStore = await cookies();
   const viewId = cookieStore.get(PUBLIC_VIEW_COOKIE)?.value?.trim();
-  if (viewId) {
+
+  // Cookie points to a different advisor — serve that advisor's section data
+  // (covers both anonymous visitors and logged-in advisors viewing another profile)
+  if (viewId && (!session?.id || session.id !== viewId)) {
     const viewProfile = await getAdvisorProfileForUser(viewId);
     if (isAdvisorProfileLive(viewProfile)) return viewId;
   }
+
+  // Own dashboard or no cross-advisor cookie
+  if (session?.id) return session.id;
 
   return null;
 }
@@ -107,6 +108,9 @@ export type PublicViewAdvisorPayload = {
   dbScore?: number | null;
   /** Advisor's chosen profile theme — applied on public profile pages */
   profileTheme: ProfileThemeId;
+  /** Advisor's office location from their settings */
+  officeAddress: string;
+  mapsLink: string;
 };
 
 async function resolveRegisteredUserForPublicView(
@@ -158,6 +162,8 @@ export async function loadPublicViewAdvisorByUserId(
     selfie_url: user.selfieUrl?.trim() || undefined,
     dbScore,
     profileTheme,
+    officeAddress: settings?.location?.officeAddress?.trim() ?? "",
+    mapsLink: settings?.location?.mapsLink?.trim() ?? "",
   };
 }
 

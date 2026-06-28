@@ -2,26 +2,31 @@
 
 import { ArrowRight, MapPin } from "lucide-react";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
-import { useAdvisorSettings } from "@/lib/advisor-settings-store";
+import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
 import { googleMapsDirectionsUrl, hasOfficeLocation } from "@/lib/advisor-office-location";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function ReachOutToAdvisorSection() {
   const advisorProfile = useAdvisorDisplayProfile();
-  const { settings } = useAdvisorSettings();
+  // Read location directly from the server-provided advisor payload so it always
+  // reflects the viewed advisor's data, not the logged-in session user's settings.
+  const publicPayload = useResolvedPublicAdvisorPayload();
 
-  // Prefer explicit office address from settings; fall back to city/state from profile
+  const officeAddressFromPayload = publicPayload?.officeAddress?.trim() ?? "";
+  const mapsLinkFromPayload = publicPayload?.mapsLink?.trim() ?? "";
+
+  // Prefer explicit office address from the advisor's payload; fall back to city/state from profile
   const officeLabel =
-    settings.location.officeAddress.trim() || advisorProfile.officeLocation?.label || "";
+    officeAddressFromPayload || advisorProfile.officeLocation?.label || "";
 
   const office = officeLabel
     ? {
         label: officeLabel,
-        mapsLink: settings.location.mapsLink.trim() || undefined,
+        mapsLink: mapsLinkFromPayload || undefined,
       }
     : advisorProfile.officeLocation
-      ? { ...advisorProfile.officeLocation, mapsLink: settings.location.mapsLink.trim() || undefined }
+      ? { ...advisorProfile.officeLocation, mapsLink: mapsLinkFromPayload || undefined }
       : null;
 
   if (!hasOfficeLocation(office)) return null;
