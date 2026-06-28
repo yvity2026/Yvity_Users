@@ -73,6 +73,108 @@ const COMPANIES = [
     email: "customercare@starhealth.in",
     lastUpdated: "15 June 2026",
   },
+  {
+    id: "niva-bupa",
+    logo: "/images/companies/niva-bupa.png",
+    initials: "NB",
+    name: "Niva Bupa Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "145",
+    website: "https://www.nivabupa.com",
+    websiteDisplay: "www.nivabupa.com",
+    phone: "1860-500-8888",
+    phone2: "1800-309-3333",
+    whatsapp: "+91 98119 56696",
+    email: "customercare@nivabupa.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "care-health",
+    logo: "/images/companies/care-health.png",
+    initials: "CH",
+    name: "Care Health Insurance Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2012,
+    irdaiRegNo: "148",
+    website: "https://www.careinsurance.com",
+    websiteDisplay: "www.careinsurance.com",
+    phone: "1800-102-4488",
+    phone2: "1800-102-6655",
+    whatsapp: "+91 88604 02452",
+    email: "customerfirst@careinsurance.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "manipalcigna",
+    logo: "/images/companies/manipalcigna.png",
+    initials: "MC",
+    name: "ManipalCigna Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2014,
+    irdaiRegNo: "151",
+    website: "https://www.manipalcigna.com",
+    websiteDisplay: "www.manipalcigna.com",
+    phone: "1800-102-4462",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@manipalcigna.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "aditya-birla-health",
+    logo: "/images/companies/aditya-birla-health.png",
+    initials: "AB",
+    name: "Aditya Birla Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2015,
+    irdaiRegNo: "153",
+    website: "https://www.adityabirlacapital.com/healthinsurance",
+    websiteDisplay: "www.adityabirlacapital.com",
+    phone: "1800-270-7000",
+    phone2: null,
+    whatsapp: "+91 88288 00035",
+    email: "care.healthinsurance@adityabirlacapital.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "galaxy-health",
+    logo: "/images/companies/galaxy-health.png",
+    initials: "GH",
+    name: "Galaxy Health Insurance Co. Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2023,
+    irdaiRegNo: "167",
+    website: "https://www.galaxyhealth.com",
+    websiteDisplay: "www.galaxyhealth.com",
+    phone: "1800 203 0007",
+    phone2: null,
+    whatsapp: null,
+    email: "support@galaxyhealth.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "narayana-health",
+    logo: "/images/companies/narayana-health.png",
+    initials: "NH",
+    name: "Narayana Health Insurance Ltd.",
+    serviceType: "Health Insurance",
+    entityType: "Company",
+    established: 2023,
+    irdaiRegNo: "166",
+    website: "https://www.narayanahealth.insurance",
+    websiteDisplay: "www.narayanahealth.insurance",
+    phone: "1800 203 0234",
+    phone2: "+91 98210 34071",
+    whatsapp: null,
+    email: "support@narayanahealth.insurance",
+    lastUpdated: "June 2026",
+  },
 ];
 
 const FILTERS = ["All", "Life", "Health", "General", "Repository", "Governing Body", "Ombudsman"];
@@ -388,8 +490,8 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
 
       {!collapsed && (<>
 
-      {/* ── Section 2: Contact (4-column grid) ── */}
-      <div className="grid grid-cols-2 gap-px bg-[#E4E2DB] sm:grid-cols-4">
+      {/* ── Section 2: Contact grid ── */}
+      <div className={cn("grid gap-px bg-[#E4E2DB]", company.whatsapp ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
 
         {/* Customer Care — hover on cell, icon flips dark teal */}
         <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F8F6F1]">
@@ -437,7 +539,8 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
           </a>
         </div>
 
-        {/* WhatsApp — hover on cell, icon flips WhatsApp green */}
+        {/* WhatsApp — only rendered when company has a WhatsApp number */}
+        {company.whatsapp && (
         <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FDF4]">
           <a
             href={`https://wa.me/${company.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -458,6 +561,7 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
             {company.whatsapp}
           </a>
         </div>
+        )}
 
         {/* 24x7 — informational, no click */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
