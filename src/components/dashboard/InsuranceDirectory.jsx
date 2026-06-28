@@ -386,21 +386,21 @@ function CompanyCard({ company, collapsed = false, onToggle }) {
     heartHover:   "hover:border-[#2ab5b5] hover:text-[#2ab5b5]",
     heartActive:  "fill-[#2ab5b5] text-[#2ab5b5]",
   } : isGeneral ? {
-    gradient:     "from-[#F3F8F8] via-[#EAF2F2] to-[#DDE9E9]",
-    watermark:    "text-[#0A4A4A] opacity-[0.06]",
-    waveColor:    "#0A4A4A",
-    bottomBar:    "bg-[#2ab5b5]",
-    logoBorder:   "border-[#C8D8D8]",
-    logoFallback: "bg-[#EAF2F2]",
-    badgeBorder:  "border-[#0A4A4A]/20",
-    badgeBg:      "bg-[#E4EDED]",
-    badgeIcon:    "text-[#0A4A4A]",
-    badgeText:    "text-[#0A4A4A]",
-    iconCircle:   "bg-[#EAF2F2]",
-    iconColor:    "text-[#0A4A4A]",
-    iconHoverBg:  "group-hover:bg-[#2ab5b5]",
-    heartHover:   "hover:border-[#0A4A4A] hover:text-[#0A4A4A]",
-    heartActive:  "fill-[#0A4A4A] text-[#0A4A4A]",
+    gradient:     "from-[#FFFBF0] via-[#FEF3C7] to-[#FDE68A]",
+    watermark:    "text-[#D97706] opacity-[0.08]",
+    waveColor:    "#D97706",
+    bottomBar:    "bg-[#92400E]",
+    logoBorder:   "border-[#FCD34D]",
+    logoFallback: "bg-[#FEF3C7]",
+    badgeBorder:  "border-[#D97706]/40",
+    badgeBg:      "bg-[#FEF3C7]",
+    badgeIcon:    "text-[#D97706]",
+    badgeText:    "text-[#92400E]",
+    iconCircle:   "bg-[#FEF3C7]",
+    iconColor:    "text-[#D97706]",
+    iconHoverBg:  "group-hover:bg-[#92400E]",
+    heartHover:   "hover:border-[#D97706] hover:text-[#D97706]",
+    heartActive:  "fill-[#D97706] text-[#D97706]",
   } : {
     gradient:     "from-[#FFFDF5] via-[#FFF8E8] to-[#FFF0CC]",
     watermark:    "text-[#F59E0B] opacity-[0.07]",
@@ -717,18 +717,18 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
   };
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C8E8E8] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#BFDBFE] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
 
       {/* ── Section 1: Header ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#F0FAFA] via-[#E8F7F7] to-[#D4EEEE] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-[#DBEAFE] to-[#BFDBFE] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
 
         {/* Database watermark */}
         <Database
-          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#2ab5b5] opacity-[0.07]"
+          className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#1D4ED8] opacity-[0.07]"
           strokeWidth={0.75}
         />
 
-        {/* Teal wave decoration */}
+        {/* Blue wave decoration */}
         <svg
           className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none"
           viewBox="0 0 400 50"
@@ -737,13 +737,13 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
           preserveAspectRatio="none"
           aria-hidden
         >
-          <path d="M0,38 C80,8 200,48 400,18" stroke="#2ab5b5" strokeWidth="1.5" />
-          <path d="M0,48 C80,18 200,58 400,28" stroke="#2ab5b5" strokeWidth="1" opacity="0.45" />
+          <path d="M0,38 C80,8 200,48 400,18" stroke="#1D4ED8" strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke="#1D4ED8" strokeWidth="1" opacity="0.45" />
         </svg>
 
-        {/* Dark teal bottom bar */}
+        {/* Bottom accent bar */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]"
+          className="absolute bottom-0 left-0 right-0 h-2 bg-[#1E3A8A]"
           style={{ borderRadius: "6px 6px 0 0" }}
         />
 
@@ -752,18 +752,18 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
           <button
             onClick={() => setFavorited((f) => !f)}
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
           >
             <Heart
               size={13}
               strokeWidth={2}
-              className={cn("transition-all", favorited && "fill-[#2ab5b5] text-[#2ab5b5]")}
+              className={cn("transition-all", favorited && "fill-[#1D4ED8] text-[#1D4ED8]")}
             />
           </button>
           <button
             onClick={handleShare}
             aria-label="Share"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#2ab5b5] hover:text-[#2ab5b5]"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
           >
             <Share2 size={12} strokeWidth={2} />
           </button>
@@ -771,7 +771,7 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
             <button
               onClick={onToggle}
               aria-label={collapsed ? "Expand card" : "Collapse card"}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8E8E8] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#BFDBFE] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
             >
               <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
             </button>
@@ -780,10 +780,10 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
 
         {/* Logo + Info */}
         <div className="flex items-start gap-3 sm:gap-4">
-          {/* Logo — circular, teal border */}
-          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#B2E0E0] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
+          {/* Logo — circular, blue border */}
+          <div className="flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full border border-[#93C5FD] bg-white p-2 shadow-sm sm:h-[100px] sm:w-[100px]">
             {imgError ? (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#E8F7F7]">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-[#EFF6FF]">
                 <span className="font-cormorant text-xl font-bold text-[#0A4A4A] sm:text-2xl">{repo.initials}</span>
               </div>
             ) : (
@@ -806,8 +806,8 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
 
             {/* Two badges */}
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#2ab5b5]/40 bg-white/70 px-2.5 py-0.5">
-                <CheckCircle2 size={10} className="text-[#2ab5b5]" strokeWidth={2.5} />
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#1D4ED8]/30 bg-white/70 px-2.5 py-0.5">
+                <CheckCircle2 size={10} className="text-[#1D4ED8]" strokeWidth={2.5} />
                 <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#0A4A4A]">
                   Verified Official Information
                 </span>
@@ -836,7 +836,7 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
                   href={repo.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-poppins text-[10px] font-semibold text-[#2ab5b5] hover:underline"
+                  className="font-poppins text-[10px] font-semibold text-[#1D4ED8] hover:underline"
                 >
                   {repo.websiteDisplay}
                 </a>
@@ -852,26 +852,26 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
       <div className="grid grid-cols-3 gap-px bg-[#E4E2DB]">
 
         {/* Phone */}
-        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FAFA]">
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EFF6FF]">
           <a
             href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
             aria-label={`Call ${repo.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7] transition-colors group-hover:bg-[#0A4A4A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] transition-colors group-hover:bg-[#1E3A8A]"
           >
-            <Phone size={17} className="text-[#2ab5b5] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Phone size={17} className="text-[#1D4ED8] transition-colors group-hover:text-white" strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Customer Care</span>
           <div className="flex flex-col gap-0.5">
             <a
               href={`tel:${repo.phone.replace(/[\s-]/g, "")}`}
-              className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+              className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
             >
               {repo.phone}
             </a>
             {repo.phone2 && (
               <a
                 href={`tel:${repo.phone2.replace(/[\s-]/g, "")}`}
-                className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+                className="font-poppins text-[12px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
               >
                 {repo.phone2}
               </a>
@@ -880,18 +880,18 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
         </div>
 
         {/* Email */}
-        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#F0FAFA]">
+        <div className="group flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center transition-colors hover:bg-[#EFF6FF]">
           <a
             href={`mailto:${repo.email}`}
             aria-label={`Email ${repo.name}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7] transition-colors group-hover:bg-[#0A4A4A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE] transition-colors group-hover:bg-[#1E3A8A]"
           >
-            <Mail size={17} className="text-[#2ab5b5] transition-colors group-hover:text-white" strokeWidth={1.75} />
+            <Mail size={17} className="text-[#1D4ED8] transition-colors group-hover:text-white" strokeWidth={1.75} />
           </a>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Email Support</span>
           <a
             href={`mailto:${repo.email}`}
-            className="break-all font-poppins text-[11px] font-bold text-[#0A4A4A] transition-colors hover:text-[#2ab5b5]"
+            className="break-all font-poppins text-[11px] font-bold text-[#0A4A4A] transition-colors hover:text-[#1D4ED8]"
           >
             {repo.email}
           </a>
@@ -899,8 +899,8 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
 
         {/* Support */}
         <div className="flex flex-col items-center gap-1.5 bg-white px-3 py-4 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8F7F7]">
-            <Headphones size={17} className="text-[#2ab5b5]" strokeWidth={1.75} />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DBEAFE]">
+            <Headphones size={17} className="text-[#1D4ED8]" strokeWidth={1.75} />
           </span>
           <span className="font-poppins text-[9px] text-[#9CA3AF]">Support</span>
           <span className="font-poppins text-[12px] font-bold text-[#0A4A4A]">Available</span>
@@ -909,9 +909,9 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
       </div>
 
       {/* ── Section 3: About ── */}
-      <div className="bg-[#F0FAFA] px-4 py-4 sm:px-5">
+      <div className="bg-[#EFF6FF] px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#D4EEEE] text-[#0A4A4A]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#1D4ED8]">
             <Database size={22} strokeWidth={1.75} />
           </div>
           <div>
@@ -933,7 +933,7 @@ function RepositoryCard({ repo, collapsed = false, onToggle }) {
               href={action.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl border border-[#E4E2DB] px-3.5 py-3 transition-colors hover:border-[#2ab5b5] hover:bg-[#F0FAFA]"
+              className="flex items-center gap-3 rounded-xl border border-[#E4E2DB] px-3.5 py-3 transition-colors hover:border-[#1D4ED8] hover:bg-[#EFF6FF]"
             >
               <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", action.iconBg)}>
                 <action.Icon size={18} className={action.iconColor} strokeWidth={1.75} />
