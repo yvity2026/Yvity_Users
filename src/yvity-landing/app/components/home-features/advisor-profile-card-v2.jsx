@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -14,7 +16,6 @@ import {
   Umbrella,
   Users,
 } from "lucide-react";
-import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
 
 const SERVICE_ICON_MAP = {
   "Life Insurance": Shield,
@@ -23,28 +24,27 @@ const SERVICE_ICON_MAP = {
   "Mutual Funds": TrendingUp,
 };
 
-// Score ring — on white panel, track is a subtle teal tint, colours match existing ScoreGauge
-function ScoreDial({ score, size = 90 }) {
+// gradId must be unique per DOM instance to avoid cross-instance gradient lookup failures
+function ScoreDial({ score, size = 90, gradId }) {
   const r = 20;
   const circ = 2 * Math.PI * r;
   const arcLen = circ * 0.75;
   const n = Math.min(100, Math.max(0, Number(score) || 0));
   const filled = (n / 100) * arcLen;
-  const numSize  = Math.round(size * 0.265);
-  const subSize  = Math.round(size * 0.145);
+  const numSize = Math.round(size * 0.265);
+  const subSize = Math.round(size * 0.145);
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 52 52" width={size} height={size} aria-hidden>
         <defs>
-          {/* Same colour ramp as the existing ScoreGauge — bright teal → gold */}
-          <linearGradient id="v2-arc-fill" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%"   stopColor="#0D6060" />
             <stop offset="50%"  stopColor="#14B8A6" />
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
         </defs>
-        {/* Track — slightly visible teal tint on white */}
+        {/* Track — subtle teal tint on white bg */}
         <circle
           cx="26" cy="26" r={r}
           fill="none"
@@ -59,7 +59,7 @@ function ScoreDial({ score, size = 90 }) {
           <circle
             cx="26" cy="26" r={r}
             fill="none"
-            stroke="url(#v2-arc-fill)"
+            stroke={`url(#${gradId})`}
             strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={`${filled} ${circ - filled}`}
@@ -99,6 +99,11 @@ export function AdvisorProfileCardV2({
   serviceTypes = ["General Insurance", "Life Insurance", "Health Insurance"],
   profileUrl   = "#",
 }) {
+  // Unique ID per DOM instance avoids SVG gradient ID collisions when
+  // both the mobile-hidden and desktop-visible copies exist simultaneously.
+  const uid    = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const gradId = `v2arc${uid}`;
+
   const numScore = Math.min(100, Math.max(0, Number(score) || 0));
   const numRecs  = Number(recs) || 0;
   const initials = (name || "")
@@ -109,10 +114,10 @@ export function AdvisorProfileCardV2({
     .toUpperCase();
 
   const statItems = [
-    { icon: Briefcase, value: `${exp} yrs`,      label: "Experience" },
-    { icon: Star,      value: String(avgRating),  label: "Rating" },
-    { icon: Users,     value: `${clients}+`,      label: "Clients" },
-    { icon: ThumbsUp,  value: String(numRecs),    label: "Recs" },
+    { icon: Briefcase, value: `${exp} yrs`,     label: "Experience" },
+    { icon: Star,      value: String(avgRating), label: "Rating" },
+    { icon: Users,     value: `${clients}+`,     label: "Clients" },
+    { icon: ThumbsUp,  value: String(numRecs),   label: "Recs" },
   ];
 
   return (
@@ -132,12 +137,25 @@ export function AdvisorProfileCardV2({
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      {/* ── Identity verified tick — top-right corner of card ── */}
+      {/* ── Verified badge — top-right corner of card ── */}
       {showIdentityVerified && (
-        <IdentityVerifiedTick
-          size="md"
-          className="!bottom-auto !right-3 !top-3 z-20 !translate-x-0 !translate-y-0"
-        />
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-[#0A4A4A]/10 bg-[#F8F6F1] px-2.5 py-1 shadow-[0_2px_8px_rgba(10,74,74,0.14)]">
+          <Image
+            src="/brand/yvity-logo.png"
+            alt="YVITY"
+            width={18}
+            height={18}
+            className="h-[18px] w-[18px] shrink-0 object-contain"
+          />
+          <div>
+            <p className="font-poppins text-[9px] font-bold leading-none tracking-wide text-[#0A4A4A]">
+              YVITY
+            </p>
+            <p className="mt-[2px] font-poppins text-[7px] font-semibold leading-none text-[#F59E0B]">
+              Verified Advisor
+            </p>
+          </div>
+        </div>
       )}
 
       {/* ── Header: avatar left + name / title / location right ── */}
@@ -157,7 +175,7 @@ export function AdvisorProfileCardV2({
         />
 
         <div className="relative z-10 flex items-center gap-3.5">
-          {/* Avatar — 96 px, gold border ring */}
+          {/* Avatar — 96 px with gold border ring */}
           <div className="relative shrink-0">
             <div className="absolute -inset-[7px] rounded-full bg-[#F59E0B]/22 blur-md" />
             <div className="absolute -inset-[3px] rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
@@ -189,14 +207,14 @@ export function AdvisorProfileCardV2({
       </div>
 
       {/* ── Body: warm cream ── */}
-      <div className="bg-[#F8F6F1] px-4 pb-4 pt-3">
+      <div className="bg-[#F8F6F1] px-4 pb-3 pt-2.5">
 
         {/* Split panel: YVITY Score ring (left) | Service pills stacked (right) */}
-        <div className="mb-3 flex items-stretch overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
+        <div className="mb-2 flex items-stretch overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
 
           {/* Left — score ring */}
-          <div className="flex shrink-0 flex-col items-center justify-center gap-1 px-3 py-3">
-            <ScoreDial score={numScore} size={90} />
+          <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 px-3 py-2.5">
+            <ScoreDial score={numScore} size={90} gradId={gradId} />
             <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
               YVITY Score
             </p>
@@ -206,7 +224,7 @@ export function AdvisorProfileCardV2({
           <div className="w-px self-stretch bg-gradient-to-b from-transparent via-[#0A4A4A]/10 to-transparent" />
 
           {/* Right — service pills stacked vertically */}
-          <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-3 py-3">
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-3 py-2.5">
             {serviceTypes.slice(0, 3).map((label) => {
               const Icon = SERVICE_ICON_MAP[label] ?? Shield;
               return (
@@ -222,15 +240,15 @@ export function AdvisorProfileCardV2({
           </div>
         </div>
 
-        {/* Stats — 4-column grid with dividers */}
-        <div className="mb-3 grid grid-cols-4 divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
+        {/* Stats — 4-column grid with dividers, tighter padding, larger text */}
+        <div className="mb-2 grid grid-cols-4 divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
           {statItems.map(({ icon: Icon, value, label }) => (
-            <div key={label} className="flex flex-col items-center gap-0.5 px-1 py-2.5">
+            <div key={label} className="flex flex-col items-center gap-0.5 px-1 py-2">
               <Icon className="h-3.5 w-3.5 text-[#F59E0B]" strokeWidth={1.8} />
-              <p className="font-poppins text-[12px] font-bold leading-tight tabular-nums text-[#0A4A4A]">
+              <p className="font-poppins text-[13px] font-bold leading-tight tabular-nums text-[#0A4A4A]">
                 {value}
               </p>
-              <p className="font-poppins text-[8px] font-medium leading-tight text-[#9CA3AF]">
+              <p className="font-poppins text-[9px] font-medium leading-tight text-[#9CA3AF]">
                 {label}
               </p>
             </div>
