@@ -2,6 +2,7 @@
 
 import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
 import { YvityScoreInfoTip } from "@/yvity-landing/components/brand/YvityScoreInfoTip";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -85,6 +86,23 @@ function AchievementBadge({ label, compact = false }) {
       <Trophy className="h-3 w-3 shrink-0 text-[#F59E0B]" strokeWidth={2} />
       <span>{shortLabel}</span>
     </span>
+  );
+}
+
+function YvityVerifiedBadge({ compact = false }) {
+  return (
+    <div className={`inline-flex items-center gap-1 rounded-full border border-[#F59E0B]/35 bg-[#F59E0B]/12 backdrop-blur-sm ${compact ? "px-1.5 py-[3px]" : "px-2 py-[3px]"}`}>
+      <Image
+        src="/brand/yvity-logo.png"
+        alt="YVITY"
+        width={10}
+        height={10}
+        className={compact ? "h-2.5 w-2.5 object-contain brightness-[1.15]" : "h-3 w-3 object-contain brightness-[1.15]"}
+      />
+      <span className={`font-poppins font-bold tracking-wide text-[#F59E0B] ${compact ? "text-[8px]" : "text-[9px]"}`}>
+        Verified
+      </span>
+    </div>
   );
 }
 
@@ -280,6 +298,11 @@ function AdvisorProfileCardCompact({
                   <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]" />
                   <span className="line-clamp-1">{location}</span>
                 </p>
+                {showIdentityVerified ? (
+                  <div className="mt-1">
+                    <YvityVerifiedBadge compact />
+                  </div>
+                ) : null}
                 {achievementTags.length > 0 ? (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {achievementTags.slice(0, 2).map((tag) => (
@@ -409,9 +432,13 @@ export function AdvisorProfileCard({
                   <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-[#F59E0B]" />
                   <span className="min-w-0 line-clamp-1 md:line-clamp-2">{location}</span>
                 </p>
-                {/* Achievements in header — clearly separated from services */}
+                {showIdentityVerified ? (
+                  <div className="mt-1.5">
+                    <YvityVerifiedBadge />
+                  </div>
+                ) : null}
                 {achievementTags.length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-1">
+                  <div className="mt-1.5 flex flex-wrap gap-1">
                     {achievementTags.slice(0, 2).map((tag) => (
                       <AchievementBadge key={tag} label={tag} />
                     ))}
