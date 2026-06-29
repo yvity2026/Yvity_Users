@@ -330,113 +330,155 @@ function AdvisorProfileCardCompact({
   isFeatured = true, isLoggedIn = true, onGatedClick,
 }) {
   const reducedMotion = usePrefersReducedMotion();
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const gradId = `arcc${uid}`;
   const numericScore = Math.min(100, Math.max(0, Number(score) || 0));
   const servicePills = resolveServicePills(serviceTypes);
-
   const numericRecs = Number(recs) || 0;
   const clientsDisplay = Number(clients) > 0 ? `${clients}+` : (clients ?? "0");
-  const clientsLabelDisplay = clientsLabel === "Clients" ? "Clients Served" : clientsLabel;
+  const clientsLabelDisplay = clientsLabel === "Clients" ? "Clients" : clientsLabel;
 
   const statItems = [
-    { icon: Briefcase, value: formatExperienceDisplay(exp),    label: "Exp."            },
-    { icon: Star,      value: formatAverageRating(avgRating),  label: "Rating"          },
-    { icon: Users,     value: clientsDisplay,                  label: clientsLabelDisplay },
-    ...(numericRecs > 0 ? [{ icon: ThumbsUp, value: String(numericRecs), label: "Recs" }] : []),
+    { icon: Briefcase, value: formatExperienceDisplay(exp),   label: "Exp."   },
+    { icon: Star,      value: formatAverageRating(avgRating), label: "Rating" },
+    { icon: Users,     value: clientsDisplay,                 label: clientsLabelDisplay },
+    ...(numericRecs > 0 ? [{ icon: ThumbsUp, value: String(numericRecs), label: "Recommends" }] : []),
   ];
+
+  const initials = (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <motion.article
-      className="relative mx-auto h-full w-full max-w-[340px] overflow-visible"
+      className="relative mx-auto w-full max-w-[340px] overflow-hidden"
+      style={{
+        borderRadius: 24,
+        boxShadow:
+          "0 8px 36px rgba(10,74,74,0.14), 0 2px 8px rgba(0,0,0,0.06)," +
+          "inset 0 0 0 1.5px rgba(245,158,11,0.16)",
+      }}
       {...(reducedMotion ? {} : {
         whileHover: {
           y: -4,
-          boxShadow: "0 14px 36px rgba(10,74,74,0.12), 0 0 18px rgba(245,158,11,0.12)",
-          transition: { duration: 0.35, ease: "easeOut" },
+          boxShadow:
+            "0 14px 40px rgba(10,74,74,0.20), 0 0 20px rgba(245,158,11,0.14)," +
+            "inset 0 0 0 1.5px rgba(245,158,11,0.32)",
         },
+        transition: { duration: 0.3, ease: "easeOut" },
       })}
     >
-      {/* YVITY Verified badge — sits on the top edge of the card */}
-      {showIdentityVerified ? (
-        <div className="absolute -top-3 right-3 z-30">
-          <YvityVerifiedBadge compact />
-        </div>
-      ) : null}
-
-      <div className="advisor-card-gold-shell">
-        <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
-
-          {/* Header */}
-          <div className="advisor-card-gold-profile-header px-3 pb-3 pt-3">
-            {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
-            {/* YVITY logo brand mark */}
-            <Image
-              src="/images/brand-logo.png"
-              alt="YVITY"
-              width={44}
-              height={16}
-              className="pointer-events-none absolute right-2.5 top-2.5 h-auto w-11 object-contain opacity-[0.25] brightness-0 invert"
-              aria-hidden
-            />
-            <div className="relative z-10 flex items-center gap-2.5">
-              <AvatarBlock
-                avatarUrl={avatarUrl}
-                name={name}
-                numericScore={numericScore}
-                showIdentityVerified={showIdentityVerified}
-                size="sm"
-              />
-              <div className="min-w-0 flex-1">
-                <h3 className="font-cormorant text-[16px] font-bold leading-tight tracking-[0.02em] text-white">
-                  {name}
-                </h3>
-                <p className="mt-0.5 font-poppins text-[10px] font-semibold tracking-wide text-[#F59E0B]">
-                  {title}
-                </p>
-                <p className="mt-1 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/75">
-                  <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]/80" />
-                  <span className="line-clamp-1 uppercase tracking-wider">{location}</span>
-                </p>
+      {/* ── Header ── */}
+      <div className="relative overflow-hidden px-3 py-3" style={{ background: "#0A4A4A" }}>
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 70% at 90% 130%, rgba(245,158,11,0.30) 0%, transparent 62%)," +
+              "radial-gradient(ellipse 60% 40% at 50% -20%, rgba(255,255,255,0.04) 0%, transparent 60%)",
+          }}
+        />
+        <div className="relative z-10 flex items-center gap-3">
+          {/* Avatar — 72px */}
+          <div className="relative shrink-0 overflow-visible">
+            <div className="absolute -inset-[8px] rounded-full bg-[#F59E0B]/18 blur-xl" />
+            <div className="absolute -inset-[4px] rounded-full bg-[#F59E0B]/30 blur-md" />
+            <div className="relative rounded-full bg-gradient-to-br from-[#0D6060] via-[#14B8A6] to-[#F59E0B] p-[3px]">
+              <div className="h-[72px] w-[72px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center font-cormorant text-[28px] font-bold text-[#F8F6F1]">
+                    {initials}
+                  </div>
+                )}
               </div>
+              {showIdentityVerified && (
+                <IdentityVerifiedTick
+                  size="sm"
+                  className="!bottom-[4px] !right-[4px] !translate-x-0 !translate-y-0"
+                />
+              )}
             </div>
           </div>
-
-          {/* Body */}
-          <div className="relative z-10 flex flex-col gap-2 p-3">
-
-            {/* YVITY Score — compact circular gauge, above service pills */}
-            <div className="advisor-card-gold-glass-panel flex items-center gap-2.5 px-2.5 py-2">
-              <ScoreGauge score={numericScore} size={52} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-white">YVITY Score</p>
-                  <YvityScoreInfoTip buttonClassName="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition hover:border-[#F59E0B]/60 hover:text-[#F59E0B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]/35" />
-                </div>
-                <p className="mt-0.5 font-poppins text-[10px] font-medium leading-snug text-white/60">
-                  Credibility &amp; experience
-                </p>
-              </div>
-            </div>
-
-            {servicePills.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-1">
-                {servicePills.map((tag) => <ServicePill key={tag} label={tag} compact />)}
-              </div>
-            ) : null}
-
-            {/* Stats — 3 or 4 in a row depending on recs */}
-            <div className={`advisor-card-gold-glass-panel grid gap-1 px-2 py-2 ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
-              {statItems.map(({ icon, value, label }) => (
-                <StatCellCompact key={label} icon={icon} value={value} label={label} />
-              ))}
-            </div>
-
-            <ViewProfileCta
-              profileUrl={profileUrl} compact reducedMotion={reducedMotion}
-              isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
-            />
+          {/* Name / title / location */}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-cormorant text-[18px] font-bold leading-tight tracking-[0.015em] text-white">
+              {name}
+            </h3>
+            <p className="mt-0.5 font-poppins text-[10px] font-semibold tracking-wide text-[#F59E0B]">
+              {title}
+            </p>
+            <p className="mt-1 flex items-center gap-1 font-poppins text-[9px] font-medium text-white/70">
+              <MapPin className="h-2.5 w-2.5 shrink-0 text-[#F59E0B]/80" />
+              <span className="min-w-0 line-clamp-1 uppercase tracking-wider">{location}</span>
+            </p>
           </div>
-
         </div>
+      </div>
+
+      {/* ── Gold hairline divider ── */}
+      <div
+        className="h-[1px] w-full"
+        style={{ background: "linear-gradient(90deg, #F59E0B, #FFAE26, #D97706)" }}
+      />
+
+      {/* ── Body: warm cream ── */}
+      <div className="bg-[#F8F6F1] px-3 pb-3 pt-2">
+
+        {/* Split panel: score ring (left) | service pills (right) */}
+        <div className="mb-2 flex items-stretch overflow-hidden rounded-xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
+          {/* Left — score ring */}
+          <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 px-2 py-2">
+            <ScoreDial score={numericScore} size={72} gradId={gradId} />
+            <div className="flex items-center gap-0.5">
+              <p className="font-poppins text-[7px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
+                YVITY Score
+              </p>
+              <YvityScoreInfoTip buttonClassName="flex h-3 w-3 shrink-0 items-center justify-center rounded-full border border-[#0A4A4A]/15 bg-[#0A4A4A]/05 text-[#0A4A4A]/40 transition hover:border-[#F59E0B]/50 hover:text-[#F59E0B] focus-visible:outline-none" />
+            </div>
+          </div>
+          {/* Vertical divider */}
+          <div className="w-px self-stretch bg-gradient-to-b from-transparent via-[#0A4A4A]/10 to-transparent" />
+          {/* Right — service pills stacked vertically */}
+          <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1 px-2.5 py-2">
+            {servicePills.map((label) => {
+              const Icon = SERVICE_ICONS[label] ?? Shield;
+              return (
+                <span
+                  key={label}
+                  className="flex items-center gap-1 rounded-full border border-[#0A4A4A]/12 bg-[#F8F6F1] px-2 py-[3px] shadow-[0_1px_3px_rgba(10,74,74,0.05)]"
+                >
+                  <Icon className="h-2.5 w-2.5 shrink-0 text-[#F59E0B]" strokeWidth={1.8} />
+                  <span className="font-poppins text-[9px] font-medium text-[#0A4A4A]">{label}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Stats strip */}
+        <div className={`mb-3 grid divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)] ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
+          {statItems.map(({ icon: Icon, value, label }) => (
+            <div key={label} className="flex flex-col items-center gap-0.5 px-1 py-1.5">
+              <Icon className="h-3 w-3 text-[#F59E0B]" strokeWidth={1.8} />
+              <p className="font-poppins text-[11px] font-bold leading-tight tabular-nums text-[#0A4A4A]">
+                {value}
+              </p>
+              <p className="font-poppins text-[8px] font-medium leading-tight text-[#9CA3AF]">
+                {label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <ViewProfileCta
+          profileUrl={profileUrl} compact reducedMotion={reducedMotion}
+          isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
+        />
       </div>
     </motion.article>
   );
