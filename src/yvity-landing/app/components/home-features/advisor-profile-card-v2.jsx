@@ -16,6 +16,7 @@ import {
   Umbrella,
   Users,
 } from "lucide-react";
+import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
 
 const SERVICE_ICON_MAP = {
   "Life Insurance": Shield,
@@ -139,7 +140,7 @@ export function AdvisorProfileCardV2({
     >
       {/* ── Verified badge — top-right corner of card ── */}
       {showIdentityVerified && (
-        <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-[#0A4A4A]/10 bg-[#F8F6F1] px-2.5 py-1 shadow-[0_2px_8px_rgba(10,74,74,0.14)]">
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-[#0A4A4A]/10 bg-[#F8F6F1] px-2.5 py-1.5 shadow-[0_2px_8px_rgba(10,74,74,0.14)]">
           <Image
             src="/brand/yvity-logo.png"
             alt="YVITY"
@@ -147,14 +148,9 @@ export function AdvisorProfileCardV2({
             height={18}
             className="h-[18px] w-[18px] shrink-0 object-contain"
           />
-          <div>
-            <p className="font-poppins text-[9px] font-bold leading-none tracking-wide text-[#0A4A4A]">
-              YVITY
-            </p>
-            <p className="mt-[2px] font-poppins text-[7px] font-semibold leading-none text-[#F59E0B]">
-              Verified Advisor
-            </p>
-          </div>
+          <span className="font-poppins text-[9px] font-bold leading-none tracking-wide text-[#0A4A4A]">
+            Verified Advisor
+          </span>
         </div>
       )}
 
@@ -175,18 +171,25 @@ export function AdvisorProfileCardV2({
         />
 
         <div className="relative z-10 flex items-center gap-3.5">
-          {/* Avatar — 96 px with gold border ring */}
-          <div className="relative shrink-0">
-            <div className="absolute -inset-[7px] rounded-full bg-[#F59E0B]/22 blur-md" />
-            <div className="absolute -inset-[3px] rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
-            <div className="relative h-[96px] w-[96px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center font-cormorant text-[36px] font-bold text-[#F8F6F1]">
-                  {initials}
-                </div>
-              )}
+          {/* Avatar — 96 px, gold border ring, glow layers, verified tick */}
+          <div className="relative shrink-0 overflow-visible">
+            {/* Outer ambient glow */}
+            <div className="absolute -inset-[10px] rounded-full bg-[#F59E0B]/18 blur-xl" />
+            {/* Inner warm glow */}
+            <div className="absolute -inset-[5px] rounded-full bg-[#F59E0B]/30 blur-md" />
+            {/* Gold border — relative so IdentityVerifiedTick anchors to it */}
+            <div className="relative rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706] p-[3px]">
+              <div className="h-[96px] w-[96px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center font-cormorant text-[36px] font-bold text-[#F8F6F1]">
+                    {initials}
+                  </div>
+                )}
+              </div>
+              {/* Verified tick sits on the bottom-right of the gold ring */}
+              {showIdentityVerified && <IdentityVerifiedTick size="sm" />}
             </div>
           </div>
 
