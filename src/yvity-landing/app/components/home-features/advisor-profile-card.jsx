@@ -210,7 +210,6 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
     .toUpperCase();
 
   return (
-    /* outer wrapper — identity tick is sibling to score ring so it sits above the SVG arc */
     <div className="relative shrink-0 overflow-visible">
       <div className="absolute -inset-1 rounded-full bg-white/30 blur-md" />
       <AdvisorScoreAvatarRing score={numericScore} onDarkHeader>
@@ -224,10 +223,9 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
               {initials}
             </div>
           )}
+          {showIdentityVerified ? <IdentityVerifiedTick size="sm" /> : null}
         </div>
       </AdvisorScoreAvatarRing>
-      {/* tick placed here — outside the ring SVG, z-[5] keeps it on top */}
-      {showIdentityVerified ? <IdentityVerifiedTick size="sm" /> : null}
     </div>
   );
 }
