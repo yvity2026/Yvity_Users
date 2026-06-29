@@ -60,6 +60,9 @@ export function Navbar() {
   const ctaHref = showAuthed ? ADVISOR_MY_SPACE_DASHBOARD_PATH : LANDING_PATH;
   const ctaLabel = showAuthed ? "Dashboard" : "Login";
   const CtaIcon = showAuthed ? LayoutDashboard : LogIn;
+  // On public profile pages the YVITY logo takes visitors back to the landing page.
+  // Section nav links and the bottom-bar Home tab still use homeHref (advisor's profile home).
+  const logoHref = showVisitorNav ? "/" : homeHref;
 
   return (
     <>
@@ -68,7 +71,7 @@ export function Navbar() {
           <div className="glass-nav-mobile mob-nav-top-inner">
           <div className="mx-auto flex h-[3.75rem] w-full max-w-[1536px] items-center justify-between px-4 sm:h-16">
             <Link
-              href={homeHref}
+              href={logoHref}
               className="flex min-w-0 items-center justify-start rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
               aria-label="YVITY home"
             >
@@ -101,7 +104,7 @@ export function Navbar() {
             <div className="glass-nav-frame relative flex h-[4.375rem] w-full items-center justify-between rounded-[100px] p-[1px]">
               <nav className="glass-nav-desktop relative z-10 flex h-full w-full items-center justify-between rounded-[100px] px-6 py-3 lg:px-8 xl:px-10">
                 <Link
-                  href={homeHref}
+                  href={logoHref}
                   className="relative z-10 flex shrink-0 items-center rounded-lg outline-offset-4 transition-opacity hover:opacity-90"
                   aria-label="YVITY home"
                 >

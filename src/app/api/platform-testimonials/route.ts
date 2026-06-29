@@ -73,7 +73,8 @@ export async function POST(request: Request) {
       testimonial_type: "text",
       testimonial_rating: rating,
       content: content || null,
-      status: "pending",
+      status: "approved",
+      user_id: session?.id ?? null,
     });
 
     if (error) {

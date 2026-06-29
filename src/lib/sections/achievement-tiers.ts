@@ -83,14 +83,33 @@ const TIER_TAG_LABELS: Record<AchievementTier, string> = {
 /**
  * Public-facing achievement badges derived from saved achievements
  * (advisor cards, directory listings, profile highlights).
+ * Accepts optional `iconStyle` per item — if any item has iconStyle "mdrt"
+ * (the MDRT/COT/TOT icon family) but the title text doesn't match a specific
+ * tier, it defaults to MDRT (the most common tier in that family).
  */
 export function extractAchievementTags(
-  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
+  achievements: (Pick<AchievementItem, "title" | "subtitle" | "years"> & { iconStyle?: string })[],
 ): string[] {
   const tags: string[] = [];
 
+  const hasMdrtIconStyle = achievements.some((a) => a.iconStyle === "mdrt");
+
   for (const tier of ["mdrt", "cot", "tot"] as AchievementTier[]) {
-    if (!hasAchievementTier(achievements, tier)) continue;
+    const hasViaTierText = hasAchievementTier(achievements, tier);
+
+    if (!hasViaTierText) {
+      // Fall back to iconStyle "mdrt" for MDRT detection when title is ambiguous
+      if (
+        tier === "mdrt" &&
+        hasMdrtIconStyle &&
+        !hasAchievementTier(achievements, "cot") &&
+        !hasAchievementTier(achievements, "tot")
+      ) {
+        tags.push("MDRT");
+      }
+      continue;
+    }
+
     if (tier === "mdrt") {
       const count = getMdrtCount(achievements);
       if (count > 1) {

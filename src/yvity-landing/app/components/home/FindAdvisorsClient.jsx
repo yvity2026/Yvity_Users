@@ -309,71 +309,67 @@ export default function FindAdvisorsClient({
 
         {/* Advisor cards */}
         <div className="mb-12 w-full lg:mb-12">
-          {displayedAdvisors.length ? (
-            <>
-              {/* Mobile horizontal scroll */}
-              <LandingSnapScroll ariaLabel="Advisor profiles" className="py-2 lg:hidden">
-                {displayedAdvisors.map((advisor, index) => {
-                  const cardProps = toAdvisorCardGoldProps(advisor);
-                  const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
-                  return (
-                    <LandingSnapItem
-                      key={`advisor-${advisor.id ?? index}`}
-                      className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
-                    >
-                      <div className="landing-hero-card-glow w-full overflow-visible py-1">
-                        <AdvisorProfileCard
-                          {...cardProps}
-                          isFeatured={isFeatured}
-                          isLoggedIn={isLoggedIn}
-                          onGatedClick={() => openGate(cardProps.profileUrl)}
-                        />
-                      </div>
-                    </LandingSnapItem>
-                  );
-                })}
-              </LandingSnapScroll>
+          {/* Mobile horizontal scroll */}
+          <LandingSnapScroll ariaLabel="Advisor profiles" className="py-2 lg:hidden">
+            {displayedAdvisors.map((advisor, index) => {
+              const cardProps = toAdvisorCardGoldProps(advisor);
+              const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+              return (
+                <LandingSnapItem
+                  key={`advisor-${advisor.id ?? index}`}
+                  className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
+                >
+                  <div className="w-full overflow-visible py-1">
+                    <AdvisorProfileCard
+                      {...cardProps}
+                      isFeatured={isFeatured}
+                      isLoggedIn={isLoggedIn}
+                      onGatedClick={() => openGate(cardProps.profileUrl)}
+                    />
+                  </div>
+                </LandingSnapItem>
+              );
+            })}
+          </LandingSnapScroll>
 
-              <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
-                Swipe for more advisors
-              </p>
+          <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
+            Swipe for more advisors
+          </p>
 
-              {/* Desktop grid */}
-              <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
-                {displayedAdvisors.map((advisor, index) => {
-                  const cardProps = toAdvisorCardGoldProps(advisor);
-                  const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
-                  return (
-                    <div
-                      key={`advisor-grid-${advisor.id ?? index}`}
-                      className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
-                    >
-                      <AdvisorProfileCard
-                        {...cardProps}
-                        isFeatured={isFeatured}
-                        isLoggedIn={isLoggedIn}
-                        onGatedClick={() => openGate(cardProps.profileUrl)}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Desktop grid */}
+          <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
+            {displayedAdvisors.map((advisor, index) => {
+              const cardProps = toAdvisorCardGoldProps(advisor);
+              const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+              return (
+                <div
+                  key={`advisor-grid-${advisor.id ?? index}`}
+                  className="w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
+                >
+                  <AdvisorProfileCard
+                    {...cardProps}
+                    isFeatured={isFeatured}
+                    isLoggedIn={isLoggedIn}
+                    onGatedClick={() => openGate(cardProps.profileUrl)}
+                  />
+                </div>
+              );
+            })}
+          </div>
 
-              {!isLoggedIn && hasFilters ? (
-                <p className="mt-4 text-center font-poppins text-[12px] text-[#6B7280]">
-                  Featured advisor profiles open directly.{" "}
-                  <span className="text-[#0A4A4A] font-semibold">Login</span>{" "}
-                  to access all advisor profiles.
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <div className="rounded-2xl border border-[#D7D7D7] bg-white px-5 py-10 text-center font-poppins text-sm text-[#374151] shadow-sm lg:rounded-[28px] lg:px-6 lg:py-12">
-              {hasFilters
-                ? "No advisors matched your search. Try a different city, service, or name."
-                : "No featured advisors yet. Check back soon."}
-            </div>
-          )}
+          {hasFilters && displayedAdvisors.length === 0 ? (
+            <p className="mt-3 text-center font-poppins text-sm text-[#6B7280]">
+              No advisors matched your search. Try a different city, service, or name.
+            </p>
+          ) : null}
+
+          {!isLoggedIn && hasFilters ? (
+            <p className="mt-4 text-center font-poppins text-[12px] text-[#6B7280]">
+              Featured advisor profiles open directly.{" "}
+              <span className="text-[#0A4A4A] font-semibold">Login</span>{" "}
+              to access all advisor profiles.
+            </p>
+          ) : null}
         </div>
       </div>
 
