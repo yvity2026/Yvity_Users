@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
+import { YvityScoreInfoTip } from "@/yvity-landing/components/brand/YvityScoreInfoTip";
 
 const SERVICE_ICON_MAP = {
   "Life Insurance": Shield,
@@ -191,8 +192,14 @@ export function AdvisorProfileCardV2({
                   </div>
                 )}
               </div>
-              {/* Verified tick sits on the bottom-right of the gold ring */}
-              {showIdentityVerified && <IdentityVerifiedTick size="sm" />}
+              {/* Tick centered on the ring arc: gold border outer = 102px, ring centre radius = 49.5px,
+                  at 45° offset = 35px → icon centre 16px from corner → bottom/right = 16 - 10(half icon) = 6px */}
+              {showIdentityVerified && (
+                <IdentityVerifiedTick
+                  size="sm"
+                  className="!bottom-[6px] !right-[6px] !translate-x-0 !translate-y-0"
+                />
+              )}
             </div>
           </div>
 
@@ -221,9 +228,12 @@ export function AdvisorProfileCardV2({
           {/* Left — score ring */}
           <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 px-3 py-2.5">
             <ScoreDial score={numScore} size={90} gradId={gradId} />
-            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
-              YVITY Score
-            </p>
+            <div className="flex items-center gap-1">
+              <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
+                YVITY Score
+              </p>
+              <YvityScoreInfoTip buttonClassName="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-[#0A4A4A]/15 bg-[#0A4A4A]/05 text-[#0A4A4A]/40 transition hover:border-[#F59E0B]/50 hover:text-[#F59E0B] focus-visible:outline-none" />
+            </div>
           </div>
 
           {/* Vertical divider */}
