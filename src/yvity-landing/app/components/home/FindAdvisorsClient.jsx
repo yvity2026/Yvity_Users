@@ -344,7 +344,7 @@ export default function FindAdvisorsClient({
 
           {/* Desktop grid — new design card always first */}
           <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
-            <div className="w-full max-w-[520px] overflow-visible py-1 lg:mx-auto">
+            <div className="w-full max-w-[460px] overflow-visible py-1 lg:mx-auto">
               <AdvisorProfileCardV2 />
             </div>
             {displayedAdvisors.map((advisor, index) => {
