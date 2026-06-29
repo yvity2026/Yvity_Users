@@ -373,7 +373,6 @@ export default function DashboardHome({ advisors = [] }) {
       ) : null}
 
       <DashboardHomeFeatured advisors={advisors} loading={authLoading} />
-      <DashboardHomeTopRated advisors={advisors} loading={authLoading} />
       <DashboardHomeRecentReviews
         reviews={reviews}
         reviewsLoaded={reviewsLoaded}
