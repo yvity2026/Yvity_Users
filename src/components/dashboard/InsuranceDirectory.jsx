@@ -3339,7 +3339,7 @@ export default function InsuranceDirectory() {
                   <button
                     key={cat.key}
                     onClick={() => goToCategory(cat.key)}
-                    className="flex w-full items-center gap-3.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3.5 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
+                    className="flex w-full items-center gap-3.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3.5 text-left shadow-sm transition-all duration-200 hover:border-[#0A4A4A]/25 hover:shadow-md hover:bg-[#F8F6F1] active:scale-[0.98] active:bg-[#F0F4F4]"
                   >
                     <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl", cat.iconBg)}>
                       <cat.Icon size={22} className={cat.iconColor} strokeWidth={1.75} />
@@ -3373,7 +3373,7 @@ export default function InsuranceDirectory() {
             >
               <button
                 onClick={goBack}
-                className="flex items-center gap-1.5 rounded-full border border-[#E4E2DB] bg-white px-3 py-1.5 font-poppins text-[12px] font-semibold text-[#0A4A4A] shadow-sm transition-colors active:bg-[#F8F6F1]"
+                className="flex items-center gap-1.5 rounded-full border border-[#E4E2DB] bg-white px-3 py-1.5 font-poppins text-[12px] font-semibold text-[#0A4A4A] shadow-sm transition-all duration-200 hover:border-[#0A4A4A] hover:bg-[#F0F4F4] active:scale-95 active:bg-[#E8EEEE]"
               >
                 <ChevronLeft size={14} />
                 Back
