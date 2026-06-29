@@ -13,6 +13,7 @@ import {
   ThumbsUp,
   TrendingUp,
   Umbrella,
+  User,
   Users,
 } from "lucide-react";
 import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
@@ -260,11 +261,16 @@ export function AdvisorProfileCardV2({
         {/* CTA */}
         <Link
           href={profileUrl}
-          className="relative flex w-full items-center justify-center gap-1.5 overflow-hidden rounded-full py-2.5 shadow-[0_4px_16px_rgba(245,158,11,0.30)] transition-transform active:scale-[0.98]"
+          className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full py-2.5 transition-transform active:scale-[0.98]"
+          style={{
+            boxShadow:
+              "0 0 0 1px rgba(245,158,11,0.35), 0 0 18px 6px rgba(245,158,11,0.45), 0 4px 16px rgba(245,158,11,0.30)",
+          }}
         >
           <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
           <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/25 to-transparent" />
-          <span className="relative z-10 flex items-center gap-1.5 font-poppins text-[13px] font-bold tracking-wide text-white">
+          <span className="relative z-10 flex items-center gap-2 font-poppins text-[13px] font-bold tracking-wide text-white">
+            <User className="h-4 w-4" strokeWidth={2} />
             View Profile
             <ArrowRight className="h-3.5 w-3.5" />
           </span>
