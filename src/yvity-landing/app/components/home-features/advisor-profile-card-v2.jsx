@@ -119,7 +119,7 @@ export function AdvisorProfileCardV2({
     { icon: Briefcase, value: `${exp} yrs`,     label: "Experience" },
     { icon: Star,      value: String(avgRating), label: "Rating" },
     { icon: Users,     value: `${clients}+`,     label: "Clients" },
-    { icon: ThumbsUp,  value: String(numRecs),   label: "Recs" },
+    { icon: ThumbsUp,  value: String(numRecs),   label: "Recommends" },
   ];
 
   return (
