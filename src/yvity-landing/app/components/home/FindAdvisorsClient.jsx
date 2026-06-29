@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { AdvisorProfileCard } from "../home-features/advisor-profile-card";
-import { AdvisorProfileCardV2 } from "../home-features/advisor-profile-card-v2";
 import { AdvisorProfileGateModal } from "../home-features/advisor-profile-gate-modal";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import LandingSectionHeader from "./LandingSectionHeader";
@@ -310,13 +309,8 @@ export default function FindAdvisorsClient({
 
         {/* Advisor cards */}
         <div className="mb-12 w-full lg:mb-12">
-          {/* Mobile horizontal scroll — new design card always first */}
+          {/* Mobile horizontal scroll */}
           <LandingSnapScroll ariaLabel="Advisor profiles" className="py-2 lg:hidden">
-            <LandingSnapItem className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]">
-              <div className="w-full overflow-visible py-1">
-                <AdvisorProfileCardV2 />
-              </div>
-            </LandingSnapItem>
             {displayedAdvisors.map((advisor, index) => {
               const cardProps = toAdvisorCardGoldProps(advisor);
               const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
@@ -325,7 +319,7 @@ export default function FindAdvisorsClient({
                   key={`advisor-${advisor.id ?? index}`}
                   className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
                 >
-                  <div className="landing-hero-card-glow w-full overflow-visible py-1">
+                  <div className="w-full overflow-visible py-1">
                     <AdvisorProfileCard
                       {...cardProps}
                       isFeatured={isFeatured}
@@ -342,18 +336,15 @@ export default function FindAdvisorsClient({
             Swipe for more advisors
           </p>
 
-          {/* Desktop grid — new design card always first */}
+          {/* Desktop grid */}
           <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
-            <div className="w-full max-w-[430px] overflow-visible py-1 lg:mx-auto">
-              <AdvisorProfileCardV2 />
-            </div>
             {displayedAdvisors.map((advisor, index) => {
               const cardProps = toAdvisorCardGoldProps(advisor);
               const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
               return (
                 <div
                   key={`advisor-grid-${advisor.id ?? index}`}
-                  className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
+                  className="w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
                 >
                   <AdvisorProfileCard
                     {...cardProps}
