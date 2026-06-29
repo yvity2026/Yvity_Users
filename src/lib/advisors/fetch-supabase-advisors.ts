@@ -31,7 +31,7 @@ const SERVICE_TYPE_DISPLAY: Record<string, string> = {
   "mutual funds": "Mutual Funds",
 };
 
-const SEARCHABLE_SERVICE_TAGS = ["Life Insurance", "Health Insurance", "General Insurance"];
+const SEARCHABLE_SERVICE_TAGS = ["Life Insurance", "Health Insurance", "General Insurance", "Mutual Funds"];
 
 function extractStateFromLocation(location: string) {
   if (!location?.includes(",")) return "";
