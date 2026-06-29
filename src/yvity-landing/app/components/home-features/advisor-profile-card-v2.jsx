@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -23,16 +22,19 @@ const SERVICE_ICON_MAP = {
   "Mutual Funds": TrendingUp,
 };
 
-function ScoreDial({ score }) {
+// Score ring — lives on white body panel, so track is light teal tint, text is dark
+function ScoreDial({ score, size = 90 }) {
   const r = 20;
   const circ = 2 * Math.PI * r;
   const arcLen = circ * 0.75;
   const n = Math.min(100, Math.max(0, Number(score) || 0));
   const filled = (n / 100) * arcLen;
+  const numSize = Math.round(size * 0.265);
+  const subSize = Math.round(size * 0.145);
 
   return (
-    <div className="relative h-[52px] w-[52px] shrink-0">
-      <svg viewBox="0 0 52 52" width={52} height={52} aria-hidden>
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 52 52" width={size} height={size} aria-hidden>
         <defs>
           <linearGradient id="v2-arc-fill" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%"   stopColor="#0A4A4A" />
@@ -40,15 +42,17 @@ function ScoreDial({ score }) {
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
         </defs>
+        {/* Track — light teal tint on white bg */}
         <circle
           cx="26" cy="26" r={r}
           fill="none"
-          stroke="rgba(255,255,255,0.18)"
+          stroke="rgba(10,74,74,0.10)"
           strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={`${arcLen} ${circ - arcLen}`}
           transform="rotate(135 26 26)"
         />
+        {/* Fill */}
         {n > 0 && (
           <circle
             cx="26" cy="26" r={r}
@@ -62,10 +66,18 @@ function ScoreDial({ score }) {
         )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-poppins text-[14px] font-bold leading-none text-white">
+        <span
+          className="font-poppins font-bold leading-none tabular-nums text-[#0A4A4A]"
+          style={{ fontSize: numSize }}
+        >
           {Math.round(n)}
         </span>
-        <span className="font-poppins text-[7px] font-medium text-white/50">/100</span>
+        <span
+          className="font-poppins font-medium text-[#9CA3AF]"
+          style={{ fontSize: subSize }}
+        >
+          /100
+        </span>
       </div>
     </div>
   );
@@ -81,7 +93,6 @@ export function AdvisorProfileCardV2({
   clients = "397",
   recs = "0",
   avatarUrl,
-  showVerified = true,
   serviceTypes = ["General Insurance", "Life Insurance", "Health Insurance"],
   profileUrl = "#",
 }) {
@@ -118,10 +129,10 @@ export function AdvisorProfileCardV2({
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      {/* ── Header: dark teal + golden rays ── */}
+      {/* ── Header: avatar left + name/title/location right ── */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: "#0A4A4A", minHeight: 162 }}
+        className="relative overflow-hidden px-4 py-4"
+        style={{ background: "#0A4A4A" }}
       >
         {/* Gold ray gradients */}
         <div
@@ -134,82 +145,63 @@ export function AdvisorProfileCardV2({
           }}
         />
 
-        {/* YVITY Score dial — top right */}
-        <div className="absolute right-3 top-3 flex flex-col items-center gap-0.5">
-          <ScoreDial score={numScore} />
-          <p className="font-poppins text-[7px] font-bold uppercase tracking-[0.1em] text-white/45">
-            YVITY Score
-          </p>
-        </div>
-
-        {/* Verified pill — top left (cream style like YVITY brand pill) */}
-        {showVerified && (
-          <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full border border-[#0A4A4A]/10 bg-[#F8F6F1] px-3 py-1.5 shadow-[0_2px_10px_rgba(10,74,74,0.14)]">
-            <Image
-              src="/brand/yvity-logo.png"
-              alt="YVITY"
-              width={22}
-              height={22}
-              className="h-[22px] w-[22px] shrink-0 object-contain"
-            />
-            <div>
-              <p className="font-poppins text-[10px] font-bold leading-none tracking-wide text-[#0A4A4A]">
-                YVITY
-              </p>
-              <p className="mt-0.5 font-poppins text-[8px] font-semibold leading-none text-[#F59E0B]">
-                Verified Advisor
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Centered avatar */}
-        <div className="flex justify-center pb-5 pt-[52px]">
-          <div className="relative">
-            {/* Gold ambient glow */}
+        <div className="relative z-10 flex items-center gap-3.5">
+          {/* Avatar — left, 40 % bigger (112 px) */}
+          <div className="relative shrink-0">
             <div className="absolute -inset-[7px] rounded-full bg-[#F59E0B]/22 blur-md" />
-            {/* Gold border ring */}
             <div className="absolute -inset-[3px] rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
-            {/* Photo / initials */}
-            <div className="relative h-[80px] w-[80px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
+            <div className="relative h-[112px] w-[112px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center font-cormorant text-[30px] font-bold text-[#F8F6F1]">
+                <div className="flex h-full w-full items-center justify-center font-cormorant text-[40px] font-bold text-[#F8F6F1]">
                   {initials}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Name / designation / location — right of avatar */}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-cormorant text-[20px] font-bold leading-tight tracking-[0.015em] text-white">
+              {name}
+            </h3>
+            <p className="mt-0.5 font-poppins text-[11px] font-semibold text-[#F59E0B]">
+              {title}
+            </p>
+            <p className="mt-1.5 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/70">
+              <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]/80" />
+              <span className="min-w-0 line-clamp-1 uppercase tracking-wider">{location}</span>
+            </p>
           </div>
         </div>
       </div>
 
       {/* ── Body: warm cream ── */}
       <div className="bg-[#F8F6F1] px-4 pb-4 pt-3">
-        {/* Name / designation / location */}
-        <div className="mb-3 text-center">
-          <h3 className="font-cormorant text-[22px] font-bold leading-snug tracking-[0.01em] text-[#0A4A4A]">
-            {name}
-          </h3>
-          <p className="font-poppins text-[11px] font-semibold text-[#F59E0B]">{title}</p>
-          <p className="mt-1 flex items-center justify-center gap-1 font-poppins text-[10px] font-medium text-[#6B7280]">
-            <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]" />
-            <span className="uppercase tracking-[0.06em]">{location}</span>
-          </p>
-        </div>
 
-        {/* Divider */}
-        <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-[#0A4A4A]/10 to-transparent" />
+        {/* Split panel: YVITY Score ring (left) | Service pills stacked (right) */}
+        <div className="mb-3 flex items-stretch overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
 
-        {/* Service pills */}
-        {serviceTypes.length > 0 && (
-          <div className="mb-3 flex flex-wrap justify-center gap-1.5">
+          {/* Left — score ring */}
+          <div className="flex shrink-0 flex-col items-center justify-center gap-1 px-3 py-3">
+            <ScoreDial score={numScore} size={90} />
+            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
+              YVITY Score
+            </p>
+          </div>
+
+          {/* Vertical divider */}
+          <div className="w-px self-stretch bg-gradient-to-b from-transparent via-[#0A4A4A]/10 to-transparent" />
+
+          {/* Right — service pills stacked */}
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-3 py-3">
             {serviceTypes.slice(0, 3).map((label) => {
               const Icon = SERVICE_ICON_MAP[label] ?? Shield;
               return (
                 <span
                   key={label}
-                  className="flex items-center gap-1.5 rounded-full border border-[#0A4A4A]/12 bg-white px-2.5 py-1 shadow-[0_1px_4px_rgba(10,74,74,0.06)]"
+                  className="flex items-center gap-1.5 rounded-full border border-[#0A4A4A]/12 bg-[#F8F6F1] px-2.5 py-1 shadow-[0_1px_3px_rgba(10,74,74,0.05)]"
                 >
                   <Icon className="h-3 w-3 shrink-0 text-[#F59E0B]" strokeWidth={1.8} />
                   <span className="font-poppins text-[10px] font-medium text-[#0A4A4A]">{label}</span>
@@ -217,7 +209,7 @@ export function AdvisorProfileCardV2({
               );
             })}
           </div>
-        )}
+        </div>
 
         {/* Stats — 4-column grid with dividers */}
         <div className="mb-3 grid grid-cols-4 divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
