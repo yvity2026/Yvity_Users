@@ -47,13 +47,7 @@ function ServicePill({ label, compact = false }) {
             ? "Mutual Funds"
             : label.split(" ")[0];
 
-  const labelText = compact
-    ? short
-    : label === "General Insurance"
-      ? "General"
-      : label === "Mutual Funds"
-        ? "Mutual Funds"
-        : `${short} Insurance`;
+  const labelText = compact ? short : label;
 
   return (
     <span
@@ -264,7 +258,7 @@ function AdvisorProfileCardCompact({
 
   return (
     <motion.article
-      className="mx-auto h-full w-full max-w-[340px]"
+      className="relative mx-auto h-full w-full max-w-[340px] overflow-visible"
       {...(reducedMotion ? {} : {
         whileHover: {
           y: -4,
@@ -273,6 +267,13 @@ function AdvisorProfileCardCompact({
         },
       })}
     >
+      {/* YVITY Verified badge — sits on the top edge of the card */}
+      {showIdentityVerified ? (
+        <div className="absolute -top-3 right-3 z-30">
+          <YvityVerifiedBadge compact />
+        </div>
+      ) : null}
+
       <div className="advisor-card-gold-shell">
         <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
 
@@ -298,11 +299,6 @@ function AdvisorProfileCardCompact({
                   <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]" />
                   <span className="line-clamp-1">{location}</span>
                 </p>
-                {showIdentityVerified ? (
-                  <div className="mt-1">
-                    <YvityVerifiedBadge compact />
-                  </div>
-                ) : null}
                 {achievementTags.length > 0 ? (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {achievementTags.slice(0, 2).map((tag) => (
@@ -378,7 +374,8 @@ export function AdvisorProfileCard({
     return (
       <AdvisorProfileCardCompact
         name={name} title={title} location={location} score={score}
-        avgRating={avgRating} profileUrl={profileUrl} avatarUrl={avatarUrl}
+        exp={exp} avgRating={avgRating} clients={clients} clientsLabel={clientsLabel} recs={recs}
+        profileUrl={profileUrl} avatarUrl={avatarUrl}
         showIdentityVerified={showIdentityVerified}
         serviceTypes={serviceTypes} achievementTags={achievementTags}
         isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
@@ -391,15 +388,15 @@ export function AdvisorProfileCard({
   const servicePills = resolveServicePills(serviceTypes);
 
   const statItems = [
-    { icon: Briefcase, value: formatExperienceDisplay(exp), label: "Experience" },
-    { icon: Star,     value: formatAverageRating(avgRating), label: "Avg. Rating" },
-    { icon: Users,    value: clients,                        label: clientsLabel  },
-    { icon: ThumbsUp, value: recs,                           label: "Recs"        },
+    { icon: Briefcase, value: formatExperienceDisplay(exp), label: "Experience"  },
+    { icon: Star,      value: formatAverageRating(avgRating), label: "Avg. Rating" },
+    { icon: Users,     value: clients,                        label: clientsLabel  },
+    { icon: ThumbsUp,  value: recs,                           label: "Recommends"  },
   ];
 
   return (
     <motion.article
-      className="mx-auto h-full w-full max-w-[380px]"
+      className="relative mx-auto h-full w-full max-w-[380px] overflow-visible"
       {...(reducedMotion ? {} : {
         whileHover: {
           y: -6,
@@ -408,6 +405,13 @@ export function AdvisorProfileCard({
         },
       })}
     >
+      {/* YVITY Verified badge — sits on the top edge of the card */}
+      {showIdentityVerified ? (
+        <div className="absolute -top-3 right-4 z-30">
+          <YvityVerifiedBadge />
+        </div>
+      ) : null}
+
       <div className="advisor-card-gold-shell">
         <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
 
@@ -432,11 +436,6 @@ export function AdvisorProfileCard({
                   <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-[#F59E0B]" />
                   <span className="min-w-0 line-clamp-1 md:line-clamp-2">{location}</span>
                 </p>
-                {showIdentityVerified ? (
-                  <div className="mt-1.5">
-                    <YvityVerifiedBadge />
-                  </div>
-                ) : null}
                 {achievementTags.length > 0 ? (
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {achievementTags.slice(0, 2).map((tag) => (

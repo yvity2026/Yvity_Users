@@ -3198,7 +3198,7 @@ function AdvisorNudgeCard({ serviceFilter }) {
 
 export default function InsuranceDirectory() {
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("Life");
   // mobileCategory drives the slide transform; listCategory persists content during back-slide
   const [mobileCategory, setMobileCategory] = useState(null);
   const [listCategory, setListCategory] = useState(null);
@@ -3242,7 +3242,7 @@ export default function InsuranceDirectory() {
       <div className="hidden lg:block">
 
         {/* Page header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-6">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8F4F4] text-[#0A4A4A]">
             <Building2 size={24} strokeWidth={1.75} />
           </div>
@@ -3250,63 +3250,113 @@ export default function InsuranceDirectory() {
             Insurance Directory
           </h1>
           <p className="mt-2 max-w-xl font-poppins text-sm leading-relaxed text-[#6B7280] sm:text-base">
-            Official contact details and verified information for top insurance companies in India.
+            Official contact details and verified information for insurance companies and bodies in India.
           </p>
         </div>
 
-        {/* Search + Filter bar */}
-        <div className="mb-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 shadow-sm focus-within:border-[#2ab5b5] focus-within:ring-1 focus-within:ring-[#2ab5b5]/20 transition-shadow">
-            <Search size={15} className="shrink-0 text-[#9CA3AF]" />
-            <input
-              type="text"
-              placeholder="Search by company name…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent font-poppins text-[13px] text-[#374151] outline-none placeholder:text-[#9CA3AF]"
-            />
-          </div>
-
-          {/* Filter chips — single unified row */}
-          <div className="flex flex-wrap gap-1.5">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={cn(
-                  "rounded-full px-3 py-1 font-poppins text-[11px] font-semibold transition-colors",
-                  activeFilter === f
-                    ? "bg-[#0A4A4A] text-white"
-                    : "border border-[#E4E2DB] bg-white text-[#6B7280] hover:border-[#0A4A4A] hover:text-[#0A4A4A]",
-                )}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+        {/* Search bar — full width */}
+        <div className="mb-6 flex items-center gap-2.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3 shadow-sm focus-within:border-[#2ab5b5] focus-within:ring-1 focus-within:ring-[#2ab5b5]/20 transition-shadow">
+          <Search size={15} className="shrink-0 text-[#9CA3AF]" />
+          <input
+            type="text"
+            placeholder="Search by company name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-transparent font-poppins text-[13px] text-[#374151] outline-none placeholder:text-[#9CA3AF]"
+          />
         </div>
 
-        {/* Accordion list */}
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
-            <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 items-start gap-2.5">
-            {filtered.map((entry) => (
-              <DesktopAccordionItem
-                key={entry.id}
-                entry={entry}
-                isOpen={!!openDesktopIds[entry.id]}
-                onToggle={() => toggleDesktop(entry.id)}
-              />
-            ))}
-          </div>
-        )}
+        {/* Sidebar + content */}
+        <div className="flex items-start gap-5">
 
-        <AdvisorNudgeCard serviceFilter={categoryToServiceFilter(activeFilter)} />
+          {/* Category sidebar */}
+          <div
+            className="w-[220px] shrink-0 sticky flex flex-col gap-2"
+            style={{ top: "calc(4.375rem + env(safe-area-inset-top, 0px) + 1.5rem)" }}
+          >
+            {MOBILE_CATEGORIES.map((cat) => {
+              const isActive = activeFilter === cat.key;
+              const count = ALL_ENTRIES.filter(cat.filter).length;
+              return (
+                <button
+                  key={cat.key}
+                  onClick={() => setActiveFilter(cat.key)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left transition-all duration-200",
+                    isActive
+                      ? "bg-[#0A4A4A] shadow-md"
+                      : "border border-[#E4E2DB] bg-white hover:border-[#0A4A4A]/25 hover:bg-[#F8F6F1] hover:shadow-sm active:scale-[0.98]",
+                  )}
+                >
+                  <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", cat.iconBg)}>
+                    <cat.Icon size={18} className={cat.iconColor} strokeWidth={1.75} />
+                  </div>
+                  <p className={cn(
+                    "min-w-0 flex-1 font-poppins text-[12px] font-semibold leading-snug",
+                    isActive ? "text-white" : "text-[#0A4A4A]",
+                  )}>
+                    {cat.label}
+                  </p>
+                  <span className={cn(
+                    "flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 font-poppins text-[10px] font-bold",
+                    isActive ? "bg-white/20 text-white" : "bg-[#0A4A4A]/10 text-[#0A4A4A]",
+                  )}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
+          {/* Right: header + entries + nudge */}
+          <div className="min-w-0 flex-1">
+
+            {/* Active category header */}
+            {(() => {
+              const activeCat = MOBILE_CATEGORIES.find((c) => c.key === activeFilter);
+              if (!activeCat) return null;
+              return (
+                <div className="mb-5 flex items-center gap-3 border-b border-[#E4E2DB] pb-4">
+                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", activeCat.iconBg)}>
+                    <activeCat.Icon size={20} className={activeCat.iconColor} strokeWidth={1.75} />
+                  </div>
+                  <div>
+                    <h2 className="font-cormorant text-2xl font-bold text-[#0A4A4A]">{activeCat.label}</h2>
+                    <p className="font-poppins text-[11px] text-[#9CA3AF]">
+                      {filtered.length === 0
+                        ? "No results match your search"
+                        : filtered.length === 1
+                        ? "1 entry"
+                        : `${filtered.length} entries`}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Entries grid */}
+            {filtered.length === 0 ? (
+              <div className="py-16 text-center">
+                <Building2 className="mx-auto mb-3 h-12 w-12 text-[#E4E2DB]" strokeWidth={1} />
+                <p className="font-poppins text-sm text-[#9CA3AF]">No results match your search.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {filtered.map((entry) => (
+                  <DesktopAccordionItem
+                    key={entry.id}
+                    entry={entry}
+                    isOpen={!!openDesktopIds[entry.id]}
+                    onToggle={() => toggleDesktop(entry.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            <AdvisorNudgeCard serviceFilter={categoryToServiceFilter(activeFilter)} />
+
+          </div>
+        </div>
       </div>
 
       {/* ── MOBILE ──────────────────────────────────────────────────────── */}
