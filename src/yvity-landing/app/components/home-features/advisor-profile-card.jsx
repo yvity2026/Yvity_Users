@@ -85,13 +85,13 @@ function AchievementBadge({ label, compact = false }) {
 
 function YvityVerifiedBadge({ compact = false }) {
   return (
-    <div className={`inline-flex items-center gap-1 rounded-full border border-[#F59E0B]/35 bg-[#F59E0B]/12 backdrop-blur-sm ${compact ? "px-1.5 py-[3px]" : "px-2 py-[3px]"}`}>
+    <div className={`inline-flex items-center gap-1 rounded-full bg-[#0A4A4A] ring-1 ring-[#F59E0B]/40 shadow-[0_2px_8px_rgba(10,74,74,0.45)] ${compact ? "px-1.5 py-[3px]" : "px-2 py-1"}`}>
       <Image
         src="/brand/yvity-logo.png"
         alt="YVITY"
         width={10}
         height={10}
-        className={compact ? "h-2.5 w-2.5 object-contain brightness-[1.15]" : "h-3 w-3 object-contain brightness-[1.15]"}
+        className={compact ? "h-2.5 w-2.5 object-contain brightness-[1.2]" : "h-3 w-3 object-contain brightness-[1.2]"}
       />
       <span className={`font-poppins font-bold tracking-wide text-[#F59E0B] ${compact ? "text-[8px]" : "text-[9px]"}`}>
         Verified

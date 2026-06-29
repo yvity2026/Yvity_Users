@@ -120,7 +120,7 @@ function mapAdvisorToCard(
         title: String(row.title ?? ""),
         subtitle: String(row.organisation ?? ""),
         years: metaYears ?? baseYear,
-        iconStyle: String(row.icon_style ?? ""),
+        iconStyle: String(row.icon ?? ""),
       };
     }),
   );
@@ -213,7 +213,7 @@ export async function fetchSupabasePublicAdvisors(
       .in("advisor_id", advisorIds),
     supabase
       .from("advisor_achievements")
-      .select("advisor_id, title, organisation, achievement_year, description, icon_style")
+      .select("advisor_id, title, organisation, achievement_year, description, icon")
       .in("advisor_id", advisorIds),
     supabase
       .from("advisor_testimonials")
