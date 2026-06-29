@@ -109,18 +109,12 @@ function YvityVerifiedBadge({ compact = false }) {
 
 function StatCell({ icon: Icon, value, label }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#0D6060] ring-1 ring-[#0A4A4A]/10 backdrop-blur-sm">
-        <Icon className="h-3.5 w-3.5" />
+    <div className="flex flex-col items-center gap-1 py-1">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#F59E0B] ring-1 ring-white/15">
+        <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
       </span>
-      <div className="min-w-0">
-        <p className="font-poppins text-[12px] font-bold leading-none text-[#0A4A4A]">
-          {value}
-        </p>
-        <p className="mt-0.5 font-poppins text-[10px] font-medium text-[#6B7280]">
-          {label}
-        </p>
-      </div>
+      <p className="font-poppins text-[13px] font-bold leading-none tabular-nums text-white">{value}</p>
+      <p className="font-poppins text-[9px] font-medium leading-none text-white/55">{label}</p>
     </div>
   );
 }
@@ -144,7 +138,7 @@ function ScoreGauge({ score, size = 72 }) {
           </linearGradient>
         </defs>
         <circle cx="50" cy="50" r={r}
-          fill="none" stroke="rgba(10,74,74,0.12)" strokeWidth="8.5" strokeLinecap="round"
+          fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8.5" strokeLinecap="round"
           strokeDasharray={`${arcLen} ${circ - arcLen}`}
           transform="rotate(135 50 50)"
         />
@@ -157,11 +151,11 @@ function ScoreGauge({ score, size = 72 }) {
         ) : null}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-poppins font-bold leading-none tabular-nums text-[#0A4A4A]"
+        <span className="font-poppins font-bold leading-none tabular-nums text-white"
           style={{ fontSize: size < 60 ? 16 : 20 }}>
           {Math.round(numScore)}
         </span>
-        <span className="font-poppins font-medium text-[#9CA3AF]"
+        <span className="font-poppins font-medium text-white/50"
           style={{ fontSize: size < 60 ? 7 : 9 }}>
           /100
         </span>
@@ -173,8 +167,8 @@ function ScoreGauge({ score, size = 72 }) {
 function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLoggedIn, onGatedClick }) {
   const ctaInner = (
     <>
-      <span className="pointer-events-none absolute inset-0 rounded-[999px] bg-gradient-to-r from-[#0A4A4A] via-[#0D5A5A] to-[#0A4A4A]" />
-      <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+      <span className="pointer-events-none absolute inset-0 rounded-[999px] bg-gradient-to-r from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
       {!reducedMotion ? (
         <motion.span
           className="pointer-events-none absolute -left-full top-0 h-full w-1/2 skew-x-[-20deg] bg-white/25"
@@ -200,7 +194,7 @@ function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLogg
     </>
   );
 
-  const className = `relative flex w-full overflow-hidden rounded-full shadow-[0_6px_18px_rgba(10,74,74,0.30)] ${
+  const className = `relative flex w-full overflow-hidden rounded-full shadow-[0_6px_18px_rgba(217,119,6,0.35)] ${
     compact ? "py-2" : "py-2"
   }`;
 
@@ -278,11 +272,11 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
 function StatCellCompact({ icon: Icon, value, label }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/55 text-[#0D6060] ring-1 ring-[#0A4A4A]/10">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#F59E0B] ring-1 ring-white/15">
         <Icon className="h-3 w-3" />
       </span>
-      <p className="font-poppins text-[11px] font-bold leading-none tabular-nums text-[#0A4A4A]">{value}</p>
-      <p className="font-poppins text-[9px] font-medium leading-none text-[#6B7280]">{label}</p>
+      <p className="font-poppins text-[11px] font-bold leading-none tabular-nums text-white">{value}</p>
+      <p className="font-poppins text-[9px] font-medium leading-none text-white/55">{label}</p>
     </div>
   );
 }
@@ -374,10 +368,10 @@ function AdvisorProfileCardCompact({
               <ScoreGauge score={numericScore} size={52} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#0A4A4A]">YVITY Score</p>
-                  <YvityScoreInfoTip />
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-white">YVITY Score</p>
+                  <YvityScoreInfoTip buttonClassName="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition hover:border-[#F59E0B]/60 hover:text-[#F59E0B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]/35" />
                 </div>
-                <p className="mt-0.5 font-poppins text-[10px] font-medium leading-snug text-[#6B7280]">
+                <p className="mt-0.5 font-poppins text-[10px] font-medium leading-snug text-white/60">
                   Credibility &amp; experience
                 </p>
               </div>
@@ -507,12 +501,12 @@ export function AdvisorProfileCard({
               <ScoreGauge score={numericScore} size={72} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.12em] text-[#0A4A4A]">
+                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.12em] text-white">
                     YVITY Score
                   </p>
-                  <YvityScoreInfoTip />
+                  <YvityScoreInfoTip buttonClassName="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition hover:border-[#F59E0B]/60 hover:text-[#F59E0B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]/35" />
                 </div>
-                <p className="mt-1 font-poppins text-[11px] font-medium leading-snug text-[#6B7280]">
+                <p className="mt-1 font-poppins text-[11px] font-medium leading-snug text-white/60">
                   A measure of credibility, experience and trust
                 </p>
               </div>
@@ -537,18 +531,18 @@ export function AdvisorProfileCard({
               isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
             />
 
-            {/* YVITY brand footer — matches Image 4 */}
-            <div className="flex items-center gap-2 border-t border-[#0A4A4A]/10 pt-2">
+            {/* YVITY brand footer */}
+            <div className="flex items-center gap-2 border-t border-white/10 pt-2">
               <Image
                 src="/brand/yvity-logo.png"
                 alt="YVITY"
                 width={22}
                 height={22}
-                className="h-[22px] w-[22px] shrink-0 object-contain"
+                className="h-[22px] w-[22px] shrink-0 object-contain brightness-0 invert opacity-70"
               />
               <div>
-                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#0A4A4A]">YVITY</p>
-                <p className="font-poppins text-[8px] font-medium text-[#9CA3AF]">Credibility that Connects</p>
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-white/85">YVITY</p>
+                <p className="font-poppins text-[8px] font-medium text-white/45">Credibility that Connects</p>
               </div>
             </div>
           </div>

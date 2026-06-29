@@ -376,7 +376,7 @@
   }
 
   .advisor-card-gold-inner {
-    background: linear-gradient(180deg, #fdfaf6 0%, #f8f6f1 100%);
+    background: linear-gradient(180deg, #0d5555 0%, #0a4a4a 100%);
     border-radius: 26.5px;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
@@ -438,32 +438,44 @@
     pointer-events: none;
   }
 
-  /* Hero card 1 â€” warm pearl glass (matches #F8F6F1 hero background) */
+  /* Shared structure */
   .advisor-card-gold-glass-panel,
   .advisor-card-gold-glass-pill {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(10, 74, 74, 0.1);
-    background: linear-gradient(
-      145deg,
-      rgba(255, 253, 248, 0.78) 0%,
-      rgba(248, 246, 241, 0.68) 48%,
-      rgba(245, 237, 224, 0.62) 100%
-    );
-    -webkit-backdrop-filter: blur(16px) saturate(155%);
-    backdrop-filter: blur(16px) saturate(155%);
-    box-shadow:
-      0 4px 18px rgba(10, 74, 74, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.72),
-      inset 0 -1px 0 rgba(245, 158, 11, 0.08);
   }
 
+  /* Score / stats panels — dark teal glass on dark card body */
   .advisor-card-gold-glass-panel {
     border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(245, 158, 11, 0.05) 100%
+    );
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    backdrop-filter: blur(16px) saturate(120%);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 
+  /* Service pills — keep light cream so they pop on dark bg */
   .advisor-card-gold-glass-pill {
     border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 253, 248, 0.88) 0%,
+      rgba(248, 246, 241, 0.78) 100%
+    );
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
 
   .advisor-card-gold-glass-panel::before,
