@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -123,25 +122,6 @@ export function AdvisorProfileCardV2({
   ];
 
   return (
-    // Outer wrapper is overflow-visible so the pill can straddle the top edge
-    <div className="relative mx-auto w-full pt-[14px]">
-
-      {/* ── Verified badge — centred on the top edge of the card ── */}
-      {showIdentityVerified && (
-        <div className="absolute left-1/2 top-0 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-[#0A4A4A]/12 bg-[#F8F6F1] px-3 py-1.5 shadow-[0_4px_14px_rgba(10,74,74,0.18)]">
-          <Image
-            src="/brand/yvity-logo.png"
-            alt="YVITY"
-            width={18}
-            height={18}
-            className="h-[18px] w-[18px] shrink-0 object-contain"
-          />
-          <span className="font-poppins text-[9px] font-bold leading-none tracking-wide text-[#0A4A4A]">
-            Verified Advisor
-          </span>
-        </div>
-      )}
-
     <motion.article
       className="relative mx-auto w-full overflow-hidden"
       style={{
@@ -285,6 +265,5 @@ export function AdvisorProfileCardV2({
         </Link>
       </div>
     </motion.article>
-    </div>
   );
 }
