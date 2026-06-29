@@ -376,7 +376,7 @@
   }
 
   .advisor-card-gold-inner {
-    background: linear-gradient(180deg, #ffffff 0%, #fdfdfb 100%);
+    background: linear-gradient(180deg, #fdfaf6 0%, #f8f6f1 100%);
     border-radius: 26.5px;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;

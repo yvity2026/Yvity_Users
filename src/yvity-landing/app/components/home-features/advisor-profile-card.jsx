@@ -289,6 +289,15 @@ function AdvisorProfileCardCompact({
           {/* Header */}
           <div className="advisor-card-gold-profile-header px-3 pb-3 pt-3">
             {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
+            {/* YVITY logo brand mark */}
+            <Image
+              src="/images/brand-logo.png"
+              alt="YVITY"
+              width={44}
+              height={16}
+              className="pointer-events-none absolute right-2.5 top-2.5 h-auto w-11 object-contain opacity-[0.25] brightness-0 invert"
+              aria-hidden
+            />
             <div className="relative z-10 flex items-center gap-2.5">
               <AvatarBlock
                 avatarUrl={avatarUrl}
@@ -315,13 +324,7 @@ function AdvisorProfileCardCompact({
           {/* Body */}
           <div className="relative z-10 flex flex-col gap-2 p-3">
 
-            {servicePills.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-1">
-                {servicePills.map((tag) => <ServicePill key={tag} label={tag} compact />)}
-              </div>
-            ) : null}
-
-            {/* YVITY Score — compact bar */}
+            {/* YVITY Score — above service pills */}
             <div className="advisor-card-gold-glass-panel px-2.5 py-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
@@ -333,7 +336,7 @@ function AdvisorProfileCardCompact({
                   <span className="font-poppins text-[9px] font-medium text-[#9CA3AF]"> /100</span>
                 </p>
               </div>
-              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/45 ring-1 ring-[#0A4A4A]/8">
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[#0A4A4A]/10 ring-1 ring-[#0A4A4A]/8">
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 45%, #F59E0B 100%)" }}
@@ -344,6 +347,12 @@ function AdvisorProfileCardCompact({
                 />
               </div>
             </div>
+
+            {servicePills.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-1">
+                {servicePills.map((tag) => <ServicePill key={tag} label={tag} compact />)}
+              </div>
+            ) : null}
 
             {/* Stats — 3 or 4 in a row depending on recs */}
             <div className={`advisor-card-gold-glass-panel grid gap-1 px-2 py-2 ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
@@ -424,6 +433,15 @@ export function AdvisorProfileCard({
           {/* Header */}
           <div className="advisor-card-gold-profile-header px-4 pb-4 pt-4 md:px-5 md:pb-5 md:pt-5">
             {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
+            {/* YVITY logo brand mark — top-right corner */}
+            <Image
+              src="/images/brand-logo.png"
+              alt="YVITY"
+              width={56}
+              height={20}
+              className="pointer-events-none absolute right-3 top-3 h-auto w-14 object-contain opacity-[0.28] brightness-0 invert"
+              aria-hidden
+            />
             <div className="relative z-10 flex items-center gap-3">
               <AvatarBlock
                 avatarUrl={avatarUrl}
@@ -449,14 +467,7 @@ export function AdvisorProfileCard({
           {/* Body */}
           <div className="relative z-10 flex flex-col gap-2 p-3 md:gap-3 md:p-4">
 
-            {/* Service pills only — no achievements here */}
-            {servicePills.length > 0 ? (
-              <div className="flex flex-wrap items-center justify-start gap-1">
-                {servicePills.map((tag) => <ServicePill key={tag} label={tag} />)}
-              </div>
-            ) : null}
-
-            {/* YVITY Score */}
+            {/* YVITY Score — above service pills so trust signal comes first */}
             <div className="advisor-card-gold-glass-panel p-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
@@ -470,7 +481,7 @@ export function AdvisorProfileCard({
                   <span className="font-poppins text-[11px] font-medium text-[#9CA3AF]"> /100</span>
                 </p>
               </div>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/45 ring-1 ring-[#0A4A4A]/8">
+              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#0A4A4A]/10 ring-1 ring-[#0A4A4A]/8">
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 45%, #F59E0B 100%)" }}
@@ -481,6 +492,13 @@ export function AdvisorProfileCard({
                 />
               </div>
             </div>
+
+            {/* Service pills */}
+            {servicePills.length > 0 ? (
+              <div className="flex flex-wrap items-center justify-start gap-1">
+                {servicePills.map((tag) => <ServicePill key={tag} label={tag} />)}
+              </div>
+            ) : null}
 
             {/* Stats — 2×2 or 1×3 row depending on recs */}
             <div className={`advisor-card-gold-glass-panel grid gap-2 p-2.5 ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
