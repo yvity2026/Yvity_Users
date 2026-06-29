@@ -34,8 +34,9 @@ function ScoreDial({ score }) {
     <div className="relative h-[52px] w-[52px] shrink-0">
       <svg viewBox="0 0 52 52" width={52} height={52} aria-hidden>
         <defs>
-          <linearGradient id="v2-arc-fill" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#14B8A6" />
+          <linearGradient id="v2-arc-fill" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#0A4A4A" />
+            <stop offset="50%"  stopColor="#14B8A6" />
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
         </defs>
@@ -141,19 +142,24 @@ export function AdvisorProfileCardV2({
           </p>
         </div>
 
-        {/* Verified pill — top left */}
+        {/* Verified pill — top left (cream style like YVITY brand pill) */}
         {showVerified && (
-          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur-sm">
+          <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full border border-[#0A4A4A]/10 bg-[#F8F6F1] px-3 py-1.5 shadow-[0_2px_10px_rgba(10,74,74,0.14)]">
             <Image
               src="/brand/yvity-logo.png"
               alt="YVITY"
-              width={12}
-              height={12}
-              className="h-3 w-3 shrink-0 object-contain brightness-0 invert"
+              width={22}
+              height={22}
+              className="h-[22px] w-[22px] shrink-0 object-contain"
             />
-            <span className="font-poppins text-[9px] font-bold tracking-wide text-white">
-              Verified Advisor
-            </span>
+            <div>
+              <p className="font-poppins text-[10px] font-bold leading-none tracking-wide text-[#0A4A4A]">
+                YVITY
+              </p>
+              <p className="mt-0.5 font-poppins text-[8px] font-semibold leading-none text-[#F59E0B]">
+                Verified Advisor
+              </p>
+            </div>
           </div>
         )}
 
