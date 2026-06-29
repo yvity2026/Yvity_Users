@@ -205,9 +205,9 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
   return (
     /* outer wrapper — identity tick is sibling to score ring so it sits above the SVG arc */
     <div className="relative shrink-0 overflow-visible">
-      <div className="absolute -inset-0.5 rounded-full bg-[#F59E0B]/30 blur-sm" />
+      <div className="absolute -inset-1 rounded-full bg-white/30 blur-md" />
       <AdvisorScoreAvatarRing score={numericScore} onDarkHeader>
-        <div className="relative rounded-full bg-gradient-to-br from-[#F59E0B] via-[#E8C872] to-[#C5A059] p-[2px]">
+        <div className="relative rounded-full bg-gradient-to-br from-white via-white/95 to-white/80 p-[2.5px]">
           {avatarUrl ? (
             <img src={avatarUrl} alt={name} className={`${dim} rounded-full object-cover`} />
           ) : (
