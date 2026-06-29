@@ -125,11 +125,56 @@ function StatCell({ icon: Icon, value, label }) {
   );
 }
 
+/** 270° circular score gauge — matches Image 4 style */
+function ScoreGauge({ score, size = 72 }) {
+  const r = 36;
+  const circ = 2 * Math.PI * r;
+  const arcLen = circ * 0.75;
+  const filled = (Math.min(100, Math.max(0, Number(score) || 0)) / 100) * arcLen;
+  const numScore = Math.min(100, Math.max(0, Number(score) || 0));
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden>
+        <defs>
+          <linearGradient id="sg-fill" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0D6060" />
+            <stop offset="50%" stopColor="#14B8A6" />
+            <stop offset="100%" stopColor="#F59E0B" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r={r}
+          fill="none" stroke="rgba(10,74,74,0.12)" strokeWidth="8.5" strokeLinecap="round"
+          strokeDasharray={`${arcLen} ${circ - arcLen}`}
+          transform="rotate(135 50 50)"
+        />
+        {numScore > 0 ? (
+          <circle cx="50" cy="50" r={r}
+            fill="none" stroke="url(#sg-fill)" strokeWidth="8.5" strokeLinecap="round"
+            strokeDasharray={`${filled} ${circ - filled}`}
+            transform="rotate(135 50 50)"
+          />
+        ) : null}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-poppins font-bold leading-none tabular-nums text-[#0A4A4A]"
+          style={{ fontSize: size < 60 ? 16 : 20 }}>
+          {Math.round(numScore)}
+        </span>
+        <span className="font-poppins font-medium text-[#9CA3AF]"
+          style={{ fontSize: size < 60 ? 7 : 9 }}>
+          /100
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLoggedIn, onGatedClick }) {
   const ctaInner = (
     <>
-      <span className="pointer-events-none absolute inset-0 rounded-[999px] bg-gradient-to-r from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
-      <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
+      <span className="pointer-events-none absolute inset-0 rounded-[999px] bg-gradient-to-r from-[#0A4A4A] via-[#0D5A5A] to-[#0A4A4A]" />
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
       {!reducedMotion ? (
         <motion.span
           className="pointer-events-none absolute -left-full top-0 h-full w-1/2 skew-x-[-20deg] bg-white/25"
@@ -155,7 +200,7 @@ function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLogg
     </>
   );
 
-  const className = `relative flex w-full overflow-hidden rounded-full shadow-[0_6px_18px_rgba(217,119,6,0.35)] ${
+  const className = `relative flex w-full overflow-hidden rounded-full shadow-[0_6px_18px_rgba(10,74,74,0.30)] ${
     compact ? "py-2" : "py-2"
   }`;
 
@@ -211,9 +256,9 @@ function AvatarBlock({ avatarUrl, name, numericScore, showIdentityVerified, size
 
   return (
     <div className="relative shrink-0 overflow-visible">
-      <div className="absolute -inset-1 rounded-full bg-white/30 blur-md" />
+      <div className="absolute -inset-1 rounded-full bg-[#F59E0B]/22 blur-md" />
       <AdvisorScoreAvatarRing score={numericScore} onDarkHeader>
-        <div className="relative rounded-full bg-gradient-to-br from-white via-white/95 to-white/80 p-[2.5px]">
+        <div className="relative rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706] p-[3px]">
           {avatarUrl ? (
             <img src={avatarUrl} alt={name} className={`${dim} rounded-full object-cover`} />
           ) : (
@@ -324,27 +369,17 @@ function AdvisorProfileCardCompact({
           {/* Body */}
           <div className="relative z-10 flex flex-col gap-2 p-3">
 
-            {/* YVITY Score — above service pills */}
-            <div className="advisor-card-gold-glass-panel px-2.5 py-1.5">
-              <div className="flex items-center justify-between gap-2">
+            {/* YVITY Score — compact circular gauge, above service pills */}
+            <div className="advisor-card-gold-glass-panel flex items-center gap-2.5 px-2.5 py-2">
+              <ScoreGauge score={numericScore} size={52} />
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
                   <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#0A4A4A]">YVITY Score</p>
                   <YvityScoreInfoTip />
                 </div>
-                <p className="font-poppins text-[15px] font-bold leading-none tabular-nums text-[#0A4A4A]">
-                  {Math.round(numericScore)}
-                  <span className="font-poppins text-[9px] font-medium text-[#9CA3AF]"> /100</span>
+                <p className="mt-0.5 font-poppins text-[10px] font-medium leading-snug text-[#6B7280]">
+                  Credibility &amp; experience
                 </p>
-              </div>
-              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[#0A4A4A]/10 ring-1 ring-[#0A4A4A]/8">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 45%, #F59E0B 100%)" }}
-                  initial={reducedMotion ? { width: `${numericScore}%` } : { width: 0 }}
-                  whileInView={{ width: `${numericScore}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
               </div>
             </div>
 
@@ -467,29 +502,19 @@ export function AdvisorProfileCard({
           {/* Body */}
           <div className="relative z-10 flex flex-col gap-2 p-3 md:gap-3 md:p-4">
 
-            {/* YVITY Score — above service pills so trust signal comes first */}
-            <div className="advisor-card-gold-glass-panel p-2">
-              <div className="flex items-center justify-between gap-2">
+            {/* YVITY Score — circular gauge, above service pills */}
+            <div className="advisor-card-gold-glass-panel flex items-center gap-3 p-3">
+              <ScoreGauge score={numericScore} size={72} />
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
                   <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.12em] text-[#0A4A4A]">
                     YVITY Score
                   </p>
                   <YvityScoreInfoTip />
                 </div>
-                <p className="font-poppins text-[18px] font-bold leading-none tabular-nums text-[#0A4A4A]">
-                  {Math.round(numericScore)}
-                  <span className="font-poppins text-[11px] font-medium text-[#9CA3AF]"> /100</span>
+                <p className="mt-1 font-poppins text-[11px] font-medium leading-snug text-[#6B7280]">
+                  A measure of credibility, experience and trust
                 </p>
-              </div>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#0A4A4A]/10 ring-1 ring-[#0A4A4A]/8">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 45%, #F59E0B 100%)" }}
-                  initial={reducedMotion ? { width: `${numericScore}%` } : { width: 0 }}
-                  whileInView={{ width: `${numericScore}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
               </div>
             </div>
 
@@ -511,6 +536,21 @@ export function AdvisorProfileCard({
               profileUrl={profileUrl} compact={false} reducedMotion={reducedMotion}
               isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
             />
+
+            {/* YVITY brand footer — matches Image 4 */}
+            <div className="flex items-center gap-2 border-t border-[#0A4A4A]/10 pt-2">
+              <Image
+                src="/brand/yvity-logo.png"
+                alt="YVITY"
+                width={22}
+                height={22}
+                className="h-[22px] w-[22px] shrink-0 object-contain"
+              />
+              <div>
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#0A4A4A]">YVITY</p>
+                <p className="font-poppins text-[8px] font-medium text-[#9CA3AF]">Credibility that Connects</p>
+              </div>
+            </div>
           </div>
 
         </div>
