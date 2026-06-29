@@ -288,10 +288,10 @@ function AdvisorProfileCardCompact({
       <div className="advisor-card-gold-shell">
         <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
 
-          {/* Header — row layout, smaller padding */}
+          {/* Header */}
           <div className="advisor-card-gold-profile-header px-3 pb-3 pt-3">
             {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
-            <div className="relative z-10 flex items-start gap-2.5">
+            <div className="relative z-10 flex items-center gap-2.5">
               <AvatarBlock
                 avatarUrl={avatarUrl}
                 name={name}
@@ -299,24 +299,17 @@ function AdvisorProfileCardCompact({
                 showIdentityVerified={showIdentityVerified}
                 size="sm"
               />
-              <div className="min-w-0 flex-1 pt-0.5">
+              <div className="min-w-0 flex-1">
                 <h3 className="font-cormorant text-[16px] font-bold leading-tight tracking-[0.02em] text-white">
                   {name}
                 </h3>
                 <p className="mt-0.5 font-poppins text-[10px] font-semibold tracking-wide text-[#F59E0B]">
                   {title}
                 </p>
-                <p className="mt-0.5 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/80">
-                  <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]" />
-                  <span className="line-clamp-1">{location}</span>
+                <p className="mt-1 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/75">
+                  <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]/80" />
+                  <span className="line-clamp-1 uppercase tracking-wider">{location}</span>
                 </p>
-                {achievementTags.length > 0 ? (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {achievementTags.slice(0, 2).map((tag) => (
-                      <AchievementBadge key={tag} label={tag} compact />
-                    ))}
-                  </div>
-                ) : null}
               </div>
             </div>
           </div>
@@ -430,34 +423,27 @@ export function AdvisorProfileCard({
       <div className="advisor-card-gold-shell">
         <div className="advisor-card-gold-inner relative flex h-full flex-col overflow-hidden antialiased">
 
-          {/* Header — compact on mobile, full size on md+ */}
-          <div className="advisor-card-gold-profile-header px-3 pb-3 pt-3 md:px-5 md:pb-5 md:pt-5">
+          {/* Header */}
+          <div className="advisor-card-gold-profile-header px-4 pb-4 pt-4 md:px-5 md:pb-5 md:pt-5">
             {!reducedMotion ? <span className="gold-bottom-shine" aria-hidden><span className="shine" /></span> : null}
-            <div className="relative z-10 flex items-start gap-3">
+            <div className="relative z-10 flex items-center gap-3">
               <AvatarBlock
                 avatarUrl={avatarUrl}
                 name={name}
                 numericScore={numericScore}
                 showIdentityVerified={showIdentityVerified}
               />
-              <div className="min-w-0 flex-1 pt-0.5">
-                <h3 className="font-cormorant text-[19px] font-bold leading-[1.12] tracking-[0.02em] text-white md:text-[24px]">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-cormorant text-[20px] font-bold leading-tight tracking-[0.015em] text-white md:text-[24px]">
                   {name}
                 </h3>
                 <p className="mt-0.5 font-poppins text-[11px] font-semibold tracking-wide text-[#F59E0B]">
                   {title}
                 </p>
-                <p className="mt-1 flex items-start gap-1 font-poppins text-[11px] font-medium leading-snug text-white/85">
-                  <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-[#F59E0B]" />
-                  <span className="min-w-0 line-clamp-1 md:line-clamp-2">{location}</span>
+                <p className="mt-1.5 flex items-center gap-1 font-poppins text-[11px] font-medium text-white/75">
+                  <MapPin className="h-3 w-3 shrink-0 text-[#F59E0B]/80" />
+                  <span className="min-w-0 line-clamp-1 uppercase tracking-wider">{location}</span>
                 </p>
-                {achievementTags.length > 0 ? (
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {achievementTags.slice(0, 2).map((tag) => (
-                      <AchievementBadge key={tag} label={tag} />
-                    ))}
-                  </div>
-                ) : null}
               </div>
             </div>
           </div>
