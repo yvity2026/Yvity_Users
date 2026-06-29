@@ -14,6 +14,7 @@ import {
   Umbrella,
   Users,
 } from "lucide-react";
+import { IdentityVerifiedTick } from "@/yvity-landing/components/brand/IdentityVerifiedTick";
 
 const SERVICE_ICON_MAP = {
   "Life Insurance": Shield,
@@ -22,37 +23,38 @@ const SERVICE_ICON_MAP = {
   "Mutual Funds": TrendingUp,
 };
 
-// Score ring — lives on white body panel, so track is light teal tint, text is dark
+// Score ring — on white panel, track is a subtle teal tint, colours match existing ScoreGauge
 function ScoreDial({ score, size = 90 }) {
   const r = 20;
   const circ = 2 * Math.PI * r;
   const arcLen = circ * 0.75;
   const n = Math.min(100, Math.max(0, Number(score) || 0));
   const filled = (n / 100) * arcLen;
-  const numSize = Math.round(size * 0.265);
-  const subSize = Math.round(size * 0.145);
+  const numSize  = Math.round(size * 0.265);
+  const subSize  = Math.round(size * 0.145);
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 52 52" width={size} height={size} aria-hidden>
         <defs>
+          {/* Same colour ramp as the existing ScoreGauge — bright teal → gold */}
           <linearGradient id="v2-arc-fill" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="#0A4A4A" />
+            <stop offset="0%"   stopColor="#0D6060" />
             <stop offset="50%"  stopColor="#14B8A6" />
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
         </defs>
-        {/* Track — light teal tint on white bg */}
+        {/* Track — slightly visible teal tint on white */}
         <circle
           cx="26" cy="26" r={r}
           fill="none"
-          stroke="rgba(10,74,74,0.10)"
+          stroke="rgba(10,74,74,0.12)"
           strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={`${arcLen} ${circ - arcLen}`}
           transform="rotate(135 26 26)"
         />
-        {/* Fill */}
+        {/* Filled arc */}
         {n > 0 && (
           <circle
             cx="26" cy="26" r={r}
@@ -84,20 +86,21 @@ function ScoreDial({ score, size = 90 }) {
 }
 
 export function AdvisorProfileCardV2({
-  name = "Krishna Mohan Noti",
-  title = "Advisor",
-  location = "Nellore, Andhra Pradesh",
-  score = 53,
-  exp = "7+",
-  avgRating = "5.0",
-  clients = "397",
-  recs = "0",
+  name         = "Krishna Mohan Noti",
+  title        = "Advisor",
+  location     = "Nellore, Andhra Pradesh",
+  score        = 53,
+  exp          = "7+",
+  avgRating    = "5.0",
+  clients      = "397",
+  recs         = "0",
   avatarUrl,
+  showIdentityVerified = true,
   serviceTypes = ["General Insurance", "Life Insurance", "Health Insurance"],
-  profileUrl = "#",
+  profileUrl   = "#",
 }) {
   const numScore = Math.min(100, Math.max(0, Number(score) || 0));
-  const numRecs = Number(recs) || 0;
+  const numRecs  = Number(recs) || 0;
   const initials = (name || "")
     .split(" ")
     .map((p) => p[0])
@@ -106,10 +109,10 @@ export function AdvisorProfileCardV2({
     .toUpperCase();
 
   const statItems = [
-    { icon: Briefcase, value: `${exp} yrs`, label: "Experience" },
-    { icon: Star,      value: String(avgRating), label: "Rating" },
-    { icon: Users,     value: `${clients}+`,    label: "Clients" },
-    { icon: ThumbsUp,  value: String(numRecs),  label: "Recs" },
+    { icon: Briefcase, value: `${exp} yrs`,      label: "Experience" },
+    { icon: Star,      value: String(avgRating),  label: "Rating" },
+    { icon: Users,     value: `${clients}+`,      label: "Clients" },
+    { icon: ThumbsUp,  value: String(numRecs),    label: "Recs" },
   ];
 
   return (
@@ -129,7 +132,15 @@ export function AdvisorProfileCardV2({
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      {/* ── Header: avatar left + name/title/location right ── */}
+      {/* ── Identity verified tick — top-right corner of card ── */}
+      {showIdentityVerified && (
+        <IdentityVerifiedTick
+          size="md"
+          className="!bottom-auto !right-3 !top-3 z-20 !translate-x-0 !translate-y-0"
+        />
+      )}
+
+      {/* ── Header: avatar left + name / title / location right ── */}
       <div
         className="relative overflow-hidden px-4 py-4"
         style={{ background: "#0A4A4A" }}
@@ -146,27 +157,27 @@ export function AdvisorProfileCardV2({
         />
 
         <div className="relative z-10 flex items-center gap-3.5">
-          {/* Avatar — left, 40 % bigger (112 px) */}
+          {/* Avatar — 96 px, gold border ring */}
           <div className="relative shrink-0">
             <div className="absolute -inset-[7px] rounded-full bg-[#F59E0B]/22 blur-md" />
             <div className="absolute -inset-[3px] rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706]" />
-            <div className="relative h-[112px] w-[112px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
+            <div className="relative h-[96px] w-[96px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center font-cormorant text-[40px] font-bold text-[#F8F6F1]">
+                <div className="flex h-full w-full items-center justify-center font-cormorant text-[36px] font-bold text-[#F8F6F1]">
                   {initials}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Name / designation / location — right of avatar */}
+          {/* Name / designation / location */}
           <div className="min-w-0 flex-1">
-            <h3 className="font-cormorant text-[20px] font-bold leading-tight tracking-[0.015em] text-white">
+            <h3 className="font-cormorant text-[22px] font-bold leading-tight tracking-[0.015em] text-white md:text-[24px]">
               {name}
             </h3>
-            <p className="mt-0.5 font-poppins text-[11px] font-semibold text-[#F59E0B]">
+            <p className="mt-0.5 font-poppins text-[11px] font-semibold tracking-wide text-[#F59E0B]">
               {title}
             </p>
             <p className="mt-1.5 flex items-center gap-1 font-poppins text-[10px] font-medium text-white/70">
@@ -194,7 +205,7 @@ export function AdvisorProfileCardV2({
           {/* Vertical divider */}
           <div className="w-px self-stretch bg-gradient-to-b from-transparent via-[#0A4A4A]/10 to-transparent" />
 
-          {/* Right — service pills stacked */}
+          {/* Right — service pills stacked vertically */}
           <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-3 py-3">
             {serviceTypes.slice(0, 3).map((label) => {
               const Icon = SERVICE_ICON_MAP[label] ?? Shield;
