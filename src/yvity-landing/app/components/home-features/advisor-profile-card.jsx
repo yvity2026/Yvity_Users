@@ -492,19 +492,6 @@ export function AdvisorProfileCard({
   serviceTypes = [], achievementTags = [], variant = "default",
   isFeatured = true, isLoggedIn = true, onGatedClick,
 }) {
-  if (variant === "compact") {
-    return (
-      <AdvisorProfileCardCompact
-        name={name} title={title} location={location} score={score}
-        exp={exp} avgRating={avgRating} clients={clients} clientsLabel={clientsLabel} recs={recs}
-        profileUrl={profileUrl} avatarUrl={avatarUrl}
-        showIdentityVerified={showIdentityVerified}
-        serviceTypes={serviceTypes} achievementTags={achievementTags}
-        isFeatured={isFeatured} isLoggedIn={isLoggedIn} onGatedClick={onGatedClick}
-      />
-    );
-  }
-
   const reducedMotion = usePrefersReducedMotion();
   const uid      = useId().replace(/[^a-zA-Z0-9]/g, "");
   const gradId   = `arc${uid}`;
