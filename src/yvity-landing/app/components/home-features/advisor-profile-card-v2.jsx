@@ -229,7 +229,7 @@ export function AdvisorProfileCardV2({
           <div className="w-px self-stretch bg-gradient-to-b from-transparent via-[#0A4A4A]/10 to-transparent" />
 
           {/* Right — service pills stacked vertically */}
-          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-3 py-2.5">
+          <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1.5 px-3 py-2.5">
             {serviceTypes.slice(0, 3).map((label) => {
               const Icon = SERVICE_ICON_MAP[label] ?? Shield;
               return (
