@@ -600,6 +600,346 @@ const COMPANIES = [
     email: "support@narayanahealth.insurance",
     lastUpdated: "June 2026",
   },
+  {
+    id: "new-india-assurance",
+    logo: "/images/companies/new-india-assurance.png",
+    initials: "NIA",
+    name: "The New India Assurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 1919,
+    irdaiRegNo: "190",
+    website: "https://www.newindia.co.in",
+    websiteDisplay: "www.newindia.co.in",
+    phone: "1800-209-1415",
+    phone2: null,
+    whatsapp: null,
+    email: "ho@newindia.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "united-india",
+    logo: "/images/companies/united-india.png",
+    initials: "UII",
+    name: "United India Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 1938,
+    irdaiRegNo: "545",
+    website: "https://www.uiic.co.in",
+    websiteDisplay: "www.uiic.co.in",
+    phone: "1800-425-33333",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@uiic.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "national-insurance",
+    logo: "/images/companies/national-insurance.png",
+    initials: "NIC",
+    name: "National Insurance Company Limited",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 1906,
+    irdaiRegNo: "58",
+    website: "https://www.nationalinsuranceindia.nic.in",
+    websiteDisplay: "nationalinsuranceindia.nic.in",
+    phone: "1800-345-0330",
+    phone2: null,
+    whatsapp: null,
+    email: "customerfeedback@nationalinsuranceindia.nic.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "oriental-insurance",
+    logo: "/images/companies/oriental-insurance.png",
+    initials: "OIC",
+    name: "The Oriental Insurance Company Limited",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 1947,
+    irdaiRegNo: "556",
+    website: "https://www.orientalinsurance.org.in",
+    websiteDisplay: "www.orientalinsurance.org.in",
+    phone: "1800-118-485",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@orientalinsurance.org.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "bajaj-allianz-general",
+    logo: "/images/companies/bajaj-allianz-general.png",
+    initials: "BAG",
+    name: "Bajaj Allianz General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "113",
+    website: "https://www.bajajallianz.com",
+    websiteDisplay: "www.bajajallianz.com",
+    phone: "1800-209-0144",
+    phone2: null,
+    whatsapp: "+91 75072 45858",
+    email: "bagichelp@bajajallianz.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "icici-lombard",
+    logo: "/images/companies/icici-lombard.png",
+    initials: "IL",
+    name: "ICICI Lombard General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "115",
+    website: "https://www.icicilombard.com",
+    websiteDisplay: "www.icicilombard.com",
+    phone: "1800-2666",
+    phone2: null,
+    whatsapp: "+91 98190 91900",
+    email: "customersupport@icicilombard.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "tata-aig-general",
+    logo: "/images/companies/tata-aig-general.png",
+    initials: "TAG",
+    name: "Tata AIG General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "108",
+    website: "https://www.tataaig.com",
+    websiteDisplay: "www.tataaig.com",
+    phone: "1800-266-7780",
+    phone2: null,
+    whatsapp: "+91 92890 22222",
+    email: "customersupport@tataaig.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "sbi-general",
+    logo: "/images/companies/sbi-general.png",
+    initials: "SBG",
+    name: "SBI General Insurance Company Limited",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2009,
+    irdaiRegNo: "144",
+    website: "https://www.sbigeneral.in",
+    websiteDisplay: "www.sbigeneral.in",
+    phone: "1800-102-1111",
+    phone2: null,
+    whatsapp: "+91 70457 22222",
+    email: "care@sbigeneral.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "reliance-general",
+    logo: "/images/companies/reliance-general.png",
+    initials: "RGI",
+    name: "Reliance General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2000,
+    irdaiRegNo: "103",
+    website: "https://www.reliancegeneral.co.in",
+    websiteDisplay: "www.reliancegeneral.co.in",
+    phone: "1800-3009",
+    phone2: null,
+    whatsapp: null,
+    email: "rgic.customerservice@reliancegeneral.co.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "go-digit-general",
+    logo: "/images/companies/go-digit-general.png",
+    initials: "GDG",
+    name: "Go Digit General Insurance Limited",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2016,
+    irdaiRegNo: "158",
+    website: "https://www.godigit.com",
+    websiteDisplay: "www.godigit.com",
+    phone: "1800-258-5956",
+    phone2: null,
+    whatsapp: "+91 70199 70000",
+    email: "hello@godigit.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "cholamandalam-general",
+    logo: "/images/companies/cholamandalam-general.png",
+    initials: "CHO",
+    name: "Cholamandalam MS General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2001,
+    irdaiRegNo: "123",
+    website: "https://www.cholainsurance.com",
+    websiteDisplay: "www.cholainsurance.com",
+    phone: "1800-200-5544",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@cholams.murugappa.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "royal-sundaram",
+    logo: "/images/companies/royal-sundaram.png",
+    initials: "RSG",
+    name: "Royal Sundaram General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2000,
+    irdaiRegNo: "102",
+    website: "https://www.royalsundaram.in",
+    websiteDisplay: "www.royalsundaram.in",
+    phone: "1860-425-0000",
+    phone2: null,
+    whatsapp: null,
+    email: "query@royalsundaram.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "future-generali-general",
+    logo: "/images/companies/future-generali-general.png",
+    initials: "FGI",
+    name: "Future Generali India Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2007,
+    irdaiRegNo: "132",
+    website: "https://www.futuregenerali.in",
+    websiteDisplay: "www.futuregenerali.in",
+    phone: "1800-220-233",
+    phone2: null,
+    whatsapp: null,
+    email: "fgcare@futuregenerali.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "universal-sompo",
+    logo: "/images/companies/universal-sompo.png",
+    initials: "USG",
+    name: "Universal Sompo General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2007,
+    irdaiRegNo: "134",
+    website: "https://www.universalsompo.com",
+    websiteDisplay: "www.universalsompo.com",
+    phone: "1800-200-5142",
+    phone2: null,
+    whatsapp: null,
+    email: "customercare@universalsompo.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "shriram-general",
+    logo: "/images/companies/shriram-general.png",
+    initials: "SGI",
+    name: "Shriram General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2008,
+    irdaiRegNo: "137",
+    website: "https://www.shriramgeneral.com",
+    websiteDisplay: "www.shriramgeneral.com",
+    phone: "1800-3000-8586",
+    phone2: null,
+    whatsapp: null,
+    email: "helpdesk@shriramgi.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "kotak-general",
+    logo: "/images/companies/kotak-general.png",
+    initials: "KGI",
+    name: "Kotak Mahindra General Insurance Co. Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2015,
+    irdaiRegNo: "152",
+    website: "https://www.kotakgeneral.com",
+    websiteDisplay: "www.kotakgeneral.com",
+    phone: "1800-266-4545",
+    phone2: null,
+    whatsapp: null,
+    email: "general.insurance@kotak.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "liberty-general",
+    logo: "/images/companies/liberty-general.png",
+    initials: "LGI",
+    name: "Liberty General Insurance Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2013,
+    irdaiRegNo: "150",
+    website: "https://www.libertyinsurance.in",
+    websiteDisplay: "www.libertyinsurance.in",
+    phone: "1800-2666-400",
+    phone2: null,
+    whatsapp: null,
+    email: "customer.care@libertyinsurance.in",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "zuno-general",
+    logo: "/images/companies/zuno-general.png",
+    initials: "ZGI",
+    name: "Zuno General Insurance Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2009,
+    irdaiRegNo: "143",
+    website: "https://www.zunoinsurance.com",
+    websiteDisplay: "www.zunoinsurance.com",
+    phone: "1800-267-2440",
+    phone2: null,
+    whatsapp: null,
+    email: "customersupport@zunoinsurance.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "acko-general",
+    logo: "/images/companies/acko-general.png",
+    initials: "ACK",
+    name: "Acko General Insurance Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2016,
+    irdaiRegNo: "157",
+    website: "https://www.acko.com",
+    websiteDisplay: "www.acko.com",
+    phone: "1800-266-2256",
+    phone2: null,
+    whatsapp: null,
+    email: "support@acko.com",
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "navi-general",
+    logo: "/images/companies/navi-general.png",
+    initials: "NGI",
+    name: "Navi General Insurance Ltd.",
+    serviceType: "General Insurance",
+    entityType: "Company",
+    established: 2016,
+    irdaiRegNo: "155",
+    website: "https://www.navi.com",
+    websiteDisplay: "www.navi.com",
+    phone: "1800-123-0004",
+    phone2: null,
+    whatsapp: null,
+    email: "insurance.help@navi.com",
+    lastUpdated: "June 2026",
+  },
 ];
 
 const FILTERS = ["All", "Life", "Health", "General", "Repository", "Governing Body", "Ombudsman"];
@@ -659,6 +999,138 @@ const REPOSITORIES = [
       },
     ],
     lastUpdated: "15 June 2026",
+  },
+  {
+    id: "cirl",
+    logo: "/images/companies/cirl.png",
+    initials: "CIRL",
+    name: "Central Insurance Repository Limited (CIRL)",
+    entityType: "Repository",
+    established: 2013,
+    irdaiRegNo: "IRDA/IR/Reg/02/2013",
+    website: "https://www.cirlrepository.com",
+    websiteDisplay: "www.cirlrepository.com",
+    phone: "+91-44-4299 6200",
+    phone2: null,
+    phoneHours: "10:00 AM – 6:00 PM",
+    email: "helpdesk@cirlrepository.com",
+    about:
+      "Central Insurance Repository Limited (CIRL) is one of four IRDAI-authorised Insurance Repositories in India. It enables policyholders to hold and service all their insurance policies in a single, secure electronic form through a free e-Insurance Account (eIA).",
+    quickActions: [
+      {
+        label: "Login to Your eIA Account",
+        description: "Access your e-Insurance account on CIRL",
+        href: "https://www.cirlrepository.com",
+        Icon: Lock,
+        iconBg: "bg-[#DCFCE7]",
+        iconColor: "text-[#16A34A]",
+      },
+      {
+        label: "Open an eIA Account",
+        description: "Create your free e-Insurance Account with CIRL",
+        href: "https://www.cirlrepository.com",
+        Icon: FileText,
+        iconBg: "bg-[#EDE9FE]",
+        iconColor: "text-[#7C3AED]",
+      },
+      {
+        label: "What is an e-Insurance Account?",
+        description: "Learn about eIA and its benefits for policyholders",
+        href: "https://www.cirlrepository.com",
+        Icon: BookOpen,
+        iconBg: "bg-[#FEF3C7]",
+        iconColor: "text-[#D97706]",
+      },
+    ],
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "cams-repo",
+    logo: "/images/companies/cams-repo.png",
+    initials: "CAMS",
+    name: "CAMS Repository Services Limited",
+    entityType: "Repository",
+    established: 2013,
+    irdaiRegNo: "IRDA/IR/Reg/03/2013",
+    website: "https://www.camsrepository.com",
+    websiteDisplay: "www.camsrepository.com",
+    phone: "1800-3010-6767",
+    phone2: null,
+    phoneHours: "10:00 AM – 6:00 PM",
+    email: "insurancerep@camsonline.com",
+    about:
+      "CAMS Repository Services Limited (CAMSRep) is an IRDAI-authorised Insurance Repository backed by the CAMS group. It offers a free e-Insurance Account (eIA) to policyholders, enabling electronic storage, retrieval and servicing of all insurance policies in one place.",
+    quickActions: [
+      {
+        label: "Login to Your eIA Account",
+        description: "Access your CAMS e-Insurance account securely",
+        href: "https://www.camsrepository.com",
+        Icon: Lock,
+        iconBg: "bg-[#DCFCE7]",
+        iconColor: "text-[#16A34A]",
+      },
+      {
+        label: "Open an eIA Account",
+        description: "Create your free e-Insurance Account with CAMS",
+        href: "https://www.camsrepository.com",
+        Icon: FileText,
+        iconBg: "bg-[#EDE9FE]",
+        iconColor: "text-[#7C3AED]",
+      },
+      {
+        label: "What is an e-Insurance Account?",
+        description: "Understand eIA and its benefits",
+        href: "https://www.camsrepository.com",
+        Icon: BookOpen,
+        iconBg: "bg-[#FEF3C7]",
+        iconColor: "text-[#D97706]",
+      },
+    ],
+    lastUpdated: "June 2026",
+  },
+  {
+    id: "kfintech-repo",
+    logo: "/images/companies/kfintech.png",
+    initials: "KFin",
+    name: "KFintech Insurance Repository",
+    entityType: "Repository",
+    established: 2013,
+    irdaiRegNo: "IRDA/IR/Reg/04/2013",
+    website: "https://ir.kfintech.com",
+    websiteDisplay: "ir.kfintech.com",
+    phone: "1800-309-4001",
+    phone2: null,
+    phoneHours: "9:00 AM – 6:00 PM",
+    email: "einsurance@kfintech.com",
+    about:
+      "KFintech Insurance Repository (formerly Karvy Insurance Repository) is an IRDAI-authorised Insurance Repository that provides policyholders a consolidated e-Insurance Account (eIA) for storing and managing all their insurance policies electronically.",
+    quickActions: [
+      {
+        label: "Login to Your eIA Account",
+        description: "Access your KFintech e-Insurance account",
+        href: "https://ir.kfintech.com",
+        Icon: Lock,
+        iconBg: "bg-[#DCFCE7]",
+        iconColor: "text-[#16A34A]",
+      },
+      {
+        label: "Open an eIA Account",
+        description: "Create your free e-Insurance Account with KFintech",
+        href: "https://ir.kfintech.com",
+        Icon: FileText,
+        iconBg: "bg-[#EDE9FE]",
+        iconColor: "text-[#7C3AED]",
+      },
+      {
+        label: "What is an e-Insurance Account?",
+        description: "Learn about eIA benefits for policyholders",
+        href: "https://ir.kfintech.com",
+        Icon: BookOpen,
+        iconBg: "bg-[#FEF3C7]",
+        iconColor: "text-[#D97706]",
+      },
+    ],
+    lastUpdated: "June 2026",
   },
 ];
 
@@ -732,6 +1204,47 @@ const GOVERNING_BODIES = [
     },
     lastUpdated: "15 May 2024",
   },
+  {
+    id: "bima-sugam",
+    logo: "/images/companies/bima-sugam.png",
+    initials: "BS",
+    isCircleLogo: false,
+    name: "Bima Sugam",
+    fullName: "IRDAI's Unified Insurance Marketplace & Policy Repository",
+    entityType: "Governing Body",
+    badges: [
+      { Icon: CheckCircle2, label: "Official IRDAI Initiative", style: "green" },
+    ],
+    metaRows: [
+      { Icon: Shield,   label: "Initiative by",   value: "IRDAI (Insurance Regulatory and Development Authority of India)" },
+      { Icon: Landmark, label: "Regulatory Body",  value: "IRDAI" },
+      { Icon: Globe,    label: "Official Website", value: "www.bimasugam.com", href: "https://www.bimasugam.com" },
+    ],
+    phone: null,
+    phoneLabel: null,
+    phoneHours: null,
+    phone2: null,
+    phone2Label: null,
+    phone2Hours: null,
+    email: null,
+    aboutIcon: Info,
+    about: "Bima Sugam is IRDAI's national digital insurance platform — a single portal where you can browse, compare, and purchase policies from all licensed insurers, store all your active policies in one place, complete eKYC once for all insurers, and initiate claims online. Think of it as a digital locker + marketplace for insurance.",
+    quickActionsColumns: 4,
+    quickActions: [
+      { label: "Browse & Compare Policies",  description: "Search and compare insurance products from all licensed insurers",     href: "https://www.bimasugam.com", Icon: Search,       iconBg: "bg-[#DBEAFE]", iconColor: "text-[#1D4ED8]" },
+      { label: "View Your Policies",         description: "See all your active insurance policies in one digital place",          href: "https://www.bimasugam.com", Icon: FileText,     iconBg: "bg-[#DCFCE7]", iconColor: "text-[#16A34A]" },
+      { label: "Open an eIA Account",        description: "Get an eInsurance Account to store all policies digitally",           href: "https://www.bimasugam.com", Icon: Lock,         iconBg: "bg-[#EDE9FE]", iconColor: "text-[#7C3AED]" },
+      { label: "File a Claim Online",        description: "Initiate and track insurance claims through the portal",               href: "https://www.bimasugam.com", Icon: CheckCircle2, iconBg: "bg-[#FEF3C7]", iconColor: "text-[#D97706]" },
+    ],
+    tipSection: {
+      title: "Confused by too many choices?",
+      description: "Bima Sugam shows you all available policies — but comparing 40+ similar products, reading fine print, and picking the right coverage for your life stage is harder than it looks. A verified YVITY advisor can shortlist the best options for your needs and explain the terms in plain language, at no extra cost to you.",
+      href: "/dashboard/explore",
+      hrefLabel: "Find an Advisor on YVITY",
+      isInternal: true,
+    },
+    lastUpdated: "June 2026",
+  },
 ];
 
 // ─── Static ombudsman data ────────────────────────────────────────────────────
@@ -745,7 +1258,7 @@ const OMBUDSMAN_OFFICES = [
     subtitle: "Insurance Ombudsman",
     status: "Active",
     jurisdiction: ["Andhra Pradesh", "Telangana", "Yanam (UT)"],
-    address: '6-2-46, 1st Floor, "Moin Court", Lane Opp. Saleem Function Palace, A.C. Guards, Lakdi-ka-pul, Hyderabad – 500 004, Telangana, India',
+    address: '6-2-46, 1st Floor, "Moin Court", Lane Opp. Saleem Function Palace, A.C. Guards, Lakdi-ka-pul, Hyderabad – 500 004',
     phone: "040-23312122",
     phone2: "040-23376599",
     email: "bimalokpal.hyd@cioins.co.in",
@@ -754,7 +1267,311 @@ const OMBUDSMAN_OFFICES = [
     mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Hyderabad+AC+Guards+500004",
     sourceUrl: "https://www.cioins.co.in",
     sourceDisplay: "cioins.co.in",
-    lastUpdated: "15 May 2024",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-ahm",
+    entityType: "Ombudsman",
+    officeCode: "AHM",
+    name: "Ahmedabad Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Gujarat", "Dadra & Nagar Haveli", "Daman & Diu"],
+    address: "Jeevan Prakash Building, 6th Floor, Tilak Marg, Relief Road, Ahmedabad – 380 001",
+    phone: "079-25501201",
+    phone2: "079-25501202",
+    email: "bimalokpal.ahmedabad@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Ahmedabad+Relief+Road+380001",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-bng",
+    entityType: "Ombudsman",
+    officeCode: "BNG",
+    name: "Bengaluru Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Karnataka"],
+    address: "Jeevan Soudha Building, PID No. 57-27-N-19, Ground Floor, 19/19, 24th Main Road, JP Nagar, 1st Phase, Bengaluru – 560 078",
+    phone: "080-26652048",
+    phone2: "080-26652049",
+    email: "bimalokpal.bengaluru@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Bengaluru+JP+Nagar+560078",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-bho",
+    entityType: "Ombudsman",
+    officeCode: "BHO",
+    name: "Bhopal Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Madhya Pradesh", "Chhattisgarh"],
+    address: "Janak Vihar Complex, 2nd Floor, 6, Malviya Nagar, Opp. Airtel Office, Near New Market, Bhopal – 462 003",
+    phone: "0755-2769201",
+    phone2: "0755-2769202",
+    email: "bimalokpal.bhopal@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Bhopal+Malviya+Nagar+462003",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-bhu",
+    entityType: "Ombudsman",
+    officeCode: "BHU",
+    name: "Bhubaneswar Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Odisha"],
+    address: "62, Forest Park, Bhubaneswar – 751 009",
+    phone: "0674-2596461",
+    phone2: "0674-2596455",
+    email: "bimalokpal.bhubaneswar@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Bhubaneswar+Forest+Park+751009",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-chd",
+    entityType: "Ombudsman",
+    officeCode: "CHD",
+    name: "Chandigarh Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Punjab", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Chandigarh (UT)"],
+    address: "S.C.O. No. 101, 102 & 103, 2nd Floor, Batra Building, Sector 17-D, Chandigarh – 160 017",
+    phone: "0172-2706196",
+    phone2: "0172-2706468",
+    email: "bimalokpal.chandigarh@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Chandigarh+Sector+17D+160017",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-che",
+    entityType: "Ombudsman",
+    officeCode: "CHE",
+    name: "Chennai Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Tamil Nadu", "Puducherry (Excl. Yanam)"],
+    address: "Fatima Akhtar Court, 4th Floor, 453 (old 312), Anna Salai, Teynampet, Chennai – 600 018",
+    phone: "044-24333668",
+    phone2: "044-24335284",
+    email: "bimalokpal.chennai@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Chennai+Anna+Salai+Teynampet+600018",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-del",
+    entityType: "Ombudsman",
+    officeCode: "DEL",
+    name: "Delhi Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Delhi"],
+    address: "2/2 A, Universal Insurance Building, Asaf Ali Road, New Delhi – 110 002",
+    phone: "011-23232481",
+    phone2: "011-23213504",
+    email: "bimalokpal.delhi@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Delhi+Asaf+Ali+Road+110002",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-guw",
+    entityType: "Ombudsman",
+    officeCode: "GUW",
+    name: "Guwahati Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Assam", "Meghalaya", "Manipur", "Mizoram", "Arunachal Pradesh", "Nagaland", "Tripura"],
+    address: '"Jeevan Nivesh", 5th Floor, Nr. Panbazar Overbridge, S.S. Road, Guwahati – 781 001',
+    phone: "0361-2632204",
+    phone2: "0361-2602205",
+    email: "bimalokpal.guwahati@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Guwahati+SS+Road+781001",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-jai",
+    entityType: "Ombudsman",
+    officeCode: "JAI",
+    name: "Jaipur Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Rajasthan"],
+    address: "Jeevan Nidhi – II Building, 4th Floor, LIC HO Campus, Near Rajmanthan Hotel, C-Scheme, Jaipur – 302 005",
+    phone: "0141-2740363",
+    phone2: null,
+    email: "bimalokpal.jaipur@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Jaipur+C+Scheme+302005",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-koc",
+    entityType: "Ombudsman",
+    officeCode: "KOC",
+    name: "Kochi Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Kerala", "Lakshadweep (UT)", "Mahe (UT)"],
+    address: "2nd Floor, Pulinat Building, Opp. Cochin Shipyard, M.G. Road, Ernakulam, Kochi – 682 015",
+    phone: "0484-2358759",
+    phone2: "0484-2359338",
+    email: "bimalokpal.ernakulam@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Kochi+MG+Road+Ernakulam+682015",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-kol",
+    entityType: "Ombudsman",
+    officeCode: "KOL",
+    name: "Kolkata Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["West Bengal", "Sikkim", "Andaman & Nicobar Islands"],
+    address: "Hindustan Building Annexe, 4th Floor, 4, C.R. Avenue, Kolkata – 700 072",
+    phone: "033-22124339",
+    phone2: "033-22987701",
+    email: "bimalokpal.kolkata@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Kolkata+CR+Avenue+700072",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-luc",
+    entityType: "Ombudsman",
+    officeCode: "LUC",
+    name: "Lucknow Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Uttar Pradesh (Central & Eastern Districts)", "Uttarakhand"],
+    address: "Jeevan Bhawan, Phase-2, 6th Floor, Nawal Kishore Road, Hazratganj, Lucknow – 226 001",
+    phone: "0522-2231330",
+    phone2: "0522-2231331",
+    email: "bimalokpal.lucknow@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Lucknow+Hazratganj+226001",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-mum",
+    entityType: "Ombudsman",
+    officeCode: "MUM",
+    name: "Mumbai Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Goa", "Mumbai Metropolitan Region", "Dadra & Nagar Haveli (part)"],
+    address: "3rd Floor, Jeevan Seva Annexe, S.V. Road, Santacruz (W), Mumbai – 400 054",
+    phone: "022-26106928",
+    phone2: "022-26106960",
+    email: "bimalokpal.mumbai@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Mumbai+Santacruz+400054",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-noi",
+    entityType: "Ombudsman",
+    officeCode: "NOI",
+    name: "Noida Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Uttar Pradesh (Western & Northern Districts)"],
+    address: "Bhagwan Sahai Palace, 4th Floor, Main Road, Naya Bans, Sector 15, Gautam Budh Nagar, Noida – 201 301",
+    phone: "0120-2514250",
+    phone2: "0120-2514252",
+    email: "bimalokpal.noida@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Noida+Sector+15+201301",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-pat",
+    entityType: "Ombudsman",
+    officeCode: "PAT",
+    name: "Patna Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Bihar", "Jharkhand"],
+    address: "1st Floor, Kalpana Arcade Building, Bazar Samiti Road, Bahadurpur, Patna – 800 006",
+    phone: "0612-2680952",
+    phone2: null,
+    email: "bimalokpal.patna@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Patna+Bahadurpur+800006",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
+  },
+  {
+    id: "ombudsman-pun",
+    entityType: "Ombudsman",
+    officeCode: "PUN",
+    name: "Pune Office",
+    subtitle: "Insurance Ombudsman",
+    status: "Active",
+    jurisdiction: ["Maharashtra (Excl. Mumbai Metro)", "Goa (North District)"],
+    address: "Jeevan Darshan Building, 3rd Floor, C.T.S. No.s 195 to 198, N.C. Kelkar Road, Narayan Peth, Pune – 411 030",
+    phone: "020-32341320",
+    phone2: null,
+    email: "bimalokpal.pune@cioins.co.in",
+    officeHours: "Monday – Friday : 10:00 AM – 5:00 PM",
+    officeHoursNote: "Excluding Saturdays, Sundays & Public Holidays",
+    mapsUrl: "https://maps.google.com/?q=Insurance+Ombudsman+Pune+Narayan+Peth+411030",
+    sourceUrl: "https://www.cioins.co.in",
+    sourceDisplay: "cioins.co.in",
+    lastUpdated: "May 2024",
   },
 ];
 
@@ -2122,9 +2939,203 @@ function getEntryMeta(entry) {
   };
 }
 
+// ─── BimaSugamCard ───────────────────────────────────────────────────────────
+
+function BimaSugamCard({ body, collapsed = false, onToggle }) {
+  const [favorited, setFavorited] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const handleShare = async () => {
+    const url = body.metaRows?.find((r) => r.href)?.href ?? window.location.href;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: body.name, url }).catch(() => {});
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(url).catch(() => {});
+    }
+  };
+
+  const websiteRow = body.metaRows?.find((r) => r.href);
+  const tip = body.tipSection ?? null;
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#C8D5D5] bg-white shadow-[0_4px_20px_rgba(10,74,74,0.08)]">
+
+      {/* ── Section 1: Header ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#EEF3F3] via-[#E4EDED] to-[#D6E5E5] px-4 pb-7 pt-4 sm:px-5 sm:pt-5">
+        <Landmark className="pointer-events-none absolute right-4 top-1/2 h-36 w-36 -translate-y-1/2 select-none text-[#0A4A4A] opacity-[0.06]" strokeWidth={0.75} />
+        <svg className="pointer-events-none absolute bottom-0 left-0 w-2/3 select-none" viewBox="0 0 400 50" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden>
+          <path d="M0,38 C80,8 200,48 400,18" stroke="#0A4A4A" strokeWidth="1.5" />
+          <path d="M0,48 C80,18 200,58 400,28" stroke="#0A4A4A" strokeWidth="1" opacity="0.35" />
+        </svg>
+        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#0A4A4A]" style={{ borderRadius: "6px 6px 0 0" }} />
+
+        <div className="flex items-start gap-3 sm:gap-4">
+          {/* Logo */}
+          <div className="flex h-[76px] w-[110px] shrink-0 items-center justify-center rounded-2xl border border-[#C8D5D5] bg-white p-2 shadow-sm sm:h-[90px] sm:w-[136px]">
+            {imgError ? (
+              <div className="flex h-full w-full items-center justify-center rounded-xl bg-[#E4EDED]">
+                <span className="font-cormorant text-xl font-bold text-[#0A4A4A]">{body.initials}</span>
+              </div>
+            ) : (
+              <Image src={body.logo} alt={`${body.name} logo`} width={130} height={85} className="h-full w-full object-contain" onError={() => setImgError(true)} />
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1 pt-0.5">
+            <h2 className="font-cormorant text-[22px] font-bold leading-tight text-[#0A4A4A] sm:text-[26px]">{body.name}</h2>
+            <p className="mt-0.5 font-poppins text-[11px] font-medium leading-snug text-[#374151]">{body.fullName}</p>
+
+            {/* Badges */}
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {(body.badges ?? []).map((badge, i) => (
+                <div key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#16A34A]/30 bg-[#DCFCE7] px-2.5 py-0.5">
+                  <badge.Icon size={10} className="text-[#16A34A]" strokeWidth={2.5} />
+                  <span className="font-poppins text-[9px] font-semibold tracking-wide text-[#15803D]">{badge.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Meta rows */}
+            <div className="mt-2 flex flex-col gap-1">
+              {(body.metaRows ?? []).map((row, i) => (
+                <div key={i} className="flex items-start gap-1.5">
+                  <row.Icon size={10} className="mt-0.5 shrink-0 text-[#9CA3AF]" />
+                  <span className="font-poppins text-[10px] text-[#6B7280]">
+                    {row.label}{" "}
+                    {row.href ? (
+                      <a href={row.href} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#0A4A4A] hover:underline">{row.value}</a>
+                    ) : (
+                      <span className="font-semibold text-[#374151]">{row.value}</span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex shrink-0 flex-col gap-1.5 pt-0.5">
+            <button onClick={() => setFavorited((f) => !f)} aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]">
+              <Heart size={13} strokeWidth={2} className={cn("transition-all", favorited && "fill-[#0A4A4A] text-[#0A4A4A]")} />
+            </button>
+            <button onClick={handleShare} aria-label="Share"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]">
+              <Share2 size={12} strokeWidth={2} />
+            </button>
+            {onToggle && (
+              <button onClick={onToggle} aria-label={collapsed ? "Expand card" : "Collapse card"}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D5D5] bg-white/90 text-[#6B7280] shadow-sm transition-colors hover:border-[#0A4A4A] hover:text-[#0A4A4A]">
+                <ChevronDown size={13} strokeWidth={2} className={cn("transition-transform duration-200", !collapsed && "rotate-180")} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {!collapsed && (<>
+
+      {/* ── Section 2: Visit Portal CTA ── */}
+      {websiteRow && (
+        <div className="flex items-center justify-between border-b border-[#E4E2DB] bg-[#EEF3F3] px-4 py-3 sm:px-5">
+          <div className="flex items-center gap-2">
+            <Globe size={14} className="shrink-0 text-[#0A4A4A]" strokeWidth={1.75} />
+            <span className="font-poppins text-[12px] font-semibold text-[#0A4A4A]">Official Portal</span>
+            <span className="font-poppins text-[11px] text-[#6B7280]">{websiteRow.value}</span>
+          </div>
+          <a href={websiteRow.href} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0A4A4A] px-3.5 py-2 font-poppins text-[11px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95">
+            Visit Bima Sugam <ChevronRight size={12} strokeWidth={2.5} />
+          </a>
+        </div>
+      )}
+
+      {/* ── Section 3: About ── */}
+      <div className="bg-[#EEF3F3] px-4 py-4 sm:px-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#D6E5E5] text-[#0A4A4A]">
+            <Info size={22} strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="font-poppins text-[13px] font-bold text-[#0A4A4A]">About {body.name}</p>
+            <p className="mt-0.5 font-poppins text-[11px] leading-relaxed text-[#6B7280]">{body.about}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 4: Quick Actions ── */}
+      {body.quickActions?.length > 0 && (
+        <div className="px-4 py-4 sm:px-5">
+          <p className="mb-3 font-poppins text-[13px] font-bold text-[#0A4A4A]">Quick Actions</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {body.quickActions.map((action, i) => (
+              <a key={i} href={action.href} target="_blank" rel="noopener noreferrer"
+                className="flex flex-col gap-2 rounded-xl border border-[#E4E2DB] p-3 transition-colors hover:border-[#0A4A4A] hover:bg-[#EEF3F3]">
+                <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", action.iconBg)}>
+                  <action.Icon size={18} className={action.iconColor} strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-poppins text-[11px] font-semibold leading-snug text-[#0A4A4A]">{action.label}</p>
+                  <p className="mt-0.5 font-poppins text-[10px] leading-relaxed text-[#6B7280]">{action.description}</p>
+                </div>
+                <ChevronRight size={13} className="self-end text-[#9CA3AF]" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Section 5: Advisor Tip ── */}
+      {tip && (
+        <div className="flex items-start gap-3 border-t border-[#E4E2DB] bg-gradient-to-br from-[#EEF8F8] via-[#E4F2F2] to-[#D6EDED] px-4 py-4 sm:px-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A]/10 text-[#0A4A4A]">
+            <Lightbulb size={18} strokeWidth={1.75} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-poppins text-[12px] font-bold text-[#0A4A4A]">{tip.title}</p>
+            <p className="mt-0.5 font-poppins text-[11px] leading-relaxed text-[#4B7070]">{tip.description}</p>
+            {tip.href && (
+              <div className="mt-2.5">
+                {tip.isInternal ? (
+                  <Link href={tip.href}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#0A4A4A] px-4 py-2 font-poppins text-[11px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95">
+                    <Users size={12} strokeWidth={2} /> {tip.hrefLabel ?? "Find an Advisor"} <ChevronRight size={12} strokeWidth={2.5} />
+                  </Link>
+                ) : (
+                  <a href={tip.href} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#0A4A4A] px-4 py-2 font-poppins text-[11px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95">
+                    {tip.hrefLabel ?? "Learn More"} <ChevronRight size={12} strokeWidth={2.5} />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Section 6: Footer ── */}
+      <div className="flex flex-col gap-1.5 border-t border-[#E4E2DB] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#E4E2DB] font-poppins text-[9px] font-bold text-[#9CA3AF]">i</span>
+          <p className="font-poppins text-[10px] text-[#9CA3AF]">All information is sourced from the official IRDAI / Bima Sugam portal.</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Calendar size={10} className="text-[#9CA3AF]" />
+          <span className="font-poppins text-[10px] text-[#9CA3AF]">
+            Last Updated: <span className="font-semibold text-[#F59E0B]">{body.lastUpdated}</span>
+          </span>
+        </div>
+      </div>
+
+      </>)}
+    </article>
+  );
+}
+
 function renderCard(entry, { collapsed = false, onToggle } = {}) {
   if (entry.entityType === "Repository") return <RepositoryCard repo={entry} collapsed={collapsed} onToggle={onToggle} />;
   if (entry.id === "bima-bharosa") return <BimaBharosaCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
+  if (entry.id === "bima-sugam") return <BimaSugamCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
   if (entry.entityType === "Governing Body") return <GoverningBodyCard body={entry} collapsed={collapsed} onToggle={onToggle} />;
   if (entry.entityType === "Ombudsman") return <OmbudsmanCard office={entry} collapsed={collapsed} onToggle={onToggle} />;
   return <CompanyCard company={entry} collapsed={collapsed} onToggle={onToggle} />;
@@ -2140,18 +3151,76 @@ function DesktopAccordionItem({ entry, isOpen, onToggle }) {
   return renderCard(entry, { collapsed: !isOpen, onToggle });
 }
 
+// ─── Helper: map category key → explore service filter ───────────────────────
+
+function categoryToServiceFilter(key) {
+  if (key === "Life") return "Life Insurance";
+  if (key === "Health") return "Health Insurance";
+  if (key === "General") return "General Insurance";
+  return null;
+}
+
+// ─── AdvisorNudgeCard ─────────────────────────────────────────────────────────
+
+function AdvisorNudgeCard({ serviceFilter }) {
+  const href = serviceFilter
+    ? `/dashboard/explore?service=${encodeURIComponent(serviceFilter)}`
+    : "/dashboard/explore";
+
+  return (
+    <div className="mt-5 overflow-hidden rounded-2xl border border-[#B8D8D8] bg-gradient-to-br from-[#EEF8F8] via-[#E4F2F2] to-[#D6EDED] p-5">
+      <div className="flex items-start gap-3.5">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0A4A4A]/10">
+          <Users size={22} className="text-[#0A4A4A]" strokeWidth={1.75} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-cormorant text-[17px] font-bold leading-snug text-[#0A4A4A]">
+            Need help choosing the right policy?
+          </p>
+          <p className="mt-1 font-poppins text-[11px] leading-relaxed text-[#4B7070]">
+            Can&apos;t find what you&apos;re looking for? Connect with a verified insurance advisor near you for personalised guidance.
+          </p>
+          <Link
+            href={href}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[#0A4A4A] px-4 py-2.5 font-poppins text-[12px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
+          >
+            <Users size={13} strokeWidth={2} />
+            Find Advisors
+            <ChevronRight size={13} strokeWidth={2.5} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── InsuranceDirectory page ──────────────────────────────────────────────────
 
 export default function InsuranceDirectory() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  // mobileCategory drives the slide transform; listCategory persists content during back-slide
   const [mobileCategory, setMobileCategory] = useState(null);
+  const [listCategory, setListCategory] = useState(null);
   const [openCardId, setOpenCardId] = useState(null);
   const [openDesktopIds, setOpenDesktopIds] = useState({});
   const toggleDesktop = (id) => setOpenDesktopIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const mobileCat = MOBILE_CATEGORIES.find((c) => c.key === mobileCategory) ?? null;
-  const mobileEntries = mobileCat ? ALL_ENTRIES.filter(mobileCat.filter) : [];
+  const goToCategory = (key) => {
+    setListCategory(key);
+    setMobileCategory(key);
+    setOpenCardId(null);
+  };
+
+  const goBack = () => {
+    setMobileCategory(null);
+    setOpenCardId(null);
+    // listCategory intentionally NOT cleared — content stays visible during back-slide
+  };
+
+  // List panel uses listCategory so content doesn't disappear mid-animation
+  const listCat = MOBILE_CATEGORIES.find((c) => c.key === listCategory) ?? null;
+  const listEntries = listCat ? ALL_ENTRIES.filter(listCat.filter) : [];
 
   const filtered = ALL_ENTRIES.filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
@@ -2236,14 +3305,21 @@ export default function InsuranceDirectory() {
           </div>
         )}
 
+        <AdvisorNudgeCard serviceFilter={categoryToServiceFilter(activeFilter)} />
+
       </div>
 
       {/* ── MOBILE ──────────────────────────────────────────────────────── */}
-      <div className="lg:hidden">
-        {mobileCategory === null ? (
+      {/* overflow-hidden clips the off-screen panel; both panels live side-by-side
+          in a flex row and the wrapper slides left/right via translateX */}
+      <div className="lg:hidden overflow-hidden">
+        <div
+          className="flex transition-transform duration-300 ease-in-out will-change-transform"
+          style={{ transform: mobileCategory ? "translateX(-100%)" : "translateX(0%)" }}
+        >
 
-          /* Level 1 — Category tiles */
-          <div>
+          {/* ── Panel 1: Hub ── */}
+          <div className="w-full min-w-full">
             <div className="mb-5">
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F4F4] text-[#0A4A4A]">
                 <Building2 size={20} strokeWidth={1.75} />
@@ -2262,10 +3338,7 @@ export default function InsuranceDirectory() {
                 return (
                   <button
                     key={cat.key}
-                    onClick={() => {
-                      setMobileCategory(cat.key);
-                      setOpenCardId(null);
-                    }}
+                    onClick={() => goToCategory(cat.key)}
                     className="flex w-full items-center gap-3.5 rounded-2xl border border-[#E4E2DB] bg-white px-4 py-3.5 text-left shadow-sm transition-colors active:bg-[#F8F6F1]"
                   >
                     <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl", cat.iconBg)}>
@@ -2291,56 +3364,51 @@ export default function InsuranceDirectory() {
             </div>
           </div>
 
-        ) : (
-
-          /* Level 2 — Accordion list */
-          <div>
-            {/* Sticky back bar — sits just below the fixed navbar */}
+          {/* ── Panel 2: Category list ── */}
+          <div className="w-full min-w-full" aria-hidden={!mobileCategory}>
+            {/* Sticky back bar */}
             <div
               className="sticky z-30 -mx-3 mb-4 flex items-center gap-3 border-b border-[#E4E2DB] bg-white/95 px-3 py-2.5 backdrop-blur-sm sm:-mx-4 sm:px-4"
               style={{ top: "calc(3.75rem + env(safe-area-inset-top, 0px))" }}
             >
               <button
-                onClick={() => {
-                  setMobileCategory(null);
-                  setOpenCardId(null);
-                }}
+                onClick={goBack}
                 className="flex items-center gap-1.5 rounded-full border border-[#E4E2DB] bg-white px-3 py-1.5 font-poppins text-[12px] font-semibold text-[#0A4A4A] shadow-sm transition-colors active:bg-[#F8F6F1]"
               >
                 <ChevronLeft size={14} />
                 Back
               </button>
-              {mobileCat && (
+              {listCat && (
                 <p className="truncate font-poppins text-[13px] font-semibold text-[#0A4A4A]">
-                  {mobileCat.label}
+                  {listCat.label}
                 </p>
               )}
             </div>
 
             {/* Category mini-header */}
-            {mobileCat && (
+            {listCat && (
               <div className="mb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", mobileCat.iconBg)}>
-                    <mobileCat.Icon size={16} className={mobileCat.iconColor} strokeWidth={1.75} />
+                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", listCat.iconBg)}>
+                    <listCat.Icon size={16} className={listCat.iconColor} strokeWidth={1.75} />
                   </div>
-                  <h2 className="font-cormorant text-xl font-bold text-[#0A4A4A]">{mobileCat.label}</h2>
+                  <h2 className="font-cormorant text-xl font-bold text-[#0A4A4A]">{listCat.label}</h2>
                 </div>
                 <p className="mt-1 pl-[2.625rem] font-poppins text-[11px] text-[#9CA3AF]">
-                  {mobileEntries.length === 0
+                  {listEntries.length === 0
                     ? "No entries yet — check back soon."
-                    : mobileEntries.length === 1
+                    : listEntries.length === 1
                     ? "1 entry listed"
-                    : `${mobileEntries.length} entries listed`}
+                    : `${listEntries.length} entries listed`}
                 </p>
               </div>
             )}
 
             {/* Accordion items or empty-state */}
-            {mobileEntries.length === 0 && mobileCat ? (
+            {listEntries.length === 0 && listCat ? (
               <div className="py-12 text-center">
-                <div className={cn("mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl", mobileCat.iconBg)}>
-                  <mobileCat.Icon size={32} className={mobileCat.iconColor} strokeWidth={1.5} />
+                <div className={cn("mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl", listCat.iconBg)}>
+                  <listCat.Icon size={32} className={listCat.iconColor} strokeWidth={1.5} />
                 </div>
                 <p className="font-poppins text-[13px] font-semibold text-[#0A4A4A]">Coming soon</p>
                 <p className="mt-1 font-poppins text-[11px] text-[#9CA3AF]">
@@ -2349,7 +3417,7 @@ export default function InsuranceDirectory() {
               </div>
             ) : (
               <div className="flex flex-col gap-2.5">
-                {mobileEntries.map((entry) => (
+                {listEntries.map((entry) => (
                   <MobileAccordionItem
                     key={entry.id}
                     entry={entry}
@@ -2359,9 +3427,11 @@ export default function InsuranceDirectory() {
                 ))}
               </div>
             )}
+
+            <AdvisorNudgeCard serviceFilter={categoryToServiceFilter(listCat?.key)} />
           </div>
 
-        )}
+        </div>
       </div>
 
     </div>
