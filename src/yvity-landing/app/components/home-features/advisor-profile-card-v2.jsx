@@ -212,8 +212,8 @@ export function AdvisorProfileCardV2({
         {/* Split panel: YVITY Score ring (left) | Service pills stacked (right) */}
         <div className="mb-2 flex items-stretch overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
 
-          {/* Left — score ring */}
-          <div className="flex flex-1 flex-col items-center justify-center gap-0.5 px-3 py-2.5">
+          {/* Left — score ring (shrink-0 so pills get max space) */}
+          <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 px-2 py-2.5">
             <ScoreDial score={numScore} size={90} gradId={gradId} />
             <div className="flex items-center gap-1">
               <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.1em] text-[#0A4A4A]/40">
