@@ -4,6 +4,7 @@ import { resolveProfileHeroStat } from "@/lib/advisor/profile-hero-stat";
 import { computeHighestExperienceYears } from "@/lib/advisor/profession-experience";
 import { mapDbServices, mapDbTestimonials } from "@/lib/server/supabase/mappers";
 import { extractAchievementTags } from "@/lib/sections/achievement-tiers";
+import { normalizeAchievements } from "@/lib/sections/normalize-achievements";
 import {
   getEffectivePlan,
   hasIdentityVerified,
@@ -12,7 +13,6 @@ import {
 import type { PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
 import { compareAdvisors } from "@/lib/advisors/publicAdvisorFilters";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
-import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
 import { getPublicProfileLivePath } from "@/lib/public-profile-url";
 
 const DEFAULT_CARD_METRICS = {
@@ -77,13 +77,13 @@ type AdvisorProfileRow = {
   account_status: string | null;
   is_hero: boolean | null;
   is_landing: boolean | null;
+  achievements_data: unknown;
 };
 
 function mapAdvisorToCard(
   profile: AdvisorProfileRow,
   usersById: Map<string, Record<string, unknown>>,
   servicesByAdvisorId: Map<string, Array<Record<string, unknown>>>,
-  achievementsByAdvisorId: Map<string, Array<Record<string, unknown>>>,
   testimonialsFullByAdvisorId: Map<string, Array<Record<string, unknown>>>,
   verifiedRecsCountByAdvisorId: Map<string, number>,
   testimonialsCountByAdvisorId: Map<string, number>,
@@ -95,7 +95,6 @@ function mapAdvisorToCard(
 
   const services = servicesByAdvisorId.get(profile.advisor_id) ?? [];
   const serviceItems = mapDbServices(services);
-  const achievementRecords = achievementsByAdvisorId.get(profile.advisor_id) ?? [];
   const testimonialsRaw = testimonialsFullByAdvisorId.get(profile.advisor_id) ?? [];
   const verifiedRecs = verifiedRecsCountByAdvisorId.get(profile.advisor_id) ?? 0;
   const photoUrl = (user.selfie_url as string) || undefined;
@@ -109,21 +108,9 @@ function mapAdvisorToCard(
   const avgRating = averageRatingByAdvisorIdMap.get(profile.advisor_id) ?? 0;
   const city = String(user.city || "Location not available");
 
-  const achievementTags = extractAchievementTags(
-    achievementRecords.map((row) => {
-      const { meta } = parseGoldMeta(String(row.description ?? ""));
-      const metaYears = Array.isArray(meta.years)
-        ? (meta.years as unknown[]).map(String).filter(Boolean)
-        : null;
-      const baseYear = row.achievement_year ? [String(row.achievement_year)] : [];
-      return {
-        title: String(row.title ?? ""),
-        subtitle: String(row.organisation ?? ""),
-        years: metaYears ?? baseYear,
-        iconStyle: String(row.icon ?? ""),
-      };
-    }),
-  );
+  // achievements_data is the same JSONB column the public profile page reads from
+  const achievements = normalizeAchievements(profile.achievements_data ?? []);
+  const achievementTags = extractAchievementTags(achievements);
 
   // Normalize service_type to title case for card display
   const serviceTypes = [
@@ -180,7 +167,7 @@ export async function fetchSupabasePublicAdvisors(
   const { data: profiles, error: profilesError } = await supabase
     .from("advisor_profiles")
     .select(
-      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing",
+      "advisor_id, profile_slug, designation, subscription_plan, account_status, is_hero, is_landing, achievements_data",
     )
     .in("account_status", ["active", "under_review"])
     .not("profile_slug", "is", null);
@@ -198,7 +185,6 @@ export async function fetchSupabasePublicAdvisors(
   const [
     usersResult,
     servicesResult,
-    achievementsResult,
     testimonialsResult,
     recommendationsResult,
     scoresResult,
@@ -210,10 +196,6 @@ export async function fetchSupabasePublicAdvisors(
     supabase
       .from("advisor_services")
       .select("advisor_id, service_type, company, no_of_clients, from_year, to_year, experience_years, key_services, short_summary, company_logo_url")
-      .in("advisor_id", advisorIds),
-    supabase
-      .from("advisor_achievements")
-      .select("advisor_id, title, organisation, achievement_year, description, icon")
       .in("advisor_id", advisorIds),
     supabase
       .from("advisor_testimonials")
@@ -234,7 +216,6 @@ export async function fetchSupabasePublicAdvisors(
   if (usersResult.error) throw new Error(`Failed to load users: ${usersResult.error.message}`);
   // Auxiliary data errors degrade gracefully (score=0, no tags, etc.) rather than hiding all advisors.
   if (servicesResult.error) console.error("[advisors] services fetch error:", servicesResult.error.message);
-  if (achievementsResult.error) console.error("[advisors] achievements fetch error:", achievementsResult.error.message);
   if (testimonialsResult.error) console.error("[advisors] testimonials fetch error:", testimonialsResult.error.message);
   if (recommendationsResult.error) console.error("[advisors] recommendations fetch error:", recommendationsResult.error.message);
 
@@ -242,7 +223,6 @@ export async function fetchSupabasePublicAdvisors(
     (usersResult.data ?? []).map((user) => [user.id, user as Record<string, unknown>]),
   );
   const servicesByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
-  const achievementsByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
   const testimonialsFullByAdvisorId = new Map<string, Array<Record<string, unknown>>>();
 
   const testimonialsCountByAdvisorId = countRowsByAdvisorId(testimonialsResult.data ?? []);
@@ -271,11 +251,6 @@ export async function fetchSupabasePublicAdvisors(
     list.push(service as Record<string, unknown>);
     servicesByAdvisorId.set(service.advisor_id, list);
   }
-  for (const achievement of achievementsResult.data ?? []) {
-    const list = achievementsByAdvisorId.get(achievement.advisor_id) ?? [];
-    list.push(achievement as Record<string, unknown>);
-    achievementsByAdvisorId.set(achievement.advisor_id, list);
-  }
   for (const testimonial of testimonialsResult.data ?? []) {
     const list = testimonialsFullByAdvisorId.get(testimonial.advisor_id) ?? [];
     list.push(testimonial as Record<string, unknown>);
@@ -288,7 +263,6 @@ export async function fetchSupabasePublicAdvisors(
         profile,
         usersById,
         servicesByAdvisorId,
-        achievementsByAdvisorId,
         testimonialsFullByAdvisorId,
         verifiedRecsCountByAdvisorId,
         testimonialsCountByAdvisorId,
