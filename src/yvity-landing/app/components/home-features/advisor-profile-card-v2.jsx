@@ -199,6 +199,15 @@ export function AdvisorProfileCardV2({
         </div>
       </div>
 
+      {/* ── Teal-to-gold glowing divider ── */}
+      <div
+        className="h-[2px] w-full"
+        style={{
+          background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 42%, #F59E0B 68%, #FFAE26 100%)",
+          boxShadow: "0 0 6px 1px rgba(20,184,166,0.55), 0 0 14px 2px rgba(245,158,11,0.40)",
+        }}
+      />
+
       {/* ── Body: warm cream ── */}
       <div className="bg-[#F8F6F1] px-4 pb-3 pt-2.5">
 
