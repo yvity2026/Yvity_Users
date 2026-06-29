@@ -244,7 +244,7 @@ export function AdvisorProfileCardV2({
         </div>
 
         {/* Stats — 4-column grid with dividers, tighter padding, larger text */}
-        <div className="mb-2 grid grid-cols-4 divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
+        <div className="mb-4 grid grid-cols-4 divide-x divide-[#0A4A4A]/8 overflow-hidden rounded-2xl border border-[#0A4A4A]/10 bg-white shadow-[0_1px_6px_rgba(10,74,74,0.05)]">
           {statItems.map(({ icon: Icon, value, label }) => (
             <div key={label} className="flex flex-col items-center gap-0.5 px-1 py-2">
               <Icon className="h-3.5 w-3.5 text-[#F59E0B]" strokeWidth={1.8} />
