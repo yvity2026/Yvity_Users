@@ -162,7 +162,7 @@ export function AdvisorProfileCardV2({
             {/* Inner warm glow */}
             <div className="absolute -inset-[5px] rounded-full bg-[#F59E0B]/30 blur-md" />
             {/* Gold border — relative so IdentityVerifiedTick anchors to it */}
-            <div className="relative rounded-full bg-gradient-to-br from-[#F59E0B] via-[#FFAE26] to-[#D97706] p-[3px]">
+            <div className="relative rounded-full bg-gradient-to-br from-[#0D6060] via-[#14B8A6] to-[#F59E0B] p-[3px]">
               <div className="h-[96px] w-[96px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
@@ -199,13 +199,10 @@ export function AdvisorProfileCardV2({
         </div>
       </div>
 
-      {/* ── Teal-to-gold glowing divider ── */}
+      {/* ── Gold hairline divider ── */}
       <div
-        className="h-[2px] w-full"
-        style={{
-          background: "linear-gradient(90deg, #0D6060 0%, #14B8A6 42%, #F59E0B 68%, #FFAE26 100%)",
-          boxShadow: "0 0 6px 1px rgba(20,184,166,0.55), 0 0 14px 2px rgba(245,158,11,0.40)",
-        }}
+        className="h-[1px] w-full"
+        style={{ background: "linear-gradient(90deg, #F59E0B, #FFAE26, #D97706)" }}
       />
 
       {/* ── Body: warm cream ── */}
