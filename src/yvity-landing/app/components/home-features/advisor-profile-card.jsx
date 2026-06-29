@@ -22,6 +22,7 @@ import {
 import { usePrefersReducedMotion } from "@/yvity-landing/hooks/usePrefersReducedMotion";
 import { formatAverageRating, formatExperienceDisplay } from "@/yvity-landing/lib/advisor/publicMetrics";
 import { AdvisorScoreAvatarRing } from "./advisor-score-avatar-ring";
+import { MdrtIcon } from "@/components/ui/mdrt-icon";
 
 const SERVICE_ICONS = {
   "Life Insurance": Shield,
@@ -67,33 +68,39 @@ function ServicePill({ label, compact = false }) {
 }
 
 function AchievementBadge({ label, compact = false }) {
-  const shortLabel = label.startsWith("MDRT") ? "MDRT" : label;
+  const isMdrt = label.startsWith("MDRT") || label === "COT" || label === "TOT";
+  const displayLabel = label.startsWith("MDRT") ? label : label;
+
+  if (isMdrt) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30 backdrop-blur-sm">
+        <MdrtIcon size={compact ? 12 : 14} className="shrink-0 brightness-0 invert" />
+        <span className={`font-poppins font-bold leading-tight text-white ${compact ? "text-[8px]" : "text-[9px]"}`}>
+          {displayLabel}
+        </span>
+      </span>
+    );
+  }
 
   return (
-    <span
-      className={
-        compact
-          ? "inline-flex items-center gap-1 rounded-full bg-[#FFF9E8] px-2 py-0.5 font-poppins text-[10px] font-bold leading-tight text-[#92400E] ring-1 ring-[#F59E0B]/35"
-          : "inline-flex items-center gap-1 rounded-full bg-[#FFF9E8] px-2 py-0.5 font-poppins text-[10px] font-bold leading-tight text-[#92400E] ring-1 ring-[#F59E0B]/35"
-      }
-    >
+    <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF9E8] px-2 py-0.5 font-poppins text-[10px] font-bold leading-tight text-[#92400E] ring-1 ring-[#F59E0B]/35">
       <Trophy className="h-3 w-3 shrink-0 text-[#F59E0B]" strokeWidth={2} />
-      <span>{shortLabel}</span>
+      <span>{displayLabel}</span>
     </span>
   );
 }
 
 function YvityVerifiedBadge({ compact = false }) {
   return (
-    <div className={`inline-flex items-center gap-1 rounded-full bg-[#0A4A4A] ring-1 ring-[#F59E0B]/40 shadow-[0_2px_8px_rgba(10,74,74,0.45)] ${compact ? "px-1.5 py-[3px]" : "px-2 py-1"}`}>
+    <div className={`inline-flex items-center gap-1.5 rounded-full bg-[#F8F6F1] ring-1 ring-[#0A4A4A]/20 shadow-[0_2px_8px_rgba(10,74,74,0.18)] ${compact ? "px-1.5 py-[3px]" : "px-2.5 py-1"}`}>
       <Image
         src="/brand/yvity-logo.png"
         alt="YVITY"
         width={10}
         height={10}
-        className={compact ? "h-2.5 w-2.5 object-contain brightness-[1.2]" : "h-3 w-3 object-contain brightness-[1.2]"}
+        className={compact ? "h-2.5 w-2.5 object-contain" : "h-3 w-3 object-contain"}
       />
-      <span className={`font-poppins font-bold tracking-wide text-[#F59E0B] ${compact ? "text-[8px]" : "text-[9px]"}`}>
+      <span className={`font-poppins font-bold tracking-wide text-[#0A4A4A] ${compact ? "text-[8px]" : "text-[9px]"}`}>
         Verified
       </span>
     </div>
