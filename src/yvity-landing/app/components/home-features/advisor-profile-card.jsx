@@ -256,11 +256,15 @@ function AdvisorProfileCardCompact({
   const numericScore = Math.min(100, Math.max(0, Number(score) || 0));
   const servicePills = resolveServicePills(serviceTypes);
 
+  const numericRecs = Number(recs) || 0;
+  const clientsDisplay = Number(clients) > 0 ? `${clients}+` : (clients ?? "0");
+  const clientsLabelDisplay = clientsLabel === "Clients" ? "Clients Served" : clientsLabel;
+
   const statItems = [
-    { icon: Briefcase, value: formatExperienceDisplay(exp), label: "Exp." },
-    { icon: Star,      value: formatAverageRating(avgRating), label: "Rating" },
-    { icon: Users,     value: clients,                        label: clientsLabel },
-    { icon: ThumbsUp,  value: recs,                           label: "Recs" },
+    { icon: Briefcase, value: formatExperienceDisplay(exp),    label: "Exp."            },
+    { icon: Star,      value: formatAverageRating(avgRating),  label: "Rating"          },
+    { icon: Users,     value: clientsDisplay,                  label: clientsLabelDisplay },
+    ...(numericRecs > 0 ? [{ icon: ThumbsUp, value: String(numericRecs), label: "Recs" }] : []),
   ];
 
   return (
@@ -350,8 +354,8 @@ function AdvisorProfileCardCompact({
               </div>
             </div>
 
-            {/* Stats — 4 in a row */}
-            <div className="advisor-card-gold-glass-panel grid grid-cols-4 gap-1 px-2 py-2">
+            {/* Stats — 3 or 4 in a row depending on recs */}
+            <div className={`advisor-card-gold-glass-panel grid gap-1 px-2 py-2 ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}>
               {statItems.map(({ icon, value, label }) => (
                 <StatCellCompact key={label} icon={icon} value={value} label={label} />
               ))}
@@ -394,11 +398,15 @@ export function AdvisorProfileCard({
   const numericScore = Math.min(100, Math.max(0, Number(score) || 0));
   const servicePills = resolveServicePills(serviceTypes);
 
+  const numericRecs = Number(recs) || 0;
+  const clientsDisplay = Number(clients) > 0 ? `${clients}+` : (clients ?? "0");
+  const clientsLabelDisplay = clientsLabel === "Clients" ? "Clients Served" : clientsLabel;
+
   const statItems = [
-    { icon: Briefcase, value: formatExperienceDisplay(exp), label: "Experience"  },
-    { icon: Star,      value: formatAverageRating(avgRating), label: "Avg. Rating" },
-    { icon: Users,     value: clients,                        label: clientsLabel  },
-    { icon: ThumbsUp,  value: recs,                           label: "Recommends"  },
+    { icon: Briefcase, value: formatExperienceDisplay(exp),   label: "Experience"       },
+    { icon: Star,      value: formatAverageRating(avgRating), label: "Avg. Rating"      },
+    { icon: Users,     value: clientsDisplay,                 label: clientsLabelDisplay },
+    ...(numericRecs > 0 ? [{ icon: ThumbsUp, value: String(numericRecs), label: "Recommends" }] : []),
   ];
 
   return (
@@ -490,8 +498,8 @@ export function AdvisorProfileCard({
               </div>
             </div>
 
-            {/* Stats 2×2 */}
-            <div className="advisor-card-gold-glass-panel grid grid-cols-2 gap-2 p-2.5">
+            {/* Stats — 2×2 or 1×3 row depending on recs */}
+            <div className={`advisor-card-gold-glass-panel grid gap-2 p-2.5 ${statItems.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
               {statItems.map(({ icon, value, label }) => (
                 <StatCell key={label} icon={icon} value={value} label={label} />
               ))}
