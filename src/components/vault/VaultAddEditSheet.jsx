@@ -86,7 +86,7 @@ export default function VaultAddEditSheet({ category, item, open, onClose, onSav
       {/* Sheet */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-3xl bg-white shadow-xl transition-transform duration-300",
+          "fixed bottom-0 left-0 right-0 z-50 flex max-h-[92dvh] flex-col rounded-t-3xl bg-white shadow-xl transition-transform duration-300 lg:left-1/4 lg:right-1/4 lg:rounded-3xl",
           open ? "translate-y-0" : "translate-y-full",
         )}
       >
