@@ -1,13 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { PublicProfileFooterLayout } from "@/components/public-profile-footer-layout";
 import { SiteChrome } from "@/components/site-chrome";
 import { Providers } from "@/components/providers";
+import { PwaInit } from "@/components/pwa/pwa-init";
+import { AddToHomeScreenBanner } from "@/components/pwa/add-to-home-screen-banner";
 import { brandFontClassName } from "@/lib/brand-fonts";
-import { COMPANY_NAME, COMPANY_TAGLINE } from "@/lib/brand";
+import { COMPANY_NAME } from "@/lib/brand";
 import { platformOpenGraphImage } from "@/lib/social/platform-public-metadata";
 import { getSiteOrigin } from "@/lib/social/site-origin";
 import "./globals.css";
 import "./yvity-landing.css";
+
+export const viewport: Viewport = {
+  themeColor: "#0A4A4A",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
@@ -18,8 +28,16 @@ export const metadata: Metadata = {
   description:
     "Find verified, IRDAI-ready insurance advisors near you — or build your own credible profile that speaks before you do. Free to join. Trusted by advisors & clients across India.",
   icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: "/brand/yvity-logo.png",
+    apple: "/brand/yvity-logo.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "YVITY",
+  },
+  formatDetection: {
+    telephone: false,
   },
   openGraph: {
     title: `${COMPANY_NAME} — India's First Credibility Platform for Insurance Advisors`,
@@ -45,7 +63,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteChrome />
           {children}
           <PublicProfileFooterLayout />
+          <AddToHomeScreenBanner />
         </Providers>
+        <PwaInit />
       </body>
     </html>
   );
