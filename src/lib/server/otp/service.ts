@@ -181,6 +181,32 @@ export async function issueOtp(input: {
   };
 }
 
+/** Validate OTP without consuming it — use for pre-verification steps. */
+export async function peekIssuedOtp(
+  identifier: string,
+  purpose: string,
+  token: string,
+  channel?: OtpChannel,
+): Promise<boolean> {
+  const resolvedChannel = channel ?? inferOtpChannel(identifier);
+  const normalized = normalizeOtpIdentifier(identifier, resolvedChannel);
+  const purposeKey = otpPurposeKey(normalized, purpose);
+  const submitted = String(token).trim();
+
+  if (!/^\d{6}$/.test(submitted)) return false;
+
+  if (isDemoOtpEnabled() && submitted === DUMMY_OTP) return true;
+
+  const record = await readOtp(purposeKey);
+  if (!record) return false;
+  if (Date.now() > record.expiresAt) {
+    await deleteOtp(purposeKey);
+    return false;
+  }
+  return submitted === record.code;
+}
+
+/** Validate OTP and consume (delete) it — use for final submission. */
 export async function verifyIssuedOtp(
   identifier: string,
   purpose: string,
