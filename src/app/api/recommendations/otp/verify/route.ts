@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyIssuedOtp } from "@/lib/server/otp/service";
+import { peekIssuedOtp } from "@/lib/server/otp/service";
 import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
 
 export async function POST(request: Request) {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Mobile number is required." }, { status: 400 });
   }
 
-  const valid = await verifyIssuedOtp(mobile, OTP_PURPOSE.RECOMMENDATION, otp, "whatsapp");
+  const valid = await peekIssuedOtp(mobile, OTP_PURPOSE.RECOMMENDATION, otp, "whatsapp");
   if (!valid) {
     return NextResponse.json({ error: "Invalid OTP. Please try again." }, { status: 401 });
   }
