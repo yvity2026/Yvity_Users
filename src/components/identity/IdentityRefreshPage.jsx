@@ -62,7 +62,7 @@ export default function IdentityRefreshPage() {
       const formData = new FormData();
       formData.append("image", blob, "identity-refresh.jpg");
 
-      const uploadRes = await fetch("/api/auth/upload-selfie", {
+      const uploadRes = await fetch("/api/auth/selfie", {
         method: "POST",
         body: formData,
       });

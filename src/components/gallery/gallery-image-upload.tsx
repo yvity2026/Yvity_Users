@@ -34,7 +34,7 @@ export function GalleryImageUpload({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/gallery/upload", { method: "POST", body: formData });
+      const res = await fetch("/api/gallery/photos", { method: "POST", body: formData });
       const json = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || !json.url) {
         throw new Error(json.error ?? "Upload failed");

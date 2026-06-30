@@ -6,6 +6,7 @@ export const OTP_PURPOSE = {
   CHANGE_EMAIL: "change-email",
   TESTIMONIAL: "testimonial",
   RECOMMENDATION: "recommendation",
+  PLATFORM_REVIEW: "platform-review",
   SENSITIVE_PHONE: "sensitive-phone",
   SENSITIVE_EMAIL: "sensitive-email",
   dangerZone: (action: string) => `danger-zone:${action}`,

@@ -463,10 +463,10 @@ function AdvisorProfileCardCompact({
           {statItems.map(({ icon: Icon, value, label }) => (
             <div key={label} className="flex flex-col items-center gap-0.5 px-1 py-1.5">
               <Icon className="h-3 w-3 text-[#F59E0B]" strokeWidth={1.8} />
-              <p className="font-poppins text-[11px] font-bold leading-tight tabular-nums text-[#0A4A4A]">
+              <p className="font-poppins text-[11px] font-bold leading-tight tabular-nums text-[#0A4A4A] text-center">
                 {value}
               </p>
-              <p className="font-poppins text-[8px] font-medium leading-tight text-[#9CA3AF]">
+              <p className="font-poppins text-[8px] font-medium leading-tight text-[#9CA3AF] text-center">
                 {label}
               </p>
             </div>
@@ -649,10 +649,10 @@ export function AdvisorProfileCard({
           {statItems.map(({ icon: Icon, value, label }) => (
             <div key={label} className={`flex flex-col items-center gap-0.5 px-1 ${statPy}`}>
               <Icon className={`text-[#F59E0B] ${statIcon}`} strokeWidth={1.8} />
-              <p className={`font-poppins font-bold leading-tight tabular-nums text-[#0A4A4A] ${statVal}`}>
+              <p className={`font-poppins font-bold leading-tight tabular-nums text-[#0A4A4A] text-center ${statVal}`}>
                 {value}
               </p>
-              <p className={`font-poppins font-medium leading-tight text-[#9CA3AF] ${statLbl}`}>
+              <p className={`font-poppins font-medium leading-tight text-[#9CA3AF] text-center ${statLbl}`}>
                 {label}
               </p>
             </div>

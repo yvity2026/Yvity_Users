@@ -141,7 +141,7 @@ export function buildCommunityTrustStatsFromCounts(input: {
     },
     {
       id: "recommendations",
-      label: "Recommendations",
+      label: "Recommends",
       value: input.recommendationCount,
       trend: recommendationTrend,
     },
