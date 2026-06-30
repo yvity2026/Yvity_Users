@@ -85,7 +85,7 @@ export default function VaultItemDetail() {
   if (!catMeta) return null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-32 pt-4">
+    <div className="mx-auto max-w-3xl px-4 pb-32 pt-4">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">

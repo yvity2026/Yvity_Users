@@ -54,7 +54,7 @@ export default function VaultDashboard() {
   const isSearching = query.trim().length > 0;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-32 pt-6">
+    <div className="mx-auto max-w-5xl px-4 pb-32 pt-6">
       {/* Header */}
       <div className="mb-2 flex items-center gap-2">
         <Lock size={18} className="text-[#B8A165]" />
@@ -131,7 +131,7 @@ export default function VaultDashboard() {
         </>
       ) : (
         /* Category grid */
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {VAULT_CATEGORIES.map((cat) => {
             const count = counts[cat.id] ?? 0;
             return (
