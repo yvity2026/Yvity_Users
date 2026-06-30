@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ success: false, message: "Not signed in" }, { status: 401 });
     }
 
-    const data = getAmbassadorDashboardForUser(session.id);
+    const data = await getAmbassadorDashboardForUser(session.id);
 
     return NextResponse.json({
       success: true,

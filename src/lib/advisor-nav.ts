@@ -4,6 +4,7 @@ import {
   Briefcase,
   Crown,
   Gauge,
+  Gift,
   Globe,
   Image as ImageIcon,
   LayoutDashboard,
@@ -23,6 +24,7 @@ export type AdvisorTopSection =
   | "profile"
   | "insights"
   | "membership"
+  | "referral"
   | "settings";
 
 /** Profile Management sub-sections (existing editable showcases). */
@@ -80,6 +82,13 @@ export const ADVISOR_TOP_NAV: AdvisorNavItem<AdvisorTopSection>[] = [
     shortLabel: "Plan",
     icon: Crown,
     description: "Your YVITY plan, benefits and verification status.",
+  },
+  {
+    id: "referral",
+    label: "Referral Program",
+    shortLabel: "Referral",
+    icon: Gift,
+    description: "Earn credits by referring advisors. Redeem for membership extensions.",
   },
   {
     id: "settings",

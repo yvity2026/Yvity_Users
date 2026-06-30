@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = registerUserRecord({
+    const user = await registerUserRecord({
       fullName: body.fullName,
       phone: mobile,
       dob: body.dob ?? "",

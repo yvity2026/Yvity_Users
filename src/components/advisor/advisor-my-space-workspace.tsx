@@ -25,6 +25,7 @@ import { AdvisorInsightsModule } from "@/components/advisor/insights/advisor-ins
 import { AdvisorMembershipModule } from "@/components/advisor/membership/advisor-membership-module";
 import { AdvisorSettingsModule } from "@/components/advisor/settings/advisor-settings-module";
 import { AdvisorLeadsModule } from "@/components/advisor/leads/advisor-leads-module";
+import { AdvisorReferralModule } from "@/components/advisor/referral/AdvisorReferralModule";
 import { AdvisorSectionPlaceholder } from "@/components/advisor/advisor-section-placeholder";
 import {
   PublicProfilePreviewModule,
@@ -166,6 +167,7 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
       }
     }
     if (topSection === "leads") return <AdvisorLeadsModule />;
+    if (topSection === "referral") return <AdvisorReferralModule />;
     if (topSection === "insights") {
       return (
         <AdvisorInsightsModule

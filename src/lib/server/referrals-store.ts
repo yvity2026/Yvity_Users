@@ -7,6 +7,18 @@ import type { PaymentRecord } from "@/lib/server/payment-store";
 import { evaluateAndGrantRewardsForUser } from "@/lib/server/reward-engine";
 import { listPaidPaymentsForUser } from "@/lib/server/payment-store";
 import { loadRegistrationDb, mutateRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
+import {
+  loadAmbassadorFromDb,
+  findAmbassadorByCodeFromDb,
+  upsertAmbassadorInDb,
+  incrementAmbassadorTotalInDb,
+  insertReferralInDb,
+  loadReferralsForAmbassadorFromDb,
+  loadReferralForUserFromDb,
+  updateReferralStatusInDb,
+  type AmbassadorRow,
+  type ReferralRow,
+} from "@/lib/server/supabase/referrals-supabase";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const CONFIG_FILE = "ambassador-program-config.json";
@@ -142,20 +154,72 @@ function buildReferralLink(code: string): string {
   return `${base}/register?${param}=${encodeURIComponent(code)}`;
 }
 
+function ambassadorRowToRecord(row: AmbassadorRow): AmbassadorRecord {
+  return {
+    id: row.id,
+    userId: row.userId,
+    referralCode: row.referralCode,
+    status: row.status,
+    totalReferrals: row.totalReferrals,
+    successfulReferrals: row.successfulReferrals,
+    createdAt: row.createdAt,
+    promotedAt: row.promotedAt,
+    referralLink: row.referralLink ?? undefined,
+  };
+}
+
+function referralRowToRecord(row: ReferralRow): ReferralRecord {
+  return {
+    id: row.id,
+    referrerUserId: row.referrerUserId,
+    referrerCode: row.referrerCode,
+    referredUserId: row.referredUserId,
+    referredUserName: row.referredUserName,
+    registeredAt: row.registeredAt,
+    planPurchased: row.planPurchased,
+    purchasedAt: row.purchasedAt,
+    paymentId: row.paymentId,
+    status: row.status,
+    rewardId: row.rewardId,
+  };
+}
+
 export type { AmbassadorDashboardData } from "@/lib/advisor/ambassador-types";
 
-export function ensureAmbassadorForUser(userId: string): AmbassadorRecord {
+export async function ensureAmbassadorForUser(userId: string): Promise<AmbassadorRecord> {
+  // Try Supabase first
+  const fromDb = await loadAmbassadorFromDb(userId);
+  if (fromDb) {
+    const record = ambassadorRowToRecord(fromDb);
+    if (!record.referralLink) {
+      record.referralLink = buildReferralLink(record.referralCode);
+    }
+    return record;
+  }
+
+  // Fall back to local file (dev environment)
   const ambassadorsDb = loadAmbassadorsDb();
   const existing = ambassadorsDb.ambassadors[userId];
   if (existing) {
     if (!existing.referralLink) {
       existing.referralLink = buildReferralLink(existing.referralCode);
-      ambassadorsDb.ambassadors[userId] = existing;
-      saveAmbassadorsDb(ambassadorsDb);
     }
+    // Sync local record to Supabase if it exists locally but not in DB
+    await upsertAmbassadorInDb({
+      id: existing.id,
+      userId: existing.userId,
+      referralCode: existing.referralCode,
+      status: existing.status,
+      totalReferrals: existing.totalReferrals,
+      successfulReferrals: existing.successfulReferrals,
+      referralLink: existing.referralLink ?? null,
+      createdAt: existing.createdAt,
+      promotedAt: existing.promotedAt,
+    });
     return existing;
   }
 
+  // Create new ambassador
   const code = generateAdvisorReferralCode();
   const now = new Date().toISOString();
   const ambassador: AmbassadorRecord = {
@@ -170,20 +234,38 @@ export function ensureAmbassadorForUser(userId: string): AmbassadorRecord {
     referralLink: buildReferralLink(code),
   };
 
+  // Persist to Supabase
+  await upsertAmbassadorInDb({
+    id: ambassador.id,
+    userId: ambassador.userId,
+    referralCode: ambassador.referralCode,
+    status: ambassador.status,
+    totalReferrals: ambassador.totalReferrals,
+    successfulReferrals: ambassador.successfulReferrals,
+    referralLink: ambassador.referralLink ?? null,
+    createdAt: ambassador.createdAt,
+    promotedAt: ambassador.promotedAt,
+  });
+
+  // Also write locally in dev
   ambassadorsDb.ambassadors[userId] = ambassador;
   saveAmbassadorsDb(ambassadorsDb);
+
   return ambassador;
 }
 
-export function getAmbassadorDashboardForUser(userId: string): AmbassadorDashboardData {
+export async function getAmbassadorDashboardForUser(userId: string): Promise<AmbassadorDashboardData> {
   const config = loadConfig();
   const programActive = config.status !== "paused";
   const qualifyingPlans = config.referralRules?.qualifyingPlans || ["silver", "gold"];
-  const ambassador = ensureAmbassadorForUser(userId);
+  const ambassador = await ensureAmbassadorForUser(userId);
 
-  const referrals = Object.values(loadReferralsDb().referrals).filter(
-    (row) => row.referrerUserId === userId,
-  );
+  // Load referrals from Supabase
+  const dbReferrals = await loadReferralsForAmbassadorFromDb(userId);
+  const referrals: ReferralRecord[] = dbReferrals.length > 0
+    ? dbReferrals.map(referralRowToRecord)
+    : Object.values(loadReferralsDb().referrals).filter((row) => row.referrerUserId === userId);
+
   const pendingRewards = Object.values(loadRewardsDb().rewards).filter(
     (row) =>
       row.referrerUserId === userId && (row.status === "pending" || row.status === "approved"),
@@ -214,9 +296,15 @@ export function getAmbassadorDashboardForUser(userId: string): AmbassadorDashboa
   };
 }
 
-export function findAmbassadorByReferralCode(code: string): AmbassadorRecord | null {
+export async function findAmbassadorByReferralCode(code: string): Promise<AmbassadorRecord | null> {
   const normalized = normalizeReferralCode(code);
   if (!normalized) return null;
+
+  // Try Supabase first
+  const fromDb = await findAmbassadorByCodeFromDb(normalized);
+  if (fromDb) return ambassadorRowToRecord(fromDb);
+
+  // Fall back to local file
   const db = loadAmbassadorsDb();
   return (
     Object.values(db.ambassadors).find(
@@ -225,7 +313,7 @@ export function findAmbassadorByReferralCode(code: string): AmbassadorRecord | n
   );
 }
 
-export function recordReferralOnRegistration(input: {
+export async function recordReferralOnRegistration(input: {
   referredUser: RegisteredUser;
   referralCode?: string | null;
 }) {
@@ -235,14 +323,18 @@ export function recordReferralOnRegistration(input: {
   const code = normalizeReferralCode(input.referralCode || "");
   if (!code) return null;
 
-  const ambassador = findAmbassadorByReferralCode(code);
+  const ambassador = await findAmbassadorByReferralCode(code);
   if (!ambassador || ambassador.userId === input.referredUser.id) return null;
 
+  // Check if this user was already referred (Supabase first, then local)
+  const existingInDb = await loadReferralForUserFromDb(input.referredUser.id);
+  if (existingInDb) return referralRowToRecord(existingInDb);
+
   const referralsDb = loadReferralsDb();
-  const existing = Object.values(referralsDb.referrals).find(
+  const existingLocal = Object.values(referralsDb.referrals).find(
     (row) => row.referredUserId === input.referredUser.id,
   );
-  if (existing) return existing;
+  if (existingLocal) return existingLocal;
 
   const referralId = randomUUID();
   const referral: ReferralRecord = {
@@ -259,6 +351,23 @@ export function recordReferralOnRegistration(input: {
     rewardId: null,
   };
 
+  // Persist to Supabase
+  await insertReferralInDb({
+    id: referral.id,
+    referrerUserId: referral.referrerUserId,
+    referrerCode: referral.referrerCode,
+    referredUserId: referral.referredUserId,
+    referredUserName: referral.referredUserName,
+    registeredAt: referral.registeredAt,
+    planPurchased: null,
+    purchasedAt: null,
+    paymentId: null,
+    status: "registered",
+    rewardId: null,
+  });
+  await incrementAmbassadorTotalInDb(ambassador.userId, "total_referrals");
+
+  // Also write locally in dev
   referralsDb.referrals[referralId] = referral;
   saveReferralsDb(referralsDb);
 
@@ -311,21 +420,34 @@ export async function qualifyReferralOnPayment(input: {
     return null;
   }
 
-  const referralsDb = loadReferralsDb();
-  const referral = Object.values(referralsDb.referrals).find(
-    (row) => row.referredUserId === input.userId && row.status === "registered",
-  );
-  if (!referral) return null;
+  // Find referral in Supabase
+  const dbReferral = await loadReferralForUserFromDb(input.userId);
+  const referral = dbReferral
+    ? referralRowToRecord(dbReferral)
+    : Object.values(loadReferralsDb().referrals).find(
+        (row) => row.referredUserId === input.userId && row.status === "registered",
+      );
 
-  referralsDb.referrals[referral.id] = {
-    ...referral,
-    status: "qualified",
+  if (!referral || referral.status !== "registered") return null;
+
+  const updates = {
+    status: "qualified" as const,
     planPurchased: input.payment.plan_id,
     purchasedAt: input.payment.paid_at || new Date().toISOString(),
     paymentId: input.payment.razorpay_payment_id || input.payment.id,
     rewardId: referral.rewardId,
   };
-  saveReferralsDb(referralsDb);
+
+  // Update Supabase
+  await updateReferralStatusInDb(referral.id, updates);
+  await incrementAmbassadorTotalInDb(referral.referrerUserId, "successful_referrals");
+
+  // Update local file in dev
+  const referralsDb = loadReferralsDb();
+  if (referralsDb.referrals[referral.id]) {
+    referralsDb.referrals[referral.id] = { ...referral, ...updates };
+    saveReferralsDb(referralsDb);
+  }
 
   const ambassadorsDb = loadAmbassadorsDb();
   const ambassador = ambassadorsDb.ambassadors[referral.referrerUserId];
@@ -338,7 +460,7 @@ export async function qualifyReferralOnPayment(input: {
   const engineGrants = evaluateAndGrantRewardsForUser(referral.referrerUserId);
 
   return {
-    referral: referralsDb.referrals[referral.id],
+    referral: { ...referral, ...updates },
     grants: engineGrants.grants,
   };
 }

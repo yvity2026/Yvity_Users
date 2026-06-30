@@ -103,7 +103,7 @@ export function createVerifiedPayload(identifier: string): VerifiedPayload {
   return { identifier, expiresAt: Date.now() + VERIFIED_TTL_MS };
 }
 
-export function registerUserRecord(input: {
+export async function registerUserRecord(input: {
   fullName: string;
   phone: string;
   dob: string;
@@ -114,7 +114,7 @@ export function registerUserRecord(input: {
   profession: string;
   selfieUrl?: string | null;
   referralCode?: string | null;
-}): RegisteredUser {
+}): Promise<RegisteredUser> {
   const phone = normalizeIndianMobile(input.phone);
   const email = normalizeEmail(input.email);
 
@@ -148,7 +148,7 @@ export function registerUserRecord(input: {
 
   if (input.referralCode) {
     try {
-      recordReferralOnRegistration({
+      await recordReferralOnRegistration({
         referredUser: user,
         referralCode: input.referralCode,
       });
