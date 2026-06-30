@@ -8,7 +8,7 @@ import {
   appendNotification,
   hasNotificationKind,
 } from "@/lib/server/notifications-store";
-import { loadRegistrationDb } from "@/lib/server/registration-store";
+import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
 import type { AdvisorProfileRecord } from "@/lib/server/advisor-profile-store";
 import { sendApprovalEmail, sendApprovalWhatsApp } from "@/lib/server/outbound-messaging";
 
@@ -27,7 +27,7 @@ export async function notifyProfileApproved(
   profile: AdvisorProfileRecord,
   options: { sendOutbound?: boolean } = {},
 ): Promise<void> {
-  const user = loadRegistrationDb().users.find((item) => item.id === profile.user_id);
+  const user = await loadUserByIdFromDb(profile.user_id);
   const advisorName = user?.fullName?.trim() || "Advisor";
   const baseUrl = resolveBaseUrl();
   const profileUrl = `${baseUrl}${buildPublicProfilePath(profile.profile_slug)}`;
@@ -77,7 +77,7 @@ export async function notifyProfileRejected(
   profile: AdvisorProfileRecord,
   reason: string,
 ): Promise<void> {
-  const user = loadRegistrationDb().users.find((item) => item.id === profile.user_id);
+  const user = await loadUserByIdFromDb(profile.user_id);
   const advisorName = user?.fullName?.trim() || "Advisor";
   const baseUrl = resolveBaseUrl();
   const resubmitUrl = `${baseUrl}/dashboard/my-space?setup=profile`;

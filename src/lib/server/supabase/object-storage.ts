@@ -38,12 +38,12 @@ export function isSupabasePublicStorageUrl(
   return trimmed.includes(`/storage/v1/object/public/${bucket}/`);
 }
 
-/** Public buckets serve files via a public URL (selfies, gallery, intro video). */
-const PUBLIC_BUCKETS = new Set<StorageBucket>(["selfies", "gallery", "intro-video"]);
+/** Public buckets serve files via a public URL (selfies, gallery, intro video, testimonials). */
+const PUBLIC_BUCKETS = new Set<StorageBucket>(["selfies", "gallery", "intro-video", "testimonials"]);
 
 /**
- * Ensures a storage bucket exists, creating it if missing.
- * Safe to call on every upload — Supabase returns a no-op if the bucket already exists.
+ * Ensures a storage bucket exists with the correct public flag.
+ * Creates it if missing; updates the public setting if it already exists with wrong config.
  */
 async function ensureBucket(supabase: NonNullable<ReturnType<typeof getAdminClientOrNull>>, bucket: StorageBucket): Promise<void> {
   const isPublic = PUBLIC_BUCKETS.has(bucket);
@@ -51,9 +51,13 @@ async function ensureBucket(supabase: NonNullable<ReturnType<typeof getAdminClie
     public: isPublic,
     allowedMimeTypes: undefined, // allow all — validation is done in app layer
   });
-  // "already exists" is not a real error
-  if (error && !error.message.toLowerCase().includes("already exist")) {
-    console.warn(`[storage] Could not ensure bucket "${bucket}": ${error.message}`);
+  if (error) {
+    if (!error.message.toLowerCase().includes("already exist")) {
+      console.warn(`[storage] Could not ensure bucket "${bucket}": ${error.message}`);
+    } else {
+      // Bucket already exists — sync its public flag in case it was created with wrong settings
+      await supabase.storage.updateBucket(bucket, { public: isPublic }).catch(() => {});
+    }
   }
 }
 
