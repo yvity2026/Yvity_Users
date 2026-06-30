@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 import { getSessionUser } from "@/lib/server/session";
+import { verifyOtpCode } from "@/lib/server/auth";
+import { OTP_PURPOSE } from "@/lib/server/otp/purposes";
+import { saveTestimonialMedia, validateTestimonialMedia } from "@/lib/server/testimonial-uploads";
+
+export const runtime = "nodejs";
 
 type PlatformTestimonialRow = {
   id: string;
@@ -18,7 +23,6 @@ type PlatformTestimonialRow = {
 
 function mapForLanding(row: PlatformTestimonialRow) {
   const type = row.testimonial_type || "text";
-
   return {
     id: row.id,
     name: row.name,
@@ -38,6 +42,17 @@ function mapForLanding(row: PlatformTestimonialRow) {
   };
 }
 
+function parseType(val: FormDataEntryValue | null): "text" | "audio" | "video" {
+  if (val === "audio") return "audio";
+  if (val === "video") return "video";
+  return "text";
+}
+
+function isValidMobile(mobile: string): boolean {
+  const digits = mobile.replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = getAdminClientOrNull();
@@ -45,36 +60,80 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Service unavailable." }, { status: 503 });
     }
 
-    const body = (await request.json()) as {
-      rating?: unknown;
-      content?: unknown;
-      name?: unknown;
-      respondentType?: unknown;
-    };
+    const formData = await request.formData();
 
-    const rating = Number(body.rating);
+    const otp     = String(formData.get("otp")     ?? "").trim();
+    const type    = parseType(formData.get("type"));
+    const name    = String(formData.get("name")    ?? "").trim();
+    const mobile  = String(formData.get("mobile")  ?? "").trim();
+    const profession   = String(formData.get("profession")   ?? "").trim();
+    const city         = String(formData.get("city")         ?? "").trim();
+    const content      = String(formData.get("content")      ?? "").trim();
+    const respondentType = formData.get("respondentType") === "advisor" ? "advisor" : "customer";
+    const audioDuration = String(formData.get("audioDuration") ?? "").trim();
+    const videoDuration = String(formData.get("videoDuration") ?? "").trim();
+    const media = formData.get("media");
+
+    const rating = Number(formData.get("rating"));
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return NextResponse.json({ error: "A rating between 1 and 5 is required." }, { status: 400 });
     }
 
-    const content = typeof body.content === "string" ? body.content.trim().slice(0, 1000) : null;
-    const respondentType = body.respondentType === "advisor" ? "advisor" : "customer";
+    if (!name || name.length < 2) {
+      return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
+    }
 
-    // Use session name if available, otherwise use submitted name
+    if (!isValidMobile(mobile)) {
+      return NextResponse.json({ error: "Enter a valid mobile number." }, { status: 400 });
+    }
+
+    // OTP check — skipped for signed-in users
     const session = await getSessionUser();
-    const submittedName = typeof body.name === "string" ? body.name.trim().slice(0, 100) : "";
-    const name = submittedName || (session ? "YVITY Member" : "Anonymous");
+    const skipOtp = Boolean(session?.id);
+    if (!skipOtp) {
+      if (!otp || otp.length < 6) {
+        return NextResponse.json({ error: "Enter the 6-digit OTP sent to your mobile." }, { status: 400 });
+      }
+      if (!(await verifyOtpCode(mobile, OTP_PURPOSE.PLATFORM_REVIEW, otp))) {
+        return NextResponse.json({ error: "Invalid OTP. Please try again." }, { status: 401 });
+      }
+    }
+
+    // Validate content for text type
+    if (type === "text" && !content) {
+      return NextResponse.json({ error: "Please share your experience in writing." }, { status: 400 });
+    }
+
+    // Media upload for audio/video
+    let mediaUrl: string | null = null;
+    if ((type === "audio" || type === "video") && media instanceof File && media.size > 0) {
+      const mediaErr = validateTestimonialMedia(media, type);
+      if (mediaErr) return NextResponse.json({ error: mediaErr }, { status: 400 });
+      // Store under "platform/" subfolder in the shared testimonials bucket
+      const saved = await saveTestimonialMedia(media, type, "platform");
+      mediaUrl = saved.url;
+    } else if (type !== "text" && !mediaUrl) {
+      return NextResponse.json({ error: `Please upload your ${type} file.` }, { status: 400 });
+    }
+
+    const displayContent =
+      type === "text"
+        ? content
+        : type === "audio"
+          ? (audioDuration ? `Audio • ${audioDuration}` : "Shared an audio review of YVITY.")
+          : (videoDuration ? `Video • ${videoDuration}` : "Shared a video review of YVITY.");
 
     const { error } = await supabase.from("yvity_testimonials").insert({
-      name,
-      profession: "",
-      city: "",
-      respondent_type: respondentType,
-      testimonial_type: "text",
+      name:             name.slice(0, 100),
+      profession:       profession.slice(0, 100) || "",
+      city:             city.slice(0, 100) || "",
+      respondent_type:  respondentType,
+      testimonial_type: type,
       testimonial_rating: rating,
-      content: content || null,
-      status: "approved",
-      user_id: session?.id ?? null,
+      content:          displayContent || null,
+      media_url:        mediaUrl,
+      status:           "approved",
+      user_id:          session?.id ?? null,
     });
 
     if (error) {
@@ -92,7 +151,6 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const supabase = getAdminClientOrNull();
-
     if (!supabase) {
       return NextResponse.json({ success: true, data: [] });
     }
