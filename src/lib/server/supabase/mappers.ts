@@ -43,7 +43,7 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       roleLabel,
       clients,
       claims,
-      sumInsured: "—",
+      sumInsured: parsed.sumInsured ?? "—",
       statusMessage,
       statusCaption: "",
       areas: Array.isArray(meta.areas) ? (meta.areas as import("@/lib/sections/types").ServiceArea[]) : [],

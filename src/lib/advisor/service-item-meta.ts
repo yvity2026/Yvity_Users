@@ -43,6 +43,9 @@ export function buildServiceGoldMeta(item: ServiceItem): Record<string, unknown>
   if (item.claimSettled && item.claimSettled.trim() && item.claimSettled !== "—") {
     meta.claimSettled = item.claimSettled.trim();
   }
+  if (item.sumInsured && item.sumInsured.trim() && item.sumInsured !== "—") {
+    meta.sumInsured = item.sumInsured.trim();
+  }
   return meta;
 }
 
@@ -59,6 +62,7 @@ export function parseServiceGoldMeta(meta: Record<string, unknown>, capacityFall
     branchCount: typeof meta.branchCount === "number" ? meta.branchCount : undefined,
     claimRatio: typeof meta.claimRatio === "number" ? meta.claimRatio : undefined,
     claimSettled: typeof meta.claimSettled === "string" ? meta.claimSettled : undefined,
+    sumInsured: typeof meta.sumInsured === "string" ? meta.sumInsured : undefined,
   };
 }
 
