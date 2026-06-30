@@ -4,7 +4,6 @@ import path from "path";
 import { canUseLocalDataFiles } from "@/lib/server/json-store";
 import type { AmbassadorDashboardData } from "@/lib/advisor/ambassador-types";
 import type { PaymentRecord } from "@/lib/server/payment-store";
-import { evaluateAndGrantRewardsForUser } from "@/lib/server/reward-engine";
 import { listPaidPaymentsForUser } from "@/lib/server/payment-store";
 import { loadRegistrationDb, mutateRegistrationDb, type RegisteredUser } from "@/lib/server/registration-store";
 import {
@@ -457,10 +456,7 @@ export async function qualifyReferralOnPayment(input: {
     saveAmbassadorsDb(ambassadorsDb);
   }
 
-  const engineGrants = evaluateAndGrantRewardsForUser(referral.referrerUserId);
-
   return {
     referral: { ...referral, ...updates },
-    grants: engineGrants.grants,
   };
 }

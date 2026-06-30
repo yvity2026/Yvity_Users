@@ -7,7 +7,7 @@ import {
   buildPaymentFailedWhatsAppMessage,
 } from "@/lib/notifications/payment-message";
 import { appendNotification } from "@/lib/server/notifications-store";
-import { loadRegistrationDb } from "@/lib/server/registration-store";
+import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
 import { sendApprovalEmail, sendApprovalWhatsApp } from "@/lib/server/outbound-messaging";
 import type { PaymentRecord } from "@/lib/server/payment-store";
 import { MEMBERSHIP_PLANS } from "@/lib/advisor-membership/plans";
@@ -25,7 +25,7 @@ function planName(planId: string): string {
 }
 
 export async function notifyPaymentSuccess(record: PaymentRecord): Promise<void> {
-  const user = loadRegistrationDb().users.find((u) => u.id === record.user_id);
+  const user = await loadUserByIdFromDb(record.user_id);
   const advisorName = user?.fullName?.trim() || "Advisor";
   const baseUrl = resolveBaseUrl();
   const dashboardUrl = `${baseUrl}/dashboard/my-space?tab=membership`;
@@ -49,9 +49,16 @@ export async function notifyPaymentSuccess(record: PaymentRecord): Promise<void>
 
   const emailPayload = buildPaymentSuccessEmail({
     advisorName,
+    advisorEmail: user?.email ?? null,
+    advisorPhone: user?.phone ?? null,
     planName: plan,
+    planId: record.plan_id,
     amountInr: record.amount_inr,
+    amountBeforeCouponInr: record.amount_before_coupon_inr ?? null,
+    couponCode: record.coupon_code ?? null,
+    couponDiscountInr: record.coupon_discount_inr ?? null,
     invoiceId,
+    razorpayPaymentId: record.razorpay_payment_id ?? null,
     paidAt,
     dashboardUrl,
   });
@@ -59,8 +66,13 @@ export async function notifyPaymentSuccess(record: PaymentRecord): Promise<void>
   const whatsappMessage = buildPaymentSuccessWhatsAppMessage({
     advisorName,
     planName: plan,
+    planId: record.plan_id,
     amountInr: record.amount_inr,
+    amountBeforeCouponInr: record.amount_before_coupon_inr ?? null,
+    couponCode: record.coupon_code ?? null,
+    couponDiscountInr: record.coupon_discount_inr ?? null,
     invoiceId,
+    razorpayPaymentId: record.razorpay_payment_id ?? null,
     paidAt,
     dashboardUrl,
   });
@@ -83,7 +95,7 @@ export async function notifyPaymentFailed(input: {
   userId: string;
   planId: string;
 }): Promise<void> {
-  const user = loadRegistrationDb().users.find((u) => u.id === input.userId);
+  const user = await loadUserByIdFromDb(input.userId);
   const advisorName = user?.fullName?.trim() || "Advisor";
   const baseUrl = resolveBaseUrl();
   const retryUrl = `${baseUrl}/dashboard/my-space?tab=membership`;
