@@ -167,7 +167,7 @@ export function PlatformReviewModal({
     }
     setSendingOtp(true);
     try {
-      const res = await fetch("/api/platform-testimonials/otp/send", {
+      const res = await fetch("/api/platform-reviews/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobile }),
@@ -216,7 +216,7 @@ export function PlatformReviewModal({
         if (type === "video" && mediaDuration) fd.set("videoDuration", mediaDuration);
       }
 
-      const res = await fetch("/api/platform-testimonials", { method: "POST", body: fd });
+      const res = await fetch("/api/platform-reviews", { method: "POST", body: fd });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) { setError(data.error ?? "Submission failed."); return; }
 

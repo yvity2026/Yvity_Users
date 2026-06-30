@@ -137,13 +137,13 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error("POST /api/platform-testimonials failed:", error);
+      console.error("POST /api/platform-reviews failed:", error);
       return NextResponse.json({ error: "Failed to submit review." }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("POST /api/platform-testimonials failed:", error);
+    console.error("POST /api/platform-reviews failed:", error);
     return NextResponse.json({ error: "Internal server error." }, { status: 500 });
   }
 }
@@ -166,8 +166,8 @@ export async function GET() {
       .limit(12);
 
     if (error) {
-      console.error("GET /api/platform-testimonials failed:", error);
-      return NextResponse.json({ error: "Unable to load testimonials" }, { status: 500 });
+      console.error("GET /api/platform-reviews failed:", error);
+      return NextResponse.json({ error: "Unable to load reviews" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -175,7 +175,7 @@ export async function GET() {
       data: (data || []).map((row) => mapForLanding(row as PlatformTestimonialRow)),
     });
   } catch (error) {
-    console.error("GET /api/platform-testimonials failed:", error);
+    console.error("GET /api/platform-reviews failed:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
