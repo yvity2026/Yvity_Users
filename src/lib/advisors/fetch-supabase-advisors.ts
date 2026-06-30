@@ -203,7 +203,7 @@ export async function fetchSupabasePublicAdvisors(
       .in("advisor_id", advisorIds),
     supabase
       .from("advisor_recommendations")
-      .select("advisor_id, is_mobile_verified, is_verified")
+      .select("advisor_id, is_mobile_verified")
       .in("advisor_id", advisorIds),
     // Single source of truth: scores written by /api/advisor/score/sync
     supabase
@@ -231,7 +231,7 @@ export async function fetchSupabasePublicAdvisors(
   const verifiedRecsCountByAdvisorId = new Map<string, number>();
   for (const row of recommendationsResult.data ?? []) {
     if (!row.advisor_id) continue;
-    if (row.is_mobile_verified || row.is_verified) {
+    if (row.is_mobile_verified) {
       verifiedRecsCountByAdvisorId.set(
         row.advisor_id,
         (verifiedRecsCountByAdvisorId.get(row.advisor_id) ?? 0) + 1,
