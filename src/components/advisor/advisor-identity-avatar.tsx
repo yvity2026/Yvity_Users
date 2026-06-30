@@ -27,21 +27,18 @@ const VARIANT_CLASS = {
     text: "text-lg sm:text-xl",
     badge: "size-6 sm:size-7",
     badgeIcon: "size-3.5 sm:size-4",
-    ring: "ring-2 sm:ring-[3px]",
   },
   cta: {
     avatar: "size-20 sm:size-24 md:size-28",
     text: "text-xl sm:text-2xl",
     badge: "size-7 sm:size-8",
     badgeIcon: "size-4 sm:size-[1.125rem]",
-    ring: "ring-[3px]",
   },
   hero: {
     avatar: "size-28 sm:size-32 md:size-36",
     text: "text-2xl sm:text-3xl",
     badge: "size-8 sm:size-9",
     badgeIcon: "size-4.5 sm:size-5",
-    ring: "ring-[3px] sm:ring-4",
   },
 } as const;
 
@@ -83,29 +80,33 @@ export function AdvisorIdentityAvatar({
       className={cn("relative shrink-0", className)}
       style={goldGlow ? { filter: "drop-shadow(0 0 18px rgba(245,158,11,0.55)) drop-shadow(0 0 6px rgba(245,158,11,0.35))" } : undefined}
     >
+      {/* Gradient border — teal → teal-mid → gold, matches profile card avatar ring */}
       <div
-        className={cn(
-          "relative flex items-center justify-center overflow-hidden rounded-full",
-          "bg-gradient-to-br from-primary to-accent font-bold text-primary-foreground",
-          styles.avatar,
-          styles.text,
-          styles.ring,
-          goldGlow
-            ? "ring-[var(--color-primary)] shadow-[0_0_0_4px_rgba(245,158,11,0.35),0_4px_24px_rgba(10,74,74,0.45)]"
-            : "ring-[oklch(0.82_0.16_78/0.55)] shadow-lg shadow-primary/40",
-        )}
+        className="rounded-full bg-gradient-to-br from-[#0D6060] via-[#14B8A6] to-[#F59E0B] p-[3px]"
+        style={goldGlow
+          ? { boxShadow: "0 0 0 4px rgba(245,158,11,0.35), 0 4px 24px rgba(10,74,74,0.45)" }
+          : { boxShadow: "0 4px 16px rgba(10,74,74,0.35)" }}
       >
-        {showPhoto ? (
-          <img
-            src={resolvedPhoto}
-            alt={name}
-            className="absolute inset-0 h-full w-full object-cover"
-            referrerPolicy="no-referrer"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          initials
-        )}
+        <div
+          className={cn(
+            "relative flex items-center justify-center overflow-hidden rounded-full",
+            "bg-gradient-to-br from-[#0D6060] to-[#0A4A4A] font-bold text-primary-foreground",
+            styles.avatar,
+            styles.text,
+          )}
+        >
+          {showPhoto ? (
+            <img
+              src={resolvedPhoto}
+              alt={name}
+              className="absolute inset-0 h-full w-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            initials
+          )}
+        </div>
       </div>
 
       {/* YVITY score arc ring — teal-to-gold gradient, sits just outside the avatar border */}
