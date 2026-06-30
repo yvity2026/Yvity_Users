@@ -8,6 +8,7 @@ import { AdvisorInsightsModule } from "@/components/advisor/insights/advisor-ins
 import { AdvisorMembershipModule } from "@/components/advisor/membership/advisor-membership-module";
 import { AdvisorSettingsModule } from "@/components/advisor/settings/advisor-settings-module";
 import { AdvisorLeadsModule } from "@/components/advisor/leads/advisor-leads-module";
+import { AdvisorReferralModule } from "@/components/advisor/referral/AdvisorReferralModule";
 import { AdvisorSectionPlaceholder } from "@/components/advisor/advisor-section-placeholder";
 import { AdvisorMobileBottomNav } from "@/components/advisor/advisor-mobile-bottom-nav";
 import { AdvisorSidebar, SIDEBAR_CONTENT_OFFSET } from "@/components/advisor/advisor-sidebar";
@@ -192,6 +193,7 @@ export function AdvisorDashboard({
       }
     }
     if (topSection === "leads") return <AdvisorLeadsModule />;
+    if (topSection === "referral") return <AdvisorReferralModule />;
     if (topSection === "insights") {
       return (
         <AdvisorInsightsModule onNavigateTop={setTopSection} onNavigateProfile={navigateProfile} />
