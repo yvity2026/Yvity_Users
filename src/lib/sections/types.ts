@@ -58,7 +58,7 @@ export type ServiceItem = {
 
 export type AchievementCategory = "life" | "health" | "education" | "other";
 
-export type AchievementIconStyle = "trophy" | "ribbon" | "star" | "heart" | "graduation" | "users";
+export type AchievementIconStyle = "trophy" | "ribbon" | "star" | "heart" | "graduation" | "users" | "mdrt";
 
 export type AchievementItem = {
   id: string;

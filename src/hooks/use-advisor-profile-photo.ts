@@ -14,27 +14,42 @@ export function useAdvisorProfilePhoto(): string {
   const publicAdvisor = useResolvedPublicAdvisorPayload();
 
   return useMemo(() => {
-    const isOwnerContext = !publicView || publicView.userId === user?.id;
+    // Determine whose profile we're showing.
+    // On slug page: publicView.userId is the advisor's userId.
+    // On section pages (/my-career etc.): publicView is null, but publicAdvisor
+    // is loaded async via cookie. Use publicAdvisor.userId when available.
+    const advisorUserId = publicView?.userId ?? publicAdvisor?.userId ?? null;
 
-    // Owner session updates immediately after profile-photo OTP upload.
+    // Owner context: the logged-in user IS the advisor (or no advisor context yet).
+    // When advisorUserId is known, compare strictly. When unknown, don't assume owner —
+    // avoids returning the customer's own photo on advisor section pages.
+    const isOwnerContext = advisorUserId
+      ? advisorUserId === user?.id
+      : !publicAdvisor; // no advisor loaded yet → if also no publicView, assume own profile
+
+    // Owner session photo updates immediately after profile-photo OTP upload.
     if (isOwnerContext) {
       const fromSession = resolveProfilePhotoUrl(user?.selfie_url);
       if (fromSession) return fromSession;
     }
 
+    // Advisor's stored photo (from server payload or async API fetch).
     const fromPayload = resolveProfilePhotoUrl(publicAdvisor?.selfie_url);
     if (fromPayload) return fromPayload;
 
     return "";
-  }, [publicAdvisor?.selfie_url, publicView, user?.id, user?.selfie_url]);
+  }, [publicAdvisor?.selfie_url, publicAdvisor?.userId, publicView, user?.id, user?.selfie_url]);
 }
 
 /** Whether the identity-verified badge should show on public profile avatars. */
 export function useShowAdvisorVerifiedBadge(): boolean {
   const { advisor } = useAuth();
   const publicView = usePublicProfileView();
+  const publicAdvisor = useResolvedPublicAdvisorPayload();
 
-  return publicView
-    ? isAdvisorProfileApproved(publicView.profile)
-    : isAdvisorProfileApproved(advisor);
+  // On slug page: publicView is set from SSR.
+  // On section pages: publicView is null — use resolved payload (async fetch via cookie).
+  // Fallback to logged-in advisor's own profile (for advisor viewing their own pages).
+  const profile = publicView?.profile ?? publicAdvisor?.profile ?? advisor;
+  return isAdvisorProfileApproved(profile);
 }

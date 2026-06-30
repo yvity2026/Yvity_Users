@@ -1,4 +1,5 @@
-import { seededVerifiedRecord } from "@/yvity-gold/lib/verification/defaults";
+import { normalizeOptionalVerification } from "@/lib/verification/defaults";
+import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/yvity-gold/lib/sections/types";
 import type { GalleryCategory, GalleryItem } from "@/yvity-gold/lib/gallery-types";
 import type { Lead } from "@/yvity-gold/lib/leads/types";
@@ -35,12 +36,12 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       claims,
       sumInsured: "—",
       claimSettled: "—",
-      claimRatio: clients > 0 ? Math.round((claims / clients) * 100) : 0,
+      claimRatio: 0,
       statusMessage: String(row.short_summary || ""),
       statusCaption: "",
       areas: [],
       verified: true,
-      verification: seededVerifiedRecord(),
+      verification: { status: "verified" as const, documents: [], updatedAt: new Date().toISOString() },
       companyLogoUrl: typeof row.company_logo_url === "string" ? row.company_logo_url : undefined,
       showDetailCard: true,
     };
@@ -88,17 +89,20 @@ const ACHIEVEMENT_CATEGORY: Record<string, AchievementItem["category"]> = {
 export function mapDbAchievements(rows: Record<string, unknown>[]): AchievementItem[] {
   return rows.map((row) => {
     const typeKey = String(row.type || "other").toLowerCase();
+    const rawDesc = String(row.description || "");
+    const { text: description, meta } = parseGoldMeta(rawDesc);
+    const verification = normalizeOptionalVerification(meta.verification);
     return {
       id: String(row.id),
       category: ACHIEVEMENT_CATEGORY[typeKey] ?? "other",
       title: String(row.title || "Achievement"),
       subtitle: String(row.organisation || ""),
-      description: String(row.description || ""),
+      description,
       achievedCount: 1,
       years: row.achievement_year ? [String(row.achievement_year)] : [],
       iconStyle: (String(row.icon || "trophy") as AchievementItem["iconStyle"]) || "trophy",
-      verified: true,
-      verification: seededVerifiedRecord(),
+      verified: verification?.status === "verified",
+      verification,
     };
   });
 }

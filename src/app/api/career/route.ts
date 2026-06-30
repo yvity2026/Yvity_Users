@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { CareerData } from "@/lib/career-types";
-import { emptyCareerData } from "@/lib/empty-data";
 import { loadCareerForUser, saveCareerForUser } from "@/lib/server/career-persistence";
 import { requireSession, unauthorized } from "@/lib/server/api-auth";
 import { resolveAdvisorDataUserId } from "@/lib/server/public-view-context";
@@ -17,9 +16,12 @@ export async function PUT(request: Request) {
     return unauthorized();
   }
 
+  // createSectionStore sends { data: T } — same as services/achievements/gallery
   let body: CareerData;
   try {
-    body = (await request.json()) as CareerData;
+    const raw = (await request.json()) as { data?: CareerData } | CareerData;
+    // Accept both { data: CareerData } (new) and bare CareerData (legacy)
+    body = "data" in raw && raw.data != null ? raw.data : (raw as CareerData);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -33,6 +35,13 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid career data" }, { status: 400 });
   }
 
-  await saveCareerForUser(user.id, body);
-  return NextResponse.json({ ok: true, data: body });
+  let saved: CareerData;
+  try {
+    saved = await saveCareerForUser(user.id, body);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[career PUT]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true, data: saved });
 }

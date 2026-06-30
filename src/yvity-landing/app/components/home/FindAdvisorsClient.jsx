@@ -1,25 +1,31 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { AdvisorCardGold } from "../home-features/advisor-card-gold";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { AdvisorProfileCard } from "../home-features/advisor-profile-card";
+import { AdvisorProfileGateModal } from "../home-features/advisor-profile-gate-modal";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import LandingSectionHeader from "./LandingSectionHeader";
-import LandingSnapScroll, {
-  LandingSnapItem,
-} from "./LandingSnapScroll";
-import { openLoginModal } from "@/yvity-landing/lib/ui/openLoginModal";
+import LandingSnapScroll, { LandingSnapItem } from "./LandingSnapScroll";
 import { LANDING_INNER, LANDING_SECTION_ANCHOR, LANDING_SECTION_PY } from "./landingLayout";
+import { filterAdvisors } from "@/lib/advisors/publicAdvisorFilters";
+import { cn } from "@/lib/utils";
 
-const SERVICE_FILTER_OPTIONS = ["Life Insurance", "Health Insurance"];
+const QUICK_SERVICES = [
+  "Life Insurance",
+  "Health Insurance",
+  "General Insurance",
+  "Mutual Funds",
+];
 
 const fieldClass =
-  "w-full rounded-lg border border-gray-200/90 bg-[#F8F6F1] px-2.5 py-2 text-[13px] font-medium text-[#0A4A4A] outline-none transition-colors placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] lg:py-2.5 lg:text-[14px]";
+  "w-full rounded-xl border border-[#E4E2DB] bg-[#F8F6F1]/90 px-3 py-2.5 text-sm font-medium text-[#0A4A4A] outline-none transition-[border-color,box-shadow] duration-300 placeholder:text-[#9CA3AF] focus:border-[#0A4A4A] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.18)]";
 
-function FilterField({ label, className = "", children }) {
+function FilterField({ label, children }) {
   return (
-    <div className={className}>
-      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+    <div>
+      <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
         {label}
       </label>
       {children}
@@ -27,154 +33,79 @@ function FilterField({ label, className = "", children }) {
   );
 }
 
-export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
-  const [results, setResults] = useState(null);
-  const [searchState, setSearchState] = useState("");
-  const [searchCity, setSearchCity] = useState("");
-  const [searchService, setSearchService] = useState("");
-  const [searchCompany, setSearchCompany] = useState("");
-  const [searchName, setSearchName] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState("");
+export default function FindAdvisorsClient({
+  featuredAdvisors = [],
+  allAdvisors = [],
+  featuredIdList = [],
+  isLoggedIn = false,
+}) {
+  const featuredIds = useMemo(() => new Set(featuredIdList), [featuredIdList]);
 
-  const stateOptions = useMemo(
-    () =>
-      [
-        ...new Set(
-          advisors.map((advisor) => advisor.state).filter(Boolean),
-        ),
-      ].sort(),
-    [advisors],
+  // Main search bar
+  const [query, setQuery] = useState("");
+  const [committedQuery, setCommittedQuery] = useState("");
+  const searchRef = useRef(null);
+
+  // Advanced filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCity, setFilterCity] = useState("");
+  const [filterService, setFilterService] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
+  const [activeQuick, setActiveQuick] = useState("");
+
+  // Gate modal
+  const [gateModal, setGateModal] = useState({ open: false, profileUrl: "" });
+
+  // Derived: are any search/filter criteria active?
+  const hasFilters =
+    Boolean(committedQuery.trim()) ||
+    Boolean(filterCity.trim()) ||
+    Boolean(filterService) ||
+    Boolean(filterCompany.trim()) ||
+    Boolean(activeQuick);
+
+  const serviceOptions = useMemo(
+    () => [...new Set(allAdvisors.flatMap((a) => a.serviceTypes ?? []).filter(Boolean))].sort(),
+    [allAdvisors],
   );
 
-  const companyOptions = useMemo(
-    () =>
-      [
-        ...new Set(
-          advisors.flatMap((advisor) => advisor.companies ?? []).filter(Boolean),
-        ),
-      ].sort(),
-    [advisors],
-  );
+  const searchResults = useMemo(() => {
+    if (!hasFilters) return null;
+    return filterAdvisors(allAdvisors, {
+      query: committedQuery,
+      city: filterCity,
+      service: filterService || activeQuick,
+      company: filterCompany,
+    });
+  }, [hasFilters, allAdvisors, committedQuery, filterCity, filterService, filterCompany, activeQuick]);
 
-  const serviceOptions = useMemo(() => {
-    const fromAdvisors = advisors.flatMap(
-      (advisor) => advisor.serviceTypes ?? [],
-    );
-    return [
-      ...new Set([...SERVICE_FILTER_OPTIONS, ...fromAdvisors].filter(Boolean)),
-    ].sort();
-  }, [advisors]);
+  const displayedAdvisors = hasFilters
+    ? (searchResults ?? []).slice(0, 15)
+    : featuredAdvisors.slice(0, 6);
 
-  const runSearch = useCallback(
-    async ({
-      state = "",
-      city = "",
-      service = "",
-      company = "",
-      name = "",
-      signal,
-    } = {}) => {
-      const params = new URLSearchParams();
-
-      if (state.trim()) params.set("state", state.trim());
-      if (city.trim()) params.set("city", city.trim());
-      if (service) params.set("service", service);
-      if (company.trim()) params.set("company", company.trim());
-      if (name.trim()) params.set("name", name.trim());
-
-      setIsSearching(true);
-      setSearchError("");
-
-      try {
-        const response = await fetch(
-          `/api/advisors/search?${params.toString()}`,
-          { signal },
-        );
-        const payload = await response.json();
-
-        if (response.status === 401 || payload.code === "LOGIN_REQUIRED") {
-          openLoginModal();
-          throw new Error("Log in to search all advisors.");
-        }
-
-        if (!response.ok) {
-          throw new Error(payload.error || "Search failed");
-        }
-
-        setResults(payload.advisors ?? []);
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        setSearchError(error.message || "Search failed");
-        setResults([]);
-      } finally {
-        if (!signal?.aborted) setIsSearching(false);
-      }
-    },
-    [],
-  );
-
-  const hasSearchInputs =
-    Boolean(searchState.trim()) ||
-    Boolean(searchCity.trim()) ||
-    Boolean(searchService) ||
-    Boolean(searchCompany.trim()) ||
-    Boolean(searchName.trim());
-
-  useEffect(() => {
-    if (!hasSearchInputs || !isLoggedIn) return undefined;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      runSearch({
-        state: searchState,
-        city: searchCity,
-        service: searchService,
-        company: searchCompany,
-        name: searchName,
-        signal: controller.signal,
-      });
-    }, 350);
-
-    return () => {
-      controller.abort();
-      clearTimeout(timeoutId);
-    };
-  }, [
-    hasSearchInputs,
-    runSearch,
-    searchState,
-    searchCity,
-    searchService,
-    searchCompany,
-    searchName,
-    isLoggedIn,
-  ]);
-
-  const clearAllFilters = () => {
-    setSearchState("");
-    setSearchCity("");
-    setSearchService("");
-    setSearchCompany("");
-    setSearchName("");
-    setResults(null);
-    setSearchError("");
+  const handleSearch = () => {
+    setCommittedQuery(query.trim());
   };
 
-  const advisorsToDisplay = hasSearchInputs && isLoggedIn ? results ?? [] : advisors;
-  const displayedAdvisors = hasSearchInputs && isLoggedIn
-    ? advisorsToDisplay.slice(0, 15)
-    : advisorsToDisplay.slice(0, 6);
-
-  const promptLoginToSearch = () => {
-    setSearchError("Log in to search all advisors.");
-    openLoginModal();
+  const handleQuickService = (service) => {
+    const next = activeQuick === service ? "" : service;
+    setActiveQuick(next);
+    setFilterService("");
   };
 
-  const resetField = () => {
-    setSearchError("");
-    setIsSearching(false);
+  const clearAll = () => {
+    setQuery("");
+    setCommittedQuery("");
+    setFilterCity("");
+    setFilterService("");
+    setFilterCompany("");
+    setActiveQuick("");
+    setShowFilters(false);
+    searchRef.current?.focus();
   };
+
+  const openGate = (profileUrl) => setGateModal({ open: true, profileUrl });
+  const closeGate = () => setGateModal({ open: false, profileUrl: "" });
 
   return (
     <section
@@ -191,203 +122,263 @@ export default function FindAdvisorsClient({ advisors, isLoggedIn = false }) {
         >
           <LandingSectionHeader
             eyebrow="Find Advisors"
-            accent="Discover Verified"
+            accent="Discover"
             title={
               <>
-                Advisors
+                Verified Advisors
                 <br className="lg:hidden" /> Near You
               </>
             }
-            description="Search from 500+ YVITY verified insurance advisors across India."
+            description="Search from YVITY verified insurance advisors across India."
           />
         </motion.div>
 
-        <div className="mb-5 rounded-xl border border-[#D7D7D7]/80 bg-white p-3 font-poppins shadow-[0_2px_12px_rgba(10,74,74,0.06)] lg:mb-6 lg:rounded-2xl lg:p-4">
-          {!isLoggedIn ? (
-            <div className="mb-3 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5 text-[12px] text-[#92400E] lg:text-[13px]">
-              Featured advisors below are visible without login.{" "}
-              <button
-                type="button"
-                onClick={openLoginModal}
-                className="font-semibold text-[#0A4A4A] underline underline-offset-2"
-              >
-                Log in
-              </button>{" "}
-              to search the full directory.
-            </div>
-          ) : null}
-          <div className="mb-2.5 flex items-center justify-between gap-2 lg:mb-3">
-            <p className="text-xs font-semibold text-[#0A4A4A] lg:text-sm">
-              Search advisors
-            </p>
-            {hasSearchInputs ? (
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="text-[11px] font-semibold text-[#F59E0B] lg:text-xs"
-              >
-                Clear all
-              </button>
-            ) : null}
-          </div>
-
-          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-2 lg:grid-cols-5 lg:gap-3">
-            <FilterField label="State">
-              <input
-                type="text"
-                list="advisor-state-options"
-                placeholder="e.g. Telangana"
-                value={searchState}
-                onChange={(e) => {
-                  setSearchState(e.target.value);
-                  resetField();
-                }}
-                className={fieldClass}
-              />
-              <datalist id="advisor-state-options">
-                {stateOptions.map((state) => (
-                  <option key={state} value={state} />
-                ))}
-              </datalist>
-            </FilterField>
-
-            <FilterField label="City">
-              <input
-                type="text"
-                placeholder="e.g. Hyderabad"
-                value={searchCity}
-                onChange={(e) => {
-                  setSearchCity(e.target.value);
-                  resetField();
-                }}
-                className={fieldClass}
-              />
-            </FilterField>
-
-            <FilterField label="Service">
-              <select
-                value={searchService}
-                onChange={(e) => {
-                  setSearchService(e.target.value);
-                  resetField();
-                }}
-                className={`${fieldClass} cursor-pointer appearance-none`}
-              >
-                <option value="">All services</option>
-                {serviceOptions.map((service) => (
-                  <option key={service} value={service}>
-                    {service}
-                  </option>
-                ))}
-              </select>
-            </FilterField>
-
-            <FilterField label="Company">
-              <input
-                type="text"
-                list="advisor-company-options"
-                placeholder="e.g. LIC"
-                value={searchCompany}
-                onChange={(e) => {
-                  setSearchCompany(e.target.value);
-                  resetField();
-                }}
-                className={fieldClass}
-              />
-              <datalist id="advisor-company-options">
-                {companyOptions.map((company) => (
-                  <option key={company} value={company} />
-                ))}
-              </datalist>
-            </FilterField>
-
-            <FilterField
-              label="Name"
-              className="min-[400px]:col-span-2 lg:col-span-1"
-            >
-              <input
-                type="text"
-                placeholder="Advisor name"
-                value={searchName}
-                onChange={(e) => {
-                  setSearchName(e.target.value);
-                  resetField();
-                }}
-                className={fieldClass}
-              />
-            </FilterField>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (!isLoggedIn) {
-                promptLoginToSearch();
-                return;
-              }
-              runSearch({
-                state: searchState,
-                city: searchCity,
-                service: searchService,
-                company: searchCompany,
-                name: searchName,
-              });
-            }}
-            disabled={!hasSearchInputs || isSearching}
-            className="mt-3 flex w-full items-center justify-center rounded-full bg-[#0A4A4A] px-4 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:hidden"
+        {/* Search panel */}
+        <div className="mb-5 font-poppins lg:mb-6">
+          {/* Main search bar */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+            className="mb-4"
           >
-            {isSearching ? "Searching…" : isLoggedIn ? "Search advisors" : "Log in to search"}
-          </button>
+            <div className="flex items-stretch gap-2.5 sm:gap-3">
+              <div
+                className={cn(
+                  "flex min-h-[52px] min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-[#E4E2DB]",
+                  "bg-white px-3.5 shadow-[0_2px_14px_rgba(10,74,74,0.07)]",
+                  "transition-[border-color,box-shadow] duration-200",
+                  "focus-within:border-[#0A4A4A]/35 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,0.16)]",
+                  "sm:gap-3 sm:px-4",
+                )}
+              >
+                <Search size={20} strokeWidth={2} className="shrink-0 text-[#0A4A4A]/70" aria-hidden />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  enterKeyHint="search"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (!e.target.value.trim()) setCommittedQuery("");
+                  }}
+                  placeholder="Search by name, city or service…"
+                  className="min-w-0 flex-1 bg-transparent font-poppins text-sm text-[#0A4A4A] outline-none placeholder:text-[#9CA3AF] sm:text-[15px]"
+                  aria-label="Search advisors by name, city or service"
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => { setQuery(""); setCommittedQuery(""); }}
+                    className="shrink-0 text-[#9CA3AF] hover:text-[#0A4A4A] transition"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                ) : null}
+              </div>
 
-          {hasSearchInputs && searchError ? (
-            <p className="mt-2.5 text-xs text-[#B91C1C] lg:text-sm">{searchError}</p>
-          ) : null}
-          {hasSearchInputs && isSearching ? (
-            <p className="mt-2.5 text-xs text-[#6B7280] lg:text-sm">Searching…</p>
+              <button
+                type="submit"
+                className="inline-flex min-h-[52px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98]"
+              >
+                Search
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowFilters((v) => !v)}
+                aria-label="Advanced filters"
+                aria-expanded={showFilters}
+                className={cn(
+                  "inline-flex min-h-[52px] min-w-[52px] shrink-0 items-center justify-center rounded-2xl border border-[#E4E2DB] bg-white",
+                  "text-[#0A4A4A] shadow-[0_2px_10px_rgba(10,74,74,0.06)] transition",
+                  "hover:border-[#0A4A4A]/20 active:scale-[0.98]",
+                  showFilters && "border-[#0A4A4A]/30 bg-[#F8F6F1] ring-2 ring-[#F59E0B]/20",
+                )}
+              >
+                <SlidersHorizontal size={20} strokeWidth={2} aria-hidden />
+              </button>
+            </div>
+
+            {/* Advanced filters panel */}
+            {showFilters ? (
+              <div className="mt-3 rounded-[20px] border border-[#E4E2DB]/90 bg-white/90 p-4 shadow-[0_8px_32px_rgba(10,74,74,0.08)] backdrop-blur-md sm:p-5">
+                <p className="mb-3.5 font-poppins text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0A4A4A]/60">
+                  Advanced filters
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <FilterField label="City / Location">
+                    <input
+                      type="text"
+                      value={filterCity}
+                      onChange={(e) => setFilterCity(e.target.value)}
+                      placeholder="e.g. Hyderabad"
+                      className={fieldClass}
+                    />
+                  </FilterField>
+                  <FilterField label="Service">
+                    <select
+                      value={filterService}
+                      onChange={(e) => { setFilterService(e.target.value); setActiveQuick(""); }}
+                      className={`${fieldClass} cursor-pointer`}
+                    >
+                      <option value="">All services</option>
+                      {serviceOptions.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </FilterField>
+                  <FilterField label="Company">
+                    <input
+                      type="text"
+                      value={filterCompany}
+                      onChange={(e) => setFilterCompany(e.target.value)}
+                      placeholder="e.g. LIC"
+                      className={fieldClass}
+                    />
+                  </FilterField>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters(false)}
+                    className="rounded-full bg-gradient-to-r from-[#0A4A4A] to-[#0D6060] px-6 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] shadow-[0_4px_16px_rgba(10,74,74,0.25)] transition active:scale-[0.98]"
+                  >
+                    Apply filters
+                  </button>
+                  {hasFilters ? (
+                    <button
+                      type="button"
+                      onClick={clearAll}
+                      className="rounded-full border border-[#E4E2DB] bg-white/80 px-6 py-2.5 font-poppins text-sm font-semibold text-[#6B7280] transition hover:border-[#0A4A4A]/20 active:scale-[0.98]"
+                    >
+                      Clear all
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+          </form>
+
+          {/* Quick service chips */}
+          <div>
+            <p className="mb-2.5 font-poppins text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">
+              Popular services
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_SERVICES.map((service) => {
+                const active = activeQuick === service;
+                return (
+                  <button
+                    key={service}
+                    type="button"
+                    onClick={() => handleQuickService(service)}
+                    aria-pressed={active}
+                    className={cn(
+                      "touch-manipulation shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5",
+                      "font-poppins text-xs font-medium transition active:scale-[0.98] sm:text-[13px] sm:px-4 sm:py-2",
+                      active
+                        ? "border-[#0A4A4A] bg-[#0A4A4A] text-[#F59E0B] shadow-[0_4px_14px_rgba(10,74,74,0.22)]"
+                        : "border-[#E4E2DB] bg-white text-[#0A4A4A] shadow-[0_1px_6px_rgba(10,74,74,0.05)] hover:border-[#0A4A4A]/25 hover:bg-[#F8F6F1]",
+                    )}
+                  >
+                    {service}
+                  </button>
+                );
+              })}
+              {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="shrink-0 whitespace-nowrap rounded-full border border-[#F59E0B]/40 bg-[#FEF3C7] px-3.5 py-1.5 font-poppins text-xs font-semibold text-[#92400E] transition active:scale-[0.98] sm:px-4 sm:py-2 sm:text-[13px]"
+                >
+                  Clear all
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Results count */}
+          {hasFilters && searchResults !== null ? (
+            <p className="mt-3 font-poppins text-[11px] text-[#6B7280]">
+              {searchResults.length === 0
+                ? "No advisors matched your search."
+                : `${searchResults.length} advisor${searchResults.length !== 1 ? "s" : ""} found`}
+            </p>
           ) : null}
         </div>
 
+        {/* Advisor cards */}
         <div className="mb-12 w-full lg:mb-12">
-          {displayedAdvisors.length ? (
-            <>
-              <LandingSnapScroll
-                ariaLabel="Advisor profiles"
-                className="py-2 lg:hidden"
-              >
-                {displayedAdvisors.map((advisor, index) => (
-                  <LandingSnapItem
-                    key={`advisor-${advisor.id ?? index}`}
-                    className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
-                  >
-                    <div className="landing-hero-card-glow w-full overflow-visible py-1">
-                      <AdvisorCardGold {...toAdvisorCardGoldProps(advisor)} />
-                    </div>
-                  </LandingSnapItem>
-                ))}
-              </LandingSnapScroll>
-              <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
-                Swipe for more advisors
-              </p>
-              <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
-                {displayedAdvisors.map((advisor, index) => (
-                  <div
-                    key={`advisor-grid-${advisor.id ?? index}`}
-                    className="landing-hero-card-glow w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
-                  >
-                    <AdvisorCardGold {...toAdvisorCardGoldProps(advisor)} />
+          {/* Mobile horizontal scroll */}
+          <LandingSnapScroll ariaLabel="Advisor profiles" className="py-2 lg:hidden">
+            {displayedAdvisors.map((advisor, index) => {
+              const cardProps = toAdvisorCardGoldProps(advisor);
+              const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+              return (
+                <LandingSnapItem
+                  key={`advisor-${advisor.id ?? index}`}
+                  className="w-[82vw] max-w-[380px] overflow-visible sm:w-[340px]"
+                >
+                  <div className="w-full overflow-visible py-1">
+                    <AdvisorProfileCard
+                      {...cardProps}
+                      isFeatured={isFeatured}
+                      isLoggedIn={isLoggedIn}
+                      onGatedClick={() => openGate(cardProps.profileUrl)}
+                    />
                   </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="rounded-2xl border border-[#D7D7D7] bg-white px-5 py-10 text-center font-poppins text-sm text-[#374151] shadow-sm lg:rounded-[28px] lg:px-6 lg:py-12">
-              {hasSearchInputs
-                ? "No public advisors matched your search."
-                : "No advisors are featured yet. Check back soon."}
-            </div>
-          )}
+                </LandingSnapItem>
+              );
+            })}
+          </LandingSnapScroll>
+
+          <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
+            Swipe for more advisors
+          </p>
+
+          {/* Desktop grid */}
+          <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 xl:gap-5">
+            {displayedAdvisors.map((advisor, index) => {
+              const cardProps = toAdvisorCardGoldProps(advisor);
+              const isFeatured = featuredIds.has(advisor.id) || cardProps.isFeatured;
+              return (
+                <div
+                  key={`advisor-grid-${advisor.id ?? index}`}
+                  className="w-full max-w-[520px] overflow-visible py-1 lg:mx-auto"
+                >
+                  <AdvisorProfileCard
+                    {...cardProps}
+                    isFeatured={isFeatured}
+                    isLoggedIn={isLoggedIn}
+                    onGatedClick={() => openGate(cardProps.profileUrl)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {hasFilters && displayedAdvisors.length === 0 ? (
+            <p className="mt-3 text-center font-poppins text-sm text-[#6B7280]">
+              No advisors matched your search. Try a different city, service, or name.
+            </p>
+          ) : null}
+
+          {!isLoggedIn && hasFilters ? (
+            <p className="mt-4 text-center font-poppins text-[12px] text-[#6B7280]">
+              Featured advisor profiles open directly.{" "}
+              <span className="text-[#0A4A4A] font-semibold">Login</span>{" "}
+              to access all advisor profiles.
+            </p>
+          ) : null}
         </div>
       </div>
+
+      {/* Profile gate modal */}
+      <AdvisorProfileGateModal
+        open={gateModal.open}
+        profileUrl={gateModal.profileUrl}
+        onClose={closeGate}
+      />
     </section>
   );
 }

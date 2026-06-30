@@ -8,6 +8,7 @@ import { GalleryImageUpload } from "@/components/gallery/gallery-image-upload";
 import { formatGalleryCategory } from "@/components/gallery/gallery-item-meta";
 import type { GalleryItem, GalleryLayout } from "@/lib/gallery-types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,9 +35,10 @@ export function GalleryEditorLightbox(props: Props) {
   const { items, index, onClose, onPrev, onNext, onSave, onDelete } = props;
   const source = items[index];
   const [draft, setDraft] = useState<GalleryItem | null>(source ?? null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    setDraft(source ?? null);
+    if (source) setDraft(source);
   }, [source]);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function GalleryEditorLightbox(props: Props) {
   const isLocal = draft.imageUrl.startsWith("/api/");
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 pb-[3.75rem] sm:pb-0 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <button
         type="button"
         className="absolute inset-0 bg-background/95 backdrop-blur-xl"
@@ -67,7 +69,7 @@ export function GalleryEditorLightbox(props: Props) {
         aria-label="Close editor"
       />
 
-      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[100dvh] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+      <div className="relative z-10 w-full sm:max-w-lg md:max-w-3xl lg:max-w-4xl max-h-[calc(100dvh-3.75rem)] sm:max-h-[92vh] flex flex-col animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
         <div className="glass-strong rounded-t-2xl sm:rounded-2xl border border-white/15 shadow-2xl shadow-black/50 flex flex-col max-h-[inherit] overflow-hidden">
           {/* Header — compact */}
           <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0">
@@ -162,15 +164,20 @@ export function GalleryEditorLightbox(props: Props) {
                   />
                 </Field>
 
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={!!draft.featured}
-                    onChange={(e) => patch({ featured: e.target.checked })}
-                  />
-                  Featured spotlight (public gallery)
-                </label>
+                <div className="space-y-1">
+                  <label className="inline-flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={!!draft.featured}
+                      onChange={(e) => patch({ featured: e.target.checked })}
+                    />
+                    Featured spotlight
+                  </label>
+                  <p className="text-[10px] text-muted-foreground pl-6">
+                    Pins this photo as the hero image at the top of your public gallery. Only one photo can be featured at a time.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -182,9 +189,7 @@ export function GalleryEditorLightbox(props: Props) {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (confirm("Delete this photo?")) onDelete(draft.id);
-              }}
+              onClick={() => setConfirmDelete(true)}
               className="gap-2"
             >
               <Trash2 className="size-4" /> Delete
@@ -213,6 +218,16 @@ export function GalleryEditorLightbox(props: Props) {
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this photo?"
+        description="This will permanently remove the photo from your gallery. This cannot be undone."
+        confirmLabel="Delete photo"
+        tone="destructive"
+        onConfirm={() => onDelete(draft.id)}
+      />
     </div>
   );
 }

@@ -63,8 +63,8 @@ export default function DashboardSavedProfiles() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {profiles.map((advisor) => (
-              <div key={advisor.id} className="mx-auto w-full max-w-[520px]">
-                <AdvisorCardWithSave advisor={advisor} />
+              <div key={advisor.id} className="mx-auto w-full max-w-[380px]">
+                <AdvisorCardWithSave advisor={advisor} variant="compact" />
               </div>
             ))}
           </div>

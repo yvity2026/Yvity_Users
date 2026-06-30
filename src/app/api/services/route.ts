@@ -23,6 +23,13 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  const normalized = await saveServicesForUser(session.id, body.data);
+  let normalized: Awaited<ReturnType<typeof saveServicesForUser>>;
+  try {
+    normalized = await saveServicesForUser(session.id, body.data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[services PUT]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, data: normalized });
 }

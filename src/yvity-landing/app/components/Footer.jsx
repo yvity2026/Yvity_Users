@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
+import { useState } from "react";
 import BrandMark from "@/yvity-landing/components/brand/BrandMark";
 import { FaArrowRight } from "react-icons/fa";
 import { scrollToSection } from "@/yvity-landing/lib/landing/scrollToSection";
@@ -8,6 +9,7 @@ import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationMo
 import { usePathname, useRouter } from "next/navigation";
 import { LANDING_INNER } from "@/yvity-landing/app/components/home/landingLayout";
 import { useLandingMobileNavOptional } from "@/yvity-landing/app/components/home/LandingMobileNavContext";
+import { PlatformReviewModal } from "@/components/platform-review/platform-review-modal";
 
 const MOBILE_PANEL_SECTIONS = new Set([
   "how-it-works",
@@ -45,6 +47,14 @@ const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const mobileNav = useLandingMobileNavOptional();
+  const [reviewOpen, setReviewOpen] = useState(false);
+
+  const handleReviewSuccess = () => {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("yvity_platform_review_done", "1");
+    }
+    setReviewOpen(false);
+  };
 
   const platformLinks = [
     { name: "Find Advisors", link: "find-advisors" },
@@ -101,9 +111,6 @@ const Footer = () => {
     router.push(subitem.link);
   };
 
-  const platformRowOne = platformLinks.slice(0, 2);
-  const platformRowTwo = platformLinks.slice(2, 5);
-
   return (
     <footer
       className={`${FOOTER_FONT} w-full border-t border-[#0AE0E0]/10 bg-[#003234] py-8 lg:py-12`}
@@ -117,7 +124,7 @@ const Footer = () => {
               showTagline
               layout="row"
               className="items-center justify-center lg:justify-start"
-              logoClassName="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14"
+              logoClassName="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 rounded-full bg-[#f8f6f1] p-1.5 shadow-sm"
               nameClassName={`${FOOTER_FONT} text-center text-xl font-bold leading-none text-[#F8F6F1] sm:text-2xl lg:text-left`}
               taglineClassName={`${FOOTER_FONT} text-center text-[11px] font-semibold text-(--ct-as-badges-accents,#F59E0B) sm:text-sm lg:text-left`}
             />
@@ -138,21 +145,11 @@ const Footer = () => {
             </button>
           </div>
 
-          <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 lg:mx-0 lg:max-w-none lg:items-start lg:gap-6">
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+          <div className="mx-auto grid w-full max-w-md grid-cols-3 gap-4 lg:mx-0 lg:max-w-none lg:gap-8">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>Platform</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
-                {platformRowOne.map((item) => (
-                  <li key={item.link}>
-                    <FooterLinkButton
-                      label={item.name}
-                      onClick={() => handlePlatformClick(item)}
-                    />
-                  </li>
-                ))}
-              </ul>
-              <ul className="grid grid-cols-3 gap-x-2 gap-y-2 sm:gap-x-3">
-                {platformRowTwo.map((item) => (
+              <ul className="flex flex-col gap-2">
+                {platformLinks.map((item) => (
                   <li key={item.link}>
                     <FooterLinkButton
                       label={item.name}
@@ -163,9 +160,9 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>For Advisors</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
+              <ul className="flex flex-col gap-2">
                 {advisorLinks.map((item) => (
                   <li key={item.name}>
                     <FooterLinkButton
@@ -177,9 +174,9 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className="flex w-full flex-col items-center gap-2.5 lg:items-start">
+            <div className="flex flex-col items-center gap-2.5 lg:items-start">
               <FooterSectionTitle>Company</FooterSectionTitle>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-2 lg:grid-cols-1 lg:gap-y-2">
+              <ul className="flex flex-col gap-2">
                 {companyLinks.map((item) => (
                   <li key={item.link}>
                     <FooterLinkButton
@@ -188,6 +185,12 @@ const Footer = () => {
                     />
                   </li>
                 ))}
+                <li>
+                  <FooterLinkButton
+                    label="⭐ Rate YVITY"
+                    onClick={() => setReviewOpen(true)}
+                  />
+                </li>
               </ul>
             </div>
           </div>
@@ -203,6 +206,13 @@ const Footer = () => {
           <p>A brand of Medhaara Innovations Pvt Ltd</p>
         </div>
       </div>
+
+      <PlatformReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        onSuccess={handleReviewSuccess}
+        respondentType="customer"
+      />
     </footer>
   );
 };

@@ -1,8 +1,8 @@
-import { seededVerifiedRecord } from "@/lib/verification/defaults";
+import { normalizeOptionalVerification } from "@/lib/verification/defaults";
+import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/lib/sections/types";
 import type { GalleryCategory, GalleryItem } from "@/lib/gallery-types";
 import type { Lead } from "@/lib/leads/types";
-import { parseGoldMeta } from "@/lib/server/supabase/gold-meta";
 import {
   parseKeyServices,
   parseServiceGoldMeta,
@@ -43,14 +43,12 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       roleLabel,
       clients,
       claims,
-      sumInsured: "—",
-      claimSettled: "—",
-      claimRatio: clients > 0 ? Math.round((claims / clients) * 100) : 0,
+      sumInsured: parsed.sumInsured ?? "—",
       statusMessage,
       statusCaption: "",
-      areas: [],
+      areas: Array.isArray(meta.areas) ? (meta.areas as import("@/lib/sections/types").ServiceArea[]) : [],
       verified: true,
-      verification: seededVerifiedRecord(),
+      verification: { status: "verified" as const, documents: [], updatedAt: new Date().toISOString() },
       companyLogoUrl: typeof row.company_logo_url === "string" ? row.company_logo_url : undefined,
       licenseHolder: parsed.licenseHolder,
       capacityId: parsed.capacityId as ServiceCapacityId,
@@ -58,6 +56,8 @@ export function mapDbServices(rows: Record<string, unknown>[]): ServiceItem[] {
       teamSize: parsed.teamSize,
       activeAgents: parsed.activeAgents,
       branchCount: parsed.branchCount,
+      claimSettled: parsed.claimSettled ?? "—",
+      claimRatio: parsed.claimRatio ?? 0,
       showDetailCard: true,
     };
   });
@@ -127,17 +127,29 @@ const ACHIEVEMENT_CATEGORY: Record<string, AchievementItem["category"]> = {
 export function mapDbAchievements(rows: Record<string, unknown>[]): AchievementItem[] {
   return rows.map((row) => {
     const typeKey = String(row.type || "other").toLowerCase();
+    const rawDesc = String(row.description || "");
+    const { text: description, meta } = parseGoldMeta(rawDesc);
+    const verification = normalizeOptionalVerification(meta.verification);
+    const metaYears = Array.isArray(meta.years)
+      ? (meta.years as unknown[]).map(String).filter(Boolean)
+      : null;
+    const baseYear = row.achievement_year ? [String(row.achievement_year)] : [];
+    const years = metaYears ?? baseYear;
+    const achievedCount =
+      typeof meta.achievedCount === "number" && meta.achievedCount > 1
+        ? meta.achievedCount
+        : Math.max(1, years.length);
     return {
       id: String(row.id),
       category: ACHIEVEMENT_CATEGORY[typeKey] ?? "other",
       title: String(row.title || "Achievement"),
       subtitle: String(row.organisation || ""),
-      description: String(row.description || ""),
-      achievedCount: 1,
-      years: row.achievement_year ? [String(row.achievement_year)] : [],
+      description,
+      achievedCount,
+      years,
       iconStyle: (String(row.icon || "trophy") as AchievementItem["iconStyle"]) || "trophy",
-      verified: true,
-      verification: seededVerifiedRecord(),
+      verified: verification?.status === "verified",
+      verification,
     };
   });
 }
@@ -180,17 +192,36 @@ function formatGalleryDate(createdAt: unknown): string {
 
 export function mapDbGallery(rows: Record<string, unknown>[]): GalleryItem[] {
   return rows.map((row) => {
-    const caption = String(row.caption || "").trim();
-    const title = caption.split("\n")[0]?.slice(0, 120) || "Gallery moment";
+    const raw = String(row.caption || "").trim();
+    // New format: "title\n\ncaption" (double newline separator written by syncGallery).
+    // Legacy format: "title\ncaption" (single newline, older rows).
+    let title: string;
+    let caption: string;
+    if (raw.includes("\n\n")) {
+      const sep = raw.indexOf("\n\n");
+      title = raw.slice(0, sep).trim() || "Gallery moment";
+      caption = raw.slice(sep + 2).trim() || title;
+    } else {
+      title = raw.split("\n")[0]?.slice(0, 120) || "Gallery moment";
+      caption = raw || title;
+    }
+
+    const validLayouts = ["hero", "wide", "tall", "default"] as const;
+    const rawLayout = String(row.layout ?? "default");
+    const layout = (validLayouts as readonly string[]).includes(rawLayout)
+      ? (rawLayout as import("@/lib/gallery-types").GalleryLayout)
+      : "default";
 
     return {
       id: String(row.id),
       title,
-      caption: caption || title,
+      caption,
       category: galleryCategory(row.category as string),
       date: formatGalleryDate(row.created_at),
       imageUrl: String(row.image_url || row.url || ""),
       featured: Boolean(row.is_featured ?? row.sort_order === 0),
+      location: row.location ? String(row.location) : undefined,
+      layout,
     };
   });
 }

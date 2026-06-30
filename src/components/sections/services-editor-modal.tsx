@@ -24,7 +24,7 @@ import {
 import { formatExperienceFromStart } from "@/lib/sections/service-experience";
 import { categoryHeadingFor } from "@/lib/sections/services-config";
 import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
-import { markSubmitted } from "@/lib/verification/defaults";
+import { markPendingReapproval, markSubmitted } from "@/lib/verification/defaults";
 import { SERVICE_DOCUMENT_REQUIREMENTS } from "@/lib/verification/service-config";
 import type { VerificationDocument } from "@/lib/verification/types";
 import { AnimatedModalShell } from "@/components/ui/animated-modal-shell";
@@ -46,7 +46,7 @@ const categories: { value: ServiceCategory; label: string }[] = [
   { value: "life", label: "Life Insurance" },
   { value: "health", label: "Health Insurance" },
   { value: "general", label: "General Insurance" },
-  { value: "mutual", label: "Mutual Funds (banner only)" },
+  { value: "mutual", label: "Mutual Funds" },
 ];
 
 export function ServicesEditorModal({
@@ -76,14 +76,30 @@ export function ServicesEditorModal({
 
   const showDetail = draft.category !== "mutual" && draft.showDetailCard !== false;
 
+  // Fields that require admin re-approval when changed on an already-verified service
+  const wasVerified = !isNew && item.verification.status === "verified";
+  const changedCriticalFields = useMemo(() => {
+    if (!wasVerified) return [];
+    const changed: string[] = [];
+    if (draft.category !== item.category) changed.push("Service category");
+    if ((draft.provider ?? "").trim() !== (item.provider ?? "").trim()) changed.push("Company name");
+    if (draft.licenseHolder?.type !== item.licenseHolder?.type) changed.push("Licence holder");
+    if ((draft.licenseHolder?.name ?? "").trim() !== (item.licenseHolder?.name ?? "").trim())
+      changed.push("Licence holder name");
+    return changed;
+  }, [wasVerified, draft.category, draft.provider, draft.licenseHolder, item]);
+  const needsReapproval = changedCriticalFields.length > 0;
+
   const suggestedDocs = useMemo(
     () => SERVICE_DOCUMENT_REQUIREMENTS[draft.category] ?? [],
     [draft.category],
   );
 
   const verification = draft.verification;
-  const canSubmit = pendingDocs.length > 0;
+  const hasDocs = pendingDocs.length > 0;
   const isResubmit = verification.status === "rejected";
+  // Save is always allowed; docs are only required for verification submission
+  const canSubmit = true;
 
   // Used as the `max` attribute on the date input — advisors can't start
   // a service in the future, and the native picker will clamp accordingly.
@@ -129,24 +145,24 @@ export function ServicesEditorModal({
   };
 
   const save = () => {
-    if (!canSubmit) return;
     const areas = areasText
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
       .map((label) => ({ label }));
 
-    // If the document set changed (added, removed, relabelled, or originally
-    // rejected), treat this as a new submission and reset status to pending so
-    // the admin can review the latest proof. Otherwise keep the existing
-    // verification record so an already-verified service stays verified after
-    // a metadata edit.
+    // Critical field changed on a verified service → re-approval required.
+    // Otherwise, if docs changed → new submission. Otherwise → keep record.
     const docsChanged =
       docsDirty ||
-      verification.status !== "verified" ||
+      (verification.status !== "verified" && hasDocs) ||
       pendingDocs.length !== (verification.documents ?? []).length;
 
-    const nextVerification = docsChanged ? markSubmitted(verification, pendingDocs) : verification;
+    const nextVerification = needsReapproval
+      ? markPendingReapproval(verification, pendingDocs)
+      : docsChanged
+        ? markSubmitted(verification, pendingDocs)
+        : verification;
 
     onSave({
       ...draft,
@@ -163,11 +179,12 @@ export function ServicesEditorModal({
 
   return (
     <AnimatedModalShell
-      className="z-[100]"
+      className="z-[100] pb-[3.75rem] sm:pb-0"
       onClose={onClose}
       backdropTone="heavy"
-      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl p-5 sm:p-6 md:p-8 space-y-4 max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto"
+      panelClassName="w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/15 shadow-2xl flex flex-col max-h-[calc(92dvh-3.75rem)] sm:max-h-[90vh]"
     >
+        <div className="overflow-y-auto flex-1 min-h-0 p-5 sm:p-6 md:p-8 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -276,6 +293,15 @@ export function ServicesEditorModal({
             onChange={(e) => patch("roleLabel", e.target.value)}
           />
         </Field>
+
+        {!showDetail && draft.category === "mutual" && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-3 text-[12px] text-muted-foreground leading-relaxed">
+            <Info className="size-3.5 shrink-0 mt-0.5 text-[oklch(0.82_0.13_205)]" />
+            <span>
+              <span className="font-medium text-foreground">Mutual Funds</span> appear in your services banner only — detailed metrics like clients, claims and areas are not available for this category.
+            </span>
+          </div>
+        )}
 
         {showDetail && (
           <>
@@ -397,20 +423,22 @@ export function ServicesEditorModal({
                   min={0}
                   max={100}
                   value={draft.claimRatio}
-                  onChange={(e) => patch("claimRatio", Number(e.target.value) || 0)}
+                  onChange={(e) => patch("claimRatio", Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
                 />
               </Field>
             ) : null}
             {cardDisplay.showStatusMessage ? (
               <>
-                <Field label="Status message">
+                <Field label="Status message" hint="Short highlight shown with a tick on your card — e.g. 'MDRT Member', 'Award-winning advisor'">
                   <Input
+                    placeholder="e.g. MDRT Member 2024"
                     value={draft.statusMessage}
                     onChange={(e) => patch("statusMessage", e.target.value)}
                   />
                 </Field>
-                <Field label="Status caption">
+                <Field label="Status caption" hint="Optional detail below the message — e.g. 'Recognised since 2018'">
                   <Input
+                    placeholder="e.g. Recognised since 2018"
                     value={draft.statusCaption}
                     onChange={(e) => patch("statusCaption", e.target.value)}
                   />
@@ -421,13 +449,39 @@ export function ServicesEditorModal({
               <Field label="Areas (comma-separated)">
                 <Textarea
                   rows={2}
-                  placeholder="Term, Child Plan, Retirement, ULIP"
+                  placeholder={
+                    draft.category === "life"
+                      ? "Term, Child Plan, Retirement, ULIP"
+                      : draft.category === "health"
+                        ? "Critical Illness, Disability, Long-term Care, Group Health"
+                        : draft.category === "general"
+                          ? "Motor, Home, Liability, Travel, Fire"
+                          : "Equity Funds, Debt Funds, Hybrid Funds, SIP"
+                  }
                   value={areasText}
                   onChange={(e) => setAreasText(e.target.value)}
                 />
               </Field>
             ) : null}
           </>
+        )}
+
+        {needsReapproval && (
+          <div className="rounded-xl border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.1)] p-4 space-y-2">
+            <p className="flex items-center gap-2 text-sm font-semibold text-[oklch(0.92_0.14_78)]">
+              <AlertTriangle className="size-4 shrink-0" />
+              Re-approval required
+            </p>
+            <p className="text-[12px] text-foreground/80 leading-relaxed">
+              You changed:{" "}
+              <span className="font-medium text-foreground">{changedCriticalFields.join(", ")}</span>.
+              This service will be <span className="font-medium">hidden from your public profile</span> until
+              admin reviews and re-approves the updated details.
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Upload updated verification documents below and save to submit for re-approval.
+            </p>
+          </div>
         )}
 
         <section className="rounded-2xl border border-white/12 bg-white/[0.03] p-4 space-y-3">
@@ -479,17 +533,23 @@ export function ServicesEditorModal({
             suggestedLabels={suggestedDocs}
           />
 
-          {!canSubmit && (
-            <p className="text-[11px] text-destructive font-medium">
-              At least one supporting document is required.
+          {!hasDocs && (
+            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+              Upload at least one document for YVITY verification. Without it, this service won&apos;t be verified on your public profile.
             </p>
           )}
         </section>
 
-        <div className="flex flex-wrap gap-2 pt-2">
+        {isResubmit && !needsReapproval && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed px-0.5">
+            Saving will reset this service to <span className="font-medium text-foreground">pending</span> status — your updated documents will go back to admin for review.
+          </p>
+        )}
+        </div>{/* end scroll body */}
+        <div className="flex flex-wrap gap-2 p-5 sm:p-6 border-t border-white/10 shrink-0">
           <Button onClick={save} disabled={!canSubmit} className="gap-2">
             <Save className="size-4" />
-            {isResubmit ? "Save & Resubmit" : isNew ? "Save Service" : "Save"}
+            {needsReapproval ? "Save & Submit for Re-approval" : isResubmit ? "Save & Resubmit" : isNew ? "Save Service" : "Save"}
           </Button>
           <Button variant="destructive" onClick={() => onDelete(draft.id)} className="gap-2">
             <Trash2 className="size-4" /> {isNew ? "Discard" : "Delete"}
@@ -499,11 +559,12 @@ export function ServicesEditorModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
+      {hint && <p className="text-[11px] text-muted-foreground leading-relaxed">{hint}</p>}
     </div>
   );
 }

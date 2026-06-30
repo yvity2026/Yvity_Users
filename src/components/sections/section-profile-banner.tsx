@@ -1,22 +1,28 @@
 "use client";
 
-import { Award, Building2, Clock, Shield } from "lucide-react";
+import { Award, Building2, Clock } from "lucide-react";
 import { SectionBannerAdvisorIdentity } from "@/components/sections/section-banner-advisor-identity";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { cn } from "@/lib/utils";
 
-const statIcons = [Clock, Award, Building2, Shield] as const;
+const statIcons = [Clock, Award, Building2] as const;
 
 const PLACEHOLDER_STATS = [
   { value: "—", label: "Years experience" },
   { value: "—", label: "Rating" },
-  { value: "—", label: "Company" },
-  { value: "—", label: "YVITY verified" },
+  { value: "—", label: "Organisations" },
 ] as const;
 
-export function SectionProfileBanner({ className }: { className?: string }) {
+export function SectionProfileBanner({
+  className,
+  statsOverride,
+}: {
+  className?: string;
+  statsOverride?: { value: string; label: string }[];
+}) {
   const display = useAdvisorDisplayProfile();
-  const stats = display.stats.length > 0 ? display.stats : PLACEHOLDER_STATS;
+  const resolvedStats = statsOverride ?? display.stats;
+  const stats = resolvedStats.length > 0 ? resolvedStats : PLACEHOLDER_STATS;
 
   return (
     <section
@@ -44,16 +50,16 @@ export function SectionProfileBanner({ className }: { className?: string }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4 lg:max-w-[min(100%,36rem)] lg:shrink-0">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:max-w-[min(100%,28rem)] lg:shrink-0">
           {stats.map((stat, i) => {
             const Icon = statIcons[i] ?? Clock;
             return (
               <div
                 key={stat.label}
-                className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-3 py-3.5 sm:py-4 text-center"
+                className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-2 py-3.5 sm:py-4 text-center min-w-0"
               >
-                <Icon className="size-4 sm:size-5 text-[oklch(0.82_0.13_205)] mb-2" />
-                <p className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+                <Icon className="size-4 sm:size-5 text-[oklch(0.82_0.13_205)] mb-2 shrink-0" />
+                <p className="w-full text-sm sm:text-base font-bold tracking-tight text-foreground truncate px-1">
                   {stat.value}
                 </p>
                 <p className="mt-0.5 text-[10px] sm:text-xs text-foreground/70 leading-tight">

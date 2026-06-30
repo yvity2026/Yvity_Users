@@ -1,6 +1,5 @@
 import "server-only";
 
-import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { fetchSupabasePublicAdvisors } from "@/lib/advisors/fetch-supabase-advisors";
 import { loadLocalPublicAdvisors } from "@/lib/advisors/load-local-public-advisors";
 import { getMockPublicAdvisors, type PublicAdvisorCard } from "@/lib/advisors/mock-public-advisors";
@@ -58,33 +57,44 @@ async function mergeLocalAdvisorCardMetrics(
   });
 }
 
-/** Public advisors — Supabase when configured, otherwise demo mocks. */
-export async function getPublicAdvisors(): Promise<PublicAdvisorCard[]> {
+/** Public advisors — Supabase when configured, otherwise demo mocks.
+ *  excludeSelf: exclude the logged-in advisor from results (default true).
+ *  Set false for the landing page hero/find-advisors which must show all
+ *  featured advisors regardless of who is viewing. */
+export async function getPublicAdvisors(
+  options: { excludeSelf?: boolean } = {},
+): Promise<PublicAdvisorCard[]> {
+  const { excludeSelf = true } = options;
   const session = await getSessionUser();
+  const excludeId = excludeSelf ? (session?.id ?? null) : null;
   let advisors: PublicAdvisorCard[] = [];
 
   try {
-    const fromSupabase = await fetchSupabasePublicAdvisors(session?.id ?? null);
+    const fromSupabase = await fetchSupabasePublicAdvisors(excludeId);
     if (fromSupabase !== null) {
       advisors = await mergeLocalAdvisorCardMetrics(fromSupabase);
+      console.log(`[advisors] Supabase returned ${advisors.length} advisor(s)`);
       if (advisors.length > 0) return advisors;
+    } else {
+      console.warn("[advisors] Supabase client not configured — no admin client available");
     }
   } catch (error) {
-    console.warn("[advisors] Supabase fetch failed, using local data:", error);
+    console.error("[advisors] Supabase fetch failed:", error instanceof Error ? error.message : error);
   }
 
-  const local = await loadLocalPublicAdvisors(session?.id ?? null);
+  const local = await loadLocalPublicAdvisors(excludeId);
   if (local.length > 0) return local;
 
   const mocks = getMockPublicAdvisors();
-  if (session?.id) {
+  if (excludeSelf && session?.id) {
     return mocks.filter((advisor) => advisor.id !== session.id);
   }
 
   return mocks;
 }
 
-/** Filter and rank public advisors for landing + dashboard search. */
+/** Filter and rank public advisors for landing + dashboard search.
+ *  All active advisors (Free, Silver, Gold) appear in search results. */
 export async function searchPublicAdvisors(filters: AdvisorSearchFilters = {}) {
   const advisors = await getPublicAdvisors();
 
@@ -94,9 +104,5 @@ export async function searchPublicAdvisors(filters: AdvisorSearchFilters = {}) {
     service: filters.service ?? "",
     company: filters.company ?? "",
     name: filters.name ?? "",
-  })
-    .filter((advisor: PublicAdvisorCard) =>
-      resolvePlanLimits(advisor.subscription_plan, advisor.account_status).searchAppearance,
-    )
-    .sort(compareAdvisors);
+  }).sort(compareAdvisors);
 }

@@ -5,7 +5,8 @@ import {
 
 export function filterHomeAdvisors(advisors, filters = {}) {
   return filterAdvisors(advisors, {
-    name: filters.query || filters.name,
+    query: filters.query,       // main search box — broad match across name/city/service
+    name: filters.name,        // dedicated name filter
     city: filters.city,
     service: filters.service,
     company: filters.company,
@@ -21,12 +22,35 @@ export function sortAdvisorsByRating(advisors) {
 import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 
 export function getFeaturedAdvisors(advisors, limit = 8) {
-  const eligible = advisors.filter(
+  // Prefer Gold members; fall back to Silver; fall back to all active advisors
+  const goldEligible = advisors.filter(
     (a) => resolvePlanLimits(a.subscription_plan, a.account_status).featuredAdvisorEligibility,
   );
-  const flagged = eligible.filter((a) => a.isHero || a.isLanding);
-  const pool = flagged.length >= 3 ? flagged : eligible;
-  return [...pool].sort(compareAdvisors).slice(0, limit);
+
+  let pool;
+  let isTopRatedFallback = false;
+
+  if (goldEligible.length > 0) {
+    const flagged = goldEligible.filter((a) => a.isHero || a.isLanding);
+    pool = flagged.length >= 3 ? flagged : goldEligible;
+  } else {
+    const isVisible = (a) => ["active", "under_review"].includes(String(a.account_status || "").toLowerCase());
+    const silverEligible = advisors.filter(
+      (a) => String(a.subscription_plan || "").toLowerCase() === "silver" && isVisible(a),
+    );
+    if (silverEligible.length > 0) {
+      pool = silverEligible;
+      isTopRatedFallback = true;
+    } else {
+      pool = advisors.filter(isVisible);
+      isTopRatedFallback = true;
+    }
+  }
+
+  const results = [...pool].sort(compareAdvisors).slice(0, limit);
+  // Attach fallback flag so UI can show "Top Rated" label instead of "Featured"
+  results._isTopRatedFallback = isTopRatedFallback;
+  return results;
 }
 
 export function getRecommendedAdvisors(

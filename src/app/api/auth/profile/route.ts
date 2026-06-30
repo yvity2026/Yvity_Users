@@ -8,6 +8,8 @@ import {
   updateRegisteredUserProfile,
 } from "@/lib/server/profile";
 import { getSessionUser, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/session";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { updateUserProfileFields } from "@/lib/server/supabase/platform-supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +68,11 @@ export async function PATCH(request: Request) {
       pincode,
       about,
     });
+
+    // Write city/name/profession directly to Supabase so advisor search works
+    if (useSupabasePersistence() && session.id) {
+      await updateUserProfileFields(session.id, { name, city, profession });
+    }
 
     const nextSession = mergeSessionProfile(
       {

@@ -17,6 +17,7 @@ function mergeSettings(base: AdvisorSettings, patch: AdvisorSettingsPatch): Advi
     publicProfile: { ...base.publicProfile, ...patch.publicProfile },
     appearance: { theme },
     introVideo: { ...base.introVideo, ...patch.introVideo },
+    location: { ...base.location, ...patch.location },
   };
 }
 

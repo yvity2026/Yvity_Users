@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       document_urls?: string[];
       subscription_plan?: MembershipPlanId;
       razorpay_payment_id?: string;
+      profile_slug?: string;
     };
 
     const services = Array.isArray(body.services) ? body.services : [];
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
       document_urls: documentUrls,
       subscription_plan: plan,
       razorpay_payment_id: body.razorpay_payment_id,
+      profile_slug: body.profile_slug,
     });
 
     const isPaidPlan = plan === "silver" || plan === "gold";

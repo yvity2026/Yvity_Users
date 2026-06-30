@@ -89,7 +89,9 @@ export function EducationSection({
         />
       ) : null}
       <div className="relative">
-      <div className="absolute left-[64px] sm:left-[80px] md:left-[110px] top-4 bottom-4 w-px bg-gradient-to-b from-[oklch(0.85_0.16_78/0.6)] via-[oklch(0.78_0.15_295/0.6)] to-[oklch(0.82_0.13_205/0.6)]" />
+      {items.length > 0 && (
+        <div className="absolute left-[64px] sm:left-[80px] md:left-[110px] top-4 bottom-4 w-px bg-gradient-to-b from-[oklch(0.85_0.16_78/0.6)] via-[oklch(0.78_0.15_295/0.6)] to-[oklch(0.82_0.13_205/0.6)]" />
+      )}
       <div className="space-y-6 sm:space-y-8">
         {items.length === 0 ? null : items.map((e, i) => {
           const t = tones[i % tones.length];
@@ -178,9 +180,6 @@ export function EducationSection({
             </p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold bg-[oklch(0.78_0.15_295/0.15)] text-[oklch(0.85_0.13_295)] border border-[oklch(0.78_0.15_295/0.4)] ring-glow-violet">
-          <BadgeCheck className="size-4" /> YVITY VERIFIED
-        </span>
       </header>
       {body}
     </section>

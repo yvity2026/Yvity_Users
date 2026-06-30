@@ -5,6 +5,11 @@ import { AdvisorIdentityAvatar } from "@/components/advisor/advisor-identity-ava
 import { AdvisorCtaButtons } from "@/components/contact/advisor-cta-buttons";
 import { StarRating } from "@/components/ui/star-rating";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
+import { ADVISOR_PROFILE_LABELS } from "@/lib/advisor-display-profile";
+
+function buildCtaFallback(): string {
+  return "Whether it's Term insurance, Health plans, Retirement planning, or any financial goal — I'll study your needs and suggest the most suitable plan. Connect with me now to get started.";
+}
 import {
   useAdvisorProfilePhoto,
   useShowAdvisorVerifiedBadge,
@@ -74,7 +79,10 @@ export function SectionAdvisorCta({ className }: { className?: string }) {
             {advisorProfile.title}
           </p>
           <p className="mt-3 text-sm text-foreground/75 leading-relaxed max-w-xl">
-            {advisorProfile.ctaDescription}
+            {advisorProfile.ctaDescription &&
+            advisorProfile.ctaDescription !== ADVISOR_PROFILE_LABELS.ctaDescription
+              ? advisorProfile.ctaDescription
+              : buildCtaFallback()}
           </p>
 
           {highlightItems.length > 0 ? (

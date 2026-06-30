@@ -5,7 +5,6 @@ import {
   profileStrengthLabel,
 } from "@/lib/advisor-dashboard/build-model";
 import { getYvityScoreTotal } from "@/lib/advisor-score/build";
-import { getEmptyAnalytics } from "@/lib/advisor-dashboard/demo-analytics";
 import { computeOverviewStats } from "@/lib/leads/utils";
 import { normalizeLeadServiceType } from "@/lib/leads/service-types";
 import type { Lead } from "@/lib/leads/types";
@@ -98,7 +97,8 @@ function testimonialsThisMonth(items: TestimonialItem[]): number {
   const month = now.toLocaleString("en-US", { month: "short" }).toLowerCase();
   const year = String(now.getFullYear());
   return items.filter((t) => {
-    const d = t.date.toLowerCase();
+    const d = t.date?.toLowerCase();
+    if (!d) return false;
     return d.includes(month) && d.includes(year);
   }).length;
 }
@@ -116,16 +116,24 @@ export function buildInsightsModel(input: {
   testimonials: TestimonialItem[];
   gallery: GalleryItem[];
   leads: Lead[];
-  /**
-   * Effective intro video URL — usually `getEffectiveIntroVideoUrl(settings)`.
-   * Falls back to the static `advisorProfile.home.introVideoUrl` seed.
-   */
   introVideoUrl?: string;
   photoUrl?: string;
   publicProfileActive?: boolean;
   underReview?: boolean;
+  profileApproved?: boolean;
+  irdaiCertificateUploaded?: boolean;
+  verifiedRecommendationCount?: number;
+  selfShareCount?: number;
+  decayPenalty?: number;
+  decayActive?: boolean;
+  decayGraceDaysRemaining?: number | null;
+  monthlyActivity?: import("@/lib/advisor-score/decay").MonthlyScoreActivity;
+  profileViews?: number;
+  profileViewsDelta?: string;
+  totalProfileViews?: number;
+  searchAppearances?: number;
+  searchDelta?: string;
 }): InsightsModel {
-  const demo = getEmptyAnalytics();
   const metrics = getEmptyInsightsMetrics();
 
   const profilePhotoUrl = input.photoUrl?.trim() || advisorProfile.photoUrl?.trim() || "";
@@ -150,6 +158,16 @@ export function buildInsightsModel(input: {
     testimonials: input.testimonials,
     gallery: input.gallery,
     underReview: input.underReview,
+    profileApproved: input.profileApproved,
+    irdaiCertificateUploaded: input.irdaiCertificateUploaded,
+    verifiedRecommendationCount: input.profileApproved
+      ? Math.max(0, input.verifiedRecommendationCount ?? 0)
+      : 0,
+    selfShareCount: Math.max(0, input.selfShareCount ?? 0),
+    decayPenalty: input.decayActive ? Math.max(0, input.decayPenalty ?? 0) : 0,
+    decayActive: input.decayActive,
+    decayGraceDaysRemaining: input.decayGraceDaysRemaining,
+    monthlyActivity: input.monthlyActivity,
   });
 
   const leadStats = computeOverviewStats(input.leads);
@@ -167,13 +185,17 @@ export function buildInsightsModel(input: {
   const conversionRate =
     input.leads.length === 0 ? 0 : Math.round((leadStats.converted / input.leads.length) * 100);
 
+  const thisMonthViews = Math.max(0, input.profileViews ?? 0);
+  const allTimeViews = Math.max(0, input.totalProfileViews ?? thisMonthViews);
+  const searchApps = Math.max(0, input.searchAppearances ?? 0);
+
   return {
     profilePerformance: {
-      totalProfileViews: demo.profileViews,
-      monthProfileViews: metrics.monthProfileViews,
-      monthViewsDelta: metrics.monthViewsDelta,
-      searchAppearances: demo.searchAppearances,
-      searchDelta: demo.searchDelta,
+      totalProfileViews: allTimeViews,
+      monthProfileViews: thisMonthViews,
+      monthViewsDelta: input.profileViewsDelta ?? "0%",
+      searchAppearances: searchApps,
+      searchDelta: input.searchDelta ?? "0%",
       profileShares: metrics.profileShares,
       sharesDelta: metrics.sharesDelta,
       contactRequests,

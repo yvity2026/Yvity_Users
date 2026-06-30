@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { redeemCoupon } from "@/lib/server/coupons-store";
 import { markPaymentPaid } from "@/lib/server/payment-store";
-import { resolveRegisteredUser } from "@/lib/server/profile";
 import { verifyRazorpayPaymentSignature, isRazorpayConfigured } from "@/lib/server/razorpay";
 import { qualifyReferralOnPayment } from "@/lib/server/referrals-store";
 import { getSessionUser } from "@/lib/server/session";
+import { loadUserByIdFromDb } from "@/lib/server/supabase/platform-supabase";
+import { notifyPaymentSuccess } from "@/lib/server/payment-notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     if (record.coupon_code) {
-      const registered = resolveRegisteredUser(session);
+      const registered = await loadUserByIdFromDb(session.id);
       await redeemCoupon(record.coupon_code, {
         userId: session.id,
         userEmail: registered?.email ?? null,
@@ -73,6 +74,10 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error("[razorpay/verify] referral qualification failed:", error);
     }
+
+    notifyPaymentSuccess(record).catch((err) =>
+      console.error("[razorpay/verify] payment notification failed:", err),
+    );
 
     return NextResponse.json({
       success: true,

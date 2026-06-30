@@ -5,6 +5,7 @@ import {
   buildWhyChooseMeIntro,
   getWhyChooseMeStrengths,
 } from "@/lib/home/why-choose-me-strengths";
+import { ADVISOR_PROFILE_LABELS } from "@/lib/advisor-display-profile";
 import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
@@ -18,6 +19,13 @@ import {
   useTestimonialsData,
 } from "@/lib/sections/stores";
 import { cn } from "@/lib/utils";
+
+const FALLBACK_STRENGTHS = [
+  "Licensed and IRDA-certified insurance advisor",
+  "Personalised cover recommendations for your life stage",
+  "End-to-end support — from policy selection to claims",
+  "Transparent, no-pressure guidance",
+];
 
 function StrengthRow({ strength, index }: { strength: WhyChooseMeStrength; index: number }) {
   const Icon = strength.icon;
@@ -69,7 +77,11 @@ export function WhyChooseMeSection() {
   const state = publicAdvisor?.state?.trim() || user?.state?.trim() || "";
   const profession =
     publicAdvisor?.profession?.trim() || user?.profession?.trim() || advisorProfile.title;
-  const about = advisorProfile.home.heroBio || advisorProfile.ctaDescription;
+  const customCta =
+    advisorProfile.ctaDescription !== ADVISOR_PROFILE_LABELS.ctaDescription
+      ? advisorProfile.ctaDescription
+      : "";
+  const about = advisorProfile.home.heroBio || customCta;
 
   const journeyExperienceDisplay = resolveCareerExperienceDisplay(career);
 
@@ -111,11 +123,33 @@ export function WhyChooseMeSection() {
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground leading-relaxed">{intro}</p>
 
-      <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
-        {strengths.map((strength, i) => (
-          <StrengthRow key={strength.id} strength={strength} index={i} />
-        ))}
-      </ul>
+      {strengths.length > 0 ? (
+        <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
+          {strengths.map((strength, i) => (
+            <StrengthRow key={strength.id} strength={strength} index={i} />
+          ))}
+        </ul>
+      ) : (
+        <ul className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
+          {FALLBACK_STRENGTHS.map((label, i) => (
+            <li
+              key={label}
+              className="border-b border-white/8 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0 py-3 sm:py-3.5"
+            >
+              <div className="flex items-center gap-3 sm:gap-3.5">
+                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/20 shadow-md ring-1 ring-white/10">
+                  <svg className="size-[1.125rem] text-[oklch(0.82_0.13_205)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <p className="min-w-0 text-sm sm:text-[0.9375rem] font-semibold leading-snug tracking-tight text-foreground opacity-75">
+                  {label}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

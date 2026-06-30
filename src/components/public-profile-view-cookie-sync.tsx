@@ -48,6 +48,7 @@ export function PublicProfileViewCookieSync() {
     void fetch("/api/public-view", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ userId: storedUserId }),
     }).then((res) => {
       if (res.ok) {
@@ -70,10 +71,11 @@ export function PublicProfileViewCookieSync() {
       bootstrappedUserRef.current = null;
       try {
         sessionStorage.removeItem(PUBLIC_VIEW_USER_STORAGE_KEY);
+        sessionStorage.removeItem("yvity-public-view-slug");
       } catch {
         // ignored
       }
-      void fetch("/api/public-view", { method: "DELETE" });
+      void fetch("/api/public-view", { method: "DELETE", credentials: "same-origin" });
     }
   }, [pathname]);
 

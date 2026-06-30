@@ -25,7 +25,8 @@ export function isCustomerTestimonial(item: TestimonialItem): boolean {
 }
 
 export function averageTestimonialRating(items: TestimonialItem[]): string {
-  if (items.length === 0) return "—";
-  const avg = items.reduce((sum, item) => sum + item.rating, 0) / items.length;
+  const rated = items.filter((item) => item.rating > 0);
+  if (rated.length === 0) return "—";
+  const avg = rated.reduce((sum, item) => sum + item.rating, 0) / rated.length;
   return avg.toFixed(1);
 }

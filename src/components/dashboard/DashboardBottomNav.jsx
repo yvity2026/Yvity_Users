@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, UserRound, Users } from "lucide-react";
+import { Building2, Home, UserRound, Users } from "lucide-react";
 import {
   DASHBOARD_PRIMARY_NAV,
   isDashboardNavActive,
@@ -14,7 +14,14 @@ import { cn } from "@/lib/utils";
 const NAV_ICONS = {
   home: Home,
   "my-network": Users,
+  "insurance-directory": Building2,
   "my-space": UserRound,
+};
+
+const NAV_SHORT_LABELS = {
+  "insurance-directory": "Directory",
+  "my-network": "Network",
+  "my-space": "My Space",
 };
 
 export default function DashboardBottomNav() {
@@ -29,7 +36,7 @@ export default function DashboardBottomNav() {
     >
       <div className="mob-nav-bottom-frame yvity-dash-nav-top-frame">
         <div className="mob-nav-bottom-inner yvity-dash-nav-bottom-inner">
-          <div className="mx-auto flex h-[4.25rem] max-w-lg items-stretch justify-around px-1">
+          <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-around px-1 sm:h-16">
             {DASHBOARD_PRIMARY_NAV.map((item) => {
               const Icon = NAV_ICONS[item.id];
               const href = loading
@@ -65,7 +72,7 @@ export default function DashboardBottomNav() {
                       isActive ? "font-semibold" : "font-medium opacity-65",
                     )}
                   >
-                    {item.label}
+                    {NAV_SHORT_LABELS[item.id] ?? item.label}
                   </span>
                 </Link>
               );

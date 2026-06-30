@@ -384,12 +384,16 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       status: ruleStatus(recommendationsEarned + bonusEarned, 15),
       explanation: {
         bullets: [
-          "Each recommendation → 2 points",
-          `Current : ${recommendations} recommendations received`,
+          "Each recommendation → 2 points (max 14 pts)",
+          "Reach 7 recommendations → +1 bonus point",
+          `Current: ${recommendations} recommendation${recommendations === 1 ? "" : "s"} received`,
         ],
         metrics: [
-          { label: "Max", value: "14 pts" },
-          { label: "", value: `${recommendationsEarned} pts`, tone: "success" },
+          { label: "Max", value: "15 pts" },
+          { label: "Earned", value: `${recommendationsEarned + bonusEarned} pts`, tone: "success" as const },
+          ...(bonusEarned > 0
+            ? [{ label: "Incl. bonus", value: "+1 pt", tone: "success" as const }]
+            : []),
         ],
       },
     },
@@ -499,7 +503,7 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       label: "Add intro video to your profile",
       points: 10,
       cta: "Add now",
-      target: { kind: "profile-section", section: "profile" },
+      target: { kind: "intro-video" },
     });
   }
   if (videoTestimonials < 3) {
@@ -514,10 +518,12 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
   }
   if (visibilityScoreActive && recommendations < 7) {
     const remaining = 7 - recommendations;
+    const recPoints = Math.min(14, remaining * 2);
     improvements.push({
       id: "imp-recommendations",
       label: `Get ${remaining} more recommendation${remaining === 1 ? "" : "s"}`,
-      points: Math.min(14, remaining * 2),
+      // Include the +1 bonus that unlocks at 7 recommendations
+      points: recPoints + 1,
       cta: "Share",
       target: { kind: "share" },
     });
@@ -532,15 +538,6 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
         Math.ceil(remaining / SELF_SHARES_PER_POINT),
       ),
       cta: "Share",
-      target: { kind: "share" },
-    });
-  }
-  if (visibilityScoreActive && recommendations < 7) {
-    improvements.push({
-      id: "imp-bonus",
-      label: "Reach 7 recommendations to unlock the final bonus point",
-      points: 1,
-      cta: "Keep going",
       target: { kind: "share" },
     });
   }

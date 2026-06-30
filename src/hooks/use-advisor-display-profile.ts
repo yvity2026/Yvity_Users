@@ -14,7 +14,7 @@ import {
   buildAdvisorDisplayProfile,
   type AdvisorDisplayProfile,
 } from "@/lib/advisor-display-profile";
-import { buildPublicProfileBannerStats } from "@/lib/home/public-profile-banner-stats";
+import { buildCareerSectionBannerStats, buildPublicProfileBannerStats } from "@/lib/home/public-profile-banner-stats";
 import { usePublicProfileStats } from "@/hooks/use-public-profile-stats";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
 import { useCareerData } from "@/lib/career-store";
@@ -42,15 +42,15 @@ export function useAdvisorDisplayProfile(
     let base: AdvisorDisplayProfile;
 
     if (publicAdvisor) {
+      // Advisor data loaded from server (SSR context or async API fetch).
       base = buildDisplayProfileFromPublicView(publicAdvisor);
-    } else if (user?.id) {
-      base = buildAdvisorDisplayProfile({
-        user,
-        advisor,
-        designation,
-      });
-    } else {
+    } else if (advisor?.id) {
+      // Logged-in advisor viewing their own section pages — use their own data.
       base = buildAdvisorDisplayProfile({ user, advisor, designation });
+    } else {
+      // No advisor data yet (customer visitor waiting for async fetch).
+      // Use empty profile to avoid showing the customer's own name/photo in the CTA.
+      base = buildAdvisorDisplayProfile({ user: null, advisor: null, designation });
     }
 
     const isOwner = Boolean(user?.id && publicAdvisor?.userId === user.id);
@@ -88,6 +88,7 @@ export function useAdvisorDisplayProfile(
       companyName: bannerStats.companyName,
       mdrtMember: bannerStats.mdrtMember,
       stats: bannerStats.sectionBannerStats,
+      careerStats: bannerStats.careerSectionBannerStats,
       highlights: bannerStats.highlightLabels,
     };
   }, [

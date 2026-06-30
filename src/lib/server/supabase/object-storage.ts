@@ -38,6 +38,29 @@ export function isSupabasePublicStorageUrl(
   return trimmed.includes(`/storage/v1/object/public/${bucket}/`);
 }
 
+/** Public buckets serve files via a public URL (selfies, gallery, intro video, testimonials). */
+const PUBLIC_BUCKETS = new Set<StorageBucket>(["selfies", "gallery", "intro-video", "testimonials"]);
+
+/**
+ * Ensures a storage bucket exists with the correct public flag.
+ * Creates it if missing; updates the public setting if it already exists with wrong config.
+ */
+async function ensureBucket(supabase: NonNullable<ReturnType<typeof getAdminClientOrNull>>, bucket: StorageBucket): Promise<void> {
+  const isPublic = PUBLIC_BUCKETS.has(bucket);
+  const { error } = await supabase.storage.createBucket(bucket, {
+    public: isPublic,
+    allowedMimeTypes: undefined, // allow all — validation is done in app layer
+  });
+  if (error) {
+    if (!error.message.toLowerCase().includes("already exist")) {
+      console.warn(`[storage] Could not ensure bucket "${bucket}": ${error.message}`);
+    } else {
+      // Bucket already exists — sync its public flag in case it was created with wrong settings
+      await supabase.storage.updateBucket(bucket, { public: isPublic }).catch(() => {});
+    }
+  }
+}
+
 export async function uploadObject(
   bucket: StorageBucket,
   objectPath: string,
@@ -47,6 +70,9 @@ export async function uploadObject(
 ): Promise<void> {
   const supabase = getAdminClientOrNull();
   if (!supabase) throw new Error("Supabase is not configured");
+
+  // Auto-create bucket if it doesn't exist (handles first-time Supabase setup)
+  await ensureBucket(supabase, bucket);
 
   const path = objectPath.replace(/^\/+/, "");
   const { error } = await supabase.storage.from(bucket).upload(path, body, {

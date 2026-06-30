@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/adminClient";
+import { embedGoldMeta } from "@/lib/server/supabase/gold-meta";
 import type { GalleryItem } from "@/yvity-gold/lib/gallery-types";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/yvity-gold/lib/sections/types";
 import { isUuid } from "@/lib/yvity-gold/bridge/career-mapper";
@@ -104,11 +105,14 @@ export async function syncAchievements(advisorId: string, items: AchievementItem
   }
 
   for (const item of items) {
+    const descriptionWithMeta = item.verification
+      ? embedGoldMeta(item.description, { verification: item.verification })
+      : item.description;
     const row = {
       advisor_id: advisorId,
       title: item.title,
       organisation: item.subtitle || "—",
-      description: item.description,
+      description: descriptionWithMeta,
       achievement_year: item.years[0] || String(new Date().getFullYear()),
       type: ACHIEVEMENT_TYPE[item.category] ?? "other",
       icon: item.iconStyle,

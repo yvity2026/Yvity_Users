@@ -13,8 +13,6 @@ import {
 } from "@/lib/advisor/service-item-meta";
 import { embedGoldMeta } from "@/lib/server/supabase/gold-meta";
 import {
-  mapDbAchievements,
-  mapDbGallery,
   mapDbServices,
   mapDbTestimonials,
 } from "@/lib/server/supabase/mappers";
@@ -30,12 +28,6 @@ function serviceShortSummary(item: ServiceItem): string | null {
   return serviceShortSummaryForDb(item);
 }
 
-const ACHIEVEMENT_TYPE: Record<AchievementItem["category"], string> = {
-  life: "life",
-  health: "health",
-  education: "education",
-  other: "other",
-};
 
 function client() {
   const supabase = getAdminClientOrNull();
@@ -65,24 +57,25 @@ export async function loadServicesFromDb(advisorId: string): Promise<ServiceItem
 
 export async function loadAchievementsFromDb(advisorId: string): Promise<AchievementItem[]> {
   const { data, error } = await client()
-    .from("advisor_achievements")
-    .select("*")
+    .from("advisor_profiles")
+    .select("achievements_data")
     .eq("advisor_id", advisorId)
-    .order("created_at", { ascending: false });
+    .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  return normalizeAchievements(mapDbAchievements((data ?? []) as Record<string, unknown>[]));
+  if (error) throw new Error(`[achievements load] ${error.message}`);
+  const raw = (data?.achievements_data as AchievementItem[] | null) ?? [];
+  return normalizeAchievements(raw);
 }
 
 export async function loadGalleryFromDb(advisorId: string): Promise<GalleryItem[]> {
   const { data, error } = await client()
-    .from("advisor_gallery")
-    .select("*")
+    .from("advisor_profiles")
+    .select("gallery_data")
     .eq("advisor_id", advisorId)
-    .order("sort_order", { ascending: true });
+    .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  return mapDbGallery((data ?? []) as Record<string, unknown>[]);
+  if (error) throw new Error(`[gallery load] ${error.message}`);
+  return (data?.gallery_data as GalleryItem[] | null) ?? [];
 }
 
 export async function loadTestimonialsFromDb(advisorId: string): Promise<TestimonialItem[]> {
@@ -145,10 +138,11 @@ export async function insertTestimonialToDb(
 
 export async function syncServices(advisorId: string, items: ServiceItem[]) {
   const supabase = client();
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("advisor_services")
     .select("id")
     .eq("advisor_id", advisorId);
+  if (fetchErr) throw new Error(`[advisor_services] fetch failed: ${fetchErr.message}`);
 
   const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
   const toDelete = (existing ?? [])
@@ -156,7 +150,12 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
     .filter((id) => !payloadIds.has(id));
 
   if (toDelete.length) {
-    await supabase.from("advisor_services").delete().eq("advisor_id", advisorId).in("id", toDelete);
+    const { error: delErr } = await supabase
+      .from("advisor_services")
+      .delete()
+      .eq("advisor_id", advisorId)
+      .in("id", toDelete);
+    if (delErr) throw new Error(`[advisor_services] delete failed: ${delErr.message}`);
   }
 
   for (const item of items) {
@@ -174,9 +173,15 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
     };
 
     if (isUuid(item.id)) {
-      await supabase.from("advisor_services").update(row).eq("id", item.id).eq("advisor_id", advisorId);
+      const { error: updErr } = await supabase
+        .from("advisor_services")
+        .update(row)
+        .eq("id", item.id)
+        .eq("advisor_id", advisorId);
+      if (updErr) throw new Error(`[advisor_services] update failed: ${updErr.message}`);
     } else {
-      await supabase.from("advisor_services").insert(row);
+      const { error: insErr } = await supabase.from("advisor_services").insert(row);
+      if (insErr) throw new Error(`[advisor_services] insert failed: ${insErr.message}`);
     }
   }
 
@@ -184,85 +189,23 @@ export async function syncServices(advisorId: string, items: ServiceItem[]) {
 }
 
 export async function syncAchievements(advisorId: string, items: AchievementItem[]) {
-  const supabase = client();
-  const { data: existing } = await supabase
-    .from("advisor_achievements")
-    .select("id")
+  const { error } = await client()
+    .from("advisor_profiles")
+    .update({ achievements_data: items, updated_at: new Date().toISOString() })
     .eq("advisor_id", advisorId);
 
-  const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
-  const toDelete = (existing ?? [])
-    .map((r) => String(r.id))
-    .filter((id) => !payloadIds.has(id));
-
-  if (toDelete.length) {
-    await supabase
-      .from("advisor_achievements")
-      .delete()
-      .eq("advisor_id", advisorId)
-      .in("id", toDelete);
-  }
-
-  for (const item of items) {
-    const row = {
-      advisor_id: advisorId,
-      title: item.title,
-      organisation: item.subtitle || "—",
-      description: item.description,
-      achievement_year: item.years[0] || String(new Date().getFullYear()),
-      type: ACHIEVEMENT_TYPE[item.category] ?? "other",
-      icon: item.iconStyle,
-    };
-
-    if (isUuid(item.id)) {
-      await supabase
-        .from("advisor_achievements")
-        .update(row)
-        .eq("id", item.id)
-        .eq("advisor_id", advisorId);
-    } else {
-      await supabase.from("advisor_achievements").insert(row);
-    }
-  }
-
-  return loadAchievementsFromDb(advisorId);
+  if (error) throw new Error(`[achievements save] ${error.message}`);
+  return normalizeAchievements(items);
 }
 
 export async function syncGallery(advisorId: string, items: GalleryItem[]) {
-  const supabase = client();
-  const { data: existing } = await supabase
-    .from("advisor_gallery")
-    .select("id")
+  const { error } = await client()
+    .from("advisor_profiles")
+    .update({ gallery_data: items, updated_at: new Date().toISOString() })
     .eq("advisor_id", advisorId);
 
-  const payloadIds = new Set(items.filter((i) => isUuid(i.id)).map((i) => i.id));
-  const toDelete = (existing ?? [])
-    .map((r) => String(r.id))
-    .filter((id) => !payloadIds.has(id));
-
-  if (toDelete.length) {
-    await supabase.from("advisor_gallery").delete().eq("advisor_id", advisorId).in("id", toDelete);
-  }
-
-  for (let index = 0; index < items.length; index++) {
-    const item = items[index];
-    const caption = [item.title, item.caption].filter(Boolean).join("\n").trim() || item.title;
-    const row = {
-      advisor_id: advisorId,
-      image_url: item.imageUrl,
-      caption,
-      category: item.category,
-      sort_order: index,
-    };
-
-    if (isUuid(item.id)) {
-      await supabase.from("advisor_gallery").update(row).eq("id", item.id).eq("advisor_id", advisorId);
-    } else if (item.imageUrl) {
-      await supabase.from("advisor_gallery").insert(row);
-    }
-  }
-
-  return loadGalleryFromDb(advisorId);
+  if (error) throw new Error(`[gallery save] ${error.message}`);
+  return items;
 }
 
 export async function syncTestimonials(advisorId: string, items: TestimonialItem[]) {

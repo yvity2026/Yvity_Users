@@ -7,6 +7,7 @@ import {
   achievementCategoryLabels,
   achievementIconMap,
 } from "@/lib/sections/achievements-config";
+import { MdrtIcon } from "@/components/ui/mdrt-icon";
 import { isYvityVerified } from "@/lib/verification/defaults";
 import { VERIFIED_BY_YVITY_LABEL } from "@/lib/verification/copy";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,8 @@ export function AchievementDetailCard({
   index?: number;
 }) {
   const accent = achievementCategoryAccents[item.category];
-  const Icon = achievementIconMap[item.iconStyle];
+  const isMdrtIcon = item.iconStyle === "mdrt";
+  const Icon = isMdrtIcon ? null : achievementIconMap[item.iconStyle as Exclude<typeof item.iconStyle, "mdrt">];
   const yearsLine = item.years.join(" • ");
 
   const inner = (
@@ -46,15 +48,25 @@ export function AchievementDetailCard({
       )}
       style={{ animationDelay: `${Math.min(index * 70, 420)}ms` }}
     >
+      {/* Shimmer sweep */}
+      <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-[inherit]">
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.06] to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      </div>
+
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="text-center">
           <span
             className={cn(
               "mx-auto inline-flex size-14 sm:size-16 items-center justify-center rounded-2xl glass mb-4",
+              "transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none",
               accent.ring,
             )}
           >
-            <Icon className={cn("size-7 sm:size-8", accent.text)} />
+            {isMdrtIcon ? (
+              <MdrtIcon size={32} />
+            ) : Icon ? (
+              <Icon className={cn("size-7 sm:size-8", accent.text)} />
+            ) : null}
           </span>
           <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             {item.title}

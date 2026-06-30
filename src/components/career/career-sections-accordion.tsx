@@ -36,6 +36,18 @@ const triggerClass = cn(
 
 const contentClass = "px-4 pb-5 sm:px-6 sm:pb-8";
 
+function byStartDesc(a: Experience, b: Experience): number {
+  const da = a.start ? new Date(a.start + "-01").getTime() : 0;
+  const db = b.start ? new Date(b.start + "-01").getTime() : 0;
+  return db - da;
+}
+
+function byYearDesc(a: Education | Certification, b: Education | Certification): number {
+  const ya = Number(String(a.year).slice(0, 4)) || 0;
+  const yb = Number(String(b.year).slice(0, 4)) || 0;
+  return yb - ya;
+}
+
 export function CareerSectionsAccordion({
   experiences,
   certifications,
@@ -53,11 +65,12 @@ export function CareerSectionsAccordion({
   showEducationalJourney?: boolean;
   profileApproved?: boolean;
 }) {
-  const showJourneyVerifiedBadge = profileApproved && experiences.length > 0;
-  const showEducationVerifiedBadge = profileApproved && education.length > 0;
+  // Verification badges re-enabled once admin verification pipeline is live.
+  const showJourneyVerifiedBadge = false;
+  const showEducationVerifiedBadge = false;
 
   return (
-    <Accordion type="multiple" className="space-y-3 sm:space-y-4">
+    <Accordion type="multiple" defaultValue={["professional-journey"]} className="space-y-3 sm:space-y-4">
       {showCareerJourney && (
         <AccordionItem value="professional-journey" className={cardClass}>
           <AccordionTrigger className={triggerClass}>
@@ -65,7 +78,7 @@ export function CareerSectionsAccordion({
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <ProfessionalJourneySection
-              experiences={experiences}
+              experiences={[...experiences].sort(byStartDesc)}
               embedded
               editable={editable?.experiences}
               showVerifiedBadge={showJourneyVerifiedBadge}
@@ -81,7 +94,7 @@ export function CareerSectionsAccordion({
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
             <CertificationsSection
-              items={certifications}
+              items={[...certifications].sort(byYearDesc)}
               embedded
               editable={editable?.certifications}
             />
@@ -95,7 +108,7 @@ export function CareerSectionsAccordion({
             <EducationHeader compact showVerifiedBadge={showEducationVerifiedBadge} />
           </AccordionTrigger>
           <AccordionContent className={contentClass}>
-            <EducationSection items={education} embedded editable={editable?.education} />
+            <EducationSection items={[...education].sort(byYearDesc)} embedded editable={editable?.education} />
           </AccordionContent>
         </AccordionItem>
       )}

@@ -35,8 +35,8 @@ export function buildHomeServiceChips(
         id: item.id,
         category: item.category,
         label: categoryHeadingFor(item.category),
-        subtitle: hasCompany ? company : "View details",
-        href: "/services",
+        subtitle: hasCompany ? company : "",
+        href: `/services?category=${item.category}#service-${item.category}`,
       };
     });
 }

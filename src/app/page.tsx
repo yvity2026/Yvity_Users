@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
@@ -20,6 +23,10 @@ import {
   pickLandingFeaturedAdvisors,
 } from "@/lib/advisors/landing-featured";
 import { getSessionUser } from "@/lib/server/session";
+import { getSiteOrigin } from "@/lib/social/site-origin";
+import { COMPANY_NAME } from "@/lib/brand";
+import { getAdminPlanPrices } from "@/lib/server/feature-controls-store";
+import { LandingScrollRestorer } from "@/components/landing-scroll-restorer";
 
 function SectionFallback() {
   return <div className="min-h-12 w-full" aria-hidden />;
@@ -31,10 +38,33 @@ type LandingSection = { id: string; content: ReactNode };
 
 /** Marketing landing — ported from YVITY/src/app/page.js */
 export default async function LandingPage() {
-  const [advisors, session] = await Promise.all([getPublicAdvisors(), getSessionUser()]);
+  const origin = getSiteOrigin();
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: COMPANY_NAME,
+    url: origin,
+    logo: `${origin}/brand/yvity-logo.png`,
+    description:
+      "India's first credibility platform for insurance advisors and their clients. Build a verified, IRDAI-ready profile or find trusted advisors near you.",
+    foundingDate: "2024",
+    areaServed: "IN",
+    sameAs: [],
+  };
+
+  const [advisors, session, adminPlanPrices] = await Promise.all([
+    // Landing page shows all featured advisors — don't exclude the logged-in user
+    // (they may be the only/featured advisor and must appear in hero/find-advisors)
+    getPublicAdvisors({ excludeSelf: false }),
+    getSessionUser(),
+    getAdminPlanPrices(),
+  ]);
   const heroAdvisors = pickHeroAdvisors(advisors);
   const landingAdvisors = pickLandingFeaturedAdvisors(advisors);
   const isLoggedIn = Boolean(session);
+  // Array — Set is not serializable across the RSC boundary
+  const featuredIdList: string[] = landingAdvisors.map((a) => a.id).filter(Boolean);
 
   const landingSections: LandingSection[] = [
     {
@@ -49,7 +79,15 @@ export default async function LandingPage() {
       id: "find-advisors",
       content: (
         <Suspense fallback={<SectionFallback />}>
-          <FindAdvisors advisors={landingAdvisors} isLoggedIn={isLoggedIn} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <FindAdvisors
+            {...({
+              featuredAdvisors: landingAdvisors,
+              allAdvisors: advisors,
+              featuredIdList,
+              isLoggedIn,
+            } as any)}
+          />
         </Suspense>
       ),
     },
@@ -65,7 +103,8 @@ export default async function LandingPage() {
       id: "pricing",
       content: (
         <Suspense fallback={<SectionFallback />}>
-          <Pricing />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Pricing {...({ livePrices: adminPlanPrices, showOriginalPrice: true } as any)} />
         </Suspense>
       ),
     },
@@ -89,6 +128,11 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-full w-full bg-[#F8F6F1]">
+      <LandingScrollRestorer />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <Navbar />
       <LandingMobileShell>
         <LandingMobileExperience

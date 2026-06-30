@@ -19,7 +19,9 @@ export async function loadLocalPublicAdvisors(
   const cards: PublicAdvisorCard[] = [];
 
   for (const profile of Object.values(db.profiles)) {
-    if (!isAdvisorProfileLive(profile)) continue;
+    // Include active and under_review advisors — matches Supabase query in fetch-supabase-advisors.ts
+    const status = String(profile.account_status || "").toLowerCase();
+    if (status !== "active" && status !== "under_review") continue;
     if (excludeUserId && profile.user_id === excludeUserId) continue;
 
     const user = byId.get(profile.user_id);

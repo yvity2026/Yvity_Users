@@ -15,6 +15,7 @@ import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { hasIrdaiCertificateUploaded } from "@/lib/advisor/irdai-workspace";
 import { useVerifiedRecommendationCount } from "@/hooks/use-verified-recommendation-count";
+import { useProfileShareCounts } from "@/hooks/use-profile-share-counts";
 import { useScoreActivity } from "@/hooks/use-score-activity";
 
 export function useAdvisorDashboardModel(): {
@@ -44,10 +45,12 @@ export function useAdvisorDashboardModel(): {
     monthlyActivity,
     profileViews,
     profileViewsDelta,
+    totalProfileViews,
     searchAppearances,
     searchDelta,
     loading: activityLoading,
   } = useScoreActivity();
+  const { selfShareCount, loading: sharesLoading } = useProfileShareCounts();
 
   const loadLeads = () => {
     setLeadsLoading(true);
@@ -74,6 +77,7 @@ export function useAdvisorDashboardModel(): {
     leadsLoading ||
     settingsLoading ||
     recsLoading ||
+    sharesLoading ||
     activityLoading;
 
   const introVideoUrl = getAdvisorIntroVideoUrl(settings, limits);
@@ -102,6 +106,7 @@ export function useAdvisorDashboardModel(): {
             subscriptionStartedAt: advisor?.subscription_started_at,
             subscriptionExpiresAt: advisor?.subscription_expires_at,
             verifiedRecommendationCount,
+            selfShareCount,
             accountCreatedAt: user?.created_at ?? null,
             decayPenalty,
             decayActive,
@@ -132,6 +137,7 @@ export function useAdvisorDashboardModel(): {
       advisor?.subscription_plan,
       advisor?.approved_at,
       verifiedRecommendationCount,
+      selfShareCount,
       user?.created_at,
       decayPenalty,
       decayActive,
@@ -143,6 +149,13 @@ export function useAdvisorDashboardModel(): {
       searchDelta,
     ],
   );
+
+  // Keep advisor_scores and users profile fields in sync.
+  useEffect(() => {
+    if (loading) return;
+    fetch("/api/advisor/score/sync", { method: "POST", credentials: "same-origin" }).catch(() => {});
+    fetch("/api/advisor/sync-profile", { method: "POST", credentials: "same-origin" }).catch(() => {});
+  }, [loading]);
 
   return { model, loading, refreshLeads: loadLeads };
 }

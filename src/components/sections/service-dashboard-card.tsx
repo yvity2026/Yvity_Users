@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AlertTriangle, FileText, Pencil, RefreshCcw, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, FileText, Pencil, RefreshCcw, Trash2 } from "lucide-react";
 import { ServiceDetailCard } from "@/components/sections/service-detail-card";
 import { VerificationStatusBadge } from "@/components/verification/verification-status-badge";
-import { displayCompanyName, displayCategoryHeading } from "@/lib/sections/service-display";
+import { displayCompanyName, displayCategoryHeading, isBannerOnlyService } from "@/lib/sections/service-display";
 import { serviceAccents } from "@/lib/sections/services-config";
 import type { ServiceItem } from "@/lib/sections/types";
 import { isServiceVerifiedForPlan } from "@/lib/advisor-membership/plan-enforcement";
@@ -56,17 +56,30 @@ export function ServiceDashboardCard({
 }) {
   const verification = item.verification;
   const isRejected = verification.status === "rejected";
-  const isBannerOnly = item.category === "mutual" || item.showDetailCard === false;
-  const [open, setOpen] = useState(false);
+  const isBannerOnly = isBannerOnlyService(item);
+  // Was previously approved (reviewedAt exists) but is now pending → re-approval in progress
+  const isReapprovalPending =
+    verification.status === "pending" && !!verification.reviewedAt;
+  // Auto-expand rejected cards and re-approval cards so advisors see the reason immediately
+  const [open, setOpen] = useState(isRejected || isReapprovalPending);
   const { limits } = useResolvedPlanLimits();
   const yvityVerified = isServiceVerifiedForPlan(limits, item, profileApproved);
-  const badgeStatus: VerificationStatus = yvityVerified
-    ? "verified"
-    : verification.status;
+  const badgeStatus: VerificationStatus = yvityVerified ? "verified" : verification.status;
+  const badgeLabel = isReapprovalPending ? "Changes Under Review" : undefined;
 
   const statusBadge = (
-    <VerificationStatusBadge status={badgeStatus} size="xs" className="shrink-0" />
+    <VerificationStatusBadge status={badgeStatus} label={badgeLabel} size="xs" className="shrink-0" />
   );
+
+  const rejectionBanner = isRejected && verification.rejectionReason ? (
+    <div className="rounded-xl border border-[oklch(0.72_0.18_15/0.4)] bg-[oklch(0.72_0.18_15/0.1)] px-3 py-2 text-[11px] leading-relaxed">
+      <p className="flex items-center gap-1.5 font-semibold text-[oklch(0.88_0.12_15)]">
+        <AlertTriangle className="size-3" />
+        Verification rejected
+      </p>
+      <p className="mt-0.5 text-foreground/85">{verification.rejectionReason}</p>
+    </div>
+  ) : null;
 
   // The rejection banner + actions toolbar are tucked INSIDE the accordion
   // body so the collapsed dashboard card matches the clean look of the
@@ -74,21 +87,14 @@ export function ServiceDashboardCard({
   // toolbar previously stacked below and made the list look cluttered.
   const dashboardFooter = readOnly ? null : (
     <div className="flex flex-col gap-2.5 border-t border-white/10 pt-4">
-      {isRejected && verification.rejectionReason && (
-        <div className="rounded-xl border border-[oklch(0.72_0.18_15/0.4)] bg-[oklch(0.72_0.18_15/0.1)] px-3 py-2 text-[11px] leading-relaxed">
-          <p className="flex items-center gap-1.5 font-semibold text-[oklch(0.88_0.12_15)]">
-            <AlertTriangle className="size-3" />
-            Verification rejected
-          </p>
-          <p className="mt-0.5 text-foreground/85">{verification.rejectionReason}</p>
-        </div>
-      )}
+      {rejectionBanner}
 
       <DashboardActionsBar
         item={item}
         onEdit={onEdit}
         onDelete={onDelete}
         isRejected={isRejected}
+        isReapprovalPending={isReapprovalPending}
         profileApproved={profileApproved}
       />
     </div>
@@ -106,21 +112,14 @@ export function ServiceDashboardCard({
             statusBadge={statusBadge}
             onEdit={readOnly ? undefined : onEdit}
           />
-          {isRejected && verification.rejectionReason && (
-            <div className="rounded-xl border border-[oklch(0.72_0.18_15/0.4)] bg-[oklch(0.72_0.18_15/0.1)] px-3 py-2 text-[11px] leading-relaxed">
-              <p className="flex items-center gap-1.5 font-semibold text-[oklch(0.88_0.12_15)]">
-                <AlertTriangle className="size-3" />
-                Verification rejected
-              </p>
-              <p className="mt-0.5 text-foreground/85">{verification.rejectionReason}</p>
-            </div>
-          )}
+          {rejectionBanner}
           {!readOnly ? (
             <DashboardActionsBar
               item={item}
               onEdit={onEdit}
               onDelete={onDelete}
               isRejected={isRejected}
+              isReapprovalPending={isReapprovalPending}
               profileApproved={profileApproved}
             />
           ) : null}
@@ -146,12 +145,14 @@ function DashboardActionsBar({
   onEdit,
   onDelete,
   isRejected,
+  isReapprovalPending = false,
   profileApproved = false,
 }: {
   item: ServiceItem;
   onEdit: () => void;
   onDelete: () => void;
   isRejected: boolean;
+  isReapprovalPending?: boolean;
   profileApproved?: boolean;
 }) {
   const verification = item.verification;
@@ -173,24 +174,50 @@ function DashboardActionsBar({
             <span>Visible on public profile</span>
           </>
         )}
-        {!yvityVerified && verification.status === "pending" && (
+        {!yvityVerified && isReapprovalPending && (
           <>
             <span aria-hidden>·</span>
-            <span>Hidden until approved</span>
+            <span className="text-[oklch(0.85_0.16_78)]">Hidden · Changes awaiting re-approval</span>
+          </>
+        )}
+        {!yvityVerified && !isReapprovalPending && verification.status === "pending" && verification.documents.length === 0 && (
+          <>
+            <span aria-hidden>·</span>
+            <span className="text-[oklch(0.85_0.16_78)]">Hidden · Upload documents to go live</span>
+          </>
+        )}
+        {!yvityVerified && !isReapprovalPending && verification.status === "pending" && verification.documents.length > 0 && (
+          <>
+            <span aria-hidden>·</span>
+            <span>Hidden · Awaiting admin approval</span>
           </>
         )}
       </p>
 
+      {isReapprovalPending && (
+        <div className="mt-2 flex items-start gap-1.5 rounded-lg border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-3 py-2 text-[11px] text-[oklch(0.92_0.14_78)]">
+          <AlertTriangle className="size-3 shrink-0 mt-0.5" />
+          <span>Your service details have changed and are under review. This service is temporarily hidden from your public profile until admin re-approves the updated information.</span>
+        </div>
+      )}
+      {!isReapprovalPending && verification.documents.length === 0 && !yvityVerified && (
+        <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-3 py-2 text-[11px] text-[oklch(0.92_0.14_78)]">
+          <AlertTriangle className="size-3 shrink-0" />
+          Upload at least one verification document to submit for review
+        </div>
+      )}
       <div className="mt-2 flex flex-wrap gap-1.5">
         <ActionButton onClick={onEdit} icon={Pencil}>
           Edit
         </ActionButton>
-        <ActionButton onClick={onEdit} icon={Upload}>
-          Upload New Proof
-        </ActionButton>
         {isRejected && (
           <ActionButton onClick={onEdit} icon={RefreshCcw} variant="primary">
             Resubmit Verification
+          </ActionButton>
+        )}
+        {isReapprovalPending && (
+          <ActionButton onClick={onEdit} icon={RefreshCcw} variant="primary">
+            Update & Resubmit
           </ActionButton>
         )}
         <ActionButton onClick={onDelete} icon={Trash2} variant="destructive">
@@ -277,7 +304,7 @@ function BannerOnlyServiceCard({
                 width={48}
                 height={48}
                 className="size-full object-contain p-1"
-                unoptimized={logoUrl.startsWith("/api/")}
+                unoptimized={logoUrl.startsWith("/api/") || logoUrl.includes("/storage/v1/object/public/")}
               />
             ) : (
               <Icon className={cn("size-6", accent.text)} />
@@ -301,7 +328,7 @@ function BannerOnlyServiceCard({
           </p>
           {item.roleLabel && <p className={cn("mt-1 text-xs", accent.text)}>{item.roleLabel}</p>}
           <p className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-            Appears in services banner only
+            Shows in banner · No detail card
           </p>
         </div>
       </div>

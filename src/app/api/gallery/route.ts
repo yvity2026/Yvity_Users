@@ -52,6 +52,13 @@ export async function PUT(request: Request) {
     }
   }
 
-  const data = await saveGalleryForUser(session.id, body.data);
+  let data: Awaited<ReturnType<typeof saveGalleryForUser>>;
+  try {
+    data = await saveGalleryForUser(session.id, body.data);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[gallery PUT]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, data });
 }

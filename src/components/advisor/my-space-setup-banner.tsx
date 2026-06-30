@@ -1,13 +1,51 @@
 "use client";
 
-import { ArrowRight, BriefcaseBusiness, Clock } from "lucide-react";
+import { AlertTriangle, ArrowRight, BriefcaseBusiness, Clock } from "lucide-react";
 
 type MySpaceSetupBannerProps = {
-  variant: "setup" | "review";
+  variant: "setup" | "review" | "rejected";
   onSetup?: () => void;
+  rejectedReason?: string;
 };
 
-export function MySpaceSetupBanner({ variant, onSetup }: MySpaceSetupBannerProps) {
+export function MySpaceSetupBanner({ variant, onSetup, rejectedReason }: MySpaceSetupBannerProps) {
+  if (variant === "rejected") {
+    return (
+      <section
+        className="mx-auto mb-4 w-full max-w-[1600px] px-4 sm:px-6 md:px-8"
+        aria-live="polite"
+      >
+        <div className="rounded-2xl border border-red-400/30 bg-gradient-to-r from-red-500/8 via-[#fff9f9] to-[#FFF9F0] px-4 py-4 sm:px-5 sm:py-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/12 text-red-600">
+                <AlertTriangle className="size-5" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-[#0A4A4A]">Profile update required</p>
+                <p className="mt-1 text-xs leading-relaxed text-[#6B7280] sm:text-sm">
+                  Our team reviewed your submission and needs some changes before your profile can go
+                  live.{" "}
+                  {rejectedReason ? (
+                    <span className="font-semibold text-red-700">Reason: {rejectedReason}</span>
+                  ) : null}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onSetup}
+              className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-full border border-[#0A4A4A]/20 bg-[#0A4A4A] px-5 py-2.5 font-poppins text-sm font-semibold text-[#F59E0B] transition hover:bg-[#0D5C5C] active:scale-[0.98] sm:self-center"
+            >
+              Fix and resubmit
+              <ArrowRight className="size-4" aria-hidden />
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (variant === "review") {
     return (
       <section

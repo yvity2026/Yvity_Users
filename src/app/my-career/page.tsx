@@ -1,24 +1,37 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { PublicProfileSectionRedirect } from "@/components/public-profile-section-redirect";
 import { PublicSectionUnavailable } from "@/components/advisor/settings/public-section-unavailable";
 import { useCareerData } from "@/lib/career-store";
 import { CareerSectionsAccordion } from "@/components/career/career-sections-accordion";
 import { SectionAdvisorCta } from "@/components/sections/section-advisor-cta";
 import { SectionProfileBanner } from "@/components/sections/section-profile-banner";
 import { useAdvisorSettings } from "@/lib/advisor-settings-store";
-import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 import { useAuth } from "@/context/AuthUserContext";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { useResolvedPublicAdvisorPayload } from "@/hooks/use-resolved-public-advisor-payload";
+import { usePublicProfileNavHome } from "@/hooks/use-public-profile-nav-home";
+import { useAdvisorDisplayProfile } from "@/hooks/use-advisor-display-profile";
 
 export default function MyCareerPage() {
+  const homeHref = usePublicProfileNavHome();
+  const pathname = usePathname();
   const [data, , loading] = useCareerData();
+  const display = useAdvisorDisplayProfile();
   const { settings, loading: settingsLoading } = useAdvisorSettings();
   const { advisor } = useAuth();
   const publicAdvisor = useResolvedPublicAdvisorPayload();
   const profileApproved = publicAdvisor
     ? isAdvisorProfileApproved(publicAdvisor.profile)
     : isAdvisorProfileApproved(advisor);
+
+  // Redirect visitors from /my-career to /{slug}/my-career — skip if already there
+  const needsRedirect =
+    homeHref && homeHref !== "/profile" && !pathname.startsWith(homeHref + "/");
+  if (needsRedirect) {
+    return <PublicProfileSectionRedirect section="my-career" />;
+  }
 
   if (loading || settingsLoading) {
     return (
@@ -39,7 +52,7 @@ export default function MyCareerPage() {
             My Career
           </h1>
         </div>
-        <SectionProfileBanner className="mb-6 sm:mb-8" />
+        <SectionProfileBanner className="mb-6 sm:mb-8" statsOverride={display.careerStats} />
         {!settings.visibility.careerJourney && !settings.visibility.educationalJourney ? (
           <PublicSectionUnavailable title="Career sections hidden" />
         ) : (

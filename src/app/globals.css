@@ -38,7 +38,7 @@
   --color-accent-emerald: var(--accent-emerald);
   --color-accent-amber: var(--accent-amber);
   --color-accent-rose: var(--accent-rose);
-  --font-cormorant: var(--font-cormorant), Georgia, serif;
+  --font-cormorant: "Cormorant Garamond", Georgia, serif;
   --font-poppins: var(--font-poppins), system-ui, sans-serif;
 }
 
@@ -337,108 +337,6 @@
   --yvity-dash-nav-cta-text: oklch(0.99 0 0);
 }
 
-/* Option D — midnight + amber (fourth theme, experimental dark luxe) */
-[data-profile-theme="midnight-amber"] {
-  --brand: #1a1f36;
-  --brand-soft: #2e3a6b;
-
-  --background: #1a1f36;
-  --foreground: #eceef8;
-
-  --card: #2a3055;
-  --card-foreground: #eceef8;
-  --popover: #2a3055;
-  --popover-foreground: #eceef8;
-
-  --primary: #1a1f36;
-  --primary-foreground: #ffffff;
-
-  --secondary: #2e3a6b;
-  --secondary-foreground: #eceef8;
-
-  --muted: #242a47;
-  --muted-foreground: #a8afc9;
-
-  --accent: #ffb347;
-  --accent-foreground: #0f1123;
-
-  --destructive: oklch(0.62 0.22 22);
-  --destructive-foreground: #ffffff;
-
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.14);
-  --ring: #ffb347;
-
-  --accent-cyan: #2e3a6b;
-  --accent-violet: oklch(0.55 0.17 295);
-  --accent-emerald: oklch(0.55 0.15 162);
-  --accent-amber: #ffb347;
-  --accent-rose: oklch(0.62 0.18 15);
-
-  --yvity-glass-top: rgba(255, 255, 255, 0.08);
-  --yvity-glass-bottom: rgba(255, 255, 255, 0.03);
-  --yvity-glass-strong-top: rgba(255, 255, 255, 0.11);
-  --yvity-glass-strong-bottom: rgba(255, 255, 255, 0.04);
-  --yvity-glass-border: rgba(255, 255, 255, 0.12);
-  --yvity-glass-strong-border: rgba(255, 179, 71, 0.22);
-  --yvity-glass-inset: rgba(255, 255, 255, 0.1);
-  --yvity-glass-strong-inset: rgba(255, 255, 255, 0.12);
-  --yvity-glass-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55);
-  --yvity-glass-strong-shadow:
-    0 40px 80px -30px rgba(0, 0, 0, 0.65),
-    0 0 48px -12px rgba(255, 179, 71, 0.18);
-  --yvity-page-gradient-1: rgba(255, 179, 71, 0.14);
-  --yvity-page-gradient-2: rgba(46, 58, 107, 0.38);
-  --yvity-page-gradient-3: rgba(14, 17, 34, 0.55);
-  --yvity-brand-text-start: #ffd080;
-  --yvity-brand-text-end: #ffb347;
-  --yvity-surface-tint: oklch(1 0 0);
-  --yvity-surface-tint-alpha: 1;
-
-  --yvity-accent-teal: #2e3a6b;
-  --yvity-accent-teal-soft: rgba(46, 58, 107, 0.28);
-  --yvity-accent-teal-border: rgba(46, 58, 107, 0.5);
-  --yvity-accent-gold: #ffb347;
-  --yvity-accent-gold-strong: #e8821a;
-  --yvity-accent-gold-soft: rgba(255, 179, 71, 0.16);
-  --yvity-accent-gold-border: rgba(255, 179, 71, 0.48);
-  --yvity-accent-violet: oklch(0.55 0.17 295);
-  --yvity-accent-emerald: oklch(0.55 0.15 162);
-  --yvity-track: rgba(255, 255, 255, 0.1);
-
-  --yvity-font-heading: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --yvity-font-body: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
-  --yvity-font-numeric: var(--font-poppins), "Poppins", system-ui, sans-serif;
-
-  --yvity-nav-shell-bg: color-mix(in srgb, var(--card) 72%, transparent);
-  --yvity-nav-shell-border: var(--border);
-  --yvity-nav-link-active: rgba(255, 255, 255, 0.1);
-  --yvity-nav-active-ring: var(--yvity-accent-gold-border);
-  --yvity-nav-fab-gradient: linear-gradient(135deg, #ffb347, #e8821a 48%, #2e3a6b);
-  --yvity-nav-mobile-shadow: var(--yvity-glass-strong-shadow);
-
-  --yvity-dash-nav-frame: linear-gradient(90deg, #ffb347, #e8821a);
-  --yvity-dash-nav-surface: linear-gradient(
-    180deg,
-    rgba(42, 48, 85, 0.94),
-    rgba(26, 31, 54, 0.92)
-  );
-  --yvity-dash-nav-flat-bg: color-mix(in srgb, #1a1f36 92%, transparent);
-  --yvity-dash-nav-flat-border: rgba(255, 255, 255, 0.12);
-  --yvity-dash-nav-link: #a8afc9;
-  --yvity-dash-nav-link-hover-bg: rgba(255, 255, 255, 0.06);
-  --yvity-dash-nav-link-hover-text: #eceef8;
-  --yvity-dash-nav-link-active-bg: #2a3055;
-  --yvity-dash-nav-link-active-text: #ffb347;
-  --yvity-dash-nav-soon: #ffb347;
-  --yvity-dash-nav-action-bg: rgba(42, 48, 85, 0.85);
-  --yvity-dash-nav-action-border: rgba(255, 179, 71, 0.35);
-  --yvity-dash-nav-avatar-ring: #ffb347;
-  --yvity-dash-nav-icon-idle: rgba(236, 238, 248, 0.45);
-  --yvity-dash-nav-cta-bg: #ffb347;
-  --yvity-dash-nav-cta-text: #1a1f36;
-}
-
 @layer base {
   * {
     border-color: var(--color-border);
@@ -523,23 +421,6 @@
     font-family: var(--yvity-font-heading);
   }
 
-  [data-profile-theme="midnight-amber"] body {
-    font-family: var(--yvity-font-body);
-  }
-
-  [data-profile-theme="midnight-amber"] .yvity-display,
-  [data-profile-theme="midnight-amber"] .yvity-section-h,
-  [data-profile-theme="midnight-amber"] .yvity-card-h,
-  [data-profile-theme="midnight-amber"] h1,
-  [data-profile-theme="midnight-amber"] h2 {
-    font-family: var(--yvity-font-heading);
-  }
-
-  [data-profile-theme="midnight-amber"] button,
-  [data-profile-theme="midnight-amber"] [role="button"],
-  [data-profile-theme="midnight-amber"] .tabular-nums {
-    font-family: var(--yvity-font-numeric);
-  }
 }
 
 @layer utilities {
@@ -840,27 +721,6 @@
     box-shadow:
       0 0 0 1px oklch(0.55 0.16 78 / 0.38),
       0 8px 20px -8px oklch(0.55 0.16 78 / 0.25);
-  }
-
-  [data-profile-theme="midnight-amber"] .ring-glow-cyan {
-    box-shadow:
-      0 0 0 1px rgba(46, 58, 107, 0.55),
-      0 0 28px rgba(46, 58, 107, 0.35);
-  }
-  [data-profile-theme="midnight-amber"] .ring-glow-amber {
-    box-shadow:
-      0 0 0 1px rgba(255, 179, 71, 0.5),
-      0 0 36px rgba(255, 179, 71, 0.28);
-  }
-  [data-profile-theme="midnight-amber"] .ring-glow-violet {
-    box-shadow:
-      0 0 0 1px oklch(0.55 0.17 295 / 0.45),
-      0 0 28px oklch(0.55 0.17 295 / 0.22);
-  }
-  [data-profile-theme="midnight-amber"] .ring-glow-emerald {
-    box-shadow:
-      0 0 0 1px oklch(0.55 0.15 162 / 0.45),
-      0 0 28px oklch(0.55 0.15 162 / 0.22);
   }
 
   /* ---------- Light profile themes: white-surface utility remaps ---------- */

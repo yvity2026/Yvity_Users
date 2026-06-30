@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import Image from "next/image";
 import { Info } from "lucide-react";
 import {
   Dialog,
@@ -75,55 +74,30 @@ function ScoreInfoButton() {
   );
 }
 
-function IntroVideoTrustCard() {
+export function IntroVideoTrustCard() {
   const { settings } = useAdvisorSettings();
   const { limits } = useResolvedPlanLimits();
   const advisorProfile = useAdvisorDisplayProfile();
   const video = getPlanGatedIntroVideo(settings, limits);
   const profilePhoto = useAdvisorProfilePhoto();
-  const hasVideo = Boolean(video.url);
+
+  if (!video.url) return null;
 
   return (
     <TrustCardShell className="p-2.5 sm:p-3">
       <div className="flex items-stretch gap-2.5 sm:gap-3">
-        {hasVideo ? (
-          <IntroVideoPublicPlayer
-            video={video}
-            advisorName={advisorProfile.name}
-            profilePhoto={profilePhoto}
-            variant="trust"
-          />
-        ) : (
-          <div
-            className={cn(
-              "relative h-[4.25rem] w-[7.25rem] sm:h-[4.5rem] sm:w-[7.75rem] shrink-0 overflow-hidden rounded-lg",
-              "border border-white/10 bg-black/25",
-            )}
-            aria-hidden
-          >
-            {profilePhoto ? (
-              <Image
-                src={profilePhoto}
-                alt=""
-                fill
-                className="object-cover opacity-60 grayscale-[0.35]"
-                sizes="124px"
-                unoptimized={profilePhoto.startsWith("/api/")}
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-[oklch(0.14_0.03_250)]" />
-            )}
-          </div>
-        )}
-
+        <IntroVideoPublicPlayer
+          video={video}
+          advisorName={advisorProfile.name}
+          profilePhoto={profilePhoto}
+          variant="trust"
+        />
         <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
           <h3 className="text-xs sm:text-[13px] font-semibold tracking-tight text-foreground leading-tight">
             Advisor Introduction
           </h3>
           <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2">
-            {hasVideo
-              ? "Know your advisor before you connect."
-              : "Introduction video not added yet."}
+            Know your advisor before you connect.
           </p>
         </div>
       </div>
@@ -173,7 +147,7 @@ function YvityScoreProgressBar({ percent, loading }: { percent: number; loading:
   );
 }
 
-function YvityScoreTrustCard({ score, loading }: { score: number; loading: boolean }) {
+export function YvityScoreTrustCard({ score, loading }: { score: number; loading: boolean }) {
   const displayScore = loading ? "—" : String(score);
 
   return (

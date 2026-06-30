@@ -108,8 +108,13 @@ export async function saveVerificationUpload(
 
   const mimeType = (file.type || "application/octet-stream").toLowerCase();
   const ext = extByMime[mimeType] ?? "bin";
-  const filename = `${Date.now()}-${randomBytes(10).toString("hex")}.${ext}`;
+  // Embed ownerId as prefix so the serve route can reconstruct the Supabase path
+  const uniquePart = `${Date.now()}-${randomBytes(10).toString("hex")}`;
+  const filename = ownerUserId
+    ? `${ownerUserId}-${uniquePart}.${ext}`
+    : `${uniquePart}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+  // Supabase path: {ownerId}/{filename} (or just {filename} when no owner)
   const storagePath = ownerUserId ? `${ownerUserId}/${filename}` : filename;
 
   if (await uploadObjectWhenConfigured(STORAGE_BUCKETS.verificationDocs, storagePath, buffer, mimeType)) {

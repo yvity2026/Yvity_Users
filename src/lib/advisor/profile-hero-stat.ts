@@ -25,13 +25,13 @@ function visibleServices(services: ServiceItem[], profileApproved: boolean): Ser
   return services.filter((item) => isServiceVisibleOnPublicProfile(item, profileApproved));
 }
 
-function computeHighestClientsCount(services: Pick<ServiceItem, "clients">[]): number {
-  let max = 0;
+function computeTotalClientsCount(services: Pick<ServiceItem, "clients">[]): number {
+  let total = 0;
   for (const service of services) {
     const value = Number(service.clients ?? 0);
-    if (Number.isFinite(value)) max = Math.max(max, value);
+    if (Number.isFinite(value) && value > 0) total += value;
   }
-  return max;
+  return total;
 }
 
 /** Profile-level capacity — firm / company wins over team leader over individual. */
@@ -125,7 +125,7 @@ export function resolveProfileHeroStat(
     }
   }
 
-  const clients = computeHighestClientsCount(visible);
+  const clients = computeTotalClientsCount(visible);
   const value = formatStatValue(clients);
   if (value === "—") return { ...EMPTY_STAT, capacityId };
 

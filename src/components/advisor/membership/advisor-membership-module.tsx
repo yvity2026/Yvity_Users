@@ -62,8 +62,20 @@ type MembershipPaymentRow = {
 
 export function AdvisorMembershipModule() {
   const { advisor, setAdvisor } = useAuth();
+  const accountStatus = advisor?.account_status;
   const [payments, setPayments] = useState<MembershipPaymentRow[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(true);
+  const [planPriceOverrides, setPlanPriceOverrides] = useState<Array<{ id: string; priceAnnualInr: number; originalPriceInr: number | null; priceLabel: string }> | null>(null);
+
+  useEffect(() => {
+    fetch("/api/advisor/subscription/plan-prices")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result?.success && Array.isArray(result.data)) setPlanPriceOverrides(result.data);
+      })
+      .catch(() => {});
+  }, []);
+
   const model = useMemo(
     () =>
       buildMembershipModel({
@@ -86,6 +98,17 @@ export function AdvisorMembershipModule() {
     target?: MembershipPlanId;
     couponCode?: string;
   }>({ open: false, mode: "renew" });
+
+  const plansWithPrices = useMemo(
+    () =>
+      model.plans.map((p) => {
+        const override = planPriceOverrides?.find((o) => o.id === p.id);
+        return override
+          ? { ...p, priceAnnualInr: override.priceAnnualInr, originalPriceInr: override.originalPriceInr, priceLabel: override.priceLabel }
+          : p;
+      }),
+    [model.plans, planPriceOverrides],
+  );
 
   const upgradeTarget = upgradePlanId(model.current.planId);
   const { current, renewal } = model;
@@ -167,7 +190,44 @@ export function AdvisorMembershipModule() {
         </div>
       </section>
 
-      {renewal.showReminder && (
+      {/* Expired plan banner */}
+      {current.status === "expired" && (
+        <div className="rounded-2xl border border-[oklch(0.72_0.18_15/0.45)] bg-[oklch(0.72_0.18_15/0.1)] p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[oklch(0.88_0.12_15)]">Your membership has expired</p>
+            <p className="mt-1 text-xs text-[oklch(0.88_0.12_15/0.75)] leading-relaxed">
+              Your {current.planName} plan expired on {formatDate(current.expiryDate)}. Renew now to restore your verified badge, profile visibility, and plan features.
+            </p>
+          </div>
+          <Button
+            onClick={openRenew}
+            className="shrink-0 rounded-xl bg-[oklch(0.72_0.18_15)] hover:bg-[oklch(0.68_0.18_15)] text-white gap-2"
+          >
+            <RefreshCw className="size-4" />
+            Renew now
+          </Button>
+        </div>
+      )}
+
+      {/* Account status banners */}
+      {accountStatus === "under_review" && (
+        <div className="rounded-2xl border border-[oklch(0.82_0.13_205/0.4)] bg-[oklch(0.82_0.13_205/0.08)] p-4 md:p-5">
+          <p className="text-sm font-bold text-[oklch(0.88_0.12_205)]">Profile under review</p>
+          <p className="mt-1 text-xs text-[oklch(0.88_0.12_205/0.75)] leading-relaxed">
+            Your profile and documents are being verified by YVITY. This typically takes 1–2 business days. Plan features will be fully active once approved.
+          </p>
+        </div>
+      )}
+      {accountStatus === "action_required" && (
+        <div className="rounded-2xl border border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.1)] p-4 md:p-5">
+          <p className="text-sm font-bold text-[oklch(0.92_0.14_78)]">Action required on your profile</p>
+          <p className="mt-1 text-xs text-[oklch(0.92_0.14_78/0.75)] leading-relaxed">
+            YVITY needs additional information to verify your profile. Check your notifications or contact support@yvity.com to resolve this quickly.
+          </p>
+        </div>
+      )}
+
+      {renewal.showReminder && current.status !== "expired" && (
         <RenewalReminder
           daysRemaining={renewal.daysRemaining}
           level={renewal.reminderLevel}
@@ -186,7 +246,7 @@ export function AdvisorMembershipModule() {
                 {current.planName}
               </p>
             </div>
-            <StatusBadge status={current.status} />
+            <StatusBadge status={current.status} accountStatus={accountStatus} />
           </div>
 
           <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -223,6 +283,21 @@ export function AdvisorMembershipModule() {
               </Button>
             )}
           </div>
+
+          {!upgradeTarget && (
+            <div className="mt-4 rounded-2xl border border-[oklch(0.85_0.16_78/0.35)] bg-[oklch(0.85_0.16_78/0.08)] px-4 py-3">
+              <p className="text-xs font-semibold text-[oklch(0.92_0.14_78)]">Need more than Gold?</p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                Custom enterprise plans are available for large teams and organizations — higher limits, white-label options, and dedicated support.
+              </p>
+              <a
+                href="mailto:support@yvity.com?subject=Enterprise%20plan%20enquiry"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[oklch(0.85_0.16_78)] hover:underline"
+              >
+                Contact YVITY support →
+              </a>
+            </div>
+          )}
         </div>
       </DashboardSection>
 
@@ -260,7 +335,7 @@ export function AdvisorMembershipModule() {
         }
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {model.plans.map((plan) => (
+          {plansWithPrices.map((plan) => (
             <PlanCompareCard
               key={plan.id}
               plan={plan}
@@ -269,7 +344,7 @@ export function AdvisorMembershipModule() {
                 if (plan.id === current.planId) return;
                 if (
                   plan.priceAnnualInr >
-                  (model.plans.find((p) => p.id === current.planId)?.priceAnnualInr ?? 0)
+                  (plansWithPrices.find((p) => p.id === current.planId)?.priceAnnualInr ?? 0)
                 ) {
                   openUpgrade(plan.id);
                 }
@@ -283,7 +358,7 @@ export function AdvisorMembershipModule() {
             <thead>
               <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3 font-semibold">Feature</th>
-                {model.plans.map((p) => (
+                {plansWithPrices.map((p) => (
                   <th key={p.id} className="px-4 py-3 font-semibold text-center">
                     {p.name}
                   </th>
@@ -294,7 +369,7 @@ export function AdvisorMembershipModule() {
               {allPlanComparisonLabels().map((label) => (
                 <tr key={label} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-2.5 text-muted-foreground">{label}</td>
-                  {model.plans.map((p) => (
+                  {plansWithPrices.map((p) => (
                     <td key={p.id} className="px-4 py-2.5 text-center">
                       {planMarketingIncludes(p.id, label) ? (
                         <Check className="size-4 mx-auto text-[oklch(0.82_0.16_162)]" />
@@ -449,7 +524,27 @@ export function AdvisorMembershipModule() {
   );
 }
 
-function StatusBadge({ status }: { status: "active" | "expired" }) {
+function StatusBadge({
+  status,
+  accountStatus,
+}: {
+  status: "active" | "expired";
+  accountStatus?: string | null;
+}) {
+  if (accountStatus === "under_review") {
+    return (
+      <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider border-[oklch(0.82_0.13_205/0.4)] bg-[oklch(0.82_0.13_205/0.12)] text-[oklch(0.88_0.12_205)]">
+        Under review
+      </span>
+    );
+  }
+  if (accountStatus === "action_required") {
+    return (
+      <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider border-[oklch(0.85_0.16_78/0.45)] bg-[oklch(0.85_0.16_78/0.12)] text-[oklch(0.92_0.14_78)]">
+        Action required
+      </span>
+    );
+  }
   const active = status === "active";
   return (
     <span

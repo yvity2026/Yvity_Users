@@ -109,7 +109,7 @@ export function SetupProfileLuxuryModal({
                     logoSize={36}
                     showName
                     showTagline={false}
-                    logoClassName="h-9 w-9 object-contain"
+                    logoClassName="h-9 w-9 object-contain rounded-full bg-[#f8f6f1] p-1 shadow-sm"
                     nameClassName="font-cormorant text-lg font-bold text-white"
                   />
                   <p className="mt-2 font-poppins text-[10px] font-bold uppercase tracking-[0.2em] text-[#F59E0B]">

@@ -25,6 +25,7 @@ import { AdvisorInsightsModule } from "@/components/advisor/insights/advisor-ins
 import { AdvisorMembershipModule } from "@/components/advisor/membership/advisor-membership-module";
 import { AdvisorSettingsModule } from "@/components/advisor/settings/advisor-settings-module";
 import { AdvisorLeadsModule } from "@/components/advisor/leads/advisor-leads-module";
+import { AdvisorReferralModule } from "@/components/advisor/referral/AdvisorReferralModule";
 import { AdvisorSectionPlaceholder } from "@/components/advisor/advisor-section-placeholder";
 import {
   PublicProfilePreviewModule,
@@ -39,6 +40,8 @@ import { useCareerData } from "@/lib/career-store";
 import { useTestimonialSubmit } from "@/lib/testimonial-submit-store";
 import { AdvisorCareerProfile } from "@/components/career/advisor-career-profile";
 import { AdvisorReviewDashboard } from "@/components/advisor/review/advisor-review-dashboard";
+import { IntroVideoUploadModal } from "@/components/intro-video/intro-video-upload-modal";
+import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 
 export type AdvisorMySpaceWorkspaceProps = {
   reviewMode?: boolean;
@@ -63,7 +66,9 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
   const [profileSection, setProfileSection] =
     useState<AdvisorProfileSection>(DEFAULT_PROFILE_SECTION);
   const [publicViewMode, setPublicViewMode] = useState<PublicProfileViewMode>("mobile");
+  const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
   const display = useAdvisorDisplayProfile();
+  const { share: shareProfile } = useShareProfileLink();
 
   const navigateProfile = (section: AdvisorProfileSection) => {
     setTopSection("profile");
@@ -99,7 +104,7 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
   const isPublicDesktop = topSection === "public-profile" && publicViewMode === "desktop";
 
   const renderSectionBody = (): ReactNode => {
-    if (topSection === "dashboard") {
+    if (topSection === "overview") {
       if (reviewMode) {
         return (
           <AdvisorReviewDashboard
@@ -152,10 +157,17 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
         case "gallery":
           return <GalleryShowcase editable embedded />;
         case "score":
-          return <AdvisorScoreModule onNavigateProfileSection={navigateProfile} />;
+          return (
+            <AdvisorScoreModule
+              onNavigateProfileSection={navigateProfile}
+              onShareProfile={() => void shareProfile()}
+              onOpenIntroVideoModal={() => setIntroVideoModalOpen(true)}
+            />
+          );
       }
     }
     if (topSection === "leads") return <AdvisorLeadsModule />;
+    if (topSection === "referral") return <AdvisorReferralModule />;
     if (topSection === "insights") {
       return (
         <AdvisorInsightsModule
@@ -228,6 +240,11 @@ export function AdvisorMySpaceWorkspace({ reviewMode = false }: AdvisorMySpaceWo
           </div>
         )}
       </div>
+
+      <IntroVideoUploadModal
+        open={introVideoModalOpen}
+        onClose={() => setIntroVideoModalOpen(false)}
+      />
     </div>
   );
 }

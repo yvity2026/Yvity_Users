@@ -39,7 +39,6 @@ const loginSchema = z.object({
     .length(6, "6-digit OTP required")
     .optional()
     .or(z.literal("")),
-  rememberMe: z.boolean().default(true),
 });
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
@@ -71,7 +70,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: { mobile: "", otp: "", rememberMe: true },
+    defaultValues: { mobile: "", otp: "" },
     mode: "onChange",
   });
 
@@ -159,6 +158,13 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
+
+  // Autofocus first OTP box when step 2 appears
+  useEffect(() => {
+    if (step === 2) {
+      setTimeout(() => otpRefs.current[0]?.focus(), 60);
+    }
+  }, [step]);
 
   if (!isOpen) return null;
 
@@ -387,7 +393,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6 custom-scrollbar">
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={(e) => { if (step === 1) { handleNextStep(e); } else { handleSubmit(onSubmit)(e); } }}>
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div key="step1" {...stepSlideMotion(reducedMotion, "left")}>

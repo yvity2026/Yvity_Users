@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import type { CareerData, Certification, Experience } from "@/lib/career-types";
-import { loadPublicProfile, savePublicProfile } from "@/lib/server/career-persistence";
 import { defaultAchievements } from "@/lib/sections/defaults";
 import { normalizeAchievements } from "@/lib/sections/normalize-achievements";
 import type { AchievementItem } from "@/lib/sections/types";
@@ -13,8 +11,9 @@ export const runtime = "nodejs";
 
 const ACHIEVEMENTS_FILE = "achievements.json";
 
-type AdminKind = "experiences" | "certifications" | "achievements";
-const KINDS: AdminKind[] = ["experiences", "certifications", "achievements"];
+// experiences and certifications verification dropped — handled via achievement-verification route
+type AdminKind = "achievements";
+const KINDS: AdminKind[] = ["achievements"];
 
 type ReviewBody = {
   entityId: string;
@@ -35,24 +34,6 @@ type AdminEntity = {
 /*  Adapters — collapse heterogeneous entity shapes into AdminEntity. */
 /* ------------------------------------------------------------------ */
 
-function toExperienceEntity(exp: Experience): AdminEntity {
-  return {
-    id: exp.id,
-    title: exp.role || "Untitled role",
-    subtitle: [exp.company, exp.category].filter(Boolean).join(" · "),
-    verification: exp.verification ?? emptyVerification(),
-  };
-}
-
-function toCertificationEntity(cert: Certification): AdminEntity {
-  return {
-    id: cert.id,
-    title: cert.name || "Untitled certification",
-    subtitle: [cert.issuer, cert.year].filter(Boolean).join(" · "),
-    verification: cert.verification ?? emptyVerification(),
-  };
-}
-
 function toAchievementEntity(item: AchievementItem): AdminEntity {
   return {
     id: item.id,
@@ -66,29 +47,12 @@ function toAchievementEntity(item: AchievementItem): AdminEntity {
 /*  Loaders / mutators                                                 */
 /* ------------------------------------------------------------------ */
 
-async function loadCareer(): Promise<CareerData> {
-  return loadPublicProfile();
-}
-
 async function loadAchievements(): Promise<AchievementItem[]> {
   const raw = await loadJsonFile<unknown>(ACHIEVEMENTS_FILE, defaultAchievements);
   return normalizeAchievements(raw);
 }
 
-async function listEntities(kind: AdminKind): Promise<AdminEntity[]> {
-  if (kind === "experiences") {
-    const career = await loadCareer();
-    return career.experiences
-      .filter((e) => e.verification && e.verification.documents.length > 0)
-      .map(toExperienceEntity);
-  }
-  if (kind === "certifications") {
-    const career = await loadCareer();
-    return career.certifications
-      .filter((c) => c.verification && c.verification.documents.length > 0)
-      .map(toCertificationEntity);
-  }
-  // achievements
+async function listEntities(_kind: AdminKind): Promise<AdminEntity[]> {
   const items = await loadAchievements();
   return items
     .filter((a) => a.verification && a.verification.documents.length > 0)
@@ -105,55 +69,16 @@ function applyVerificationUpdate(
 }
 
 async function mutate(
-  kind: AdminKind,
+  _kind: AdminKind,
   entityId: string,
   action: ReviewBody["action"],
   reason: string | undefined,
 ): Promise<AdminEntity[]> {
-  if (kind === "experiences") {
-    const career = await loadCareer();
-    const nextExperiences = career.experiences.map((e) => {
-      if (e.id !== entityId) return e;
-      const v = applyVerificationUpdate(e.verification ?? emptyVerification(), action, reason);
-      return {
-        ...e,
-        verification: v,
-        verified: v.status === "verified",
-      };
-    });
-    await savePublicProfile({ ...career, experiences: nextExperiences });
-    return nextExperiences
-      .filter((e) => e.verification && e.verification.documents.length > 0)
-      .map(toExperienceEntity);
-  }
-
-  if (kind === "certifications") {
-    const career = await loadCareer();
-    const nextCertifications = career.certifications.map((c) => {
-      if (c.id !== entityId) return c;
-      const v = applyVerificationUpdate(c.verification ?? emptyVerification(), action, reason);
-      return {
-        ...c,
-        verification: v,
-        status: v.status === "verified" ? ("verified" as const) : ("pending" as const),
-      };
-    });
-    await savePublicProfile({ ...career, certifications: nextCertifications });
-    return nextCertifications
-      .filter((c) => c.verification && c.verification.documents.length > 0)
-      .map(toCertificationEntity);
-  }
-
-  // achievements
   const items = await loadAchievements();
   const next = items.map((a) => {
     if (a.id !== entityId) return a;
     const v = applyVerificationUpdate(a.verification ?? emptyVerification(), action, reason);
-    return {
-      ...a,
-      verification: v,
-      verified: v.status === "verified",
-    };
+    return { ...a, verification: v, verified: v.status === "verified" };
   });
   await saveJsonFile(ACHIEVEMENTS_FILE, next);
   return next

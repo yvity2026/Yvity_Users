@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
+import { getSessionUser } from "@/lib/server/session";
 
 type PlatformTestimonialRow = {
   id: string;
@@ -35,6 +36,57 @@ function mapForLanding(row: PlatformTestimonialRow) {
     mediaUrl: row.media_url,
     replyText: row.yvity_reply || null,
   };
+}
+
+export async function POST(request: Request) {
+  try {
+    const supabase = getAdminClientOrNull();
+    if (!supabase) {
+      return NextResponse.json({ error: "Service unavailable." }, { status: 503 });
+    }
+
+    const body = (await request.json()) as {
+      rating?: unknown;
+      content?: unknown;
+      name?: unknown;
+      respondentType?: unknown;
+    };
+
+    const rating = Number(body.rating);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return NextResponse.json({ error: "A rating between 1 and 5 is required." }, { status: 400 });
+    }
+
+    const content = typeof body.content === "string" ? body.content.trim().slice(0, 1000) : null;
+    const respondentType = body.respondentType === "advisor" ? "advisor" : "customer";
+
+    // Use session name if available, otherwise use submitted name
+    const session = await getSessionUser();
+    const submittedName = typeof body.name === "string" ? body.name.trim().slice(0, 100) : "";
+    const name = submittedName || (session ? "YVITY Member" : "Anonymous");
+
+    const { error } = await supabase.from("yvity_testimonials").insert({
+      name,
+      profession: "",
+      city: "",
+      respondent_type: respondentType,
+      testimonial_type: "text",
+      testimonial_rating: rating,
+      content: content || null,
+      status: "approved",
+      user_id: session?.id ?? null,
+    });
+
+    if (error) {
+      console.error("POST /api/platform-testimonials failed:", error);
+      return NextResponse.json({ error: "Failed to submit review." }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("POST /api/platform-testimonials failed:", error);
+    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
+  }
 }
 
 export async function GET() {

@@ -142,7 +142,7 @@ const Getstarted = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.2, duration: 0.6 }}
               viewport={{ once: true }}
-              className="h-full md:max-h-[339px] w-full rounded-2xl flex flex-col space-y-3 items-start md:space-y-3 place-self-center p-5 md:p-6 lg:p-8 md:rounded-[16px] border border-[#186E6E] bg-[#195A5A] hover:rounded-[16px] hover:border hover:border-[#0AE0E0] hover:bg-[#195A5A] hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)] hover:transition-all hover:duration-500 ease-in-out"
+              className="h-full md:max-h-[339px] w-full rounded-2xl flex flex-col space-y-3 items-start md:space-y-3 place-self-center p-5 md:p-6 lg:p-8 md:rounded-[16px] border border-[#186E6E] bg-[#195A5A] hover:border-[#0AE0E0] hover:shadow-[0_0_4px_2px_rgba(13,96,96,0.25)] transition-all duration-500 ease-in-out"
             >
               <Image
                 src={item.imagePath}

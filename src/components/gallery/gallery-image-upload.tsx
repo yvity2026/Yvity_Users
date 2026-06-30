@@ -54,7 +54,7 @@ export function GalleryImageUpload({
     e.target.value = "";
   };
 
-  const isLocal = imageUrl.startsWith("/api/");
+  const isLocal = imageUrl.startsWith("/api/") || imageUrl.includes("/storage/v1/object/public/");
 
   return (
     <div className="space-y-3">
@@ -120,9 +120,22 @@ export function GalleryImageUpload({
           <Label className="text-xs text-muted-foreground">Image URL</Label>
           <Input
             value={imageUrl}
-            onChange={(e) => onImageUrlChange(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value.trim();
+              onImageUrlChange(val);
+              // Validate on blur via onError on the preview Image below
+            }}
+            onBlur={(e) => {
+              const val = e.target.value.trim();
+              if (val && !val.startsWith("http://") && !val.startsWith("https://")) {
+                setError("Please enter a valid URL starting with https://");
+              } else {
+                setError(null);
+              }
+            }}
             placeholder="https://…"
           />
+          <p className="text-[10px] text-muted-foreground">Must be a publicly accessible image URL</p>
         </div>
       )}
 

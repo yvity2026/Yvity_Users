@@ -1,6 +1,7 @@
 import "server-only";
 
 import { appendOutboundLog } from "@/lib/server/outbound-log";
+import { resolveEmailFrom } from "@/lib/server/email-from";
 import {
   buildOtpWhatsAppMessage,
   getOtpTemplateName,
@@ -35,7 +36,7 @@ function getSmtpConfig() {
     host: process.env.SMTP_HOST?.trim() || "smtp.gmail.com",
     port: Number(process.env.SMTP_PORT?.trim() || "465"),
     secure: process.env.SMTP_SECURE?.trim() !== "false",
-    from: process.env.YVITY_EMAIL_FROM?.trim() || `YVITY <${user}>`,
+    from: resolveEmailFrom("noreply"),
   };
 }
 
@@ -317,7 +318,7 @@ async function sendEmailViaResend(input: {
   html: string;
 }): Promise<{ ok: boolean; mode: "resend" | "missing" }> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.YVITY_EMAIL_FROM?.trim() || "YVITY <onboarding@yvity.in>";
+  const from = resolveEmailFrom("noreply");
   if (!apiKey) return { ok: false, mode: "missing" };
 
   try {

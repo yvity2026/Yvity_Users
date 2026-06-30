@@ -30,6 +30,15 @@ export function hasMdrtAchievement(
   return hasAchievementTier(achievements, "mdrt");
 }
 
+/** Total number of times MDRT was achieved (sum of years across all MDRT items). */
+export function getMdrtCount(
+  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
+): number {
+  return achievements
+    .filter((item) => achievementHasTier(item, "mdrt"))
+    .reduce((sum, item) => sum + Math.max(1, (item.years ?? []).length), 0);
+}
+
 export function getMdrtLatestYear(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): number | null {
@@ -45,20 +54,24 @@ export function getMdrtLatestYear(
   return years.length ? Math.max(...years) : null;
 }
 
-/** Banner tile on the achievements page — e.g. "MDRT 2024" or "—". */
+/** Banner tile on the achievements page — e.g. "MDRT 2024", "MDRT x 2", or "—". */
 export function formatMdrtStatusLabel(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): string {
   if (!hasMdrtAchievement(achievements)) return "—";
+  const count = getMdrtCount(achievements);
+  if (count > 1) return `MDRT x ${count}`;
   const year = getMdrtLatestYear(achievements);
   return year ? `MDRT ${year}` : "MDRT";
 }
 
-/** Profile hero badge — "MDRT Member" when an MDRT achievement exists. */
+/** Profile hero badge — "MDRT Member", "MDRT x 2", or "Trusted Advisor". */
 export function formatMdrtMemberLabel(
   achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
 ): string {
-  return hasMdrtAchievement(achievements) ? "MDRT Member" : "Trusted Advisor";
+  if (!hasMdrtAchievement(achievements)) return "Trusted Advisor";
+  const count = getMdrtCount(achievements);
+  return count > 1 ? `MDRT x ${count}` : "MDRT Member";
 }
 
 const TIER_TAG_LABELS: Record<AchievementTier, string> = {
@@ -70,17 +83,41 @@ const TIER_TAG_LABELS: Record<AchievementTier, string> = {
 /**
  * Public-facing achievement badges derived from saved achievements
  * (advisor cards, directory listings, profile highlights).
+ * Accepts optional `iconStyle` per item — if any item has iconStyle "mdrt"
+ * (the MDRT/COT/TOT icon family) but the title text doesn't match a specific
+ * tier, it defaults to MDRT (the most common tier in that family).
  */
 export function extractAchievementTags(
-  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
+  achievements: (Pick<AchievementItem, "title" | "subtitle" | "years"> & { iconStyle?: string })[],
 ): string[] {
   const tags: string[] = [];
 
+  const hasMdrtIconStyle = achievements.some((a) => a.iconStyle === "mdrt");
+
   for (const tier of ["mdrt", "cot", "tot"] as AchievementTier[]) {
-    if (!hasAchievementTier(achievements, tier)) continue;
+    const hasViaTierText = hasAchievementTier(achievements, tier);
+
+    if (!hasViaTierText) {
+      // Fall back to iconStyle "mdrt" for MDRT detection when title is ambiguous
+      if (
+        tier === "mdrt" &&
+        hasMdrtIconStyle &&
+        !hasAchievementTier(achievements, "cot") &&
+        !hasAchievementTier(achievements, "tot")
+      ) {
+        tags.push("MDRT");
+      }
+      continue;
+    }
+
     if (tier === "mdrt") {
-      const year = getMdrtLatestYear(achievements);
-      tags.push(year ? `MDRT ${year}` : "MDRT");
+      const count = getMdrtCount(achievements);
+      if (count > 1) {
+        tags.push(`MDRT x ${count}`);
+      } else {
+        const year = getMdrtLatestYear(achievements);
+        tags.push(year ? `MDRT ${year}` : "MDRT");
+      }
     } else {
       tags.push(TIER_TAG_LABELS[tier]);
     }

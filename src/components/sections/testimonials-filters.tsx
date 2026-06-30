@@ -47,9 +47,10 @@ export function TestimonialsFilters({
             Filter by Type
           </p>
           <div className="flex flex-wrap gap-2">
-            {testimonialTypeFilters.map((f) => {
+            {testimonialTypeFilters.filter((f) => f.id === "all" || typeFilter === f.id || typeCounts[f.id] > 0).map((f) => {
               const Icon = f.icon;
               const active = typeFilter === f.id;
+              const count = f.id !== "all" ? typeCounts[f.id] : undefined;
               return (
                 <button
                   key={f.id}
@@ -64,6 +65,7 @@ export function TestimonialsFilters({
                 >
                   <Icon className="size-3.5 sm:size-4" />
                   {f.label}
+                  {count !== undefined && <span className="opacity-60">({count})</span>}
                 </button>
               );
             })}

@@ -8,6 +8,7 @@ import { AdvisorInsightsModule } from "@/components/advisor/insights/advisor-ins
 import { AdvisorMembershipModule } from "@/components/advisor/membership/advisor-membership-module";
 import { AdvisorSettingsModule } from "@/components/advisor/settings/advisor-settings-module";
 import { AdvisorLeadsModule } from "@/components/advisor/leads/advisor-leads-module";
+import { AdvisorReferralModule } from "@/components/advisor/referral/AdvisorReferralModule";
 import { AdvisorSectionPlaceholder } from "@/components/advisor/advisor-section-placeholder";
 import { AdvisorMobileBottomNav } from "@/components/advisor/advisor-mobile-bottom-nav";
 import { AdvisorSidebar, SIDEBAR_CONTENT_OFFSET } from "@/components/advisor/advisor-sidebar";
@@ -18,6 +19,8 @@ import {
   type PublicProfileViewMode,
 } from "@/components/advisor/public-profile/public-profile-preview-module";
 import { AdvisorScoreModule } from "@/components/advisor/score/advisor-score-module";
+import { IntroVideoUploadModal } from "@/components/intro-video/intro-video-upload-modal";
+import { useShareProfileLink } from "@/hooks/use-share-profile-link";
 import { GalleryShowcase } from "@/components/gallery/gallery-showcase";
 import { ServicesShowcase } from "@/components/sections/services-showcase";
 import { AchievementsShowcase } from "@/components/sections/achievements-showcase";
@@ -67,8 +70,10 @@ export function AdvisorDashboard({
   // narrow-iframe layout reads as a phone preview; "desktop" mode hides the
   // workspace header so the iframe fills the entire content area.
   const [publicViewMode, setPublicViewMode] = useState<PublicProfileViewMode>("mobile");
+  const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
   const display = useAdvisorDisplayProfile();
   const { previewPath } = usePublicProfileUrls();
+  const { share: shareProfile } = useShareProfileLink();
 
   useEffect(() => {
     if (!embedMode && ready && !isAuthed) router.replace("/login");
@@ -130,7 +135,7 @@ export function AdvisorDashboard({
    * (no more vertically stacked accordion).
    */
   const renderSectionBody = (): ReactNode => {
-    if (topSection === "dashboard") {
+    if (topSection === "overview") {
       if (reviewMode) {
         return (
           <AdvisorReviewDashboard
@@ -178,10 +183,17 @@ export function AdvisorDashboard({
         case "gallery":
           return <GalleryShowcase editable embedded />;
         case "score":
-          return <AdvisorScoreModule onNavigateProfileSection={navigateProfile} />;
+          return (
+            <AdvisorScoreModule
+              onNavigateProfileSection={navigateProfile}
+              onShareProfile={() => void shareProfile()}
+              onOpenIntroVideoModal={() => setIntroVideoModalOpen(true)}
+            />
+          );
       }
     }
     if (topSection === "leads") return <AdvisorLeadsModule />;
+    if (topSection === "referral") return <AdvisorReferralModule />;
     if (topSection === "insights") {
       return (
         <AdvisorInsightsModule onNavigateTop={setTopSection} onNavigateProfile={navigateProfile} />
@@ -215,7 +227,7 @@ export function AdvisorDashboard({
       <header className="md:hidden sticky top-0 z-40 border-b yvity-workspace-chrome">
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between gap-3">
           <Link href="/advisor" className="flex items-center gap-2.5 shrink-0">
-            <YvityLogo size={36} wordmarkClassName="text-sm tracking-[0.16em]" />
+            <YvityLogo size={36} imageClassName="rounded-full bg-[#f8f6f1] p-1 shadow-sm" wordmarkClassName="text-sm tracking-[0.16em]" />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -311,6 +323,11 @@ export function AdvisorDashboard({
           navigateProfile(section);
           window.scrollTo({ top: 0, behavior: "auto" });
         }}
+      />
+
+      <IntroVideoUploadModal
+        open={introVideoModalOpen}
+        onClose={() => setIntroVideoModalOpen(false)}
       />
     </div>
   );

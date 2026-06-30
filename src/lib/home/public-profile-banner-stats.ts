@@ -1,4 +1,5 @@
 import type { CareerData } from "@/lib/career-types";
+import { computeCareerTotalExperienceYears } from "@/lib/advisor/profession-experience";
 import { formatMdrtStatusLabel, hasMdrtAchievement } from "@/lib/sections/achievement-tiers";
 import { normalizeCompanyName } from "@/lib/sections/service-display";
 import type { AchievementItem, ServiceItem, TestimonialItem } from "@/lib/sections/types";
@@ -22,6 +23,8 @@ export type PublicProfileBannerStats = {
   irdaiVerified: boolean;
   profileApproved: boolean;
   sectionBannerStats: { value: string; label: string }[];
+  /** Stats for the career section banner — experience and orgs from career entries only. */
+  careerSectionBannerStats: { value: string; label: string }[];
   communityTrustStats: CommunityTrustStat[];
   highlightLabels: { label: string }[];
 };
@@ -53,12 +56,34 @@ export function isIrdaiVerified(profileApproved: boolean): boolean {
   return profileApproved;
 }
 
+/** Career-page-specific banner stats — experience and orgs from career entries only. */
+export function buildCareerSectionBannerStats(
+  career: CareerData,
+  avgRating: number | null,
+): { value: string; label: string }[] {
+  const years = computeCareerTotalExperienceYears(career);
+  const experienceValue =
+    years === null ? "—" : years === 0 ? "< 1 yr" : `${years}+ yrs`;
+
+  const orgSet = new Set(
+    career.experiences.map((e) => e.company.trim().toLowerCase()).filter(Boolean),
+  );
+  const orgCount = orgSet.size;
+  const orgValue = orgCount > 0 ? String(orgCount) : "—";
+  const orgLabel = orgCount === 1 ? "Organisation" : "Organisations";
+
+  return [
+    { value: experienceValue, label: "Years experience" },
+    { value: avgRating != null ? `${avgRating}/5` : "—", label: "Rating" },
+    { value: orgValue, label: orgLabel },
+  ];
+}
+
 export function buildSectionProfileBannerStats(input: {
-  /** Service tenure — matches profile header pills. */
+  /** Total career experience — from journey entries, not current profession. */
   experienceDisplay: string;
   avgRating: number | null;
-  companyName: string;
-  profileApproved: boolean;
+  organizationCount: number;
 }): { value: string; label: string }[] {
   const experienceValue = input.experienceDisplay
     ? input.experienceDisplay.includes("year") || input.experienceDisplay.endsWith("+")
@@ -66,17 +91,16 @@ export function buildSectionProfileBannerStats(input: {
       : `${input.experienceDisplay} yrs`
     : "—";
 
+  const orgValue = input.organizationCount > 0 ? String(input.organizationCount) : "—";
+  const orgLabel = input.organizationCount === 1 ? "Organisation" : "Organisations";
+
   return [
     { value: experienceValue, label: "Years experience" },
     {
       value: input.avgRating != null ? `${input.avgRating}/5` : "—",
       label: "Rating",
     },
-    { value: input.companyName || "—", label: "Company" },
-    {
-      value: input.profileApproved ? "Verified" : "—",
-      label: "YVITY verified",
-    },
+    { value: orgValue, label: orgLabel },
   ];
 }
 
@@ -162,10 +186,14 @@ export function buildAdvisorHighlightLabels(input: {
     ];
   }
 
-  while (highlights.length < 3) {
-    highlights.push({
-      label: input.profileApproved ? "Verified by YVITY" : "Flexible consultation",
-    });
+  const padLabels = input.profileApproved
+    ? ["Verified by YVITY", "Flexible consultation", "Direct advisor contact"]
+    : ["Flexible consultation", "Verified credentials", "Direct advisor contact"];
+  for (const label of padLabels) {
+    if (highlights.length >= 3) break;
+    if (!highlights.some((h) => h.label === label)) {
+      highlights.push({ label });
+    }
   }
 
   return highlights.slice(0, 3);
@@ -188,6 +216,13 @@ export function buildPublicProfileBannerStats(input: {
   const companyName = resolvePrimaryCompanyName(input.services, input.profileApproved);
   const mdrtLabel = formatMdrtStatusLabel(input.achievements);
   const mdrtMember = hasMdrtAchievement(input.achievements);
+  const visibleServices = input.services.filter((s) =>
+    isServiceVisibleOnPublicProfile(s, input.profileApproved),
+  );
+  const organizationCount = new Set([
+    ...input.career.experiences.map((e) => e.company.trim().toLowerCase()).filter(Boolean),
+    ...visibleServices.map((s) => normalizeCompanyName(s.provider).trim().toLowerCase()).filter(Boolean),
+  ]).size;
 
   return {
     experienceDisplay: input.experienceDisplay,
@@ -204,11 +239,11 @@ export function buildPublicProfileBannerStats(input: {
     irdaiVerified: isIrdaiVerified(input.profileApproved),
     profileApproved: input.profileApproved,
     sectionBannerStats: buildSectionProfileBannerStats({
-      experienceDisplay: input.experienceDisplay,
+      experienceDisplay: input.journeyExperienceDisplay || input.experienceDisplay,
       avgRating,
-      companyName,
-      profileApproved: input.profileApproved,
+      organizationCount,
     }),
+    careerSectionBannerStats: buildCareerSectionBannerStats(input.career, avgRating),
     communityTrustStats: buildCommunityTrustStatsFromCounts({
       testimonialCount: input.testimonials.length,
       recommendationCount: input.recommendationCount,

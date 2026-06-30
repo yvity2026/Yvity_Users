@@ -18,6 +18,7 @@ export function TestimonialsBanner({
   const audioCount = items.filter((i) => i.type === "audio").length;
   const videoCount = items.filter((i) => i.type === "video").length;
   const avgRating = averageTestimonialRating(items);
+  const hasAny = items.length > 0;
 
   const stats = [
     { icon: MessageSquare, value: String(textCount), label: "Text Reviews" },
@@ -52,7 +53,7 @@ export function TestimonialsBanner({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4 lg:max-w-[min(100%,28rem)] lg:shrink-0">
+        {hasAny && <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4 lg:max-w-[min(100%,28rem)] lg:shrink-0">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -70,7 +71,7 @@ export function TestimonialsBanner({
               </div>
             );
           })}
-        </div>
+        </div>}
       </div>
     </section>
   );

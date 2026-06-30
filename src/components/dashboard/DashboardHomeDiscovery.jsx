@@ -30,13 +30,12 @@ export default function DashboardHomeDiscovery({
   searchQuery,
   onSearchQueryChange,
   searchCity,
+  searchCityPlaceholder = "e.g. Hyderabad",
   onSearchCityChange,
   searchService,
   onSearchServiceChange,
   searchCompany,
   onSearchCompanyChange,
-  searchName,
-  onSearchNameChange,
   activeQuickFilter,
   showFilters,
   onToggleFilters,
@@ -46,6 +45,7 @@ export default function DashboardHomeDiscovery({
   onApplyFilters,
   onClearFilters,
   onQuickFilter,
+  hasSearched = false,
 }) {
   const chips =
     serviceChips.length > 0 ? serviceChips : FALLBACK_SERVICE_CHIPS;
@@ -118,22 +118,24 @@ export default function DashboardHomeDiscovery({
           </button>
         </div>
 
-        <p className="font-poppins text-[11px] text-[#9CA3AF]">
-          Home shows up to 5 matches — use Explore for the full directory.
-        </p>
+        {hasSearched ? (
+          <p className="font-poppins text-[11px] text-[#9CA3AF]">
+            Showing up to 5 matches — use Explore for the full directory.
+          </p>
+        ) : null}
 
         {showFilters ? (
           <div className="home-discovery-advanced rounded-[24px] border border-[#E4E2DB]/90 bg-white/90 p-4 shadow-[0_8px_32px_rgba(10,74,74,0.08)] backdrop-blur-md sm:p-5">
             <p className="mb-4 font-poppins text-xs font-semibold uppercase tracking-[0.14em] text-[#0A4A4A]/60">
               Advanced filters
             </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <FilterField label="City / Location">
                 <input
                   type="text"
                   value={searchCity}
                   onChange={(event) => onSearchCityChange(event.target.value)}
-                  placeholder="e.g. Hyderabad"
+                  placeholder={searchCityPlaceholder}
                   className={fieldClass}
                 />
               </FilterField>
@@ -157,15 +159,6 @@ export default function DashboardHomeDiscovery({
                   value={searchCompany}
                   onChange={(event) => onSearchCompanyChange(event.target.value)}
                   placeholder="e.g. LIC"
-                  className={fieldClass}
-                />
-              </FilterField>
-              <FilterField label="Name">
-                <input
-                  type="text"
-                  value={searchName}
-                  onChange={(event) => onSearchNameChange(event.target.value)}
-                  placeholder="Advisor name"
                   className={fieldClass}
                 />
               </FilterField>

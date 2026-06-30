@@ -1,6 +1,6 @@
 "use client";
 
-import { AdvisorCardGold } from "@/yvity-landing/app/components/home-features/advisor-card-gold";
+import { AdvisorProfileCard } from "@/yvity-landing/app/components/home-features/advisor-profile-card";
 import { toAdvisorCardGoldProps } from "@/lib/advisor/cardGoldProps";
 import { useAuth } from "@/context/AuthUserContext";
 import AdvisorSaveButton from "@/components/advisor/AdvisorSaveButton";
@@ -33,7 +33,7 @@ export default function AdvisorCardWithSave({
           size="sm"
         />
       ) : null}
-      <AdvisorCardGold variant={variant} {...cardProps} />
+      <AdvisorProfileCard variant={variant} {...cardProps} />
     </div>
   );
 }

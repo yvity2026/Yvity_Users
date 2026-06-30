@@ -30,7 +30,7 @@ type PrimaryItem = {
 };
 
 const PRIMARY_ITEMS: PrimaryItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "overview", label: "Dashboard", icon: LayoutDashboard },
   { id: "leads", label: "Leads", icon: Users },
   { id: "profile", label: "Profile", icon: UserRound },
   { id: "menu", label: "Menu", icon: MenuIcon },

@@ -5,16 +5,17 @@ import {
 } from "@/lib/advisor-membership/checkout-pricing";
 import type { MembershipPlanId } from "@/lib/advisor-membership/types";
 import { previewCouponDiscount, reserveCouponForOrder } from "@/lib/server/coupons-store";
-import { getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
+import { getAdminPlanPrices, getGlobalFeatureFlags } from "@/lib/server/feature-controls-store";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
 import { createPendingPayment } from "@/lib/server/payment-store";
-import { resolveRegisteredUser } from "@/lib/server/profile";
 import {
   createRazorpayOrder,
   getRazorpayKeyId,
   isRazorpayConfigured,
 } from "@/lib/server/razorpay";
 import { getSessionUser } from "@/lib/server/session";
+import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
+import { loadUserByIdFromDb, upsertUserToDb } from "@/lib/server/supabase/platform-supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,7 +49,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const globalFlags = await getGlobalFeatureFlags();
+    const [globalFlags, adminPrices] = await Promise.all([
+      getGlobalFeatureFlags(),
+      getAdminPlanPrices(),
+    ]);
+    const planPrices: Partial<Record<string, number>> = Object.fromEntries(
+      Object.entries(adminPrices).map(([id, p]) => [id, p?.salePriceInr]),
+    );
+
     if (!globalFlags.membershipCheckoutEnabled) {
       return NextResponse.json(
         { success: false, message: "Membership checkout is temporarily unavailable" },
@@ -71,9 +79,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Ensure user exists in users table before inserting payment (FK: advisor_payments.user_id → users.id).
+    // resolveRegisteredUser uses the local JSON store which is always empty on Vercel, so we
+    // load from Supabase directly and upsert to guarantee the row exists.
+    let registered = useSupabasePersistence() ? await loadUserByIdFromDb(session.id) : null;
+    if (registered) {
+      await upsertUserToDb(registered);
+    }
+
     const profile = await getAdvisorProfileForUser(session.id);
     const quote = profile
-      ? resolveCheckoutQuoteForProfile(profile, { checkoutKind, targetPlanId: planId })
+      ? resolveCheckoutQuoteForProfile(profile, { checkoutKind, targetPlanId: planId, planPrices })
       : resolveCheckoutQuoteForProfile(
           {
             id: "",
@@ -84,7 +100,7 @@ export async function POST(request: Request) {
             profile_slug: "",
             subscription_plan: "free",
           },
-          { checkoutKind: "purchase", targetPlanId: planId },
+          { checkoutKind: "purchase", targetPlanId: planId, planPrices },
         );
 
     if ("error" in quote) {
@@ -96,7 +112,6 @@ export async function POST(request: Request) {
     let couponDiscountInr = 0;
     const amountBeforeCouponInr = quote.amountInr;
 
-    const registered = resolveRegisteredUser(session);
     const rawCouponCode = body.couponCode?.trim();
     if (rawCouponCode && !globalFlags.couponRedemptionEnabled) {
       return NextResponse.json(

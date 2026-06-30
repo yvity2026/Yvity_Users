@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { FaArrowRight } from "react-icons/fa";
-import { AdvisorCardGold } from "./home-features/advisor-card-gold";
+import { AdvisorProfileCard } from "./home-features/advisor-profile-card";
 import { toAdvisorCardGoldProps } from "@/yvity-landing/lib/advisor/cardGoldProps";
 import { openRegistrationModal } from "@/yvity-landing/lib/ui/openRegistrationModal";
 import AnimatedCounter from "@/yvity-landing/components/ui/AnimatedCounter";
@@ -13,24 +13,6 @@ import { useLandingMobileNavOptional } from "@/yvity-landing/app/components/home
 import { scrollToSection } from "@/yvity-landing/lib/landing/scrollToSection";
 import { usePathname, useRouter } from "next/navigation";
 
-const HERO_PREVIEW_ADVISOR = {
-  name: "Krishna Mohan Noti",
-  title: "Chief Life Planner",
-  location: "Guntur, Telangana",
-  score: 40,
-  exp: "15",
-  reviews: "2",
-  avgRating: "4.5",
-  recs: "0",
-  clients: "127",
-  clientsLabel: "Clients",
-  serviceTypes: ["Life Insurance", "Health Insurance", "General Insurance"],
-  achievementTags: ["MDRT"],
-  profileUrl: "/krishna-mohan-noti-167ec15f",
-  profileSlug: "krishna-mohan-noti-167ec15f",
-  showVerifiedBadge: true,
-  showIdentityVerified: true,
-};
 
 const HERO_ADVISOR_POINTS = [
   "Verified, scored & shareable profile",
@@ -73,9 +55,7 @@ const Hero = ({ advisor = [] }) => {
   const reducedMotion = usePrefersReducedMotion();
   const [audience, setAudience] = useState("customer");
   const heroAdvisors = Array.isArray(advisor) ? advisor : [];
-  const displayAdvisor = toAdvisorCardGoldProps(
-    heroAdvisors[0] ?? HERO_PREVIEW_ADVISOR,
-  );
+  const displayAdvisor = heroAdvisors[0] ? toAdvisorCardGoldProps(heroAdvisors[0]) : null;
   const heroCopy = HERO_COPY[audience];
 
   const goToFindAdvisors = useCallback(() => {
@@ -97,18 +77,11 @@ const Hero = ({ advisor = [] }) => {
   }, [mobileNav, pathname, router]);
 
   const [countData, setCountData] = useState([
-    {
-      count: 0,
-      title: "Verified Advisors",
-    },
-    {
-      count: 0,
-      title: "Cities Covered",
-    },
-    {
-      count: 0,
-      title: "Verified Reviews",
-    },
+    { count: 0, title: "Total Users", isRating: false, ratingCount: null },
+    { count: 0, title: "Verified Advisors", isRating: false, ratingCount: null },
+    { count: 0, title: "Cities Covered", isRating: false, ratingCount: null },
+    { count: 0, title: "Avg Advisor Rating", isRating: true, ratingCount: null },
+    { count: 0, title: "Platform Rating", isRating: true, ratingCount: 0 },
   ]);
   useEffect(() => {
     let ignore = false;
@@ -125,18 +98,11 @@ const Hero = ({ advisor = [] }) => {
         }
 
         setCountData([
-          {
-            count: Number(result.data?.verifiedAdvisors || 0),
-            title: "Verified Advisors",
-          },
-          {
-            count: Number(result.data?.citiesCovered || 0),
-            title: "Cities Covered",
-          },
-          {
-            count: Number(result.data?.verifiedReviews || 0),
-            title: "Verified Reviews",
-          },
+          { count: Number(result.data?.totalUsers || 0), title: "Total Users", isRating: false, ratingCount: null },
+          { count: Number(result.data?.verifiedAdvisors || 0), title: "Verified Advisors", isRating: false, ratingCount: null },
+          { count: Number(result.data?.citiesCovered || 0), title: "Cities Covered", isRating: false, ratingCount: null },
+          { count: Number(result.data?.avgAdvisorRating || 0), title: "Avg Advisor Rating", isRating: true, ratingCount: null },
+          { count: Number(result.data?.platformRating || 0), title: "Platform Rating", isRating: true, ratingCount: Number(result.data?.platformRatingCount || 0) },
         ]);
       } catch (error) {
         console.error("Failed to load landing stats:", error);
@@ -156,11 +122,11 @@ const Hero = ({ advisor = [] }) => {
       className={`landing-hero-luxury flex h-full flex-col overflow-x-hidden pb-8 pt-[calc(3.75rem+1rem)] sm:pt-[calc(4rem+1.125rem)] md:pb-10 lg:pt-[calc(4.375rem+1.25rem)] xl:pt-[calc(4.375rem+1.5rem)] ${LANDING_SECTION_ANCHOR}`}
     >
       <div
-        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10`}
+        className={`${LANDING_INNER} grid h-full grid-cols-1 items-stretch gap-8 md:gap-10 ${displayAdvisor ? "lg:grid-cols-12" : ""} lg:gap-8 xl:gap-10`}
       >
         {/* Left side Panel */}
         <motion.div
-          className="relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-6 text-center md:gap-7 lg:col-span-6 lg:items-start lg:text-left xl:col-span-7"
+          className={`relative z-10 flex h-full min-w-0 flex-col items-center justify-start gap-6 text-center md:gap-7 lg:items-start lg:text-left ${displayAdvisor ? "lg:col-span-6 xl:col-span-7" : "lg:col-span-12"}`}
           {...(reducedMotion
             ? {}
             : {
@@ -222,10 +188,10 @@ const Hero = ({ advisor = [] }) => {
           </div>
 
           <span className="flex w-full min-w-0 flex-col gap-1 text-[26px] font-cormorant font-bold leading-[1.18] sm:text-[40px] sm:leading-[1.12] md:text-[52px] md:gap-2 lg:text-[56px] lg:leading-[1.1] xl:text-[64px]">
-            <p className="landing-hero-headline-accent w-full text-balance">
+            <p className="landing-hero-headline-accent font-cormorant w-full text-balance">
               {heroCopy.line1}
             </p>
-            <p className="landing-hero-headline-primary w-full text-balance">
+            <p className="landing-hero-headline-primary font-cormorant w-full text-balance">
               {heroCopy.line2}
             </p>
           </span>
@@ -289,54 +255,74 @@ const Hero = ({ advisor = [] }) => {
             )}
           </div>
         </motion.div>
-        {/* Right side pannel */}
-        {/* <div className="xl:pr-25 md:mx-auto h-full lg:col-span-5"> */}
-        {/* <div className="h-full z-0 relative">   Dup*/}
-        {/* <AdvisorCard {...advisors[0]} /> */}
-        {/* </div>  Dup */}
-        {/* </div> */}
-        {/* Right side pannel */}
-<motion.div
-    className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
-    {...(reducedMotion
-      ? {}
-      : {
-          initial: { x: 100, opacity: 0 },
-          whileInView: { x: 0, opacity: 1 },
-          transition: { duration: 0.8, ease: "easeOut", delay: 0.2 },
-          viewport: { once: true, margin: "-100px" },
-        })}
-  >
-    <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
-      <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
-        <AdvisorCardGold {...displayAdvisor} key={displayAdvisor.name} />
-      </div>
-    </div>
-  </motion.div>
+        {/* Right side panel — only shown when a real advisor exists in DB */}
+        {displayAdvisor && (
+          <motion.div
+            className="flex h-full w-full min-w-0 items-center justify-center overflow-visible p-0 lg:col-span-6 xl:col-span-5"
+            {...(reducedMotion
+              ? {}
+              : {
+                  initial: { x: 100, opacity: 0 },
+                  whileInView: { x: 0, opacity: 1 },
+                  transition: { duration: 0.8, ease: "easeOut", delay: 0.2 },
+                  viewport: { once: true, margin: "-100px" },
+                })}
+          >
+            <div className="relative mx-auto w-full max-w-md px-2 sm:px-4 lg:px-6 landing-hero-card-glow">
+              <div className="relative flex min-h-0 items-center justify-center md:min-h-[500px]">
+                <AdvisorProfileCard {...displayAdvisor} key={displayAdvisor.name} />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
       </div>
       {/* Count Bar — hidden when all stats are zero (e.g. empty local DB) */}
       {countData.some((item) => item.count > 0) ? (
       <div className="landing-hero-stats mt-16 w-full sm:mt-14 md:mt-20">
-        <div className={`${LANDING_INNER} grid grid-cols-3 py-4 md:py-5`}>
-          {countData.map((item, index) => (
-            <div
-              key={item.title}
-              className={`flex flex-col items-center justify-center gap-1 px-2 text-center sm:flex-row sm:gap-3 sm:px-4 ${
-                index < countData.length - 1
-                  ? "border-r landing-hero-stats-divider"
-                  : ""
-              }`}
-            >
-              <AnimatedCounter
-                value={item.count}
-                className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
-              />
-              <p className="landing-hero-stats-label font-poppins text-[10px] leading-snug sm:max-w-[8rem] sm:text-left md:text-xs lg:text-sm">
-                {item.title}
-              </p>
-            </div>
-          ))}
+        {/* Mobile: row 1 = 3 stats, row 2 = 2 ratings | Desktop: single row of 5 */}
+        <div className={`${LANDING_INNER} grid grid-cols-6 py-4 sm:grid-cols-5 md:py-5`}>
+          {countData.map((item, index) => {
+            // Mobile: first 3 take 2 of 6 cols each; last 2 take 3 of 6 cols each
+            // Desktop: all equal (col-span-1 in 5-col grid)
+            const colSpan = index < 3 ? "col-span-2 sm:col-span-1" : "col-span-3 sm:col-span-1";
+            // Borders: mobile — right/bottom within each row; desktop — right between all 5
+            const hasBorder = index < 4 || index === 0 || index === 1 || index === 3;
+            const borderClass = [
+              (index === 0 || index === 1 || index === 3) ? "border-r" : "",
+              index < 3 ? "border-b sm:border-b-0" : "",
+              index < 4 ? "sm:border-r" : "",
+              hasBorder ? "landing-hero-stats-divider" : "",
+            ].filter(Boolean).join(" ");
+
+            return (
+              <div
+                key={item.title}
+                className={`flex flex-col items-center justify-center gap-1 px-2 py-2 text-center sm:flex-row sm:gap-3 sm:px-4 sm:py-0 ${colSpan} ${borderClass}`}
+              >
+                {item.isRating ? (
+                  <span className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl whitespace-nowrap">
+                    {item.count > 0 ? (
+                      <>
+                        {item.count.toFixed(1)}<span className="text-[#F59E0B]"> ★</span>
+                        {item.ratingCount != null && item.ratingCount > 0 && (
+                          <span className="text-xs font-normal text-[#0A4A4A]/55"> ({item.ratingCount})</span>
+                        )}
+                      </>
+                    ) : "—"}
+                  </span>
+                ) : (
+                  <AnimatedCounter
+                    value={item.count}
+                    className="text-2xl font-bold leading-none text-[#0A4A4A] sm:text-3xl"
+                  />
+                )}
+                <p className="landing-hero-stats-label font-poppins text-[10px] leading-snug sm:max-w-[8rem] sm:text-left md:text-xs lg:text-sm">
+                  {item.title}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
       ) : null}

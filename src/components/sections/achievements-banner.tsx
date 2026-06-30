@@ -1,8 +1,10 @@
 "use client";
 
-import { Clock, Globe, Trophy } from "lucide-react";
+import type React from "react";
+import { Clock, Trophy } from "lucide-react";
 import { SectionBannerAdvisorIdentity } from "@/components/sections/section-banner-advisor-identity";
 import { achievementsBannerStats, achievementsPageCopy } from "@/lib/sections/achievements-config";
+import { MdrtIcon } from "@/components/ui/mdrt-icon";
 import { cn } from "@/lib/utils";
 
 export function AchievementsBanner({
@@ -18,23 +20,11 @@ export function AchievementsBanner({
 }) {
   const experienceValue = experienceDisplay?.trim() || achievementsBannerStats.experienceValue;
 
-  const stats = [
-    {
-      icon: Trophy,
-      value: totalAwards > 0 ? String(totalAwards) : "—",
-      label: "Total Awards",
-    },
-    {
-      icon: Globe,
-      value: mdrtLabel ?? achievementsBannerStats.mdrtLabel,
-      label: achievementsBannerStats.mdrtSub,
-    },
-    {
-      icon: Clock,
-      value: experienceValue || "—",
-      label: achievementsBannerStats.experienceLabel,
-    },
-  ] as const;
+  const stats: { value: string; label: string; lucideIcon?: React.ElementType; mdrtIcon?: boolean }[] = [
+    { lucideIcon: Trophy, value: totalAwards > 0 ? String(totalAwards) : "—", label: "Total Awards" },
+    ...(mdrtLabel ? [{ mdrtIcon: true, value: mdrtLabel, label: achievementsBannerStats.mdrtSub }] : []),
+    { lucideIcon: Clock, value: experienceValue || "—", label: achievementsBannerStats.experienceLabel },
+  ];
 
   return (
     <section
@@ -62,24 +52,30 @@ export function AchievementsBanner({
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:max-w-[min(100%,22rem)] lg:shrink-0">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-2 py-3.5 sm:py-4 text-center min-h-[88px]"
-              >
-                <Icon className="size-4 sm:size-5 text-[oklch(0.82_0.13_205)] mb-2" />
-                <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground leading-none">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-[9px] sm:text-[10px] text-foreground/70 leading-tight">
-                  {stat.label}
-                </p>
-              </div>
-            );
-          })}
+        <div className={cn(
+          "grid gap-2.5 sm:gap-3 lg:shrink-0",
+          stats.length === 3
+            ? "grid-cols-3 lg:max-w-[min(100%,22rem)]"
+            : "grid-cols-2 lg:max-w-[min(100%,16rem)]",
+        )}>
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-2 py-3.5 sm:py-4 text-center min-h-[88px]"
+            >
+              {stat.mdrtIcon ? (
+                <MdrtIcon size={20} className="mb-2 brightness-0 invert" />
+              ) : stat.lucideIcon ? (
+                <stat.lucideIcon className="size-4 sm:size-5 text-[oklch(0.82_0.13_205)] mb-2" />
+              ) : null}
+              <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground leading-none">
+                {stat.value}
+              </p>
+              <p className="mt-1 text-[9px] sm:text-[10px] text-foreground/70 leading-tight">
+                {stat.label}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

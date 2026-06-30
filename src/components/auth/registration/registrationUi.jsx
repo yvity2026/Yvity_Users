@@ -323,8 +323,7 @@ export function ExistingAccountNotice({
 export function ComplianceFooter() {
   return (
     <p className="mt-3 shrink-0 text-center text-[10px] leading-snug text-[#9CA3AF]">
-      Your data is encrypted and never sold. IRDAI compliant · Secure · For your
-      protection
+      Your data is encrypted and never sold. Secure · For your protection
     </p>
   );
 }

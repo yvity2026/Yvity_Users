@@ -1,30 +1,48 @@
 "use client";
 
+import { Briefcase, Clock, Users } from "lucide-react";
 import { SectionBannerAdvisorIdentity } from "@/components/sections/section-banner-advisor-identity";
-import type { ServiceCategory, ServiceItem } from "@/lib/sections/types";
-import { categoryHeadingFor, serviceAccents, servicesPageCopy } from "@/lib/sections/services-config";
+import { servicesPageCopy } from "@/lib/sections/services-config";
+import { computeYearsSinceStartDate } from "@/lib/sections/service-experience";
+import type { ServiceItem } from "@/lib/sections/types";
 import { cn } from "@/lib/utils";
 
-const PLACEHOLDER_SLOTS: { category: ServiceCategory; provider: string }[] = [
-  { category: "life", provider: "Life insurance" },
-  { category: "health", provider: "Health insurance" },
-  { category: "general", provider: "General insurance" },
-  { category: "mutual", provider: "Mutual funds" },
-];
+function buildServicesBannerStats(items: ServiceItem[]) {
+  // Max experience across all services (longest-serving one wins)
+  let maxYears: number | null = null;
+  for (const item of items) {
+    const years = computeYearsSinceStartDate(item.serviceStartDate);
+    if (years !== null && (maxYears === null || years > maxYears)) {
+      maxYears = years;
+    }
+  }
+  // Fall back to legacy experience string if no start dates
+  if (maxYears === null) {
+    for (const item of items) {
+      const match = /(\d+)\+?\s*[Yy]ear/.exec(item.experience ?? "");
+      if (match) {
+        const n = Number(match[1]);
+        if (maxYears === null || n > maxYears) maxYears = n;
+      }
+    }
+  }
+
+  const experienceValue = maxYears !== null ? `${maxYears}+` : "—";
+  const experienceLabel = maxYears === 1 ? "Year experience" : "Years experience";
+
+  const serviceCount = items.length;
+  const totalClients = items.reduce((sum, i) => sum + (i.clients ?? 0), 0);
+
+  return [
+    { icon: Clock, value: experienceValue, label: experienceLabel },
+    { icon: Briefcase, value: serviceCount > 0 ? String(serviceCount) : "—", label: serviceCount === 1 ? "Service" : "Services" },
+    { icon: Users, value: totalClients > 0 ? `${totalClients}+` : "—", label: "Clients served" },
+  ];
+}
 
 export function ServicesBanner({ items, className }: { items: ServiceItem[]; className?: string }) {
-  const slots =
-    items.length > 0
-      ? items.map((item) => ({ key: item.id, item }))
-      : PLACEHOLDER_SLOTS.map((slot) => ({
-          key: slot.category,
-          item: {
-            id: slot.category,
-            category: slot.category,
-            title: "—",
-            provider: slot.provider,
-          } as ServiceItem,
-        }));
+  if (items.length === 0) return null;
+  const stats = buildServicesBannerStats(items);
 
   return (
     <section
@@ -38,9 +56,9 @@ export function ServicesBanner({ items, className }: { items: ServiceItem[]; cla
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_100%_0%,oklch(0.82_0.16_162/0.22),transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_0%_100%,oklch(0.82_0.13_205/0.15),transparent_50%)]" />
 
-      <div className="relative flex flex-col gap-6 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-stretch lg:gap-8">
-        <SectionBannerAdvisorIdentity className="lg:shrink-0 lg:self-center" />
-        <div className="min-w-0 flex-1 text-center lg:text-left lg:flex lg:flex-col lg:justify-center">
+      <div className="relative flex flex-col gap-6 p-5 sm:p-6 md:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+        <SectionBannerAdvisorIdentity className="lg:shrink-0" />
+        <div className="min-w-0 flex-1 text-center lg:text-left">
           <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[oklch(0.82_0.13_205)]">
             {servicesPageCopy.label}
           </p>
@@ -52,32 +70,21 @@ export function ServicesBanner({ items, className }: { items: ServiceItem[]; cla
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:max-w-[min(100%,32rem)] lg:shrink-0 lg:self-center">
-          {slots.map(({ key, item }) => {
-            const accent = serviceAccents[item.category];
-            const Icon = accent.icon;
-            return (
-              <div
-                key={key}
-                className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-3 py-4 text-center min-h-[100px]"
-              >
-                <span
-                  className={cn(
-                    "inline-flex size-9 sm:size-10 items-center justify-center rounded-xl glass mb-2.5",
-                    accent.ring,
-                  )}
-                >
-                  <Icon className={cn("size-4 sm:size-[1.125rem]", accent.text)} />
-                </span>
-                <p className="text-xs sm:text-sm font-semibold text-foreground leading-tight">
-                  {categoryHeadingFor(item.category)}
-                </p>
-                <p className="mt-1 text-[10px] sm:text-xs text-[oklch(0.82_0.13_205)] leading-tight">
-                  {item.provider}
-                </p>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:max-w-[min(100%,22rem)] lg:shrink-0">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/12 bg-white/[0.06] backdrop-blur-sm px-2 py-3.5 sm:py-4 text-center min-h-[88px]"
+            >
+              <stat.icon className="size-4 sm:size-5 text-[oklch(0.82_0.13_205)] mb-2" />
+              <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground leading-none">
+                {stat.value}
+              </p>
+              <p className="mt-1 text-[9px] sm:text-[10px] text-foreground/70 leading-tight">
+                {stat.label}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

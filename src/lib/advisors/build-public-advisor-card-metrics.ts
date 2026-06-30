@@ -89,6 +89,7 @@ export async function loadPublicAdvisorCardMetrics(
     photoUrl: photoUrl?.trim() || undefined,
     introVideoUrl: getPlanGatedIntroVideoUrl(settings, limits),
     publicProfileActive,
+    profileApproved,
     career,
     services,
     achievements,

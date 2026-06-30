@@ -10,39 +10,6 @@ import {
   LANDING_SECTION_PY,
 } from "./landingLayout";
 
-const testimonialsData = [
-  {
-    id: 1,
-    name: "Krishna Mohan",
-    role: "LIC Advisor • Nellore",
-    type: "Advisor",
-    text: '"YVITY transformed how my clients perceive me. My verified profile speaks before I even meet them — 3x more inquiries in 2 months!"',
-    rating: 5,
-    status: "Verified",
-    hasAudio: false,
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    role: "Customer • Hyderabad",
-    type: "Customer",
-    text: '"I could compare advisors by score and reviews in one place. It made choosing someone I trust much easier."',
-    rating: 5,
-    status: "OTP Verified",
-    hasAudio: true,
-    audioDuration: "1:12",
-  },
-  {
-    id: 3,
-    name: "Anitha Reddy",
-    role: "Health Advisor • Bengaluru",
-    type: "Advisor",
-    text: '"Clients now see my achievements and verified reviews upfront. My profile does the talking before the first call."',
-    rating: 5,
-    status: "Verified",
-    hasAudio: false,
-  },
-];
 
 const waveHeights = [40, 70, 30, 90, 50, 100, 60, 40, 80, 30, 70, 50, 90, 40];
 
@@ -82,7 +49,7 @@ const renderAvatar = (testimonial) => {
 };
 
 const Testimonials = () => {
-  const [testimonials, setTestimonials] = useState(testimonialsData);
+  const [testimonials, setTestimonials] = useState([]);
   const visibleTestimonials = getSortedTestimonials(testimonials);
   const reducedMotion = usePrefersReducedMotion();
 
@@ -192,7 +159,7 @@ const Testimonials = () => {
         renderReplySection(testimonial)}
 
       <p
-        className={`mb-5 font-nunito text-[12px] leading-relaxed italic text-gray-600 lg:text-[14px] ${testimonial.hasAudio ? "line-clamp-3" : ""}`}
+        className={`mb-5 font-poppins text-[12px] leading-relaxed italic text-gray-600 lg:text-[14px] ${testimonial.hasAudio ? "line-clamp-3" : ""}`}
       >
         {testimonial.text}
       </p>
@@ -244,39 +211,39 @@ const Testimonials = () => {
         <motion.div {...motionProps} className="mb-8 lg:mb-12">
           <LandingSectionHeader
             eyebrow="Reviews"
-            title={
-              <>
-                Real Stories.{" "}
-                <span className="text-[#F59E0B]">Real Trust.</span>
-              </>
-            }
+            accent="Real Stories."
+            title="Real Trust."
             description="See how YVITY is helping advisors build credibility and customers find trusted professionals."
           />
         </motion.div>
 
-        <LandingSnapScroll ariaLabel="Reviews" className="lg:hidden">
-          {visibleTestimonials.map((testimonial) => (
-            <LandingSnapItem
-              key={`snap-${testimonial.id}`}
-              className="w-[88vw] max-w-[400px] py-3"
-            >
-              {renderTestimonialCard(testimonial)}
-            </LandingSnapItem>
-          ))}
-        </LandingSnapScroll>
-        {visibleTestimonials.length > 1 ? (
-          <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
-            Swipe for more stories
-          </p>
-        ) : null}
+        {visibleTestimonials.length > 0 && (
+          <>
+            <LandingSnapScroll ariaLabel="Reviews" className="lg:hidden">
+              {visibleTestimonials.map((testimonial) => (
+                <LandingSnapItem
+                  key={`snap-${testimonial.id}`}
+                  className="w-[88vw] max-w-[400px] py-3"
+                >
+                  {renderTestimonialCard(testimonial)}
+                </LandingSnapItem>
+              ))}
+            </LandingSnapScroll>
+            {visibleTestimonials.length > 1 ? (
+              <p className="mt-1 text-center font-poppins text-[10px] text-[#6B7280] lg:hidden">
+                Swipe for more stories
+              </p>
+            ) : null}
 
-        <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-          {visibleTestimonials.map((testimonial) => (
-            <div key={`grid-${testimonial.id}`} className="py-3">
-              {renderTestimonialCard(testimonial)}
+            <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
+              {visibleTestimonials.map((testimonial) => (
+                <div key={`grid-${testimonial.id}`} className="py-3">
+                  {renderTestimonialCard(testimonial)}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </section>
   );

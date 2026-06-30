@@ -67,7 +67,7 @@ export function recommendSubmitShareDescription(name: string, designation: strin
   return `${recommendShareCopy.ogDescription} — ${advisorLine}.`;
 }
 
-export const platformShareTitle = `${COMPANY_NAME} — ${COMPANY_TAGLINE}`;
+export const platformShareTitle = `${COMPANY_NAME} — India's First Credibility Platform for Insurance Advisors`;
 
 export const platformShareDescription =
-  "Build a verified, scored, and shareable profile for insurance advisors — or discover trusted advisors on YVITY. Credibility that connects.";
+  "Find verified, IRDAI-ready insurance advisors near you — or build your own credible profile that speaks before you do. Free to join. Trusted by advisors & clients across India.";

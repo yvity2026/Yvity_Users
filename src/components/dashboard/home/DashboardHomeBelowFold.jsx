@@ -3,9 +3,15 @@
 import Link from "next/link";
 import {
   Award,
+  BadgeCheck,
+  Briefcase,
+  Calendar,
   ChevronRight,
   MapPin,
   MessageCircle,
+  MessageSquare,
+  Quote,
+  Shield,
   Sparkles,
   Star,
 } from "lucide-react";
@@ -158,6 +164,7 @@ function ReviewStars({ rating = 5 }) {
 
 export function DashboardHomeFeatured({ advisors, loading = false }) {
   const featured = getFeaturedAdvisors(advisors);
+  const isTopRated = Boolean(featured._isTopRatedFallback);
 
   if (loading && !advisors.length) {
     return <DashboardHomeSectionSkeleton rows={2} />;
@@ -166,8 +173,8 @@ export function DashboardHomeFeatured({ advisors, loading = false }) {
   return (
     <section className="mb-10" aria-labelledby="home-featured-heading">
       <SectionHeader
-        title="Featured Advisors"
-        subtitle="Hand-picked professionals on YVITY"
+        title={isTopRated ? "Top Rated Advisors" : "Featured Advisors"}
+        subtitle={isTopRated ? "Highest-rated professionals on YVITY" : "Hand-picked professionals on YVITY"}
         seeAllHref="/dashboard/explore"
       />
       <AdvisorScrollRow
@@ -279,39 +286,104 @@ export function DashboardHomeRecentReviews({ reviews, reviewsLoaded }) {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 animate-pulse rounded-2xl bg-[#E4E2DB]/80"
+              className="h-52 animate-pulse rounded-2xl bg-[#E4E2DB]/80"
               aria-hidden
             />
           ))}
         </div>
       ) : reviews.length ? (
         <div className="no-scrollbar -mx-3 flex gap-4 overflow-x-auto px-3 pb-1 snap-x snap-mandatory sm:-mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-3">
-          {reviews.map((review) => {
+          {reviews.map((review, index) => {
+            const reviewerInitials = (review.reviewerName || "C")
+              .split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+            const avatarTones = [
+              "from-[#0A4A4A] to-[#0D6060]",
+              "from-[oklch(0.38_0.09_185)] to-[oklch(0.82_0.16_162)]",
+              "from-[oklch(0.55_0.13_260)] to-[oklch(0.82_0.13_205)]",
+            ];
+            const avatarTone = avatarTones[index % avatarTones.length];
+            const dateLabel = review.createdAt
+              ? new Date(review.createdAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+              : "";
+
             const card = (
-              <article className="flex h-full flex-col rounded-2xl border border-[#E4E2DB] bg-white p-5 shadow-[0_2px_16px_rgba(10,74,74,0.06)] transition hover:border-[#0A4A4A]/15 hover:shadow-[0_6px_24px_rgba(10,74,74,0.1)]">
-                <ReviewStars
-                  rating={Math.max(1, Math.round(Number(review.rating || 5)))}
-                />
-                <p className="mt-3 line-clamp-4 flex-1 font-poppins text-sm leading-relaxed text-[#374151]">
-                  &ldquo;{review.text}&rdquo;
-                </p>
-                <div className="mt-4 border-t border-[#E4E2DB]/80 pt-4">
-                  <p className="font-poppins text-xs font-semibold text-[#0A4A4A]">
-                    {review.reviewerName || review.name || "YVITY member"}
+              <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E4E2DB]/70 bg-white shadow-[0_2px_16px_rgba(10,74,74,0.06)] transition-all duration-300 hover:border-[#0A4A4A]/20 hover:shadow-[0_8px_28px_rgba(10,74,74,0.12)] hover:-translate-y-0.5">
+                {/* Header badges */}
+                <header className="flex items-center justify-between gap-2 px-4 pt-4 sm:px-5 sm:pt-5">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#0A4A4A]/20 px-2 py-1 font-poppins text-[10px] font-bold uppercase tracking-wider text-[#0A4A4A]">
+                    <MessageSquare size={12} />
+                    Text
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#0A4A4A]/25 bg-[#E8F4F4]/60 px-2 py-0.5 font-poppins text-[10px] font-semibold text-[#0A4A4A]">
+                    <BadgeCheck size={11} />
+                    Verified
+                  </span>
+                </header>
+
+                {/* Quote + text */}
+                <div className="flex flex-1 flex-col px-4 pb-2 pt-3 sm:px-5">
+                  <Quote size={18} className="mb-2 text-[#0A4A4A]" />
+                  <p className="line-clamp-4 flex-1 font-poppins text-sm leading-relaxed text-[#374151]">
+                    &ldquo;{review.text}&rdquo;
                   </p>
-                  <p className="mt-1 font-poppins text-xs font-semibold text-[#0A4A4A]">
-                    {review.advisorName}
-                  </p>
-                  <p className="font-poppins text-[11px] text-[#6B7280]">
-                    {review.advisorTitle}
-                  </p>
-                  {review.advisorCity ? (
-                    <p className="mt-1 inline-flex items-center gap-1 font-poppins text-[11px] text-[#6B7280]">
-                      <MapPin size={11} aria-hidden />
-                      {review.advisorCity}
-                    </p>
-                  ) : null}
+
+                  {/* Reviewer row */}
+                  <div className="mt-5 flex gap-3">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-poppins text-sm font-bold text-white ${avatarTone}`}
+                    >
+                      {reviewerInitials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-poppins text-sm font-semibold text-[#0A4A4A]">
+                            {review.reviewerName || "YVITY member"}
+                          </p>
+                          <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-poppins text-[11px] text-[#6B7280]">
+                            {(review.reviewerProfession || "Client") ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Briefcase size={11} /> {review.reviewerProfession || "Client"}
+                              </span>
+                            ) : null}
+                            {review.reviewerCity ? (
+                              <span className="inline-flex items-center gap-1">
+                                <MapPin size={11} /> {review.reviewerCity}
+                              </span>
+                            ) : null}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="flex items-center justify-end gap-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                size={12}
+                                className={i < Math.round(Number(review.rating || 5)) ? "fill-[#F59E0B] text-[#F59E0B]" : "text-[#E4E2DB]"}
+                              />
+                            ))}
+                          </div>
+                          {dateLabel ? (
+                            <p className="mt-0.5 flex items-center justify-end gap-1 font-poppins text-[10px] text-[#9CA3AF]">
+                              <Calendar size={10} /> {dateLabel}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Footer: service + advisor */}
+                <footer className="mt-auto border-t border-[#E4E2DB]/80 px-4 py-3 sm:px-5">
+                  <div className="flex items-center gap-2">
+                    <Shield size={13} className="shrink-0 text-[#0D6060]" />
+                    <span className="font-poppins text-xs text-[#6B7280]">
+                      {review.advisorName}
+                      {review.advisorTitle ? ` · ${review.advisorTitle}` : ""}
+                    </span>
+                  </div>
+                </footer>
               </article>
             );
 

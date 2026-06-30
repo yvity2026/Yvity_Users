@@ -17,6 +17,7 @@ import {
 } from "@/lib/server/profile-shares-persistence";
 import { useSupabasePersistence } from "@/lib/server/supabase/persistence-mode";
 import {
+  countAllTimeUniqueProfileViewsDb,
   countLoginDaysInMonthDb,
   countUniqueProfileViewsInMonthDb,
   loadScoreDecayLedgerFromDb,
@@ -166,6 +167,15 @@ async function countUniqueProfileViewsInMonthJson(
   return viewers.size;
 }
 
+async function countAllTimeUniqueProfileViewsJson(advisorUserId: string): Promise<number> {
+  const db = await loadActivityDb();
+  return new Set(
+    db.profileViews
+      .filter((row) => row.advisorUserId === advisorUserId)
+      .map((row) => row.viewerKey),
+  ).size;
+}
+
 async function countLoginDaysInMonthJson(
   userId: string,
   year: number,
@@ -277,6 +287,7 @@ export async function loadAdvisorPerformanceTelemetry(
 ): Promise<{
   profileViews: number;
   profileViewsDelta: string;
+  totalProfileViews: number;
   searchAppearances: number;
   searchDelta: string;
 }> {
@@ -289,16 +300,24 @@ export async function loadAdvisorPerformanceTelemetry(
       ? countUniqueProfileViewsInMonthDb(advisorUserId, y, m)
       : countUniqueProfileViewsInMonthJson(advisorUserId, y, m);
 
-  const [profileCurrent, profilePrevious, searchCurrent, searchPrevious] = await Promise.all([
-    countViews(year, month),
-    countViews(prev.year, prev.month),
-    countSearchAppearancesInMonth(advisorUserId, year, month),
-    countSearchAppearancesInMonth(advisorUserId, prev.year, prev.month),
-  ]);
+  const countAllTime = () =>
+    useSupabasePersistence()
+      ? countAllTimeUniqueProfileViewsDb(advisorUserId)
+      : countAllTimeUniqueProfileViewsJson(advisorUserId);
+
+  const [profileCurrent, profilePrevious, totalProfileViews, searchCurrent, searchPrevious] =
+    await Promise.all([
+      countViews(year, month),
+      countViews(prev.year, prev.month),
+      countAllTime(),
+      countSearchAppearancesInMonth(advisorUserId, year, month),
+      countSearchAppearancesInMonth(advisorUserId, prev.year, prev.month),
+    ]);
 
   return {
     profileViews: profileCurrent,
     profileViewsDelta: formatMonthOverMonthDelta(profileCurrent, profilePrevious),
+    totalProfileViews,
     searchAppearances: searchCurrent,
     searchDelta: formatMonthOverMonthDelta(searchCurrent, searchPrevious),
   };

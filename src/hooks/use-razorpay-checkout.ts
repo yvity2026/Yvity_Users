@@ -57,6 +57,7 @@ export function useRazorpayCheckout() {
       const orderRes = await fetch("/api/payments/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           planId,
           checkoutKind,
@@ -103,6 +104,7 @@ export function useRazorpayCheckout() {
               const verifyRes = await fetch("/api/payments/razorpay/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
                 body: JSON.stringify({
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
@@ -128,6 +130,12 @@ export function useRazorpayCheckout() {
         });
 
         rzp.on("payment.failed", () => {
+          fetch("/api/payments/razorpay/failed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ planId }),
+          }).catch(() => {});
           reject(new Error("Payment failed. Please try again."));
         });
 

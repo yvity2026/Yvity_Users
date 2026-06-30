@@ -95,7 +95,7 @@ export function ProfileAppearanceSection() {
       defaultOpen
     >
       <div className="py-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {PROFILE_THEMES.map((theme) => {
             const selected = activeTheme === theme.id;
             const locked = !allowedSet.has(theme.id);
@@ -141,9 +141,9 @@ export function ProfileAppearanceSection() {
                       </p>
                     )}
                     {theme.goldOnly && locked && (
-                      <p className="text-[10px] uppercase tracking-wider text-[#F59E0B] mt-0.5">
+                      <span className="inline-flex items-center rounded-full bg-[#F59E0B]/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#92610A] mt-0.5">
                         Gold plan
-                      </p>
+                      </span>
                     )}
                     <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
                       {theme.tagline}

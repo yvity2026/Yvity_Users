@@ -60,11 +60,14 @@ export function ServicesShowcase({
   editable = false,
   embedded = false,
   reviewReadOnly = false,
+  highlightCategory,
 }: {
   editable?: boolean;
   embedded?: boolean;
   /** Submitted services visible but not editable during admin review. */
   reviewReadOnly?: boolean;
+  /** When set (from ?category= query param), auto-scrolls to the first matching service card. */
+  highlightCategory?: ServiceItem["category"];
 }) {
   const [items, setItems, loading] = useServicesData();
   const { settings } = useAdvisorSettings();
@@ -264,14 +267,19 @@ export function ServicesShowcase({
               toggleClassName="mt-1"
             >
               {detailItems.map((item, i) => (
-                <ServiceDetailCard
+                <div
                   key={item.id}
-                  item={item}
-                  editable={false}
-                  index={i}
-                  profileApproved={profileApproved}
-                  profileOwnerName={profileOwnerName}
-                />
+                  id={`service-${item.category}`}
+                  className={highlightCategory === item.category ? "ring-2 ring-primary/40 rounded-3xl" : ""}
+                >
+                  <ServiceDetailCard
+                    item={item}
+                    editable={false}
+                    index={i}
+                    profileApproved={profileApproved}
+                    profileOwnerName={profileOwnerName}
+                  />
+                </div>
               ))}
             </MobilePreviewExpand>
           </div>

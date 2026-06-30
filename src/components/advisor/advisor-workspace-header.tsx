@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PwaDesktopInstallButton } from "@/components/pwa/pwa-desktop-install-button";
 
 /**
  * Sticky workspace header that sits above every section of the Advisor
@@ -43,46 +44,49 @@ export function AdvisorWorkspaceHeader({
         "border-b yvity-workspace-chrome",
       )}
     >
-      <div className="mx-auto max-w-5xl px-4 md:px-8 py-3.5 md:py-5">
-        {/* Workspace title — advisor name + Workspace. The personalised
-            "<Name> Workspace" string already conveys the surface; the
-            previous "Advisor workspace" eyebrow above it was redundant. */}
-        <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold tracking-tight">
-          <span className="text-foreground">{ownerName}</span>
-          <span className="ml-1.5 font-light text-foreground/70">Workspace</span>
-        </h1>
+      <div className="mx-auto max-w-5xl px-4 md:px-8 py-3.5 md:py-5 flex items-start justify-between gap-4">
+        {/* Left — title, tagline, breadcrumb */}
+        <div className="min-w-0 flex-1">
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold tracking-tight">
+            <span className="text-foreground">{ownerName}</span>
+            <span className="ml-1.5 font-light text-foreground/70">Workspace</span>
+          </h1>
 
-        {/* Static tagline */}
-        <p className="mt-0.5 text-[11px] md:text-sm text-muted-foreground line-clamp-1 md:line-clamp-2">
-          {tagline}
-        </p>
+          <p className="mt-0.5 text-[11px] md:text-sm text-muted-foreground line-clamp-1 md:line-clamp-2">
+            {tagline}
+          </p>
 
-        {/* Breadcrumb — updates per section */}
-        {breadcrumb.length > 0 && (
-          <nav aria-label="Breadcrumb" className="mt-2 md:mt-2.5 flex items-center gap-1 flex-wrap">
-            {breadcrumb.map((label, i) => {
-              const last = i === breadcrumb.length - 1;
-              return (
-                <span key={`${i}-${label}`} className="inline-flex items-center gap-1">
-                  {i > 0 && (
-                    <ChevronRight
-                      className="size-3 md:size-3.5 text-muted-foreground/55"
-                      aria-hidden
-                    />
-                  )}
-                  <span
-                    className={cn(
-                      "text-[11px] md:text-xs leading-none",
-                      last ? "font-semibold text-foreground" : "font-medium text-muted-foreground",
+          {breadcrumb.length > 0 && (
+            <nav aria-label="Breadcrumb" className="mt-2 md:mt-2.5 flex items-center gap-1 flex-wrap">
+              {breadcrumb.map((label, i) => {
+                const last = i === breadcrumb.length - 1;
+                return (
+                  <span key={`${i}-${label}`} className="inline-flex items-center gap-1">
+                    {i > 0 && (
+                      <ChevronRight
+                        className="size-3 md:size-3.5 text-muted-foreground/55"
+                        aria-hidden
+                      />
                     )}
-                  >
-                    {label}
+                    <span
+                      className={cn(
+                        "text-[11px] md:text-xs leading-none",
+                        last ? "font-semibold text-foreground" : "font-medium text-muted-foreground",
+                      )}
+                    >
+                      {label}
+                    </span>
                   </span>
-                </span>
-              );
-            })}
-          </nav>
-        )}
+                );
+              })}
+            </nav>
+          )}
+        </div>
+
+        {/* Right — desktop-only install button (hidden on mobile) */}
+        <div className="shrink-0 flex items-center pt-1">
+          <PwaDesktopInstallButton />
+        </div>
       </div>
     </div>
   );
