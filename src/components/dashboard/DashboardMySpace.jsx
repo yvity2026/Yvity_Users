@@ -132,10 +132,10 @@ function CustomerMySpace({ user }) {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-cormorant text-lg font-bold text-[#0A4A4A]">
-              Are you an insurance advisor?
+              My Space — for professionals
             </h3>
             <p className="mt-1 font-poppins text-sm leading-relaxed text-[#6B7280]">
-              Build a verified YVITY profile, showcase your credentials, and let clients find you by city and service.
+              My Space is where professionals build a verified YVITY profile — services, credentials, YVITY Score, and client testimonials. Currently open for insurance advisors. Other professions coming soon.
             </p>
             <Link
               href="/dashboard/my-space?setup=profile"

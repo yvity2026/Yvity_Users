@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Home, UserRound, Users } from "lucide-react";
+import { Building2, Home, LockKeyhole, UserRound, Users } from "lucide-react";
 import {
   DASHBOARD_PRIMARY_NAV,
   isDashboardNavActive,
@@ -13,15 +13,17 @@ import { cn } from "@/lib/utils";
 
 const NAV_ICONS = {
   home: Home,
-  "my-network": Users,
-  "insurance-directory": Building2,
   "my-space": UserRound,
+  "insurance-directory": Building2,
+  vault: LockKeyhole,
+  "my-network": Users,
 };
 
 const NAV_SHORT_LABELS = {
   "insurance-directory": "Directory",
   "my-network": "Network",
   "my-space": "My Space",
+  vault: "Vault",
 };
 
 export default function DashboardBottomNav() {

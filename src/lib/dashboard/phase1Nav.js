@@ -7,6 +7,7 @@ export const DASHBOARD_HOME_PATH = "/dashboard";
 export const DASHBOARD_NETWORK_PATH = "/dashboard/my-network";
 export const DASHBOARD_MY_SPACE_PATH = "/dashboard/my-space";
 export const DASHBOARD_INSURANCE_DIRECTORY_PATH = "/dashboard/insurance-directory";
+export const DASHBOARD_VAULT_PATH = "/dashboard/vault";
 
 export const DASHBOARD_PRIMARY_NAV = [
   {
@@ -16,11 +17,10 @@ export const DASHBOARD_PRIMARY_NAV = [
     ariaLabel: "Home — search professionals",
   },
   {
-    id: "my-network",
-    label: "My Network",
-    href: DASHBOARD_NETWORK_PATH,
-    ariaLabel: "My network — coming soon",
-    phase: 2,
+    id: "my-space",
+    label: "My Space",
+    href: DASHBOARD_MY_SPACE_PATH,
+    ariaLabel: "My space — your workspace",
   },
   {
     id: "insurance-directory",
@@ -29,10 +29,17 @@ export const DASHBOARD_PRIMARY_NAV = [
     ariaLabel: "Insurance Directory — company contacts and info",
   },
   {
-    id: "my-space",
-    label: "My Space",
-    href: DASHBOARD_MY_SPACE_PATH,
-    ariaLabel: "My space — your workspace",
+    id: "vault",
+    label: "Vault",
+    href: DASHBOARD_VAULT_PATH,
+    ariaLabel: "My Financial Vault — private financial records",
+  },
+  {
+    id: "my-network",
+    label: "My Network",
+    href: DASHBOARD_NETWORK_PATH,
+    ariaLabel: "My network — coming soon",
+    phase: 2,
   },
 ];
 
@@ -44,6 +51,7 @@ export const DASHBOARD_TOP_ROUTES = {
   myNetwork: DASHBOARD_NETWORK_PATH,
   insuranceDirectory: DASHBOARD_INSURANCE_DIRECTORY_PATH,
   mySpace: DASHBOARD_MY_SPACE_PATH,
+  vault: DASHBOARD_VAULT_PATH,
 };
 
 export function resolveDashboardNavHref(item, user, advisor) {
@@ -79,6 +87,13 @@ export function isDashboardNavActive(pathname, item, resolvedHref, user, advisor
     return (
       pathname === DASHBOARD_INSURANCE_DIRECTORY_PATH ||
       pathname.startsWith(`${DASHBOARD_INSURANCE_DIRECTORY_PATH}/`)
+    );
+  }
+
+  if (item.id === "vault") {
+    return (
+      pathname === DASHBOARD_VAULT_PATH ||
+      pathname.startsWith(`${DASHBOARD_VAULT_PATH}/`)
     );
   }
 
