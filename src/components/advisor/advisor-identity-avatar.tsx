@@ -150,7 +150,7 @@ export function AdvisorIdentityAvatar({
       {showVerifiedBadge ? (
         <span
           className={cn(
-            "absolute bottom-0 right-0 translate-x-[15%] translate-y-[15%]",
+            "absolute bottom-0 right-0 z-[3] translate-x-[15%] translate-y-[15%]",
             "inline-flex items-center justify-center rounded-full",
             "bg-[oklch(0.82_0.16_78)] text-[oklch(0.18_0.035_235)] shadow-md",
             "ring-[3px] ring-[oklch(0.18_0.035_235)]",
