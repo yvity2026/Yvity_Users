@@ -14,7 +14,7 @@ export async function getSessionUser(): Promise<AuthUser | null> {
   }
 }
 
-export function sessionCookieOptions(maxAge = 60 * 60 * 24 * 7) {
+export function sessionCookieOptions(maxAge = 60 * 60 * 24 * 180) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,

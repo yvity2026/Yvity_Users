@@ -209,7 +209,7 @@ function ViewProfileCta({ profileUrl, compact, reducedMotion, isFeatured, isLogg
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
       {!reducedMotion ? (
         <motion.span
-          className="pointer-events-none absolute -left-full top-0 h-full w-1/2 skew-x-[-20deg] bg-white/25"
+          className="pointer-events-none absolute -left-full top-0 h-full w-1/2 skew-x-[-20deg] bg-white/25 max-md:hidden"
           animate={{ left: ["-100%", "200%"] }}
           transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut", repeatDelay: 4 }}
         />
@@ -383,9 +383,7 @@ function AdvisorProfileCardCompact({
         />
         <div className="relative z-10 flex items-center gap-3">
           {/* Avatar — 72px */}
-          <div className="relative shrink-0 overflow-visible">
-            <div className="absolute -inset-[8px] rounded-full bg-[#F59E0B]/18 blur-xl" />
-            <div className="absolute -inset-[4px] rounded-full bg-[#F59E0B]/30 blur-md" />
+          <div className="relative shrink-0 overflow-visible" style={{ filter: "drop-shadow(0 0 10px rgba(245,158,11,0.40))" }}>
             <div className="relative rounded-full bg-gradient-to-br from-[#0D6060] via-[#14B8A6] to-[#F59E0B] p-[3px]">
               <div className="h-[72px] w-[72px] overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]">
                 {avatarUrl ? (
@@ -570,9 +568,7 @@ export function AdvisorProfileCard({
         />
         <div className={`relative z-10 flex items-center ${hdrGap}`}>
           {/* Avatar */}
-          <div className="relative shrink-0 overflow-visible">
-            <div className="absolute -inset-[10px] rounded-full bg-[#F59E0B]/18 blur-xl" />
-            <div className="absolute -inset-[5px] rounded-full bg-[#F59E0B]/30 blur-md" />
+          <div className="relative shrink-0 overflow-visible" style={{ filter: "drop-shadow(0 0 12px rgba(245,158,11,0.40))" }}>
             <div className="relative rounded-full bg-gradient-to-br from-[#0D6060] via-[#14B8A6] to-[#F59E0B] p-[3px]">
               <div
                 className="overflow-hidden rounded-full bg-gradient-to-br from-[#0D6060] to-[#0A4A4A]"

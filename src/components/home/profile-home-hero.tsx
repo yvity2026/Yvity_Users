@@ -181,6 +181,7 @@ function ProfileHeaderBanner() {
             showVerifiedBadge={showIrdaiBadge}
             variant="hero"
             goldGlow
+            score={scoreLoading ? undefined : score}
           />
 
           {/* Left column: identity + bio + pills + CTAs (desktop) */}
