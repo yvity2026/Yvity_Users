@@ -1,5 +1,5 @@
 export async function verifyEmailOtp(email, token) {
-  const res = await fetch("/api/auth/verify-email-otp", {
+  const res = await fetch("/api/auth/otp/email/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, token }),

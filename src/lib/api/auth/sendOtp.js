@@ -1,6 +1,6 @@
 export async function sendOtp(phone, flow = "login", options = {}) {
   console.info("[client:auth] sendOtp called", { phone });
-  const res = await fetch("/api/auth/send-otp", {
+  const res = await fetch("/api/auth/otp/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, flow, ...options }),

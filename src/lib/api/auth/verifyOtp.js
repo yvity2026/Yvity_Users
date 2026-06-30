@@ -3,7 +3,7 @@ export async function verifyOtp(phone, token, deviceToken = "", flow = "login") 
     phone,
     tokenLength: String(token || "").length,
   });
-  const res = await fetch("/api/auth/verify-otp", {
+  const res = await fetch("/api/auth/otp/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, token, deviceToken, flow }),
