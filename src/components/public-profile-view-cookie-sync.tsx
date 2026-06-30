@@ -45,7 +45,7 @@ export function PublicProfileViewCookieSync() {
     if (!storedUserId || bootstrappedUserRef.current === storedUserId) return;
 
     bootstrappedUserRef.current = storedUserId;
-    void fetch("/api/public-view", {
+    void fetch("/api/public/view-context", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
@@ -75,7 +75,7 @@ export function PublicProfileViewCookieSync() {
       } catch {
         // ignored
       }
-      void fetch("/api/public-view", { method: "DELETE", credentials: "same-origin" });
+      void fetch("/api/public/view-context", { method: "DELETE", credentials: "same-origin" });
     }
   }, [pathname]);
 

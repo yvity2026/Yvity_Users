@@ -58,7 +58,7 @@ export function PublicProfileViewProvider({
     let cancelled = false;
     setReady(false);
 
-    void fetch("/api/public-view", {
+    void fetch("/api/public/view-context", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: value.userId }),
