@@ -92,6 +92,12 @@ export const VAULT_FIELD_CONFIGS = {
       hint: "Do not store full Aadhaar — use masked form only" },
     { key: "issue_date", label: "Issue Date", type: "date" },
     { key: "expiry_date", label: "Expiry Date", type: "date" },
+    { key: "original_location", label: "Where is the original?", type: "select",
+      options: ["Wallet", "Home Safe", "Bank Locker", "With CA / Lawyer", "With Family Member", "Other"],
+      hint: "Helps you find it quickly in an emergency" },
+    { key: "softcopy_location", label: "Soft copy location", type: "select",
+      options: ["DigiLocker", "Gmail", "Google Drive", "WhatsApp Saved", "Laptop / Hard Disk", "Not available", "Other"],
+      hint: "Where is the digital copy stored?" },
     { key: "notes", label: "Notes", type: "textarea" },
   ],
 
