@@ -129,21 +129,32 @@ export function AdvisorIdentityAvatar({
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            {/* When the verified badge is shown, punch a clean gap in the ring at the badge position
+                (bottom-right, ~87,87 in the 0-100 viewBox) so the badge sits in clear space */}
+            {showVerifiedBadge && (
+              <mask id={`${gradId}-mask`}>
+                <rect x="0" y="0" width="100" height="100" fill="white" />
+                <circle cx="87" cy="87" r="17" fill="black" />
+              </mask>
+            )}
           </defs>
           {/* Track */}
           <circle
             cx="50" cy="50" r={SCORE_RING_R}
             fill="none" stroke="rgba(255,255,255,0.13)" strokeWidth="3.5"
+            mask={showVerifiedBadge ? `url(#${gradId}-mask)` : undefined}
           />
-          {/* Score arc */}
-          <circle
-            cx="50" cy="50" r={SCORE_RING_R}
-            fill="none" stroke={`url(#${gradId})`} strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeDasharray={`${ringFilled} ${SCORE_RING_CIRC - ringFilled}`}
-            transform="rotate(-90 50 50)"
-            filter={`url(#${gradId}-glow)`}
-          />
+          {/* Score arc — wrapped in <g> so mask applies after the glow filter */}
+          <g mask={showVerifiedBadge ? `url(#${gradId}-mask)` : undefined}>
+            <circle
+              cx="50" cy="50" r={SCORE_RING_R}
+              fill="none" stroke={`url(#${gradId})`} strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeDasharray={`${ringFilled} ${SCORE_RING_CIRC - ringFilled}`}
+              transform="rotate(-90 50 50)"
+              filter={`url(#${gradId}-glow)`}
+            />
+          </g>
         </svg>
       )}
 
