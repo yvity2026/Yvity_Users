@@ -742,7 +742,7 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
       const primaryLicense = serviceDetails[selectedServices[0]]?.licenseNumber?.trim() || "";
       const documentUrls = uploadedDocs.map((doc) => doc.url).filter(Boolean);
 
-      const res = await fetch("/api/customer/setprofile", {
+      const res = await fetch("/api/customer/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -765,7 +765,7 @@ export default function SetupMyProfileFlow({ isOpen = true, onClose, onComplete 
 
       // Patch IRDAI details — flexible, strips only surrounding whitespace
       if (primaryLicense && uploadedDocs[0]?.url) {
-        await fetch("/api/customer/setprofile/irdai", {
+        await fetch("/api/customer/profile/irdai", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

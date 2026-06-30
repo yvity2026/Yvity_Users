@@ -75,7 +75,7 @@ export async function saveGalleryUpload(
   const filepath = path.join(UPLOADS_DIR, filename);
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
   await fs.writeFile(filepath, buffer);
-  return { filename, url: `/api/gallery/uploads/${filename}` };
+  return { filename, url: `/api/gallery/photos/${filename}` };
 }
 
 export function uploadsFilePath(filename: string): string | null {

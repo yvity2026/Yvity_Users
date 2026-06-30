@@ -4,7 +4,7 @@ function isSupabaseBucketUrl(url: string, bucket: string): boolean {
 
 export function isHostedGalleryUrl(url: string): boolean {
   const trimmed = url.trim();
-  return trimmed.startsWith("/api/gallery/uploads/") || isSupabaseBucketUrl(trimmed, "gallery");
+  return trimmed.startsWith("/api/gallery/photos/") || isSupabaseBucketUrl(trimmed, "gallery");
 }
 
 export function isHostedIntroVideoUrl(url: string): boolean {

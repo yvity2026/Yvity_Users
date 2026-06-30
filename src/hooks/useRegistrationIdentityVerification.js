@@ -337,7 +337,7 @@ export function useRegistrationIdentityVerification({
       formData.append("image", blob, "selfie.jpg");
       formData.append("mobile", phoneValue || "");
 
-      const res = await fetch("/api/auth/upload-selfie", {
+      const res = await fetch("/api/auth/selfie", {
         method: "POST",
         body: formData,
       });
