@@ -254,6 +254,7 @@ export async function loadPublicProfileEngagementTelemetry(
 ): Promise<{
   profileViews: number;
   profileViewsDelta: string;
+  totalProfileViews: number;
   clientSharers: number;
   clientSharersDelta: string;
 }> {
@@ -266,16 +267,24 @@ export async function loadPublicProfileEngagementTelemetry(
       ? countUniqueProfileViewsInMonthDb(advisorUserId, y, m)
       : countUniqueProfileViewsInMonthJson(advisorUserId, y, m);
 
-  const [profileCurrent, profilePrevious, sharesCurrent, sharesPrevious] = await Promise.all([
-    countViews(year, month),
-    countViews(prev.year, prev.month),
-    countUniqueClientProfileSharersInMonth(advisorUserId, year, month),
-    countUniqueClientProfileSharersInMonth(advisorUserId, prev.year, prev.month),
-  ]);
+  const countAllTime = () =>
+    useSupabasePersistence()
+      ? countAllTimeUniqueProfileViewsDb(advisorUserId)
+      : countAllTimeUniqueProfileViewsJson(advisorUserId);
+
+  const [profileCurrent, profilePrevious, totalProfileViews, sharesCurrent, sharesPrevious] =
+    await Promise.all([
+      countViews(year, month),
+      countViews(prev.year, prev.month),
+      countAllTime(),
+      countUniqueClientProfileSharersInMonth(advisorUserId, year, month),
+      countUniqueClientProfileSharersInMonth(advisorUserId, prev.year, prev.month),
+    ]);
 
   return {
     profileViews: profileCurrent,
     profileViewsDelta: formatMonthOverMonthDelta(profileCurrent, profilePrevious),
+    totalProfileViews,
     clientSharers: sharesCurrent,
     clientSharersDelta: formatMonthOverMonthDelta(sharesCurrent, sharesPrevious),
   };

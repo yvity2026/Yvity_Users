@@ -12,7 +12,7 @@ export const INSURANCE_COMPANIES = {
     "SBI Life Insurance Company Ltd.",
     "Max Life Insurance Company Ltd.",
     "Kotak Mahindra Life Insurance Company Ltd.",
-    "Bajaj Allianz Life Insurance Company Ltd.",
+    "Bajaj Life Insurance",
     "Aditya Birla Sun Life Insurance Company Ltd.",
     "Tata AIA Life Insurance Company Ltd.",
     "PNB MetLife India Insurance Company Ltd.",
@@ -46,7 +46,7 @@ export const INSURANCE_COMPANIES = {
     "National Insurance Company Ltd.",
     "ICICI Lombard General Insurance Company Ltd.",
     "HDFC ERGO General Insurance Company Ltd.",
-    "Bajaj Allianz General Insurance Company Ltd.",
+    "Bajaj General Insurance",
     "Digit Insurance (Go Digit General Insurance Ltd.)",
     "Tata AIG General Insurance Company Ltd.",
     "SBI General Insurance Company Ltd.",
@@ -62,7 +62,7 @@ export const INSURANCE_COMPANIES = {
     // Private sector
     "ICICI Lombard General Insurance Company Ltd.",
     "HDFC ERGO General Insurance Company Ltd.",
-    "Bajaj Allianz General Insurance Company Ltd.",
+    "Bajaj General Insurance",
     "Tata AIG General Insurance Company Ltd.",
     "SBI General Insurance Company Ltd.",
     "Digit Insurance (Go Digit General Insurance Ltd.)",
@@ -81,5 +81,6 @@ export const INSURANCE_COMPANIES = {
     "Navi General Insurance Ltd.",
     "Zurich Kotak General Insurance Company (India) Ltd.",
     "Aditya Birla General Insurance Company Ltd.",
+    "Kiwi General Insurance Ltd.",
   ],
 };

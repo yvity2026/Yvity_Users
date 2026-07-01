@@ -9,6 +9,7 @@ type PublicProfileStatsResponse = {
   testimonialCount?: number;
   profileViews?: number;
   profileViewsDelta?: string;
+  totalProfileViews?: number;
   profileSharesByOthers?: number;
   profileSharesDelta?: string;
   decayPenalty?: number;
@@ -23,6 +24,7 @@ export function usePublicProfileStats(): {
   testimonialCount: number;
   profileViews: number;
   profileViewsDelta: string;
+  totalProfileViews: number;
   profileSharesByOthers: number;
   profileSharesDelta: string;
   decayPenalty: number;
@@ -36,6 +38,7 @@ export function usePublicProfileStats(): {
   const [testimonialCount, setTestimonialCount] = useState(0);
   const [profileViews, setProfileViews] = useState(0);
   const [profileViewsDelta, setProfileViewsDelta] = useState("0%");
+  const [totalProfileViews, setTotalProfileViews] = useState(0);
   const [profileSharesByOthers, setProfileSharesByOthers] = useState(0);
   const [profileSharesDelta, setProfileSharesDelta] = useState("0%");
   const [decayPenalty, setDecayPenalty] = useState(0);
@@ -60,6 +63,7 @@ export function usePublicProfileStats(): {
         const activity = json.currentMonthActivity ?? null;
         setMonthlyActivity(activity);
         setProfileViews(Math.max(0, activity?.uniqueProfileViews ?? 0));
+        setTotalProfileViews(Math.max(0, json.totalProfileViews ?? 0));
         setProfileSharesByOthers(Math.max(0, activity?.clientSharers ?? 0));
       })
       .catch(() => {
@@ -72,6 +76,7 @@ export function usePublicProfileStats(): {
           setMonthlyActivity(null);
           setProfileViews(0);
           setProfileViewsDelta("0%");
+          setTotalProfileViews(0);
           setProfileSharesByOthers(0);
           setProfileSharesDelta("0%");
         }
@@ -90,6 +95,7 @@ export function usePublicProfileStats(): {
     testimonialCount,
     profileViews,
     profileViewsDelta,
+    totalProfileViews,
     profileSharesByOthers,
     profileSharesDelta,
     decayPenalty,
