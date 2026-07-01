@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Eye, EyeOff, X } from "lucide-react";
 import { VAULT_FIELD_CONFIGS } from "@/lib/vault/field-configs";
 import { autoTitle, autoSubtitle } from "@/lib/vault/auto-title";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
@@ -109,14 +109,43 @@ export default function VaultAddEditSheet({ category, item, open, onClose, onSav
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-5 py-5">
           <div className="space-y-4 pb-2">
-            {fields.map((field) => (
-              <FormField
-                key={field.key}
-                field={field}
-                value={formData[field.key] ?? ""}
-                onChange={(v) => setValue(field.key, v)}
-              />
-            ))}
+            {fields.map((field) => {
+              if (field.type === "advisor-picker") {
+                return (
+                  <AdvisorPickerField
+                    key={field.key}
+                    field={field}
+                    formData={formData}
+                    onChange={(name, yvityId, yvitySlug) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        advisor_name: name,
+                        advisor_yvity_id: yvityId ?? null,
+                        advisor_yvity_slug: yvitySlug ?? null,
+                      }))
+                    }
+                  />
+                );
+              }
+              if (field.type === "vault-link") {
+                return (
+                  <LinkedVaultItemsField
+                    key={field.key}
+                    field={field}
+                    value={formData[field.key] ?? []}
+                    onChange={(v) => setValue(field.key, v)}
+                  />
+                );
+              }
+              return (
+                <FormField
+                  key={field.key}
+                  field={field}
+                  value={formData[field.key] ?? ""}
+                  onChange={(v) => setValue(field.key, v)}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -206,6 +235,303 @@ function FormField({ field, value, onChange }) {
           maxLength={field.maxLength}
           className={baseClass}
         />
+      )}
+
+      {field.hint && (
+        <p className="mt-1 font-poppins text-[10px] text-[#8B8175]">{field.hint}</p>
+      )}
+    </div>
+  );
+}
+
+function AdvisorPickerField({ field, formData, onChange }) {
+  const [query, setQuery] = useState(formData.advisor_name ?? "");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const debounceRef = useRef(null);
+
+  const isYvityLinked = Boolean(formData.advisor_yvity_id);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!query.trim() || query.length < 2) {
+      setResults([]);
+      setSearched(false);
+      setShowResults(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/advisors/search?name=${encodeURIComponent(query.trim())}`);
+        if (res.ok) {
+          const json = await res.json();
+          setResults(json.advisors ?? []);
+          setSearched(true);
+          setShowResults(true);
+        }
+      } catch {
+        // silent
+      } finally {
+        setLoading(false);
+      }
+    }, 450);
+    return () => clearTimeout(debounceRef.current);
+  }, [query]);
+
+  function selectAdvisor(advisor) {
+    onChange(advisor.name, advisor.id, advisor.profileSlug ?? null);
+    setQuery(advisor.name);
+    setShowResults(false);
+    setResults([]);
+  }
+
+  function clearSelection() {
+    onChange("", null, null);
+    setQuery("");
+    setResults([]);
+    setSearched(false);
+    setShowResults(false);
+  }
+
+  function handleInput(val) {
+    setQuery(val);
+    if (isYvityLinked) onChange(val, null, null);
+    else onChange(val, null, null);
+  }
+
+  function handleInvite() {
+    const msg = `Hi! I've added you as my advisor on YVITY – India's credibility platform for insurance advisors. Please register at https://www.yvity.in/register to build your verified profile.`;
+    if (navigator.share) {
+      navigator.share({ text: msg }).catch(() => {});
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+  }
+
+  const baseClass =
+    "w-full rounded-xl border border-[#E0DBD1] bg-[#FAFAF8] px-4 py-3 font-poppins text-sm text-[#1A1A1A] placeholder:text-[#AEAAA0] focus:border-[#B8A165] focus:outline-none transition-colors";
+
+  return (
+    <div>
+      <label className="mb-1.5 block font-poppins text-xs font-medium text-[#4A4A4A]">
+        {field.label}
+      </label>
+
+      {isYvityLinked ? (
+        <div className="flex items-center gap-3 rounded-xl border border-[#0A4A4A]/20 bg-[#E8F7F7] px-4 py-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
+            {(formData.advisor_name ?? "?").charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
+              {formData.advisor_name}
+            </p>
+            <p className="font-poppins text-[10px] text-[#0A4A4A]">✓ YVITY Advisor linked</p>
+          </div>
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="shrink-0 text-[#6B6B6B] hover:text-[#1A1A1A]"
+            aria-label="Remove advisor"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      ) : (
+        <div>
+          <div className="relative">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => handleInput(e.target.value)}
+              placeholder={field.placeholder ?? "Search advisor on YVITY…"}
+              className={cn(baseClass, loading ? "pr-10" : "")}
+            />
+            {loading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0A4A4A] border-t-transparent" />
+              </div>
+            )}
+          </div>
+
+          {showResults && (
+            <div className="mt-1 overflow-hidden rounded-xl border border-[#E0DBD1] bg-white shadow-sm">
+              {results.length > 0 ? (
+                <>
+                  {results.slice(0, 5).map((advisor) => (
+                    <button
+                      key={advisor.id}
+                      type="button"
+                      onClick={() => selectAdvisor(advisor)}
+                      className="flex w-full items-center gap-3 border-b border-[#F0EDE6] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[#F0EDE6]"
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
+                        {advisor.name?.charAt(0) ?? "?"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
+                          {advisor.name}
+                        </p>
+                        <p className="truncate font-poppins text-[10px] text-[#6B6B6B]">
+                          {advisor.location}
+                          {advisor.companies?.[0] ? ` · ${advisor.companies[0]}` : ""}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              ) : (
+                searched && query.length >= 2 && (
+                  <div className="px-4 py-3">
+                    <p className="mb-2 font-poppins text-xs text-[#6B6B6B]">
+                      &ldquo;{query}&rdquo; isn&apos;t on YVITY yet.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleInvite}
+                      className="rounded-lg bg-[#0A4A4A] px-3 py-1.5 font-poppins text-xs font-semibold text-white"
+                    >
+                      Invite to YVITY
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {field.hint && (
+        <p className="mt-1 font-poppins text-[10px] text-[#8B8175]">{field.hint}</p>
+      )}
+    </div>
+  );
+}
+
+function LinkedVaultItemsField({ field, value, onChange }) {
+  const [items, setItems] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const selected = Array.isArray(value) ? value : [];
+  const selectedIds = new Set(selected.map((s) => s.id));
+
+  async function openAndLoad() {
+    if (expanded) { setExpanded(false); return; }
+    if (items.length > 0) { setExpanded(true); return; }
+    setLoadingItems(true);
+    try {
+      const [insRes, invRes] = await Promise.all([
+        fetch("/api/vault?category=insurance").then((r) => r.json()),
+        fetch("/api/vault?category=investments").then((r) => r.json()),
+      ]);
+      const all = [
+        ...(insRes.items ?? []).map((i) => ({ ...i, _catLabel: "Insurance" })),
+        ...(invRes.items ?? []).map((i) => ({ ...i, _catLabel: "Investment" })),
+      ];
+      setItems(all);
+      setExpanded(true);
+    } finally {
+      setLoadingItems(false);
+    }
+  }
+
+  function toggle(item) {
+    if (selectedIds.has(item.id)) {
+      onChange(selected.filter((s) => s.id !== item.id));
+    } else {
+      onChange([
+        ...selected,
+        { id: item.id, title: item.title, subtitle: item.subtitle ?? null, category: item.category },
+      ]);
+    }
+  }
+
+  return (
+    <div>
+      <label className="mb-1.5 block font-poppins text-xs font-medium text-[#4A4A4A]">
+        {field.label}
+      </label>
+
+      {selected.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {selected.map((s) => (
+            <span
+              key={s.id}
+              className="flex items-center gap-1 rounded-full bg-[#E8F7F7] px-3 py-1 font-poppins text-[11px] text-[#0A4A4A]"
+            >
+              {s.title}
+              <button
+                type="button"
+                onClick={() => toggle(s)}
+                className="text-[#0A4A4A]/50 hover:text-[#0A4A4A]"
+              >
+                <X size={11} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={openAndLoad}
+        disabled={loadingItems}
+        className="flex w-full items-center justify-between rounded-xl border border-dashed border-[#E0DBD1] bg-[#FAFAF8] px-4 py-3 font-poppins text-xs text-[#6B6B6B] transition-colors hover:bg-[#F0EDE6]"
+      >
+        <span>
+          {loadingItems ? "Loading…" : expanded ? "Close list" : selected.length > 0 ? "Change selection" : "+ Link policy or investment"}
+        </span>
+        {loadingItems && (
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#0A4A4A] border-t-transparent" />
+        )}
+      </button>
+
+      {expanded && (
+        <div className="mt-1 overflow-hidden rounded-xl border border-[#E0DBD1]">
+          {items.length === 0 ? (
+            <p className="px-4 py-3 font-poppins text-xs text-[#AEAAA0]">
+              No insurance or investment items in your vault yet. Add some first.
+            </p>
+          ) : (
+            items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => toggle(item)}
+                className={cn(
+                  "flex w-full items-center gap-3 border-b border-[#F0EDE6] px-4 py-3 text-left transition-colors last:border-0",
+                  selectedIds.has(item.id) ? "bg-[#E8F7F7]" : "bg-white hover:bg-[#F0EDE6]",
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                    selectedIds.has(item.id)
+                      ? "border-[#0A4A4A] bg-[#0A4A4A]"
+                      : "border-[#AEAAA0] bg-white",
+                  )}
+                >
+                  {selectedIds.has(item.id) && <Check size={10} className="text-white" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-poppins text-xs font-semibold text-[#1A1A1A]">
+                    {item.title}
+                  </p>
+                  {item.subtitle && (
+                    <p className="truncate font-poppins text-[10px] text-[#6B6B6B]">{item.subtitle}</p>
+                  )}
+                </div>
+                <span className="shrink-0 font-poppins text-[10px] text-[#AEAAA0]">
+                  {item._catLabel}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
       )}
 
       {field.hint && (

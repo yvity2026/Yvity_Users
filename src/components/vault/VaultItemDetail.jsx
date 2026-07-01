@@ -200,6 +200,48 @@ export default function VaultItemDetail() {
           {/* Field display */}
           <div className="space-y-2.5">
             {fields.map((field) => {
+              // vault-link: show linked policy chips
+              if (field.type === "vault-link") {
+                const linked = Array.isArray(item.data?.[field.key]) ? item.data[field.key] : [];
+                if (linked.length === 0) return null;
+                return (
+                  <div key={field.key} className="rounded-2xl border border-[#E8E4DA] bg-white px-4 py-3.5">
+                    <p className="mb-2 font-poppins text-[10px] font-medium uppercase tracking-wide text-[#8C8C8C]">
+                      {field.label}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {linked.map((p) => (
+                        <span key={p.id} className="rounded-full bg-[#E8F7F7] px-3 py-1 font-poppins text-xs text-[#0A4A4A]">
+                          {p.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              // advisor-picker: show name + YVITY badge if linked
+              if (field.type === "advisor-picker") {
+                const name = item.data?.advisor_name;
+                const yvityId = item.data?.advisor_yvity_id;
+                if (!name) return null;
+                return (
+                  <div key={field.key} className="rounded-2xl border border-[#E8E4DA] bg-white px-4 py-3.5">
+                    <p className="font-poppins text-[10px] font-medium uppercase tracking-wide text-[#8C8C8C]">
+                      {field.label}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <p className="font-poppins text-sm text-[#1A1A1A]">{name}</p>
+                      {yvityId && (
+                        <span className="rounded-full bg-[#0A4A4A] px-2 py-0.5 font-poppins text-[10px] font-semibold text-white">
+                          YVITY ✓
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
               const display = displayValue(field, item.data?.[field.key]);
               if (!display) return null;
               const isRevealed = revealed.has(field.key);

@@ -10,7 +10,7 @@ export const VAULT_FIELD_CONFIGS = {
       options: ["Annual", "Semi-Annual", "Quarterly", "Monthly", "Single Premium"] },
     { key: "start_date", label: "Policy Start Date", type: "date" },
     { key: "expiry_date", label: "Expiry / Maturity Date", type: "date" },
-    { key: "advisor_name", label: "Advisor Name", type: "text", placeholder: "Who sold this policy? (optional)" },
+    { key: "advisor_name", label: "Advisor Name", type: "advisor-picker", placeholder: "Search advisor on YVITY…", hint: "Link your advisor's YVITY profile so they get credit" },
     { key: "notes", label: "Notes", type: "textarea", placeholder: "Any other details" },
   ],
 
@@ -22,7 +22,7 @@ export const VAULT_FIELD_CONFIGS = {
     { key: "amount_invested", label: "Amount Invested (₹)", type: "number" },
     { key: "current_value", label: "Current Value (₹)", type: "number" },
     { key: "start_date", label: "Start Date", type: "date" },
-    { key: "advisor_name", label: "Advisor Name", type: "text", placeholder: "Who manages this? (optional)" },
+    { key: "advisor_name", label: "Advisor Name", type: "advisor-picker", placeholder: "Search advisor on YVITY…", hint: "Link your advisor's YVITY profile so they get credit" },
     { key: "notes", label: "Notes", type: "textarea" },
   ],
 
@@ -111,5 +111,6 @@ export const VAULT_FIELD_CONFIGS = {
     { key: "aadhaar_last4", label: "Aadhaar (last 4 digits only)", type: "text",
       placeholder: "XXXX", maxLength: 4, hint: "Store only last 4 digits for safety" },
     { key: "address", label: "Address", type: "textarea" },
+    { key: "linked_policies", label: "Linked Policies & Investments", type: "vault-link", hint: "Select which policies or investments list this person as a nominee" },
   ],
 };
