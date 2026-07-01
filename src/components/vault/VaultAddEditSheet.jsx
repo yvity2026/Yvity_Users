@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Eye, EyeOff, X } from "lucide-react";
+import { Check, Eye, EyeOff, Phone, X } from "lucide-react";
 import { VAULT_FIELD_CONFIGS } from "@/lib/vault/field-configs";
 import { autoTitle, autoSubtitle } from "@/lib/vault/auto-title";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
@@ -116,14 +116,7 @@ export default function VaultAddEditSheet({ category, item, open, onClose, onSav
                     key={field.key}
                     field={field}
                     formData={formData}
-                    onChange={(name, yvityId, yvitySlug) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        advisor_name: name,
-                        advisor_yvity_id: yvityId ?? null,
-                        advisor_yvity_slug: yvitySlug ?? null,
-                      }))
-                    }
+                    setFormData={setFormData}
                   />
                 );
               }
@@ -244,7 +237,7 @@ function FormField({ field, value, onChange }) {
   );
 }
 
-function AdvisorPickerField({ field, formData, onChange }) {
+function AdvisorPickerField({ field, formData, setFormData }) {
   const [query, setQuery] = useState(formData.advisor_name ?? "");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -253,10 +246,14 @@ function AdvisorPickerField({ field, formData, onChange }) {
   const debounceRef = useRef(null);
 
   const isYvityLinked = Boolean(formData.advisor_yvity_id);
+  const mobile = formData.advisor_mobile ?? "";
+  const cleanMobile = mobile.replace(/\D/g, "");
+  const mobileValid = cleanMobile.length >= 10;
+  const hasName = query.trim().length > 0;
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!query.trim() || query.length < 2) {
+    if (isYvityLinked || !query.trim() || query.length < 2) {
       setResults([]);
       setSearched(false);
       setShowResults(false);
@@ -279,76 +276,108 @@ function AdvisorPickerField({ field, formData, onChange }) {
       }
     }, 450);
     return () => clearTimeout(debounceRef.current);
-  }, [query]);
+  }, [query, isYvityLinked]);
 
   function selectAdvisor(advisor) {
-    onChange(advisor.name, advisor.id, advisor.profileSlug ?? null);
+    setFormData((prev) => ({
+      ...prev,
+      advisor_name: advisor.name,
+      advisor_yvity_id: advisor.id,
+      advisor_yvity_slug: advisor.profileSlug ?? null,
+    }));
     setQuery(advisor.name);
     setShowResults(false);
     setResults([]);
   }
 
-  function clearSelection() {
-    onChange("", null, null);
+  function clearAdvisor() {
+    setFormData((prev) => ({
+      ...prev,
+      advisor_name: "",
+      advisor_yvity_id: null,
+      advisor_yvity_slug: null,
+    }));
     setQuery("");
     setResults([]);
     setSearched(false);
     setShowResults(false);
   }
 
-  function handleInput(val) {
+  function handleNameInput(val) {
     setQuery(val);
-    if (isYvityLinked) onChange(val, null, null);
-    else onChange(val, null, null);
+    setFormData((prev) => ({
+      ...prev,
+      advisor_name: val,
+      advisor_yvity_id: null,
+      advisor_yvity_slug: null,
+    }));
   }
 
   function handleInvite() {
-    const msg = `Hi! I've added you as my advisor on YVITY – India's credibility platform for insurance advisors. Please register at https://www.yvity.in/register to build your verified profile.`;
-    if (navigator.share) {
+    const name = formData.advisor_name || "there";
+    const msg = `Hi ${name}! I've noted you as my advisor in my financial vault on YVITY — India's credibility platform for insurance advisors. Join YVITY to build your verified profile and get recognised for your work.\n\nRegister here: https://www.yvity.in/register`;
+    if (mobileValid) {
+      const num = cleanMobile.startsWith("91") ? cleanMobile : `91${cleanMobile.slice(-10)}`;
+      window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
+    } else if (navigator.share) {
       navigator.share({ text: msg }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
     }
   }
 
-  const baseClass =
+  const inputClass =
     "w-full rounded-xl border border-[#E0DBD1] bg-[#FAFAF8] px-4 py-3 font-poppins text-sm text-[#1A1A1A] placeholder:text-[#AEAAA0] focus:border-[#B8A165] focus:outline-none transition-colors";
 
   return (
-    <div>
-      <label className="mb-1.5 block font-poppins text-xs font-medium text-[#4A4A4A]">
+    <div className="space-y-2.5">
+      <label className="block font-poppins text-xs font-medium text-[#4A4A4A]">
         {field.label}
       </label>
 
+      {/* ── YVITY-linked advisor card ── */}
       {isYvityLinked ? (
-        <div className="flex items-center gap-3 rounded-xl border border-[#0A4A4A]/20 bg-[#E8F7F7] px-4 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
-            {(formData.advisor_name ?? "?").charAt(0).toUpperCase()}
+        <div className="rounded-xl border border-[#0A4A4A]/20 bg-[#E8F7F7] px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
+              {(formData.advisor_name ?? "?").charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
+                {formData.advisor_name}
+              </p>
+              <p className="font-poppins text-[10px] text-[#0A4A4A]">✓ Verified YVITY profile linked</p>
+            </div>
+            <button
+              type="button"
+              onClick={clearAdvisor}
+              className="shrink-0 rounded-full p-1 text-[#6B6B6B] hover:text-[#1A1A1A]"
+              aria-label="Remove advisor"
+            >
+              <X size={15} />
+            </button>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
-              {formData.advisor_name}
-            </p>
-            <p className="font-poppins text-[10px] text-[#0A4A4A]">✓ YVITY Advisor linked</p>
-          </div>
-          <button
-            type="button"
-            onClick={clearSelection}
-            className="shrink-0 text-[#6B6B6B] hover:text-[#1A1A1A]"
-            aria-label="Remove advisor"
-          >
-            <X size={16} />
-          </button>
+          {formData.advisor_yvity_slug && (
+            <a
+              href={`/advisor/${formData.advisor_yvity_slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-block font-poppins text-[11px] font-medium text-[#0A4A4A] underline underline-offset-2"
+            >
+              View YVITY profile →
+            </a>
+          )}
         </div>
       ) : (
+        /* ── Name search ── */
         <div>
           <div className="relative">
             <input
               type="text"
               value={query}
-              onChange={(e) => handleInput(e.target.value)}
+              onChange={(e) => handleNameInput(e.target.value)}
               placeholder={field.placeholder ?? "Search advisor on YVITY…"}
-              className={cn(baseClass, loading ? "pr-10" : "")}
+              className={cn(inputClass, loading ? "pr-10" : "")}
             />
             {loading && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -360,43 +389,35 @@ function AdvisorPickerField({ field, formData, onChange }) {
           {showResults && (
             <div className="mt-1 overflow-hidden rounded-xl border border-[#E0DBD1] bg-white shadow-sm">
               {results.length > 0 ? (
-                <>
-                  {results.slice(0, 5).map((advisor) => (
-                    <button
-                      key={advisor.id}
-                      type="button"
-                      onClick={() => selectAdvisor(advisor)}
-                      className="flex w-full items-center gap-3 border-b border-[#F0EDE6] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[#F0EDE6]"
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
-                        {advisor.name?.charAt(0) ?? "?"}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
-                          {advisor.name}
-                        </p>
-                        <p className="truncate font-poppins text-[10px] text-[#6B6B6B]">
-                          {advisor.location}
-                          {advisor.companies?.[0] ? ` · ${advisor.companies[0]}` : ""}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </>
+                results.slice(0, 5).map((advisor) => (
+                  <button
+                    key={advisor.id}
+                    type="button"
+                    onClick={() => selectAdvisor(advisor)}
+                    className="flex w-full items-center gap-3 border-b border-[#F0EDE6] px-4 py-3 text-left transition-colors last:border-0 hover:bg-[#F0EDE6]"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
+                      {advisor.name?.charAt(0) ?? "?"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-poppins text-sm font-semibold text-[#1A1A1A]">
+                        {advisor.name}
+                      </p>
+                      <p className="truncate font-poppins text-[10px] text-[#6B6B6B]">
+                        {advisor.location}
+                        {advisor.companies?.[0] ? ` · ${advisor.companies[0]}` : ""}
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-[#0A4A4A]/10 px-2 py-0.5 font-poppins text-[9px] font-semibold text-[#0A4A4A]">
+                      YVITY ✓
+                    </span>
+                  </button>
+                ))
               ) : (
-                searched && query.length >= 2 && (
-                  <div className="px-4 py-3">
-                    <p className="mb-2 font-poppins text-xs text-[#6B6B6B]">
-                      &ldquo;{query}&rdquo; isn&apos;t on YVITY yet.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleInvite}
-                      className="rounded-lg bg-[#0A4A4A] px-3 py-1.5 font-poppins text-xs font-semibold text-white"
-                    >
-                      Invite to YVITY
-                    </button>
-                  </div>
+                searched && (
+                  <p className="px-4 py-3 font-poppins text-xs text-[#6B6B6B]">
+                    &ldquo;{query}&rdquo; isn&apos;t on YVITY yet — enter their mobile below to call or invite them.
+                  </p>
                 )
               )}
             </div>
@@ -404,8 +425,54 @@ function AdvisorPickerField({ field, formData, onChange }) {
         </div>
       )}
 
+      {/* ── Mobile number (optional, shown once name is entered) ── */}
+      {(hasName || isYvityLinked) && (
+        <div>
+          <label className="mb-1.5 block font-poppins text-xs font-medium text-[#4A4A4A]">
+            Advisor Mobile{" "}
+            <span className="font-normal text-[#AEAAA0]">(optional)</span>
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={mobile}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, advisor_mobile: e.target.value }))
+              }
+              placeholder="10-digit mobile number"
+              maxLength={13}
+              className={cn(inputClass, "flex-1")}
+            />
+            {mobileValid && (
+              <a
+                href={`tel:+91${cleanMobile.slice(-10)}`}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0A4A4A] px-4 py-3 font-poppins text-xs font-semibold text-white"
+              >
+                <Phone size={14} />
+                Call
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Invite button ── */}
+      {!isYvityLinked && hasName && (
+        <button
+          type="button"
+          onClick={handleInvite}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#0A4A4A]/25 bg-white py-2.5 font-poppins text-xs font-semibold text-[#0A4A4A] transition-colors hover:bg-[#E8F7F7]"
+        >
+          <span>📩</span>
+          {mobileValid
+            ? `Send YVITY invite on WhatsApp (+91 ${cleanMobile.slice(-10)})`
+            : "Invite advisor to YVITY"}
+        </button>
+      )}
+
       {field.hint && (
-        <p className="mt-1 font-poppins text-[10px] text-[#8B8175]">{field.hint}</p>
+        <p className="font-poppins text-[10px] text-[#8B8175]">{field.hint}</p>
       )}
     </div>
   );

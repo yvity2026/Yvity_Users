@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Pencil, Phone, Trash2 } from "lucide-react";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { VAULT_FIELD_CONFIGS } from "@/lib/vault/field-configs";
 import VaultAddEditSheet from "./VaultAddEditSheet";
@@ -220,23 +220,54 @@ export default function VaultItemDetail() {
                 );
               }
 
-              // advisor-picker: show name + YVITY badge if linked
+              // advisor-picker: name, YVITY badge, view profile, call button
               if (field.type === "advisor-picker") {
                 const name = item.data?.advisor_name;
+                const yvitySlug = item.data?.advisor_yvity_slug;
                 const yvityId = item.data?.advisor_yvity_id;
+                const mob = (item.data?.advisor_mobile ?? "").replace(/\D/g, "");
+                const mobValid = mob.length >= 10;
                 if (!name) return null;
                 return (
                   <div key={field.key} className="rounded-2xl border border-[#E8E4DA] bg-white px-4 py-3.5">
-                    <p className="font-poppins text-[10px] font-medium uppercase tracking-wide text-[#8C8C8C]">
+                    <p className="mb-2 font-poppins text-[10px] font-medium uppercase tracking-wide text-[#8C8C8C]">
                       {field.label}
                     </p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <p className="font-poppins text-sm text-[#1A1A1A]">{name}</p>
-                      {yvityId && (
-                        <span className="rounded-full bg-[#0A4A4A] px-2 py-0.5 font-poppins text-[10px] font-semibold text-white">
-                          YVITY ✓
-                        </span>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A4A4A] font-poppins text-xs font-bold text-white">
+                        {name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="font-poppins text-sm font-semibold text-[#1A1A1A]">{name}</p>
+                          {yvityId && (
+                            <span className="rounded-full bg-[#0A4A4A] px-2 py-0.5 font-poppins text-[9px] font-semibold text-white">
+                              YVITY ✓
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-3">
+                          {yvitySlug && (
+                            <a
+                              href={`/advisor/${yvitySlug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-poppins text-[11px] font-medium text-[#0A4A4A] underline underline-offset-2"
+                            >
+                              View profile
+                            </a>
+                          )}
+                          {mobValid && (
+                            <a
+                              href={`tel:+91${mob.slice(-10)}`}
+                              className="flex items-center gap-1 font-poppins text-[11px] font-medium text-[#0A4A4A]"
+                            >
+                              <Phone size={11} />
+                              {mob.slice(-10)}
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
