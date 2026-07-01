@@ -60,9 +60,11 @@ export function autoSubtitle(category, data) {
           ? `Invested: ${fmtCrore(data.amount_invested)}`
           : null;
     case "bank_accounts":
-      return data.account_number_last4
-        ? `···${data.account_number_last4}`
-        : data.branch || null;
+      if (data.account_number) {
+        const n = String(data.account_number).trim();
+        return n.length >= 4 ? `···${n.slice(-4)}` : `···${n}`;
+      }
+      return data.branch || null;
     case "fixed_deposits":
       return data.principal_amount
         ? `Principal: ${fmtCrore(data.principal_amount)}`
