@@ -18,6 +18,8 @@ import { getPlanGatedIntroVideoUrl } from "@/lib/intro-video";
 import { getYvityScoreTotal } from "@/lib/advisor-score/build";
 import { getAdminClientOrNull } from "@/lib/supabase/adminClient";
 import { evaluateAdvisorScoreDecay } from "@/lib/server/evaluate-score-decay";
+import { monthKey, addMonths } from "@/lib/advisor-score/decay";
+import { loadMonthlyScoreActivity } from "@/lib/server/score-activity-persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +33,11 @@ export async function POST() {
 
     const userId = session.id;
 
-    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs, selfShareCount, decayState] =
+    const now = new Date();
+    const lastMonthKey = monthKey(addMonths(now, -1));
+    const twoMonthsAgoKey = monthKey(addMonths(now, -2));
+
+    const [profile, services, achievements, testimonials, gallery, settings, career, verifiedRecs, selfShareCount, decayState, lastMonthRaw, twoMonthsAgoRaw] =
       await Promise.all([
         getAdvisorProfileForUser(userId),
         loadServicesForUser(userId),
@@ -43,7 +49,14 @@ export async function POST() {
         countVerifiedRecommendations(userId),
         countSelfProfileShares(userId),
         evaluateAdvisorScoreDecay(userId),
+        loadMonthlyScoreActivity(userId, lastMonthKey),
+        loadMonthlyScoreActivity(userId, twoMonthsAgoKey),
       ]);
+
+    const lastMonthActivity = {
+      ...lastMonthRaw,
+      loginDays: Math.max(lastMonthRaw.loginDays, twoMonthsAgoRaw.loginDays),
+    };
 
     const profileApproved = isAdvisorProfileApproved(profile);
     const underReview = profile?.account_status === "under_review";
@@ -69,7 +82,7 @@ export async function POST() {
       decayPenalty: decayState?.penalty ?? 0,
       decayActive: decayState?.active ?? false,
       decayGraceDaysRemaining: decayState?.graceDaysRemaining ?? null,
-      monthlyActivity: decayState?.currentMonthActivity ?? undefined,
+      monthlyActivity: lastMonthActivity ?? decayState?.currentMonthActivity ?? undefined,
     });
 
     const finalScore = Math.max(0, Math.min(100, score));

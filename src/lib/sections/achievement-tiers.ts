@@ -135,6 +135,39 @@ export function extractAchievementTags(
   return tags.slice(0, 3);
 }
 
+const TIER_SCORE_VALUES: Record<AchievementTier, number> = {
+  mdrt: 2,
+  cot: 6,
+  tot: 10,
+};
+
+/**
+ * Computes YVITY Score achievement pts (max 10).
+ * Each achievement always adds its full tier value: MDRT=2, COT=6, TOT=10.
+ * Multiple years of the same tier each count separately.
+ * Total is capped at 10.
+ *
+ * Examples: MDRT=2, MDRT+COT=8, 5×MDRT=10, TOT=10, COT+COT=12→10.
+ */
+export function computeAchievementPts(
+  achievements: Pick<AchievementItem, "title" | "subtitle" | "years">[],
+): number {
+  let pts = 0;
+
+  for (const item of achievements) {
+    let value = 0;
+    if (achievementHasTier(item, "tot")) value = TIER_SCORE_VALUES.tot;
+    else if (achievementHasTier(item, "cot")) value = TIER_SCORE_VALUES.cot;
+    else if (achievementHasTier(item, "mdrt")) value = TIER_SCORE_VALUES.mdrt;
+    else continue;
+
+    const count = Math.max(1, (item.years ?? []).length);
+    pts += value * count;
+  }
+
+  return Math.min(10, pts);
+}
+
 /** Map lightweight DB / API rows into achievement tags. */
 export function extractAchievementTagsFromRecords(
   records: Array<{ title?: string | null; organisation?: string | null; subtitle?: string | null }>,
