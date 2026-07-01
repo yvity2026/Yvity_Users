@@ -46,6 +46,7 @@ export async function GET() {
     testimonialCount: visibleTestimonials.length,
     profileViews: engagement?.profileViews ?? 0,
     profileViewsDelta: engagement?.profileViewsDelta ?? "0%",
+    totalProfileViews: engagement?.totalProfileViews ?? 0,
     profileSharesByOthers: engagement?.clientSharers ?? 0,
     profileSharesDelta: engagement?.clientSharersDelta ?? "0%",
     decayPenalty: decayState.penalty,

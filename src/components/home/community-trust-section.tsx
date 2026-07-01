@@ -60,7 +60,7 @@ export function CommunityTrustSection() {
   const {
     recommendationCount,
     testimonialCount,
-    profileViews,
+    totalProfileViews,
     profileViewsDelta,
     profileSharesByOthers,
     profileSharesDelta,
@@ -77,7 +77,7 @@ export function CommunityTrustSection() {
       getCommunityTrustStats({
         testimonialCount,
         recommendationCount,
-        profileViews,
+        profileViews: totalProfileViews,
         profileViewsDelta,
         profileSharesByOthers,
         profileSharesDelta,
@@ -86,7 +86,7 @@ export function CommunityTrustSection() {
     [
       testimonialCount,
       recommendationCount,
-      profileViews,
+      totalProfileViews,
       profileViewsDelta,
       profileSharesByOthers,
       profileSharesDelta,
