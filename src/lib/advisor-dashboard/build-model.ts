@@ -225,7 +225,9 @@ export function buildDashboardOverviewModel(input: {
   decayGraceDaysRemaining?: number | null;
   monthlyActivity?: import("@/lib/advisor-score/decay").MonthlyScoreActivity;
   profileViews?: number;
+  profileViewsLastMonth?: number;
   profileViewsDelta?: string;
+  totalProfileViews?: number;
   searchAppearances?: number;
   searchDelta?: string;
 }): DashboardOverviewModel {
@@ -307,7 +309,9 @@ export function buildDashboardOverviewModel(input: {
     performance: {
       yvityScore,
       profileViews: profileApproved ? Math.max(0, input.profileViews ?? 0) : 0,
+      profileViewsLastMonth: profileApproved ? Math.max(0, input.profileViewsLastMonth ?? 0) : 0,
       profileViewsDelta: profileApproved ? (input.profileViewsDelta ?? "0%") : "0%",
+      totalProfileViews: profileApproved ? Math.max(0, input.totalProfileViews ?? 0) : 0,
       searchAppearances: profileApproved ? Math.max(0, input.searchAppearances ?? 0) : 0,
       searchDelta: profileApproved ? (input.searchDelta ?? "0%") : "0%",
       profileSharesByOthers: profileApproved

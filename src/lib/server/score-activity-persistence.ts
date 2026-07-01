@@ -286,6 +286,7 @@ export async function loadAdvisorPerformanceTelemetry(
   now: Date = new Date(),
 ): Promise<{
   profileViews: number;
+  profileViewsLastMonth: number;
   profileViewsDelta: string;
   totalProfileViews: number;
   searchAppearances: number;
@@ -316,6 +317,7 @@ export async function loadAdvisorPerformanceTelemetry(
 
   return {
     profileViews: profileCurrent,
+    profileViewsLastMonth: profilePrevious,
     profileViewsDelta: formatMonthOverMonthDelta(profileCurrent, profilePrevious),
     totalProfileViews,
     searchAppearances: searchCurrent,

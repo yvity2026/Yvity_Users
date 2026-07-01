@@ -14,6 +14,7 @@ import {
   type MonthlyScoreActivity,
 } from "@/lib/advisor-score/decay";
 import {
+  computeAchievementPts,
   getMdrtLatestYear,
   hasAchievementTier,
 } from "@/lib/sections/achievement-tiers";
@@ -310,7 +311,7 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       max: 5,
       status: ruleStatus(activityEarned, 5),
       explanation: {
-        bullets: ["Each active day → 1 point", `Active ${monthlyActiveDays} days this month`],
+        bullets: ["Each active day → 1 point", `Active ${monthlyActiveDays} days last month`],
         metrics: [
           { label: "Max", value: "5 pts" },
           {
@@ -345,14 +346,9 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
   const hasMDRT = hasAchievementTier(input.achievements, "mdrt");
   const hasCOT = hasAchievementTier(input.achievements, "cot");
   const hasTOT = hasAchievementTier(input.achievements, "tot");
-  const achievementYears = hasMDRT
-    ? getMdrtLatestYear(input.achievements) ?? 1
-    : 1;
-  const mdrtEarned = hasMDRT ? Math.min(10, 2 * Math.max(1, achievementYears - 2023)) : 0;
-  const cotEarned = hasCOT ? 6 : 0;
-  const totEarned = hasTOT ? 10 : 0;
-  const achievementsEarnedRaw = hasTOT ? totEarned : hasCOT ? cotEarned : mdrtEarned;
-  const achievementsEarned = Math.min(10, hasMDRT ? 2 : achievementsEarnedRaw); // demo aligns to 2
+  const achievementYears = hasMDRT ? getMdrtLatestYear(input.achievements) ?? 1 : 1;
+  // Purely additive: each MDRT=+2, COT=+6, TOT=+10 per year achieved. Capped at 10.
+  const achievementsEarned = computeAchievementPts(input.achievements);
 
   const trustRules: ScoreRule[] = [
     {
@@ -550,14 +546,21 @@ export function buildYvityScoreModel(input: YvityScoreBuildInput): YvityScoreMod
       target: { kind: "share" },
     });
   }
-  if (!hasCOT) {
-    improvements.push({
-      id: "imp-cot",
-      label: "Upload your COT certificate for additional achievement points",
-      points: 6 - mdrtEarned,
-      cta: "Upload",
-      target: { kind: "profile-section", section: "achievements" },
-    });
+  if (achievementsEarned < 10) {
+    const cotDelta = achievementsEarned < 6
+      ? 6 - achievementsEarned
+      : Math.min(6, 10 - achievementsEarned);
+    if (cotDelta > 0) {
+      improvements.push({
+        id: "imp-cot",
+        label: hasCOT
+          ? "Upload another COT certificate for additional achievement points"
+          : "Upload your COT certificate for additional achievement points",
+        points: cotDelta,
+        cta: "Upload",
+        target: { kind: "profile-section", section: "achievements" },
+      });
+    }
   }
 
   // Highest-impact items first, drop anything that would not move the score.

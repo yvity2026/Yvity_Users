@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { buildDecayNegativeRules } from "@/lib/advisor-score/decay";
+import { buildDecayNegativeRules, monthKey, addMonths } from "@/lib/advisor-score/decay";
 import { isAdvisorProfileApproved } from "@/lib/advisor/profile-approval";
 import { resolvePlanLimits } from "@/lib/advisor-membership/plan-limits";
 import { evaluateAdvisorScoreDecayForSession } from "@/lib/server/evaluate-score-decay";
 import { getAdvisorProfileForUser } from "@/lib/server/advisor-profile-store";
-import { loadAdvisorPerformanceTelemetry } from "@/lib/server/score-activity-persistence";
+import {
+  loadAdvisorPerformanceTelemetry,
+  loadMonthlyScoreActivity,
+} from "@/lib/server/score-activity-persistence";
 import { unauthorized, requireSession } from "@/lib/server/api-auth";
 
 export const runtime = "nodejs";
@@ -15,8 +18,23 @@ export async function GET() {
   const user = await requireSession();
   if (!user?.id) return unauthorized();
 
-  const state = await evaluateAdvisorScoreDecayForSession();
+  const now = new Date();
+  const lastMonthKey = monthKey(addMonths(now, -1));
+  const twoMonthsAgoKey = monthKey(addMonths(now, -2));
+
+  const [state, lastMonthRaw, twoMonthsAgoRaw] = await Promise.all([
+    evaluateAdvisorScoreDecayForSession(),
+    loadMonthlyScoreActivity(user.id, lastMonthKey),
+    loadMonthlyScoreActivity(user.id, twoMonthsAgoKey),
+  ]);
   if (!state) return unauthorized();
+
+  // Use the best loginDays from the last 2 months so one inactive month doesn't
+  // crash the activity score to 0 — decay (-1 pt) is the only reduction.
+  const lastMonthActivity = {
+    ...lastMonthRaw,
+    loginDays: Math.max(lastMonthRaw.loginDays, twoMonthsAgoRaw.loginDays),
+  };
 
   const profile = await getAdvisorProfileForUser(user.id);
   const approved = isAdvisorProfileApproved(profile);
@@ -25,6 +43,7 @@ export async function GET() {
     ? await loadAdvisorPerformanceTelemetry(user.id)
     : {
         profileViews: 0,
+        profileViewsLastMonth: 0,
         profileViewsDelta: "0%",
         totalProfileViews: 0,
         searchAppearances: 0,
@@ -41,8 +60,10 @@ export async function GET() {
     graceDaysRemaining: state.graceDaysRemaining,
     breakdown: state.breakdown,
     currentMonthActivity: state.currentMonthActivity,
+    lastMonthActivity,
     negativeRules: buildDecayNegativeRules(state),
     profileViews: telemetry.profileViews,
+    profileViewsLastMonth: telemetry.profileViewsLastMonth,
     profileViewsDelta: telemetry.profileViewsDelta,
     totalProfileViews: telemetry.totalProfileViews,
     searchAppearances: searchTelemetry.searchAppearances,

@@ -9,8 +9,10 @@ type ScoreActivityResponse = {
   decayActive?: boolean;
   graceDaysRemaining?: number | null;
   currentMonthActivity?: MonthlyScoreActivity;
+  lastMonthActivity?: MonthlyScoreActivity;
   negativeRules?: ScoreNegativeRule[];
   profileViews?: number;
+  profileViewsLastMonth?: number;
   profileViewsDelta?: string;
   totalProfileViews?: number;
   searchAppearances?: number;
@@ -24,6 +26,7 @@ export function useScoreActivity(): {
   monthlyActivity: MonthlyScoreActivity | null;
   negativeRules: ScoreNegativeRule[] | null;
   profileViews: number;
+  profileViewsLastMonth: number;
   profileViewsDelta: string;
   totalProfileViews: number;
   searchAppearances: number;
@@ -36,6 +39,7 @@ export function useScoreActivity(): {
   const [monthlyActivity, setMonthlyActivity] = useState<MonthlyScoreActivity | null>(null);
   const [negativeRules, setNegativeRules] = useState<ScoreNegativeRule[] | null>(null);
   const [profileViews, setProfileViews] = useState(0);
+  const [profileViewsLastMonth, setProfileViewsLastMonth] = useState(0);
   const [profileViewsDelta, setProfileViewsDelta] = useState("0%");
   const [totalProfileViews, setTotalProfileViews] = useState(0);
   const [searchAppearances, setSearchAppearances] = useState(0);
@@ -49,9 +53,10 @@ export function useScoreActivity(): {
         setDecayPenalty(Math.max(0, json.decayPenalty ?? 0));
         setDecayActive(Boolean(json.decayActive));
         setGraceDaysRemaining(json.graceDaysRemaining ?? null);
-        setMonthlyActivity(json.currentMonthActivity ?? null);
+        setMonthlyActivity(json.lastMonthActivity ?? json.currentMonthActivity ?? null);
         setNegativeRules(json.negativeRules ?? null);
         setProfileViews(Math.max(0, json.profileViews ?? 0));
+        setProfileViewsLastMonth(Math.max(0, json.profileViewsLastMonth ?? 0));
         setProfileViewsDelta(json.profileViewsDelta ?? "0%");
         setTotalProfileViews(Math.max(0, json.totalProfileViews ?? 0));
         setSearchAppearances(Math.max(0, json.searchAppearances ?? 0));
@@ -64,6 +69,7 @@ export function useScoreActivity(): {
         setMonthlyActivity(null);
         setNegativeRules(null);
         setProfileViews(0);
+        setProfileViewsLastMonth(0);
         setProfileViewsDelta("0%");
         setTotalProfileViews(0);
         setSearchAppearances(0);
@@ -79,6 +85,7 @@ export function useScoreActivity(): {
     monthlyActivity,
     negativeRules,
     profileViews,
+    profileViewsLastMonth,
     profileViewsDelta,
     totalProfileViews,
     searchAppearances,

@@ -40,7 +40,9 @@ export type LeadSummary = {
 export type PerformanceSnapshot = {
   yvityScore: number;
   profileViews: number;
+  profileViewsLastMonth: number;
   profileViewsDelta: string;
+  totalProfileViews: number;
   searchAppearances: number;
   searchDelta: string;
   profileSharesByOthers: number;

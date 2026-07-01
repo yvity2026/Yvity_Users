@@ -223,8 +223,12 @@ export function AdvisorDashboardOverview({
           />
           <DashboardStatCard
             label="Profile Views"
-            value={model.performance.profileViews.toLocaleString("en-IN")}
-            delta={model.performance.profileViewsDelta}
+            value={model.performance.totalProfileViews.toLocaleString("en-IN")}
+            delta={
+              model.performance.profileViewsLastMonth > 0
+                ? `+${model.performance.profileViewsLastMonth} last month`
+                : undefined
+            }
             icon={Eye}
             accent="cyan"
           />
