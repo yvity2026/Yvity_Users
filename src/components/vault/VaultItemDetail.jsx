@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { VAULT_FIELD_CONFIGS } from "@/lib/vault/field-configs";
 import VaultAddEditSheet from "./VaultAddEditSheet";
+
+const AUTO_HIDE_MS = 60_000; // 60 seconds
 
 function displayValue(field, raw) {
   if (raw === "" || raw === null || raw === undefined) return null;
@@ -47,6 +49,54 @@ export default function VaultItemDetail() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Sensitive field reveal state
+  const [revealed, setRevealed] = useState(new Set());
+  const timerRef = useRef(null);
+
+  const startOrResetTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setRevealed(new Set());
+    }, AUTO_HIDE_MS);
+  }, []);
+
+  // Listen for any user activity to reset the auto-hide timer
+  useEffect(() => {
+    if (revealed.size === 0) return;
+    document.addEventListener("click", startOrResetTimer);
+    document.addEventListener("scroll", startOrResetTimer, true);
+    document.addEventListener("touchstart", startOrResetTimer);
+    return () => {
+      document.removeEventListener("click", startOrResetTimer);
+      document.removeEventListener("scroll", startOrResetTimer, true);
+      document.removeEventListener("touchstart", startOrResetTimer);
+    };
+  }, [revealed.size, startOrResetTimer]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  function toggleReveal(key) {
+    setRevealed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+        if (next.size === 0 && timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      } else {
+        next.add(key);
+        startOrResetTimer();
+      }
+      return next;
+    });
+  }
 
   const fetchItem = useCallback(async () => {
     if (!id) return;
@@ -130,18 +180,30 @@ export default function VaultItemDetail() {
       ) : (
         <>
           {/* Title block */}
-          <div className="mb-6">
+          <div className="mb-5">
             <h2 className="font-poppins text-xl font-bold text-[#1A1A1A]">{item.title}</h2>
             {item.subtitle && (
               <p className="mt-1 font-poppins text-sm text-[#6B6B6B]">{item.subtitle}</p>
             )}
           </div>
 
+          {/* Auto-hide notice */}
+          {revealed.size > 0 && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-[#FFFBF2] border border-[#F5E6C8] px-3 py-2">
+              <EyeOff size={13} className="shrink-0 text-[#8B6914]" />
+              <p className="font-poppins text-[11px] text-[#8B6914]">
+                Sensitive fields will auto-hide after 60 seconds of inactivity.
+              </p>
+            </div>
+          )}
+
           {/* Field display */}
           <div className="space-y-2.5">
             {fields.map((field) => {
               const display = displayValue(field, item.data?.[field.key]);
               if (!display) return null;
+              const isRevealed = revealed.has(field.key);
+
               return (
                 <div
                   key={field.key}
@@ -150,9 +212,28 @@ export default function VaultItemDetail() {
                   <p className="font-poppins text-[10px] font-medium uppercase tracking-wide text-[#8C8C8C]">
                     {field.label}
                   </p>
-                  <p className="mt-1 whitespace-pre-wrap font-poppins text-sm text-[#1A1A1A]">
-                    {display}
-                  </p>
+                  {field.sensitive ? (
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                      <p className="font-poppins text-sm text-[#1A1A1A]">
+                        {isRevealed ? display : "••••••••••••"}
+                      </p>
+                      <button
+                        onClick={() => toggleReveal(field.key)}
+                        className="flex shrink-0 items-center gap-1 rounded-lg bg-[#F0EDE6] px-2.5 py-1 font-poppins text-[11px] font-medium text-[#6B6B6B] transition-colors hover:bg-[#E8E4DA]"
+                        aria-label={isRevealed ? "Hide" : "Show"}
+                      >
+                        {isRevealed ? (
+                          <><EyeOff size={12} /> Hide</>
+                        ) : (
+                          <><Eye size={12} /> Show</>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="mt-1 whitespace-pre-wrap font-poppins text-sm text-[#1A1A1A]">
+                      {display}
+                    </p>
+                  )}
                 </div>
               );
             })}

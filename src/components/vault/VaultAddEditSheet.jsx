@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { VAULT_FIELD_CONFIGS } from "@/lib/vault/field-configs";
 import { autoTitle, autoSubtitle } from "@/lib/vault/auto-title";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
@@ -144,6 +144,8 @@ export default function VaultAddEditSheet({ category, item, open, onClose, onSav
 }
 
 function FormField({ field, value, onChange }) {
+  const [showSensitive, setShowSensitive] = useState(false);
+
   const baseClass =
     "w-full rounded-xl border border-[#E0DBD1] bg-[#FAFAF8] px-4 py-3 font-poppins text-sm text-[#1A1A1A] placeholder:text-[#AEAAA0] focus:border-[#B8A165] focus:outline-none transition-colors";
 
@@ -175,6 +177,25 @@ function FormField({ field, value, onChange }) {
           rows={3}
           className={cn(baseClass, "resize-none")}
         />
+      ) : field.sensitive ? (
+        <div className="relative">
+          <input
+            type={showSensitive ? "text" : "password"}
+            autoComplete="off"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder ?? ""}
+            className={cn(baseClass, "pr-11")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowSensitive((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#AEAAA0] hover:text-[#6B6B6B]"
+            aria-label={showSensitive ? "Hide" : "Show"}
+          >
+            {showSensitive ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
       ) : (
         <input
           type={field.type === "number" ? "text" : field.type}

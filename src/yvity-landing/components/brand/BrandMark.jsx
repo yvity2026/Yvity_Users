@@ -31,7 +31,11 @@ export default function BrandMark({
       />
       {(showName || showTagline) && (
         <div className={`flex flex-col ${stack ? "items-center text-center" : "items-start"}`}>
-          {showName && <span className={nameClassName}>{BRAND_NAME}</span>}
+          {showName && (
+            <span className={nameClassName}>
+              <span className="text-[#F59E0B]">Y</span>VITY
+            </span>
+          )}
           {showTagline && <span className={taglineClassName}>{BRAND_TAGLINE}</span>}
         </div>
       )}
